@@ -27,6 +27,15 @@ type Service interface {
 	// Delete survey (proxies to ITX DELETE /v2/surveys/{survey_id}). Only allowed
 	// when status is 'disabled'
 	DeleteSurvey(context.Context, *DeleteSurveyPayload) (err error)
+	// Bulk resend survey emails to select recipients (proxies to ITX POST
+	// /v2/surveys/{survey_id}/bulk_resend)
+	BulkResendSurvey(context.Context, *BulkResendSurveyPayload) (err error)
+	// Preview which recipients, committees, and projects would be affected by a
+	// resend (proxies to ITX GET /v2/surveys/{survey_id}/preview_send)
+	PreviewSendSurvey(context.Context, *PreviewSendSurveyPayload) (res *PreviewSendResult, err error)
+	// Send survey emails to committee members who haven't received it (proxies to
+	// ITX POST /v2/surveys/{survey_id}/send_missing_recipients)
+	SendMissingRecipients(context.Context, *SendMissingRecipientsPayload) (err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -49,7 +58,7 @@ const ServiceName = "survey"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [4]string{"schedule_survey", "get_survey", "update_survey", "delete_survey"}
+var MethodNames = [7]string{"schedule_survey", "get_survey", "update_survey", "delete_survey", "bulk_resend_survey", "preview_send_survey", "send_missing_recipients"}
 
 // Bad request error response
 type BadRequestError struct {
@@ -57,6 +66,17 @@ type BadRequestError struct {
 	Code string
 	// Error message
 	Message string
+}
+
+// BulkResendSurveyPayload is the payload type of the survey service
+// bulk_resend_survey method.
+type BulkResendSurveyPayload struct {
+	// JWT token
+	Token *string
+	// Survey identifier
+	SurveyID string
+	// Array of recipient IDs to resend survey emails to
+	RecipientIds []string
 }
 
 // Conflict error response
@@ -76,6 +96,20 @@ type DeleteSurveyPayload struct {
 	SurveyID string
 }
 
+// Committee information for preview send
+type ExcludedCommittee struct {
+	// Project ID
+	ProjectID string
+	// Project name
+	ProjectName string
+	// Committee ID
+	CommitteeID string
+	// Committee name
+	CommitteeName string
+	// Committee category
+	CommitteeCategory string
+}
+
 // Forbidden error response
 type ForbiddenError struct {
 	// HTTP status code
@@ -92,6 +126,24 @@ type GetSurveyPayload struct {
 	SurveyID string
 }
 
+// Recipient information for preview send
+type ITXPreviewRecipient struct {
+	// LF user ID
+	UserID string
+	// User full name
+	Name *string
+	// User first name
+	FirstName *string
+	// User last name
+	LastName *string
+	// Linux Foundation ID
+	Username *string
+	// Email address
+	Email string
+	// Role in committee
+	Role *string
+}
+
 // Internal server error response
 type InternalServerError struct {
 	// HTTP status code
@@ -100,12 +152,48 @@ type InternalServerError struct {
 	Message string
 }
 
+// LFX Project information
+type LFXProject struct {
+	// Project ID
+	ID string
+	// Project name
+	Name string
+	// Project slug
+	Slug string
+	// Project status/stage
+	Status string
+	// Project logo URL
+	LogoURL *string
+}
+
 // Not found error response
 type NotFoundError struct {
 	// HTTP status code
 	Code string
 	// Error message
 	Message string
+}
+
+// PreviewSendResult is the result type of the survey service
+// preview_send_survey method.
+type PreviewSendResult struct {
+	// List of affected projects
+	AffectedProjects []*LFXProject
+	// List of affected committees
+	AffectedCommittees []*ExcludedCommittee
+	// List of affected recipients
+	AffectedRecipients []*ITXPreviewRecipient
+}
+
+// PreviewSendSurveyPayload is the payload type of the survey service
+// preview_send_survey method.
+type PreviewSendSurveyPayload struct {
+	// JWT token
+	Token *string
+	// Survey identifier
+	SurveyID string
+	// Optional committee ID to filter preview
+	CommitteeID *string
 }
 
 // ScheduleSurveyPayload is the payload type of the survey service
@@ -145,6 +233,17 @@ type ScheduleSurveyPayload struct {
 	Committees []string
 	// Whether committee voting is enabled
 	CommitteeVotingEnabled *bool
+}
+
+// SendMissingRecipientsPayload is the payload type of the survey service
+// send_missing_recipients method.
+type SendMissingRecipientsPayload struct {
+	// JWT token
+	Token *string
+	// Survey identifier
+	SurveyID string
+	// Optional committee ID to resync only that committee
+	CommitteeID *string
 }
 
 // Service unavailable error response

@@ -101,6 +101,42 @@ type BulkResendRequest struct {
 	RecipientIDs []string `json:"recipient_ids"`
 }
 
+// PreviewSendResponse represents the response from preview_send endpoint
+type PreviewSendResponse struct {
+	AffectedProjects    []LFXProject              `json:"affected_projects,omitempty"`
+	AffectedCommittees  []ExcludedCommittee       `json:"affected_committees,omitempty"`
+	AffectedRecipients  []ITXPreviewRecipient     `json:"affected_recipients,omitempty"`
+}
+
+// LFXProject represents a project in the preview send response
+type LFXProject struct {
+	ID     string  `json:"id"`
+	Name   string  `json:"name"`
+	Slug   string  `json:"slug"`
+	Status string  `json:"status"`
+	LogoURL *string `json:"logo_url,omitempty"`
+}
+
+// ExcludedCommittee represents a committee in the preview send response
+type ExcludedCommittee struct {
+	ProjectID         string  `json:"project_id"`
+	ProjectName       string  `json:"project_name"`
+	CommitteeID       string  `json:"committee_id"`
+	CommitteeName     string  `json:"committee_name"`
+	CommitteeCategory string  `json:"committee_category"`
+}
+
+// ITXPreviewRecipient represents a recipient in the preview send response
+type ITXPreviewRecipient struct {
+	UserID    string  `json:"user_id"`
+	Name      *string `json:"name,omitempty"`
+	FirstName *string `json:"first_name,omitempty"`
+	LastName  *string `json:"last_name,omitempty"`
+	Username  *string `json:"username,omitempty"`
+	Email     string  `json:"email"`
+	Role      *string `json:"role,omitempty"`
+}
+
 // SurveyResults represents aggregated survey results
 type SurveyResults struct {
 	SurveyResults    []SurveyResultItem `json:"survey_results"`

@@ -34,6 +34,18 @@ type Client struct {
 	// delete_survey endpoint.
 	DeleteSurveyDoer goahttp.Doer
 
+	// BulkResendSurvey Doer is the HTTP client used to make requests to the
+	// bulk_resend_survey endpoint.
+	BulkResendSurveyDoer goahttp.Doer
+
+	// PreviewSendSurvey Doer is the HTTP client used to make requests to the
+	// preview_send_survey endpoint.
+	PreviewSendSurveyDoer goahttp.Doer
+
+	// SendMissingRecipients Doer is the HTTP client used to make requests to the
+	// send_missing_recipients endpoint.
+	SendMissingRecipientsDoer goahttp.Doer
+
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
 	RestoreResponseBody bool
@@ -54,15 +66,18 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		ScheduleSurveyDoer:  doer,
-		GetSurveyDoer:       doer,
-		UpdateSurveyDoer:    doer,
-		DeleteSurveyDoer:    doer,
-		RestoreResponseBody: restoreBody,
-		scheme:              scheme,
-		host:                host,
-		decoder:             dec,
-		encoder:             enc,
+		ScheduleSurveyDoer:        doer,
+		GetSurveyDoer:             doer,
+		UpdateSurveyDoer:          doer,
+		DeleteSurveyDoer:          doer,
+		BulkResendSurveyDoer:      doer,
+		PreviewSendSurveyDoer:     doer,
+		SendMissingRecipientsDoer: doer,
+		RestoreResponseBody:       restoreBody,
+		scheme:                    scheme,
+		host:                      host,
+		decoder:                   dec,
+		encoder:                   enc,
 	}
 }
 
@@ -157,6 +172,78 @@ func (c *Client) DeleteSurvey() goa.Endpoint {
 		resp, err := c.DeleteSurveyDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("survey", "delete_survey", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// BulkResendSurvey returns an endpoint that makes HTTP requests to the survey
+// service bulk_resend_survey server.
+func (c *Client) BulkResendSurvey() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeBulkResendSurveyRequest(c.encoder)
+		decodeResponse = DecodeBulkResendSurveyResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildBulkResendSurveyRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.BulkResendSurveyDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "bulk_resend_survey", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// PreviewSendSurvey returns an endpoint that makes HTTP requests to the survey
+// service preview_send_survey server.
+func (c *Client) PreviewSendSurvey() goa.Endpoint {
+	var (
+		encodeRequest  = EncodePreviewSendSurveyRequest(c.encoder)
+		decodeResponse = DecodePreviewSendSurveyResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildPreviewSendSurveyRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.PreviewSendSurveyDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "preview_send_survey", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// SendMissingRecipients returns an endpoint that makes HTTP requests to the
+// survey service send_missing_recipients server.
+func (c *Client) SendMissingRecipients() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeSendMissingRecipientsRequest(c.encoder)
+		decodeResponse = DecodeSendMissingRecipientsResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildSendMissingRecipientsRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.SendMissingRecipientsDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "send_missing_recipients", err)
 		}
 		return decodeResponse(resp)
 	}

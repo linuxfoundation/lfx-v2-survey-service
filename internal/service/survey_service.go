@@ -217,6 +217,120 @@ func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurvey
 	return nil
 }
 
+// BulkResendSurvey implements survey.Service.BulkResendSurvey
+func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkResendSurveyPayload) error {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "bulk resending survey",
+		"principal", principal,
+		"survey_id", p.SurveyID,
+		"recipient_count", len(p.RecipientIds),
+	)
+
+	// Build ITX request
+	itxRequest := &itx.BulkResendRequest{
+		RecipientIDs: p.RecipientIds,
+	}
+
+	// Call ITX API
+	err = s.proxy.BulkResendSurvey(ctx, p.SurveyID, itxRequest)
+	if err != nil {
+		return mapDomainError(err)
+	}
+
+	s.logger.InfoContext(ctx, "survey bulk resend dispatched successfully",
+		"survey_id", p.SurveyID,
+	)
+
+	return nil
+}
+
+// PreviewSendSurvey implements survey.Service.PreviewSendSurvey
+func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.PreviewSendSurveyPayload) (*survey.PreviewSendResult, error) {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return nil, &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "previewing survey send",
+		"principal", principal,
+		"survey_id", p.SurveyID,
+		"committee_id", p.CommitteeID,
+	)
+
+	// Call ITX API
+	itxResponse, err := s.proxy.PreviewSend(ctx, p.SurveyID, p.CommitteeID)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+
+	// Map response back to goa result
+	result := mapPreviewSendResponseToResult(itxResponse)
+
+	s.logger.InfoContext(ctx, "survey preview send retrieved successfully",
+		"survey_id", p.SurveyID,
+		"affected_recipients", len(result.AffectedRecipients),
+	)
+
+	return result, nil
+}
+
+// SendMissingRecipients implements survey.Service.SendMissingRecipients
+func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.SendMissingRecipientsPayload) error {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "sending survey to missing recipients",
+		"principal", principal,
+		"survey_id", p.SurveyID,
+		"committee_id", p.CommitteeID,
+	)
+
+	// Call ITX API
+	err = s.proxy.SendMissingRecipients(ctx, p.SurveyID, p.CommitteeID)
+	if err != nil {
+		return mapDomainError(err)
+	}
+
+	s.logger.InfoContext(ctx, "survey send to missing recipients dispatched successfully",
+		"survey_id", p.SurveyID,
+	)
+
+	return nil
+}
+
 // Helper functions
 
 // mapITXResponseToResult maps ITX response to Goa result (extracted to avoid duplication)
@@ -278,6 +392,61 @@ func mapSurveyCommitteesToResult(committees []itx.SurveyCommittee) []*survey.Sur
 			TotalResponses:  c.TotalResponses,
 			NpsValue:        c.NPSValue,
 		}
+	}
+	return result
+}
+
+func mapPreviewSendResponseToResult(itxResponse *itx.PreviewSendResponse) *survey.PreviewSendResult {
+	return &survey.PreviewSendResult{
+		AffectedProjects:    mapLFXProjectsToResult(itxResponse.AffectedProjects),
+		AffectedCommittees:  mapExcludedCommitteesToResult(itxResponse.AffectedCommittees),
+		AffectedRecipients:  mapITXPreviewRecipientsToResult(itxResponse.AffectedRecipients),
+	}
+}
+
+func mapLFXProjectsToResult(projects []itx.LFXProject) []*survey.LFXProject {
+	// Always return an empty slice instead of nil to ensure JSON marshals as []
+	result := make([]*survey.LFXProject, 0, len(projects))
+	for _, p := range projects {
+		result = append(result, &survey.LFXProject{
+			ID:      p.ID,
+			Name:    p.Name,
+			Slug:    p.Slug,
+			Status:  p.Status,
+			LogoURL: p.LogoURL,
+		})
+	}
+	return result
+}
+
+func mapExcludedCommitteesToResult(committees []itx.ExcludedCommittee) []*survey.ExcludedCommittee {
+	// Always return an empty slice instead of nil to ensure JSON marshals as []
+	result := make([]*survey.ExcludedCommittee, 0, len(committees))
+	for _, c := range committees {
+		result = append(result, &survey.ExcludedCommittee{
+			ProjectID:         c.ProjectID,
+			ProjectName:       c.ProjectName,
+			CommitteeID:       c.CommitteeID,
+			CommitteeName:     c.CommitteeName,
+			CommitteeCategory: c.CommitteeCategory,
+		})
+	}
+	return result
+}
+
+func mapITXPreviewRecipientsToResult(recipients []itx.ITXPreviewRecipient) []*survey.ITXPreviewRecipient {
+	// Always return an empty slice instead of nil to ensure JSON marshals as []
+	result := make([]*survey.ITXPreviewRecipient, 0, len(recipients))
+	for _, r := range recipients {
+		result = append(result, &survey.ITXPreviewRecipient{
+			UserID:    r.UserID,
+			Name:      r.Name,
+			FirstName: r.FirstName,
+			LastName:  r.LastName,
+			Username:  r.Username,
+			Email:     r.Email,
+			Role:      r.Role,
+		})
 	}
 	return result
 }

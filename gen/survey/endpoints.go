@@ -17,10 +17,13 @@ import (
 
 // Endpoints wraps the "survey" service endpoints.
 type Endpoints struct {
-	ScheduleSurvey goa.Endpoint
-	GetSurvey      goa.Endpoint
-	UpdateSurvey   goa.Endpoint
-	DeleteSurvey   goa.Endpoint
+	ScheduleSurvey        goa.Endpoint
+	GetSurvey             goa.Endpoint
+	UpdateSurvey          goa.Endpoint
+	DeleteSurvey          goa.Endpoint
+	BulkResendSurvey      goa.Endpoint
+	PreviewSendSurvey     goa.Endpoint
+	SendMissingRecipients goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "survey" service with endpoints.
@@ -28,10 +31,13 @@ func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
 	a := s.(Auther)
 	return &Endpoints{
-		ScheduleSurvey: NewScheduleSurveyEndpoint(s, a.JWTAuth),
-		GetSurvey:      NewGetSurveyEndpoint(s, a.JWTAuth),
-		UpdateSurvey:   NewUpdateSurveyEndpoint(s, a.JWTAuth),
-		DeleteSurvey:   NewDeleteSurveyEndpoint(s, a.JWTAuth),
+		ScheduleSurvey:        NewScheduleSurveyEndpoint(s, a.JWTAuth),
+		GetSurvey:             NewGetSurveyEndpoint(s, a.JWTAuth),
+		UpdateSurvey:          NewUpdateSurveyEndpoint(s, a.JWTAuth),
+		DeleteSurvey:          NewDeleteSurveyEndpoint(s, a.JWTAuth),
+		BulkResendSurvey:      NewBulkResendSurveyEndpoint(s, a.JWTAuth),
+		PreviewSendSurvey:     NewPreviewSendSurveyEndpoint(s, a.JWTAuth),
+		SendMissingRecipients: NewSendMissingRecipientsEndpoint(s, a.JWTAuth),
 	}
 }
 
@@ -41,6 +47,9 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.GetSurvey = m(e.GetSurvey)
 	e.UpdateSurvey = m(e.UpdateSurvey)
 	e.DeleteSurvey = m(e.DeleteSurvey)
+	e.BulkResendSurvey = m(e.BulkResendSurvey)
+	e.PreviewSendSurvey = m(e.PreviewSendSurvey)
+	e.SendMissingRecipients = m(e.SendMissingRecipients)
 }
 
 // NewScheduleSurveyEndpoint returns an endpoint function that calls the method
@@ -132,5 +141,74 @@ func NewDeleteSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endp
 			return nil, err
 		}
 		return nil, s.DeleteSurvey(ctx, p)
+	}
+}
+
+// NewBulkResendSurveyEndpoint returns an endpoint function that calls the
+// method "bulk_resend_survey" of service "survey".
+func NewBulkResendSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*BulkResendSurveyPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.BulkResendSurvey(ctx, p)
+	}
+}
+
+// NewPreviewSendSurveyEndpoint returns an endpoint function that calls the
+// method "preview_send_survey" of service "survey".
+func NewPreviewSendSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*PreviewSendSurveyPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.PreviewSendSurvey(ctx, p)
+	}
+}
+
+// NewSendMissingRecipientsEndpoint returns an endpoint function that calls the
+// method "send_missing_recipients" of service "survey".
+func NewSendMissingRecipientsEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*SendMissingRecipientsPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.SendMissingRecipients(ctx, p)
 	}
 }

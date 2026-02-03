@@ -13,6 +13,7 @@ import (
 	"fmt"
 
 	survey "github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
+	goa "goa.design/goa/v3/pkg"
 )
 
 // BuildScheduleSurveyPayload builds the payload for the survey schedule_survey
@@ -23,7 +24,7 @@ func BuildScheduleSurveyPayload(surveyScheduleSurveyBody string, surveyScheduleS
 	{
 		err = json.Unmarshal([]byte(surveyScheduleSurveyBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Omnis placeat rerum ad eum.\",\n         \"Sapiente et corporis.\"\n      ],\n      \"creator_id\": \"Quasi nisi.\",\n      \"creator_name\": \"Aut molestiae officiis nihil et voluptas possimus.\",\n      \"creator_username\": \"Consequatur animi odit nostrum nostrum.\",\n      \"email_body\": \"Sapiente qui.\",\n      \"email_body_text\": \"Eos porro voluptatem doloremque qui mollitia sit.\",\n      \"email_subject\": \"Qui consequatur delectus.\",\n      \"is_project_survey\": false,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Sed molestiae.\",\n      \"survey_cutoff_date\": \"Nisi harum delectus veniam delectus.\",\n      \"survey_monkey_id\": \"Fuga maiores quis incidunt pariatur et unde.\",\n      \"survey_reminder_rate_days\": 5299522033241582586,\n      \"survey_send_date\": \"Itaque quidem saepe et saepe corrupti quis.\",\n      \"survey_title\": \"Voluptates sunt accusamus.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Consequuntur sapiente et corporis quis numquam autem.\",\n         \"Quia aut.\"\n      ],\n      \"creator_id\": \"Unde consequatur.\",\n      \"creator_name\": \"Illum fuga maiores quis incidunt pariatur.\",\n      \"creator_username\": \"Voluptas possimus iste quasi.\",\n      \"email_body\": \"Voluptatem doloremque qui.\",\n      \"email_body_text\": \"Sit qui ut omnis placeat rerum.\",\n      \"email_subject\": \"Ut sapiente qui numquam eos.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": false,\n      \"stage_filter\": \"Nostrum nostrum repellat aut molestiae officiis nihil.\",\n      \"survey_cutoff_date\": \"Fugit qui.\",\n      \"survey_monkey_id\": \"Sunt accusamus pariatur quia itaque quidem.\",\n      \"survey_reminder_rate_days\": 2463719811884759918,\n      \"survey_send_date\": \"Delectus veniam delectus.\",\n      \"survey_title\": \"Et saepe corrupti quis nostrum.\"\n   }'")
 		}
 	}
 	var token *string
@@ -139,6 +140,102 @@ func BuildDeleteSurveyPayload(surveyDeleteSurveySurveyID string, surveyDeleteSur
 	}
 	v := &survey.DeleteSurveyPayload{}
 	v.SurveyID = surveyID
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildBulkResendSurveyPayload builds the payload for the survey
+// bulk_resend_survey endpoint from CLI flags.
+func BuildBulkResendSurveyPayload(surveyBulkResendSurveyBody string, surveyBulkResendSurveySurveyID string, surveyBulkResendSurveyToken string) (*survey.BulkResendSurveyPayload, error) {
+	var err error
+	var body BulkResendSurveyRequestBody
+	{
+		err = json.Unmarshal([]byte(surveyBulkResendSurveyBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"recipient_ids\": [\n         \"cba14f40-1636-11ec-9621-0242ac130002\",\n         \"cba14f40-1636-11ec-9621-0242ac130003\"\n      ]\n   }'")
+		}
+		if body.RecipientIds == nil {
+			err = goa.MergeErrors(err, goa.MissingFieldError("recipient_ids", "body"))
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	var surveyID string
+	{
+		surveyID = surveyBulkResendSurveySurveyID
+	}
+	var token *string
+	{
+		if surveyBulkResendSurveyToken != "" {
+			token = &surveyBulkResendSurveyToken
+		}
+	}
+	v := &survey.BulkResendSurveyPayload{}
+	if body.RecipientIds != nil {
+		v.RecipientIds = make([]string, len(body.RecipientIds))
+		for i, val := range body.RecipientIds {
+			v.RecipientIds[i] = val
+		}
+	} else {
+		v.RecipientIds = []string{}
+	}
+	v.SurveyID = surveyID
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildPreviewSendSurveyPayload builds the payload for the survey
+// preview_send_survey endpoint from CLI flags.
+func BuildPreviewSendSurveyPayload(surveyPreviewSendSurveySurveyID string, surveyPreviewSendSurveyCommitteeID string, surveyPreviewSendSurveyToken string) (*survey.PreviewSendSurveyPayload, error) {
+	var surveyID string
+	{
+		surveyID = surveyPreviewSendSurveySurveyID
+	}
+	var committeeID *string
+	{
+		if surveyPreviewSendSurveyCommitteeID != "" {
+			committeeID = &surveyPreviewSendSurveyCommitteeID
+		}
+	}
+	var token *string
+	{
+		if surveyPreviewSendSurveyToken != "" {
+			token = &surveyPreviewSendSurveyToken
+		}
+	}
+	v := &survey.PreviewSendSurveyPayload{}
+	v.SurveyID = surveyID
+	v.CommitteeID = committeeID
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildSendMissingRecipientsPayload builds the payload for the survey
+// send_missing_recipients endpoint from CLI flags.
+func BuildSendMissingRecipientsPayload(surveySendMissingRecipientsSurveyID string, surveySendMissingRecipientsCommitteeID string, surveySendMissingRecipientsToken string) (*survey.SendMissingRecipientsPayload, error) {
+	var surveyID string
+	{
+		surveyID = surveySendMissingRecipientsSurveyID
+	}
+	var committeeID *string
+	{
+		if surveySendMissingRecipientsCommitteeID != "" {
+			committeeID = &surveySendMissingRecipientsCommitteeID
+		}
+	}
+	var token *string
+	{
+		if surveySendMissingRecipientsToken != "" {
+			token = &surveySendMissingRecipientsToken
+		}
+	}
+	v := &survey.SendMissingRecipientsPayload{}
+	v.SurveyID = surveyID
+	v.CommitteeID = committeeID
 	v.Token = token
 
 	return v, nil

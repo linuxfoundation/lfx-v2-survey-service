@@ -75,6 +75,13 @@ type UpdateSurveyRequestBody struct {
 	CommitteeVotingEnabled *bool `form:"committee_voting_enabled,omitempty" json:"committee_voting_enabled,omitempty" xml:"committee_voting_enabled,omitempty"`
 }
 
+// BulkResendSurveyRequestBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP request body.
+type BulkResendSurveyRequestBody struct {
+	// Array of recipient IDs to resend survey emails to
+	RecipientIds []string `form:"recipient_ids" json:"recipient_ids" xml:"recipient_ids"`
+}
+
 // ScheduleSurveyResponseBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP response body.
 type ScheduleSurveyResponseBody struct {
@@ -304,6 +311,17 @@ type UpdateSurveyResponseBody struct {
 	NextAutomatedReminderAt *string `form:"next_automated_reminder_at,omitempty" json:"next_automated_reminder_at,omitempty" xml:"next_automated_reminder_at,omitempty"`
 	// Latest automated reminder sent date
 	LatestAutomatedReminderSentAt *string `form:"latest_automated_reminder_sent_at,omitempty" json:"latest_automated_reminder_sent_at,omitempty" xml:"latest_automated_reminder_sent_at,omitempty"`
+}
+
+// PreviewSendSurveyResponseBody is the type of the "survey" service
+// "preview_send_survey" endpoint HTTP response body.
+type PreviewSendSurveyResponseBody struct {
+	// List of affected projects
+	AffectedProjects []*LFXProjectResponseBody `form:"affected_projects,omitempty" json:"affected_projects,omitempty" xml:"affected_projects,omitempty"`
+	// List of affected committees
+	AffectedCommittees []*ExcludedCommitteeResponseBody `form:"affected_committees,omitempty" json:"affected_committees,omitempty" xml:"affected_committees,omitempty"`
+	// List of affected recipients
+	AffectedRecipients []*ITXPreviewRecipientResponseBody `form:"affected_recipients,omitempty" json:"affected_recipients,omitempty" xml:"affected_recipients,omitempty"`
 }
 
 // ScheduleSurveyBadRequestResponseBody is the type of the "survey" service
@@ -537,6 +555,180 @@ type DeleteSurveyUnauthorizedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// BulkResendSurveyBadRequestResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "BadRequest" error.
+type BulkResendSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// BulkResendSurveyForbiddenResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "Forbidden" error.
+type BulkResendSurveyForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// BulkResendSurveyInternalServerErrorResponseBody is the type of the "survey"
+// service "bulk_resend_survey" endpoint HTTP response body for the
+// "InternalServerError" error.
+type BulkResendSurveyInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// BulkResendSurveyNotFoundResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "NotFound" error.
+type BulkResendSurveyNotFoundResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// BulkResendSurveyServiceUnavailableResponseBody is the type of the "survey"
+// service "bulk_resend_survey" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type BulkResendSurveyServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// BulkResendSurveyUnauthorizedResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "Unauthorized"
+// error.
+type BulkResendSurveyUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PreviewSendSurveyBadRequestResponseBody is the type of the "survey" service
+// "preview_send_survey" endpoint HTTP response body for the "BadRequest" error.
+type PreviewSendSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PreviewSendSurveyForbiddenResponseBody is the type of the "survey" service
+// "preview_send_survey" endpoint HTTP response body for the "Forbidden" error.
+type PreviewSendSurveyForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PreviewSendSurveyInternalServerErrorResponseBody is the type of the "survey"
+// service "preview_send_survey" endpoint HTTP response body for the
+// "InternalServerError" error.
+type PreviewSendSurveyInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PreviewSendSurveyNotFoundResponseBody is the type of the "survey" service
+// "preview_send_survey" endpoint HTTP response body for the "NotFound" error.
+type PreviewSendSurveyNotFoundResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PreviewSendSurveyServiceUnavailableResponseBody is the type of the "survey"
+// service "preview_send_survey" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type PreviewSendSurveyServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PreviewSendSurveyUnauthorizedResponseBody is the type of the "survey"
+// service "preview_send_survey" endpoint HTTP response body for the
+// "Unauthorized" error.
+type PreviewSendSurveyUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// SendMissingRecipientsBadRequestResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "BadRequest" error.
+type SendMissingRecipientsBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// SendMissingRecipientsForbiddenResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "Forbidden" error.
+type SendMissingRecipientsForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// SendMissingRecipientsInternalServerErrorResponseBody is the type of the
+// "survey" service "send_missing_recipients" endpoint HTTP response body for
+// the "InternalServerError" error.
+type SendMissingRecipientsInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// SendMissingRecipientsNotFoundResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "NotFound" error.
+type SendMissingRecipientsNotFoundResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// SendMissingRecipientsServiceUnavailableResponseBody is the type of the
+// "survey" service "send_missing_recipients" endpoint HTTP response body for
+// the "ServiceUnavailable" error.
+type SendMissingRecipientsServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// SendMissingRecipientsUnauthorizedResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "Unauthorized" error.
+type SendMissingRecipientsUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // SurveyCommitteeResponseBody is used to define fields on response body types.
 type SurveyCommitteeResponseBody struct {
 	// Committee name
@@ -555,6 +747,54 @@ type SurveyCommitteeResponseBody struct {
 	TotalResponses *int `form:"total_responses,omitempty" json:"total_responses,omitempty" xml:"total_responses,omitempty"`
 	// NPS value for this committee
 	NpsValue *float64 `form:"nps_value,omitempty" json:"nps_value,omitempty" xml:"nps_value,omitempty"`
+}
+
+// LFXProjectResponseBody is used to define fields on response body types.
+type LFXProjectResponseBody struct {
+	// Project ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Project name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Project slug
+	Slug *string `form:"slug,omitempty" json:"slug,omitempty" xml:"slug,omitempty"`
+	// Project status/stage
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
+	// Project logo URL
+	LogoURL *string `form:"logo_url,omitempty" json:"logo_url,omitempty" xml:"logo_url,omitempty"`
+}
+
+// ExcludedCommitteeResponseBody is used to define fields on response body
+// types.
+type ExcludedCommitteeResponseBody struct {
+	// Project ID
+	ProjectID *string `form:"project_id,omitempty" json:"project_id,omitempty" xml:"project_id,omitempty"`
+	// Project name
+	ProjectName *string `form:"project_name,omitempty" json:"project_name,omitempty" xml:"project_name,omitempty"`
+	// Committee ID
+	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
+	// Committee name
+	CommitteeName *string `form:"committee_name,omitempty" json:"committee_name,omitempty" xml:"committee_name,omitempty"`
+	// Committee category
+	CommitteeCategory *string `form:"committee_category,omitempty" json:"committee_category,omitempty" xml:"committee_category,omitempty"`
+}
+
+// ITXPreviewRecipientResponseBody is used to define fields on response body
+// types.
+type ITXPreviewRecipientResponseBody struct {
+	// LF user ID
+	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+	// User full name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// User first name
+	FirstName *string `form:"first_name,omitempty" json:"first_name,omitempty" xml:"first_name,omitempty"`
+	// User last name
+	LastName *string `form:"last_name,omitempty" json:"last_name,omitempty" xml:"last_name,omitempty"`
+	// Linux Foundation ID
+	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
+	// Email address
+	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
+	// Role in committee
+	Role *string `form:"role,omitempty" json:"role,omitempty" xml:"role,omitempty"`
 }
 
 // NewScheduleSurveyRequestBody builds the HTTP request body from the payload
@@ -605,6 +845,21 @@ func NewUpdateSurveyRequestBody(p *survey.UpdateSurveyPayload) *UpdateSurveyRequ
 		for i, val := range p.Committees {
 			body.Committees[i] = val
 		}
+	}
+	return body
+}
+
+// NewBulkResendSurveyRequestBody builds the HTTP request body from the payload
+// of the "bulk_resend_survey" endpoint of the "survey" service.
+func NewBulkResendSurveyRequestBody(p *survey.BulkResendSurveyPayload) *BulkResendSurveyRequestBody {
+	body := &BulkResendSurveyRequestBody{}
+	if p.RecipientIds != nil {
+		body.RecipientIds = make([]string, len(p.RecipientIds))
+		for i, val := range p.RecipientIds {
+			body.RecipientIds[i] = val
+		}
+	} else {
+		body.RecipientIds = []string{}
 	}
 	return body
 }
@@ -1046,6 +1301,242 @@ func NewDeleteSurveyUnauthorized(body *DeleteSurveyUnauthorizedResponseBody) *su
 	return v
 }
 
+// NewBulkResendSurveyBadRequest builds a survey service bulk_resend_survey
+// endpoint BadRequest error.
+func NewBulkResendSurveyBadRequest(body *BulkResendSurveyBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewBulkResendSurveyForbidden builds a survey service bulk_resend_survey
+// endpoint Forbidden error.
+func NewBulkResendSurveyForbidden(body *BulkResendSurveyForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewBulkResendSurveyInternalServerError builds a survey service
+// bulk_resend_survey endpoint InternalServerError error.
+func NewBulkResendSurveyInternalServerError(body *BulkResendSurveyInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewBulkResendSurveyNotFound builds a survey service bulk_resend_survey
+// endpoint NotFound error.
+func NewBulkResendSurveyNotFound(body *BulkResendSurveyNotFoundResponseBody) *survey.NotFoundError {
+	v := &survey.NotFoundError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewBulkResendSurveyServiceUnavailable builds a survey service
+// bulk_resend_survey endpoint ServiceUnavailable error.
+func NewBulkResendSurveyServiceUnavailable(body *BulkResendSurveyServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewBulkResendSurveyUnauthorized builds a survey service bulk_resend_survey
+// endpoint Unauthorized error.
+func NewBulkResendSurveyUnauthorized(body *BulkResendSurveyUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPreviewSendSurveyPreviewSendResultOK builds a "survey" service
+// "preview_send_survey" endpoint result from a HTTP "OK" response.
+func NewPreviewSendSurveyPreviewSendResultOK(body *PreviewSendSurveyResponseBody) *survey.PreviewSendResult {
+	v := &survey.PreviewSendResult{}
+	if body.AffectedProjects != nil {
+		v.AffectedProjects = make([]*survey.LFXProject, len(body.AffectedProjects))
+		for i, val := range body.AffectedProjects {
+			if val == nil {
+				v.AffectedProjects[i] = nil
+				continue
+			}
+			v.AffectedProjects[i] = unmarshalLFXProjectResponseBodyToSurveyLFXProject(val)
+		}
+	}
+	if body.AffectedCommittees != nil {
+		v.AffectedCommittees = make([]*survey.ExcludedCommittee, len(body.AffectedCommittees))
+		for i, val := range body.AffectedCommittees {
+			if val == nil {
+				v.AffectedCommittees[i] = nil
+				continue
+			}
+			v.AffectedCommittees[i] = unmarshalExcludedCommitteeResponseBodyToSurveyExcludedCommittee(val)
+		}
+	}
+	if body.AffectedRecipients != nil {
+		v.AffectedRecipients = make([]*survey.ITXPreviewRecipient, len(body.AffectedRecipients))
+		for i, val := range body.AffectedRecipients {
+			if val == nil {
+				v.AffectedRecipients[i] = nil
+				continue
+			}
+			v.AffectedRecipients[i] = unmarshalITXPreviewRecipientResponseBodyToSurveyITXPreviewRecipient(val)
+		}
+	}
+
+	return v
+}
+
+// NewPreviewSendSurveyBadRequest builds a survey service preview_send_survey
+// endpoint BadRequest error.
+func NewPreviewSendSurveyBadRequest(body *PreviewSendSurveyBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPreviewSendSurveyForbidden builds a survey service preview_send_survey
+// endpoint Forbidden error.
+func NewPreviewSendSurveyForbidden(body *PreviewSendSurveyForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPreviewSendSurveyInternalServerError builds a survey service
+// preview_send_survey endpoint InternalServerError error.
+func NewPreviewSendSurveyInternalServerError(body *PreviewSendSurveyInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPreviewSendSurveyNotFound builds a survey service preview_send_survey
+// endpoint NotFound error.
+func NewPreviewSendSurveyNotFound(body *PreviewSendSurveyNotFoundResponseBody) *survey.NotFoundError {
+	v := &survey.NotFoundError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPreviewSendSurveyServiceUnavailable builds a survey service
+// preview_send_survey endpoint ServiceUnavailable error.
+func NewPreviewSendSurveyServiceUnavailable(body *PreviewSendSurveyServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPreviewSendSurveyUnauthorized builds a survey service preview_send_survey
+// endpoint Unauthorized error.
+func NewPreviewSendSurveyUnauthorized(body *PreviewSendSurveyUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewSendMissingRecipientsBadRequest builds a survey service
+// send_missing_recipients endpoint BadRequest error.
+func NewSendMissingRecipientsBadRequest(body *SendMissingRecipientsBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewSendMissingRecipientsForbidden builds a survey service
+// send_missing_recipients endpoint Forbidden error.
+func NewSendMissingRecipientsForbidden(body *SendMissingRecipientsForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewSendMissingRecipientsInternalServerError builds a survey service
+// send_missing_recipients endpoint InternalServerError error.
+func NewSendMissingRecipientsInternalServerError(body *SendMissingRecipientsInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewSendMissingRecipientsNotFound builds a survey service
+// send_missing_recipients endpoint NotFound error.
+func NewSendMissingRecipientsNotFound(body *SendMissingRecipientsNotFoundResponseBody) *survey.NotFoundError {
+	v := &survey.NotFoundError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewSendMissingRecipientsServiceUnavailable builds a survey service
+// send_missing_recipients endpoint ServiceUnavailable error.
+func NewSendMissingRecipientsServiceUnavailable(body *SendMissingRecipientsServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewSendMissingRecipientsUnauthorized builds a survey service
+// send_missing_recipients endpoint Unauthorized error.
+func NewSendMissingRecipientsUnauthorized(body *SendMissingRecipientsUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // ValidateScheduleSurveyResponseBody runs the validations defined on
 // schedule_survey_response_body
 func ValidateScheduleSurveyResponseBody(body *ScheduleSurveyResponseBody) (err error) {
@@ -1162,6 +1653,33 @@ func ValidateUpdateSurveyResponseBody(body *UpdateSurveyResponseBody) (err error
 	}
 	if body.LatestAutomatedReminderSentAt != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.latest_automated_reminder_sent_at", *body.LatestAutomatedReminderSentAt, goa.FormatDateTime))
+	}
+	return
+}
+
+// ValidatePreviewSendSurveyResponseBody runs the validations defined on
+// preview_send_survey_response_body
+func ValidatePreviewSendSurveyResponseBody(body *PreviewSendSurveyResponseBody) (err error) {
+	for _, e := range body.AffectedProjects {
+		if e != nil {
+			if err2 := ValidateLFXProjectResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	for _, e := range body.AffectedCommittees {
+		if e != nil {
+			if err2 := ValidateExcludedCommitteeResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	for _, e := range body.AffectedRecipients {
+		if e != nil {
+			if err2 := ValidateITXPreviewRecipientResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
 	}
 	return
 }
@@ -1462,6 +1980,293 @@ func ValidateDeleteSurveyUnauthorizedResponseBody(body *DeleteSurveyUnauthorized
 	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateBulkResendSurveyBadRequestResponseBody runs the validations defined
+// on bulk_resend_survey_BadRequest_response_body
+func ValidateBulkResendSurveyBadRequestResponseBody(body *BulkResendSurveyBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateBulkResendSurveyForbiddenResponseBody runs the validations defined
+// on bulk_resend_survey_Forbidden_response_body
+func ValidateBulkResendSurveyForbiddenResponseBody(body *BulkResendSurveyForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateBulkResendSurveyInternalServerErrorResponseBody runs the validations
+// defined on bulk_resend_survey_InternalServerError_response_body
+func ValidateBulkResendSurveyInternalServerErrorResponseBody(body *BulkResendSurveyInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateBulkResendSurveyNotFoundResponseBody runs the validations defined on
+// bulk_resend_survey_NotFound_response_body
+func ValidateBulkResendSurveyNotFoundResponseBody(body *BulkResendSurveyNotFoundResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateBulkResendSurveyServiceUnavailableResponseBody runs the validations
+// defined on bulk_resend_survey_ServiceUnavailable_response_body
+func ValidateBulkResendSurveyServiceUnavailableResponseBody(body *BulkResendSurveyServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateBulkResendSurveyUnauthorizedResponseBody runs the validations
+// defined on bulk_resend_survey_Unauthorized_response_body
+func ValidateBulkResendSurveyUnauthorizedResponseBody(body *BulkResendSurveyUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidatePreviewSendSurveyBadRequestResponseBody runs the validations defined
+// on preview_send_survey_BadRequest_response_body
+func ValidatePreviewSendSurveyBadRequestResponseBody(body *PreviewSendSurveyBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidatePreviewSendSurveyForbiddenResponseBody runs the validations defined
+// on preview_send_survey_Forbidden_response_body
+func ValidatePreviewSendSurveyForbiddenResponseBody(body *PreviewSendSurveyForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidatePreviewSendSurveyInternalServerErrorResponseBody runs the
+// validations defined on preview_send_survey_InternalServerError_response_body
+func ValidatePreviewSendSurveyInternalServerErrorResponseBody(body *PreviewSendSurveyInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidatePreviewSendSurveyNotFoundResponseBody runs the validations defined
+// on preview_send_survey_NotFound_response_body
+func ValidatePreviewSendSurveyNotFoundResponseBody(body *PreviewSendSurveyNotFoundResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidatePreviewSendSurveyServiceUnavailableResponseBody runs the validations
+// defined on preview_send_survey_ServiceUnavailable_response_body
+func ValidatePreviewSendSurveyServiceUnavailableResponseBody(body *PreviewSendSurveyServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidatePreviewSendSurveyUnauthorizedResponseBody runs the validations
+// defined on preview_send_survey_Unauthorized_response_body
+func ValidatePreviewSendSurveyUnauthorizedResponseBody(body *PreviewSendSurveyUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateSendMissingRecipientsBadRequestResponseBody runs the validations
+// defined on send_missing_recipients_BadRequest_response_body
+func ValidateSendMissingRecipientsBadRequestResponseBody(body *SendMissingRecipientsBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateSendMissingRecipientsForbiddenResponseBody runs the validations
+// defined on send_missing_recipients_Forbidden_response_body
+func ValidateSendMissingRecipientsForbiddenResponseBody(body *SendMissingRecipientsForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateSendMissingRecipientsInternalServerErrorResponseBody runs the
+// validations defined on
+// send_missing_recipients_InternalServerError_response_body
+func ValidateSendMissingRecipientsInternalServerErrorResponseBody(body *SendMissingRecipientsInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateSendMissingRecipientsNotFoundResponseBody runs the validations
+// defined on send_missing_recipients_NotFound_response_body
+func ValidateSendMissingRecipientsNotFoundResponseBody(body *SendMissingRecipientsNotFoundResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateSendMissingRecipientsServiceUnavailableResponseBody runs the
+// validations defined on
+// send_missing_recipients_ServiceUnavailable_response_body
+func ValidateSendMissingRecipientsServiceUnavailableResponseBody(body *SendMissingRecipientsServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateSendMissingRecipientsUnauthorizedResponseBody runs the validations
+// defined on send_missing_recipients_Unauthorized_response_body
+func ValidateSendMissingRecipientsUnauthorizedResponseBody(body *SendMissingRecipientsUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateLFXProjectResponseBody runs the validations defined on
+// LFXProjectResponseBody
+func ValidateLFXProjectResponseBody(body *LFXProjectResponseBody) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Slug == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("slug", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Status != nil {
+		if !(*body.Status == "Formation - Exploratory" || *body.Status == "Formation - Engaged" || *body.Status == "Active" || *body.Status == "Archived" || *body.Status == "Formation - On Hold" || *body.Status == "Formation - Disengaged" || *body.Status == "Formation - Confidential" || *body.Status == "Prospect") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"Formation - Exploratory", "Formation - Engaged", "Active", "Archived", "Formation - On Hold", "Formation - Disengaged", "Formation - Confidential", "Prospect"}))
+		}
+	}
+	return
+}
+
+// ValidateExcludedCommitteeResponseBody runs the validations defined on
+// ExcludedCommitteeResponseBody
+func ValidateExcludedCommitteeResponseBody(body *ExcludedCommitteeResponseBody) (err error) {
+	if body.ProjectID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("project_id", "body"))
+	}
+	if body.ProjectName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("project_name", "body"))
+	}
+	if body.CommitteeID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("committee_id", "body"))
+	}
+	if body.CommitteeName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("committee_name", "body"))
+	}
+	if body.CommitteeCategory == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("committee_category", "body"))
+	}
+	if body.CommitteeCategory != nil {
+		if !(*body.CommitteeCategory == "Legal Committee" || *body.CommitteeCategory == "Finance Committee" || *body.CommitteeCategory == "Special Interest Group" || *body.CommitteeCategory == "Board" || *body.CommitteeCategory == "Technical Oversight Committee/Technical Advisory Committee" || *body.CommitteeCategory == "Technical Steering Committee") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.committee_category", *body.CommitteeCategory, []any{"Legal Committee", "Finance Committee", "Special Interest Group", "Board", "Technical Oversight Committee/Technical Advisory Committee", "Technical Steering Committee"}))
+		}
+	}
+	return
+}
+
+// ValidateITXPreviewRecipientResponseBody runs the validations defined on
+// ITXPreviewRecipientResponseBody
+func ValidateITXPreviewRecipientResponseBody(body *ITXPreviewRecipientResponseBody) (err error) {
+	if body.UserID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_id", "body"))
+	}
+	if body.Email == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email", "body"))
+	}
+	if body.Email != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.email", *body.Email, goa.FormatEmail))
+	}
+	if body.Role != nil {
+		if !(*body.Role == "Chair" || *body.Role == "Voting Rep" || *body.Role == "Member") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.role", *body.Role, []any{"Chair", "Voting Rep", "Member"}))
+		}
 	}
 	return
 }

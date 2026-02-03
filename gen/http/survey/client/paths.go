@@ -31,3 +31,18 @@ func UpdateSurveySurveyPath(surveyID string) string {
 func DeleteSurveySurveyPath(surveyID string) string {
 	return fmt.Sprintf("/surveys/%v", surveyID)
 }
+
+// BulkResendSurveySurveyPath returns the URL path to the survey service bulk_resend_survey HTTP endpoint.
+func BulkResendSurveySurveyPath(surveyID string) string {
+	return fmt.Sprintf("/surveys/%v/bulk_resend", surveyID)
+}
+
+// PreviewSendSurveySurveyPath returns the URL path to the survey service preview_send_survey HTTP endpoint.
+func PreviewSendSurveySurveyPath(surveyID string) string {
+	return fmt.Sprintf("/surveys/%v/preview_send", surveyID)
+}
+
+// SendMissingRecipientsSurveyPath returns the URL path to the survey service send_missing_recipients HTTP endpoint.
+func SendMissingRecipientsSurveyPath(surveyID string) string {
+	return fmt.Sprintf("/surveys/%v/send_missing_recipients", surveyID)
+}

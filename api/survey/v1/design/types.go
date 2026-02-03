@@ -270,3 +270,103 @@ var ForbiddenError = Type("ForbiddenError", func() {
 	Attribute("message", String, "Error message")
 	Required("code", "message")
 })
+
+// PreviewSendResult represents the preview send response
+var PreviewSendResult = Type("PreviewSendResult", func() {
+	Description("Preview of recipients, committees, and projects affected by a resend")
+
+	Attribute("affected_projects", ArrayOf(LFXProject), "List of affected projects")
+	Attribute("affected_committees", ArrayOf(ExcludedCommittee), "List of affected committees")
+	Attribute("affected_recipients", ArrayOf(ITXPreviewRecipient), "List of affected recipients")
+})
+
+// LFXProject represents a project in the preview send response
+var LFXProject = Type("LFXProject", func() {
+	Description("LFX Project information")
+
+	Attribute("id", String, "Project ID", func() {
+		Example("003170000123XHTAA2")
+	})
+
+	Attribute("name", String, "Project name", func() {
+		Example("Express JS")
+	})
+
+	Attribute("slug", String, "Project slug", func() {
+		Example("express-gateway")
+	})
+
+	Attribute("status", String, "Project status/stage", func() {
+		Enum("Formation - Exploratory", "Formation - Engaged", "Active", "Archived", "Formation - On Hold", "Formation - Disengaged", "Formation - Confidential", "Prospect")
+		Example("Active")
+	})
+
+	Attribute("logo_url", String, "Project logo URL")
+
+	Required("id", "name", "slug", "status")
+})
+
+// ExcludedCommittee represents a committee in the preview send response
+var ExcludedCommittee = Type("ExcludedCommittee", func() {
+	Description("Committee information for preview send")
+
+	Attribute("project_id", String, "Project ID", func() {
+		Example("003170000123XHTAA2")
+	})
+
+	Attribute("project_name", String, "Project name", func() {
+		Example("Kubernetes")
+	})
+
+	Attribute("committee_id", String, "Committee ID", func() {
+		Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
+	})
+
+	Attribute("committee_name", String, "Committee name", func() {
+		Example("Technical Steering Committee")
+	})
+
+	Attribute("committee_category", String, "Committee category", func() {
+		Enum("Legal Committee", "Finance Committee", "Special Interest Group", "Board", "Technical Oversight Committee/Technical Advisory Committee", "Technical Steering Committee")
+		Example("Technical Steering Committee")
+	})
+
+	Required("project_id", "project_name", "committee_id", "committee_name", "committee_category")
+})
+
+// ITXPreviewRecipient represents a recipient in the preview send response
+var ITXPreviewRecipient = Type("ITXPreviewRecipient", func() {
+	Description("Recipient information for preview send")
+
+	Attribute("user_id", String, "LF user ID", func() {
+		Example("005f1000009RbC4AAK")
+	})
+
+	Attribute("name", String, "User full name", func() {
+		Example("John Doe")
+	})
+
+	Attribute("first_name", String, "User first name", func() {
+		Example("John")
+	})
+
+	Attribute("last_name", String, "User last name", func() {
+		Example("Doe")
+	})
+
+	Attribute("username", String, "Linux Foundation ID", func() {
+		Example("jdoe")
+	})
+
+	Attribute("email", String, "Email address", func() {
+		Format(FormatEmail)
+		Example("john.doe@example.com")
+	})
+
+	Attribute("role", String, "Role in committee", func() {
+		Enum("Chair", "Voting Rep", "Member")
+		Example("Voting Rep")
+	})
+
+	Required("user_id", "email")
+})

@@ -32,6 +32,12 @@ type SurveyClient interface {
 	// BulkResendSurvey bulk resends survey emails to select recipients in ITX
 	BulkResendSurvey(ctx context.Context, surveyID string, req *itx.BulkResendRequest) error
 
+	// PreviewSend previews which recipients would be affected by a resend in ITX
+	PreviewSend(ctx context.Context, surveyID string, committeeID *string) (*itx.PreviewSendResponse, error)
+
+	// SendMissingRecipients sends survey emails to committee members who haven't received it in ITX
+	SendMissingRecipients(ctx context.Context, surveyID string, committeeID *string) error
+
 	// GetSurveyResults retrieves aggregated survey results from ITX
 	GetSurveyResults(ctx context.Context, surveyID string) (*itx.SurveyResults, error)
 }

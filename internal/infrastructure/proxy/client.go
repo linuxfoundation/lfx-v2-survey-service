@@ -502,6 +502,91 @@ func (c *Client) BulkResendSurvey(ctx context.Context, surveyID string, req *itx
 	return nil
 }
 
+// PreviewSend previews which recipients would be affected by a resend
+func (c *Client) PreviewSend(ctx context.Context, surveyID string, committeeID *string) (*itx.PreviewSendResponse, error) {
+	// Create HTTP request with optional committee_id query parameter
+	url := fmt.Sprintf("%sv2/surveys/%s/preview_send", c.config.BaseURL, surveyID)
+	if committeeID != nil && *committeeID != "" {
+		url = fmt.Sprintf("%s?committee_id=%s", url, *committeeID)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, domain.NewInternalError("failed to create request", err)
+	}
+
+	// Set headers (Authorization header is automatically set by OAuth2 transport)
+	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("x-scope", "manage:surveys")
+
+	// Execute request
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, domain.NewUnavailableError("ITX service request failed", err)
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	// Read response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, domain.NewInternalError("failed to read response", err)
+	}
+
+	// Handle non-2xx status codes
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, c.mapHTTPError(resp.StatusCode, respBody)
+	}
+
+	// Unmarshal response
+	var result itx.PreviewSendResponse
+	if err := json.Unmarshal(respBody, &result); err != nil {
+		return nil, domain.NewInternalError("failed to unmarshal response", err)
+	}
+
+	return &result, nil
+}
+
+// SendMissingRecipients sends survey emails to committee members who haven't received it
+func (c *Client) SendMissingRecipients(ctx context.Context, surveyID string, committeeID *string) error {
+	// Create HTTP request with optional committee_id query parameter
+	url := fmt.Sprintf("%sv2/surveys/%s/send_missing_recipients", c.config.BaseURL, surveyID)
+	if committeeID != nil && *committeeID != "" {
+		url = fmt.Sprintf("%s?committee_id=%s", url, *committeeID)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
+	if err != nil {
+		return domain.NewInternalError("failed to create request", err)
+	}
+
+	// Set headers (Authorization header is automatically set by OAuth2 transport)
+	httpReq.Header.Set("x-scope", "manage:surveys")
+
+	// Execute request
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return domain.NewUnavailableError("ITX service request failed", err)
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	// Read response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return domain.NewInternalError("failed to read response", err)
+	}
+
+	// Handle non-2xx status codes
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return c.mapHTTPError(resp.StatusCode, respBody)
+	}
+
+	return nil
+}
+
 // GetSurveyResults retrieves aggregated survey results from ITX
 func (c *Client) GetSurveyResults(ctx context.Context, surveyID string) (*itx.SurveyResults, error) {
 	// Create HTTP request

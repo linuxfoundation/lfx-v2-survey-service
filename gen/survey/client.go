@@ -16,19 +16,25 @@ import (
 
 // Client is the "survey" service client.
 type Client struct {
-	ScheduleSurveyEndpoint goa.Endpoint
-	GetSurveyEndpoint      goa.Endpoint
-	UpdateSurveyEndpoint   goa.Endpoint
-	DeleteSurveyEndpoint   goa.Endpoint
+	ScheduleSurveyEndpoint        goa.Endpoint
+	GetSurveyEndpoint             goa.Endpoint
+	UpdateSurveyEndpoint          goa.Endpoint
+	DeleteSurveyEndpoint          goa.Endpoint
+	BulkResendSurveyEndpoint      goa.Endpoint
+	PreviewSendSurveyEndpoint     goa.Endpoint
+	SendMissingRecipientsEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "survey" service client given the endpoints.
-func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey goa.Endpoint) *Client {
+func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResendSurvey, previewSendSurvey, sendMissingRecipients goa.Endpoint) *Client {
 	return &Client{
-		ScheduleSurveyEndpoint: scheduleSurvey,
-		GetSurveyEndpoint:      getSurvey,
-		UpdateSurveyEndpoint:   updateSurvey,
-		DeleteSurveyEndpoint:   deleteSurvey,
+		ScheduleSurveyEndpoint:        scheduleSurvey,
+		GetSurveyEndpoint:             getSurvey,
+		UpdateSurveyEndpoint:          updateSurvey,
+		DeleteSurveyEndpoint:          deleteSurvey,
+		BulkResendSurveyEndpoint:      bulkResendSurvey,
+		PreviewSendSurveyEndpoint:     previewSendSurvey,
+		SendMissingRecipientsEndpoint: sendMissingRecipients,
 	}
 }
 
@@ -101,5 +107,57 @@ func (c *Client) UpdateSurvey(ctx context.Context, p *UpdateSurveyPayload) (res 
 //   - error: internal error
 func (c *Client) DeleteSurvey(ctx context.Context, p *DeleteSurveyPayload) (err error) {
 	_, err = c.DeleteSurveyEndpoint(ctx, p)
+	return
+}
+
+// BulkResendSurvey calls the "bulk_resend_survey" endpoint of the "survey"
+// service.
+// BulkResendSurvey may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) BulkResendSurvey(ctx context.Context, p *BulkResendSurveyPayload) (err error) {
+	_, err = c.BulkResendSurveyEndpoint(ctx, p)
+	return
+}
+
+// PreviewSendSurvey calls the "preview_send_survey" endpoint of the "survey"
+// service.
+// PreviewSendSurvey may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) PreviewSendSurvey(ctx context.Context, p *PreviewSendSurveyPayload) (res *PreviewSendResult, err error) {
+	var ires any
+	ires, err = c.PreviewSendSurveyEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*PreviewSendResult), nil
+}
+
+// SendMissingRecipients calls the "send_missing_recipients" endpoint of the
+// "survey" service.
+// SendMissingRecipients may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) SendMissingRecipients(ctx context.Context, p *SendMissingRecipientsPayload) (err error) {
+	_, err = c.SendMissingRecipientsEndpoint(ctx, p)
 	return
 }

@@ -728,6 +728,526 @@ func DecodeDeleteSurveyResponse(decoder func(*http.Response) goahttp.Decoder, re
 	}
 }
 
+// BuildBulkResendSurveyRequest instantiates a HTTP request object with method
+// and path set to call the "survey" service "bulk_resend_survey" endpoint
+func (c *Client) BuildBulkResendSurveyRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		surveyID string
+	)
+	{
+		p, ok := v.(*survey.BulkResendSurveyPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("survey", "bulk_resend_survey", "*survey.BulkResendSurveyPayload", v)
+		}
+		surveyID = p.SurveyID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: BulkResendSurveySurveyPath(surveyID)}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "bulk_resend_survey", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeBulkResendSurveyRequest returns an encoder for requests sent to the
+// survey bulk_resend_survey server.
+func EncodeBulkResendSurveyRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.BulkResendSurveyPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "bulk_resend_survey", "*survey.BulkResendSurveyPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		body := NewBulkResendSurveyRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("survey", "bulk_resend_survey", err)
+		}
+		return nil
+	}
+}
+
+// DecodeBulkResendSurveyResponse returns a decoder for responses returned by
+// the survey bulk_resend_survey endpoint. restoreBody controls whether the
+// response body should be restored after having been read.
+// DecodeBulkResendSurveyResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "NotFound" (type *survey.NotFoundError): http.StatusNotFound
+//   - "ServiceUnavailable" (type *survey.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeBulkResendSurveyResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		case http.StatusBadRequest:
+			var (
+				body BulkResendSurveyBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "bulk_resend_survey", err)
+			}
+			err = ValidateBulkResendSurveyBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "bulk_resend_survey", err)
+			}
+			return nil, NewBulkResendSurveyBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body BulkResendSurveyForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "bulk_resend_survey", err)
+			}
+			err = ValidateBulkResendSurveyForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "bulk_resend_survey", err)
+			}
+			return nil, NewBulkResendSurveyForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body BulkResendSurveyInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "bulk_resend_survey", err)
+			}
+			err = ValidateBulkResendSurveyInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "bulk_resend_survey", err)
+			}
+			return nil, NewBulkResendSurveyInternalServerError(&body)
+		case http.StatusNotFound:
+			var (
+				body BulkResendSurveyNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "bulk_resend_survey", err)
+			}
+			err = ValidateBulkResendSurveyNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "bulk_resend_survey", err)
+			}
+			return nil, NewBulkResendSurveyNotFound(&body)
+		case http.StatusServiceUnavailable:
+			var (
+				body BulkResendSurveyServiceUnavailableResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "bulk_resend_survey", err)
+			}
+			err = ValidateBulkResendSurveyServiceUnavailableResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "bulk_resend_survey", err)
+			}
+			return nil, NewBulkResendSurveyServiceUnavailable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body BulkResendSurveyUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "bulk_resend_survey", err)
+			}
+			err = ValidateBulkResendSurveyUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "bulk_resend_survey", err)
+			}
+			return nil, NewBulkResendSurveyUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "bulk_resend_survey", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildPreviewSendSurveyRequest instantiates a HTTP request object with method
+// and path set to call the "survey" service "preview_send_survey" endpoint
+func (c *Client) BuildPreviewSendSurveyRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		surveyID string
+	)
+	{
+		p, ok := v.(*survey.PreviewSendSurveyPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("survey", "preview_send_survey", "*survey.PreviewSendSurveyPayload", v)
+		}
+		surveyID = p.SurveyID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: PreviewSendSurveySurveyPath(surveyID)}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "preview_send_survey", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodePreviewSendSurveyRequest returns an encoder for requests sent to the
+// survey preview_send_survey server.
+func EncodePreviewSendSurveyRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.PreviewSendSurveyPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "preview_send_survey", "*survey.PreviewSendSurveyPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		values := req.URL.Query()
+		if p.CommitteeID != nil {
+			values.Add("committee_id", *p.CommitteeID)
+		}
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodePreviewSendSurveyResponse returns a decoder for responses returned by
+// the survey preview_send_survey endpoint. restoreBody controls whether the
+// response body should be restored after having been read.
+// DecodePreviewSendSurveyResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "NotFound" (type *survey.NotFoundError): http.StatusNotFound
+//   - "ServiceUnavailable" (type *survey.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodePreviewSendSurveyResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body PreviewSendSurveyResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "preview_send_survey", err)
+			}
+			err = ValidatePreviewSendSurveyResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "preview_send_survey", err)
+			}
+			res := NewPreviewSendSurveyPreviewSendResultOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body PreviewSendSurveyBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "preview_send_survey", err)
+			}
+			err = ValidatePreviewSendSurveyBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "preview_send_survey", err)
+			}
+			return nil, NewPreviewSendSurveyBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body PreviewSendSurveyForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "preview_send_survey", err)
+			}
+			err = ValidatePreviewSendSurveyForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "preview_send_survey", err)
+			}
+			return nil, NewPreviewSendSurveyForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body PreviewSendSurveyInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "preview_send_survey", err)
+			}
+			err = ValidatePreviewSendSurveyInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "preview_send_survey", err)
+			}
+			return nil, NewPreviewSendSurveyInternalServerError(&body)
+		case http.StatusNotFound:
+			var (
+				body PreviewSendSurveyNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "preview_send_survey", err)
+			}
+			err = ValidatePreviewSendSurveyNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "preview_send_survey", err)
+			}
+			return nil, NewPreviewSendSurveyNotFound(&body)
+		case http.StatusServiceUnavailable:
+			var (
+				body PreviewSendSurveyServiceUnavailableResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "preview_send_survey", err)
+			}
+			err = ValidatePreviewSendSurveyServiceUnavailableResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "preview_send_survey", err)
+			}
+			return nil, NewPreviewSendSurveyServiceUnavailable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body PreviewSendSurveyUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "preview_send_survey", err)
+			}
+			err = ValidatePreviewSendSurveyUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "preview_send_survey", err)
+			}
+			return nil, NewPreviewSendSurveyUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "preview_send_survey", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildSendMissingRecipientsRequest instantiates a HTTP request object with
+// method and path set to call the "survey" service "send_missing_recipients"
+// endpoint
+func (c *Client) BuildSendMissingRecipientsRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		surveyID string
+	)
+	{
+		p, ok := v.(*survey.SendMissingRecipientsPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("survey", "send_missing_recipients", "*survey.SendMissingRecipientsPayload", v)
+		}
+		surveyID = p.SurveyID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: SendMissingRecipientsSurveyPath(surveyID)}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "send_missing_recipients", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeSendMissingRecipientsRequest returns an encoder for requests sent to
+// the survey send_missing_recipients server.
+func EncodeSendMissingRecipientsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.SendMissingRecipientsPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "send_missing_recipients", "*survey.SendMissingRecipientsPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		values := req.URL.Query()
+		if p.CommitteeID != nil {
+			values.Add("committee_id", *p.CommitteeID)
+		}
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodeSendMissingRecipientsResponse returns a decoder for responses returned
+// by the survey send_missing_recipients endpoint. restoreBody controls whether
+// the response body should be restored after having been read.
+// DecodeSendMissingRecipientsResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "NotFound" (type *survey.NotFoundError): http.StatusNotFound
+//   - "ServiceUnavailable" (type *survey.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeSendMissingRecipientsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		case http.StatusBadRequest:
+			var (
+				body SendMissingRecipientsBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "send_missing_recipients", err)
+			}
+			err = ValidateSendMissingRecipientsBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "send_missing_recipients", err)
+			}
+			return nil, NewSendMissingRecipientsBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body SendMissingRecipientsForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "send_missing_recipients", err)
+			}
+			err = ValidateSendMissingRecipientsForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "send_missing_recipients", err)
+			}
+			return nil, NewSendMissingRecipientsForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body SendMissingRecipientsInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "send_missing_recipients", err)
+			}
+			err = ValidateSendMissingRecipientsInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "send_missing_recipients", err)
+			}
+			return nil, NewSendMissingRecipientsInternalServerError(&body)
+		case http.StatusNotFound:
+			var (
+				body SendMissingRecipientsNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "send_missing_recipients", err)
+			}
+			err = ValidateSendMissingRecipientsNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "send_missing_recipients", err)
+			}
+			return nil, NewSendMissingRecipientsNotFound(&body)
+		case http.StatusServiceUnavailable:
+			var (
+				body SendMissingRecipientsServiceUnavailableResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "send_missing_recipients", err)
+			}
+			err = ValidateSendMissingRecipientsServiceUnavailableResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "send_missing_recipients", err)
+			}
+			return nil, NewSendMissingRecipientsServiceUnavailable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body SendMissingRecipientsUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "send_missing_recipients", err)
+			}
+			err = ValidateSendMissingRecipientsUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "send_missing_recipients", err)
+			}
+			return nil, NewSendMissingRecipientsUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "send_missing_recipients", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // unmarshalSurveyCommitteeResponseBodyToSurveySurveyCommittee builds a value
 // of type *survey.SurveyCommittee from a value of type
 // *SurveyCommitteeResponseBody.
@@ -744,6 +1264,61 @@ func unmarshalSurveyCommitteeResponseBodyToSurveySurveyCommittee(v *SurveyCommit
 		TotalRecipients: v.TotalRecipients,
 		TotalResponses:  v.TotalResponses,
 		NpsValue:        v.NpsValue,
+	}
+
+	return res
+}
+
+// unmarshalLFXProjectResponseBodyToSurveyLFXProject builds a value of type
+// *survey.LFXProject from a value of type *LFXProjectResponseBody.
+func unmarshalLFXProjectResponseBodyToSurveyLFXProject(v *LFXProjectResponseBody) *survey.LFXProject {
+	if v == nil {
+		return nil
+	}
+	res := &survey.LFXProject{
+		ID:      *v.ID,
+		Name:    *v.Name,
+		Slug:    *v.Slug,
+		Status:  *v.Status,
+		LogoURL: v.LogoURL,
+	}
+
+	return res
+}
+
+// unmarshalExcludedCommitteeResponseBodyToSurveyExcludedCommittee builds a
+// value of type *survey.ExcludedCommittee from a value of type
+// *ExcludedCommitteeResponseBody.
+func unmarshalExcludedCommitteeResponseBodyToSurveyExcludedCommittee(v *ExcludedCommitteeResponseBody) *survey.ExcludedCommittee {
+	if v == nil {
+		return nil
+	}
+	res := &survey.ExcludedCommittee{
+		ProjectID:         *v.ProjectID,
+		ProjectName:       *v.ProjectName,
+		CommitteeID:       *v.CommitteeID,
+		CommitteeName:     *v.CommitteeName,
+		CommitteeCategory: *v.CommitteeCategory,
+	}
+
+	return res
+}
+
+// unmarshalITXPreviewRecipientResponseBodyToSurveyITXPreviewRecipient builds a
+// value of type *survey.ITXPreviewRecipient from a value of type
+// *ITXPreviewRecipientResponseBody.
+func unmarshalITXPreviewRecipientResponseBodyToSurveyITXPreviewRecipient(v *ITXPreviewRecipientResponseBody) *survey.ITXPreviewRecipient {
+	if v == nil {
+		return nil
+	}
+	res := &survey.ITXPreviewRecipient{
+		UserID:    *v.UserID,
+		Name:      v.Name,
+		FirstName: v.FirstName,
+		LastName:  v.LastName,
+		Username:  v.Username,
+		Email:     *v.Email,
+		Role:      v.Role,
 	}
 
 	return res

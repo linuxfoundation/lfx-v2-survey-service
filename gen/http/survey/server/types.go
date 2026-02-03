@@ -10,6 +10,7 @@ package server
 
 import (
 	survey "github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
+	goa "goa.design/goa/v3/pkg"
 )
 
 // ScheduleSurveyRequestBody is the type of the "survey" service
@@ -72,6 +73,13 @@ type UpdateSurveyRequestBody struct {
 	Committees []string `form:"committees,omitempty" json:"committees,omitempty" xml:"committees,omitempty"`
 	// Whether committee voting is enabled
 	CommitteeVotingEnabled *bool `form:"committee_voting_enabled,omitempty" json:"committee_voting_enabled,omitempty" xml:"committee_voting_enabled,omitempty"`
+}
+
+// BulkResendSurveyRequestBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP request body.
+type BulkResendSurveyRequestBody struct {
+	// Array of recipient IDs to resend survey emails to
+	RecipientIds []string `form:"recipient_ids,omitempty" json:"recipient_ids,omitempty" xml:"recipient_ids,omitempty"`
 }
 
 // ScheduleSurveyResponseBody is the type of the "survey" service
@@ -305,6 +313,17 @@ type UpdateSurveyResponseBody struct {
 	LatestAutomatedReminderSentAt *string `form:"latest_automated_reminder_sent_at,omitempty" json:"latest_automated_reminder_sent_at,omitempty" xml:"latest_automated_reminder_sent_at,omitempty"`
 }
 
+// PreviewSendSurveyResponseBody is the type of the "survey" service
+// "preview_send_survey" endpoint HTTP response body.
+type PreviewSendSurveyResponseBody struct {
+	// List of affected projects
+	AffectedProjects []*LFXProjectResponseBody `form:"affected_projects,omitempty" json:"affected_projects,omitempty" xml:"affected_projects,omitempty"`
+	// List of affected committees
+	AffectedCommittees []*ExcludedCommitteeResponseBody `form:"affected_committees,omitempty" json:"affected_committees,omitempty" xml:"affected_committees,omitempty"`
+	// List of affected recipients
+	AffectedRecipients []*ITXPreviewRecipientResponseBody `form:"affected_recipients,omitempty" json:"affected_recipients,omitempty" xml:"affected_recipients,omitempty"`
+}
+
 // ScheduleSurveyBadRequestResponseBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP response body for the "BadRequest" error.
 type ScheduleSurveyBadRequestResponseBody struct {
@@ -536,6 +555,180 @@ type DeleteSurveyUnauthorizedResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// BulkResendSurveyBadRequestResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "BadRequest" error.
+type BulkResendSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// BulkResendSurveyForbiddenResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "Forbidden" error.
+type BulkResendSurveyForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// BulkResendSurveyInternalServerErrorResponseBody is the type of the "survey"
+// service "bulk_resend_survey" endpoint HTTP response body for the
+// "InternalServerError" error.
+type BulkResendSurveyInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// BulkResendSurveyNotFoundResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "NotFound" error.
+type BulkResendSurveyNotFoundResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// BulkResendSurveyServiceUnavailableResponseBody is the type of the "survey"
+// service "bulk_resend_survey" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type BulkResendSurveyServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// BulkResendSurveyUnauthorizedResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "Unauthorized"
+// error.
+type BulkResendSurveyUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// PreviewSendSurveyBadRequestResponseBody is the type of the "survey" service
+// "preview_send_survey" endpoint HTTP response body for the "BadRequest" error.
+type PreviewSendSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// PreviewSendSurveyForbiddenResponseBody is the type of the "survey" service
+// "preview_send_survey" endpoint HTTP response body for the "Forbidden" error.
+type PreviewSendSurveyForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// PreviewSendSurveyInternalServerErrorResponseBody is the type of the "survey"
+// service "preview_send_survey" endpoint HTTP response body for the
+// "InternalServerError" error.
+type PreviewSendSurveyInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// PreviewSendSurveyNotFoundResponseBody is the type of the "survey" service
+// "preview_send_survey" endpoint HTTP response body for the "NotFound" error.
+type PreviewSendSurveyNotFoundResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// PreviewSendSurveyServiceUnavailableResponseBody is the type of the "survey"
+// service "preview_send_survey" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type PreviewSendSurveyServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// PreviewSendSurveyUnauthorizedResponseBody is the type of the "survey"
+// service "preview_send_survey" endpoint HTTP response body for the
+// "Unauthorized" error.
+type PreviewSendSurveyUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// SendMissingRecipientsBadRequestResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "BadRequest" error.
+type SendMissingRecipientsBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// SendMissingRecipientsForbiddenResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "Forbidden" error.
+type SendMissingRecipientsForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// SendMissingRecipientsInternalServerErrorResponseBody is the type of the
+// "survey" service "send_missing_recipients" endpoint HTTP response body for
+// the "InternalServerError" error.
+type SendMissingRecipientsInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// SendMissingRecipientsNotFoundResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "NotFound" error.
+type SendMissingRecipientsNotFoundResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// SendMissingRecipientsServiceUnavailableResponseBody is the type of the
+// "survey" service "send_missing_recipients" endpoint HTTP response body for
+// the "ServiceUnavailable" error.
+type SendMissingRecipientsServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// SendMissingRecipientsUnauthorizedResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "Unauthorized" error.
+type SendMissingRecipientsUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // SurveyCommitteeResponseBody is used to define fields on response body types.
 type SurveyCommitteeResponseBody struct {
 	// Committee name
@@ -554,6 +747,54 @@ type SurveyCommitteeResponseBody struct {
 	TotalResponses *int `form:"total_responses,omitempty" json:"total_responses,omitempty" xml:"total_responses,omitempty"`
 	// NPS value for this committee
 	NpsValue *float64 `form:"nps_value,omitempty" json:"nps_value,omitempty" xml:"nps_value,omitempty"`
+}
+
+// LFXProjectResponseBody is used to define fields on response body types.
+type LFXProjectResponseBody struct {
+	// Project ID
+	ID string `form:"id" json:"id" xml:"id"`
+	// Project name
+	Name string `form:"name" json:"name" xml:"name"`
+	// Project slug
+	Slug string `form:"slug" json:"slug" xml:"slug"`
+	// Project status/stage
+	Status string `form:"status" json:"status" xml:"status"`
+	// Project logo URL
+	LogoURL *string `form:"logo_url,omitempty" json:"logo_url,omitempty" xml:"logo_url,omitempty"`
+}
+
+// ExcludedCommitteeResponseBody is used to define fields on response body
+// types.
+type ExcludedCommitteeResponseBody struct {
+	// Project ID
+	ProjectID string `form:"project_id" json:"project_id" xml:"project_id"`
+	// Project name
+	ProjectName string `form:"project_name" json:"project_name" xml:"project_name"`
+	// Committee ID
+	CommitteeID string `form:"committee_id" json:"committee_id" xml:"committee_id"`
+	// Committee name
+	CommitteeName string `form:"committee_name" json:"committee_name" xml:"committee_name"`
+	// Committee category
+	CommitteeCategory string `form:"committee_category" json:"committee_category" xml:"committee_category"`
+}
+
+// ITXPreviewRecipientResponseBody is used to define fields on response body
+// types.
+type ITXPreviewRecipientResponseBody struct {
+	// LF user ID
+	UserID string `form:"user_id" json:"user_id" xml:"user_id"`
+	// User full name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// User first name
+	FirstName *string `form:"first_name,omitempty" json:"first_name,omitempty" xml:"first_name,omitempty"`
+	// User last name
+	LastName *string `form:"last_name,omitempty" json:"last_name,omitempty" xml:"last_name,omitempty"`
+	// Linux Foundation ID
+	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
+	// Email address
+	Email string `form:"email" json:"email" xml:"email"`
+	// Role in committee
+	Role *string `form:"role,omitempty" json:"role,omitempty" xml:"role,omitempty"`
 }
 
 // NewScheduleSurveyResponseBody builds the HTTP response body from the result
@@ -710,6 +951,43 @@ func NewUpdateSurveyResponseBody(res *survey.SurveyScheduleResult) *UpdateSurvey
 				continue
 			}
 			body.Committees[i] = marshalSurveySurveyCommitteeToSurveyCommitteeResponseBody(val)
+		}
+	}
+	return body
+}
+
+// NewPreviewSendSurveyResponseBody builds the HTTP response body from the
+// result of the "preview_send_survey" endpoint of the "survey" service.
+func NewPreviewSendSurveyResponseBody(res *survey.PreviewSendResult) *PreviewSendSurveyResponseBody {
+	body := &PreviewSendSurveyResponseBody{}
+	if res.AffectedProjects != nil {
+		body.AffectedProjects = make([]*LFXProjectResponseBody, len(res.AffectedProjects))
+		for i, val := range res.AffectedProjects {
+			if val == nil {
+				body.AffectedProjects[i] = nil
+				continue
+			}
+			body.AffectedProjects[i] = marshalSurveyLFXProjectToLFXProjectResponseBody(val)
+		}
+	}
+	if res.AffectedCommittees != nil {
+		body.AffectedCommittees = make([]*ExcludedCommitteeResponseBody, len(res.AffectedCommittees))
+		for i, val := range res.AffectedCommittees {
+			if val == nil {
+				body.AffectedCommittees[i] = nil
+				continue
+			}
+			body.AffectedCommittees[i] = marshalSurveyExcludedCommitteeToExcludedCommitteeResponseBody(val)
+		}
+	}
+	if res.AffectedRecipients != nil {
+		body.AffectedRecipients = make([]*ITXPreviewRecipientResponseBody, len(res.AffectedRecipients))
+		for i, val := range res.AffectedRecipients {
+			if val == nil {
+				body.AffectedRecipients[i] = nil
+				continue
+			}
+			body.AffectedRecipients[i] = marshalSurveyITXPreviewRecipientToITXPreviewRecipientResponseBody(val)
 		}
 	}
 	return body
@@ -967,6 +1245,198 @@ func NewDeleteSurveyUnauthorizedResponseBody(res *survey.UnauthorizedError) *Del
 	return body
 }
 
+// NewBulkResendSurveyBadRequestResponseBody builds the HTTP response body from
+// the result of the "bulk_resend_survey" endpoint of the "survey" service.
+func NewBulkResendSurveyBadRequestResponseBody(res *survey.BadRequestError) *BulkResendSurveyBadRequestResponseBody {
+	body := &BulkResendSurveyBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewBulkResendSurveyForbiddenResponseBody builds the HTTP response body from
+// the result of the "bulk_resend_survey" endpoint of the "survey" service.
+func NewBulkResendSurveyForbiddenResponseBody(res *survey.ForbiddenError) *BulkResendSurveyForbiddenResponseBody {
+	body := &BulkResendSurveyForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewBulkResendSurveyInternalServerErrorResponseBody builds the HTTP response
+// body from the result of the "bulk_resend_survey" endpoint of the "survey"
+// service.
+func NewBulkResendSurveyInternalServerErrorResponseBody(res *survey.InternalServerError) *BulkResendSurveyInternalServerErrorResponseBody {
+	body := &BulkResendSurveyInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewBulkResendSurveyNotFoundResponseBody builds the HTTP response body from
+// the result of the "bulk_resend_survey" endpoint of the "survey" service.
+func NewBulkResendSurveyNotFoundResponseBody(res *survey.NotFoundError) *BulkResendSurveyNotFoundResponseBody {
+	body := &BulkResendSurveyNotFoundResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewBulkResendSurveyServiceUnavailableResponseBody builds the HTTP response
+// body from the result of the "bulk_resend_survey" endpoint of the "survey"
+// service.
+func NewBulkResendSurveyServiceUnavailableResponseBody(res *survey.ServiceUnavailableError) *BulkResendSurveyServiceUnavailableResponseBody {
+	body := &BulkResendSurveyServiceUnavailableResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewBulkResendSurveyUnauthorizedResponseBody builds the HTTP response body
+// from the result of the "bulk_resend_survey" endpoint of the "survey" service.
+func NewBulkResendSurveyUnauthorizedResponseBody(res *survey.UnauthorizedError) *BulkResendSurveyUnauthorizedResponseBody {
+	body := &BulkResendSurveyUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewPreviewSendSurveyBadRequestResponseBody builds the HTTP response body
+// from the result of the "preview_send_survey" endpoint of the "survey"
+// service.
+func NewPreviewSendSurveyBadRequestResponseBody(res *survey.BadRequestError) *PreviewSendSurveyBadRequestResponseBody {
+	body := &PreviewSendSurveyBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewPreviewSendSurveyForbiddenResponseBody builds the HTTP response body from
+// the result of the "preview_send_survey" endpoint of the "survey" service.
+func NewPreviewSendSurveyForbiddenResponseBody(res *survey.ForbiddenError) *PreviewSendSurveyForbiddenResponseBody {
+	body := &PreviewSendSurveyForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewPreviewSendSurveyInternalServerErrorResponseBody builds the HTTP response
+// body from the result of the "preview_send_survey" endpoint of the "survey"
+// service.
+func NewPreviewSendSurveyInternalServerErrorResponseBody(res *survey.InternalServerError) *PreviewSendSurveyInternalServerErrorResponseBody {
+	body := &PreviewSendSurveyInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewPreviewSendSurveyNotFoundResponseBody builds the HTTP response body from
+// the result of the "preview_send_survey" endpoint of the "survey" service.
+func NewPreviewSendSurveyNotFoundResponseBody(res *survey.NotFoundError) *PreviewSendSurveyNotFoundResponseBody {
+	body := &PreviewSendSurveyNotFoundResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewPreviewSendSurveyServiceUnavailableResponseBody builds the HTTP response
+// body from the result of the "preview_send_survey" endpoint of the "survey"
+// service.
+func NewPreviewSendSurveyServiceUnavailableResponseBody(res *survey.ServiceUnavailableError) *PreviewSendSurveyServiceUnavailableResponseBody {
+	body := &PreviewSendSurveyServiceUnavailableResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewPreviewSendSurveyUnauthorizedResponseBody builds the HTTP response body
+// from the result of the "preview_send_survey" endpoint of the "survey"
+// service.
+func NewPreviewSendSurveyUnauthorizedResponseBody(res *survey.UnauthorizedError) *PreviewSendSurveyUnauthorizedResponseBody {
+	body := &PreviewSendSurveyUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewSendMissingRecipientsBadRequestResponseBody builds the HTTP response body
+// from the result of the "send_missing_recipients" endpoint of the "survey"
+// service.
+func NewSendMissingRecipientsBadRequestResponseBody(res *survey.BadRequestError) *SendMissingRecipientsBadRequestResponseBody {
+	body := &SendMissingRecipientsBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewSendMissingRecipientsForbiddenResponseBody builds the HTTP response body
+// from the result of the "send_missing_recipients" endpoint of the "survey"
+// service.
+func NewSendMissingRecipientsForbiddenResponseBody(res *survey.ForbiddenError) *SendMissingRecipientsForbiddenResponseBody {
+	body := &SendMissingRecipientsForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewSendMissingRecipientsInternalServerErrorResponseBody builds the HTTP
+// response body from the result of the "send_missing_recipients" endpoint of
+// the "survey" service.
+func NewSendMissingRecipientsInternalServerErrorResponseBody(res *survey.InternalServerError) *SendMissingRecipientsInternalServerErrorResponseBody {
+	body := &SendMissingRecipientsInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewSendMissingRecipientsNotFoundResponseBody builds the HTTP response body
+// from the result of the "send_missing_recipients" endpoint of the "survey"
+// service.
+func NewSendMissingRecipientsNotFoundResponseBody(res *survey.NotFoundError) *SendMissingRecipientsNotFoundResponseBody {
+	body := &SendMissingRecipientsNotFoundResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewSendMissingRecipientsServiceUnavailableResponseBody builds the HTTP
+// response body from the result of the "send_missing_recipients" endpoint of
+// the "survey" service.
+func NewSendMissingRecipientsServiceUnavailableResponseBody(res *survey.ServiceUnavailableError) *SendMissingRecipientsServiceUnavailableResponseBody {
+	body := &SendMissingRecipientsServiceUnavailableResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewSendMissingRecipientsUnauthorizedResponseBody builds the HTTP response
+// body from the result of the "send_missing_recipients" endpoint of the
+// "survey" service.
+func NewSendMissingRecipientsUnauthorizedResponseBody(res *survey.UnauthorizedError) *SendMissingRecipientsUnauthorizedResponseBody {
+	body := &SendMissingRecipientsUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewScheduleSurveyPayload builds a survey service schedule_survey endpoint
 // payload.
 func NewScheduleSurveyPayload(body *ScheduleSurveyRequestBody, token *string) *survey.ScheduleSurveyPayload {
@@ -1041,4 +1511,49 @@ func NewDeleteSurveyPayload(surveyID string, token *string) *survey.DeleteSurvey
 	v.Token = token
 
 	return v
+}
+
+// NewBulkResendSurveyPayload builds a survey service bulk_resend_survey
+// endpoint payload.
+func NewBulkResendSurveyPayload(body *BulkResendSurveyRequestBody, surveyID string, token *string) *survey.BulkResendSurveyPayload {
+	v := &survey.BulkResendSurveyPayload{}
+	v.RecipientIds = make([]string, len(body.RecipientIds))
+	for i, val := range body.RecipientIds {
+		v.RecipientIds[i] = val
+	}
+	v.SurveyID = surveyID
+	v.Token = token
+
+	return v
+}
+
+// NewPreviewSendSurveyPayload builds a survey service preview_send_survey
+// endpoint payload.
+func NewPreviewSendSurveyPayload(surveyID string, committeeID *string, token *string) *survey.PreviewSendSurveyPayload {
+	v := &survey.PreviewSendSurveyPayload{}
+	v.SurveyID = surveyID
+	v.CommitteeID = committeeID
+	v.Token = token
+
+	return v
+}
+
+// NewSendMissingRecipientsPayload builds a survey service
+// send_missing_recipients endpoint payload.
+func NewSendMissingRecipientsPayload(surveyID string, committeeID *string, token *string) *survey.SendMissingRecipientsPayload {
+	v := &survey.SendMissingRecipientsPayload{}
+	v.SurveyID = surveyID
+	v.CommitteeID = committeeID
+	v.Token = token
+
+	return v
+}
+
+// ValidateBulkResendSurveyRequestBody runs the validations defined on
+// bulk_resend_survey_request_body
+func ValidateBulkResendSurveyRequestBody(body *BulkResendSurveyRequestBody) (err error) {
+	if body.RecipientIds == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("recipient_ids", "body"))
+	}
+	return
 }

@@ -24,13 +24,13 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"survey (schedule-survey|get-survey|update-survey|delete-survey)",
+		"survey (schedule-survey|get-survey|update-survey|delete-survey|bulk-resend-survey|preview-send-survey|send-missing-recipients)",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + " " + "survey schedule-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Omnis placeat rerum ad eum.\",\n         \"Sapiente et corporis.\"\n      ],\n      \"creator_id\": \"Quasi nisi.\",\n      \"creator_name\": \"Aut molestiae officiis nihil et voluptas possimus.\",\n      \"creator_username\": \"Consequatur animi odit nostrum nostrum.\",\n      \"email_body\": \"Sapiente qui.\",\n      \"email_body_text\": \"Eos porro voluptatem doloremque qui mollitia sit.\",\n      \"email_subject\": \"Qui consequatur delectus.\",\n      \"is_project_survey\": false,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Sed molestiae.\",\n      \"survey_cutoff_date\": \"Nisi harum delectus veniam delectus.\",\n      \"survey_monkey_id\": \"Fuga maiores quis incidunt pariatur et unde.\",\n      \"survey_reminder_rate_days\": 5299522033241582586,\n      \"survey_send_date\": \"Itaque quidem saepe et saepe corrupti quis.\",\n      \"survey_title\": \"Voluptates sunt accusamus.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"" + "\n" +
+	return os.Args[0] + " " + "survey schedule-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Consequuntur sapiente et corporis quis numquam autem.\",\n         \"Quia aut.\"\n      ],\n      \"creator_id\": \"Unde consequatur.\",\n      \"creator_name\": \"Illum fuga maiores quis incidunt pariatur.\",\n      \"creator_username\": \"Voluptas possimus iste quasi.\",\n      \"email_body\": \"Voluptatem doloremque qui.\",\n      \"email_body_text\": \"Sit qui ut omnis placeat rerum.\",\n      \"email_subject\": \"Ut sapiente qui numquam eos.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": false,\n      \"stage_filter\": \"Nostrum nostrum repellat aut molestiae officiis nihil.\",\n      \"survey_cutoff_date\": \"Fugit qui.\",\n      \"survey_monkey_id\": \"Sunt accusamus pariatur quia itaque quidem.\",\n      \"survey_reminder_rate_days\": 2463719811884759918,\n      \"survey_send_date\": \"Delectus veniam delectus.\",\n      \"survey_title\": \"Et saepe corrupti quis nostrum.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"" + "\n" +
 		""
 }
 
@@ -62,12 +62,30 @@ func ParseEndpoint(
 		surveyDeleteSurveyFlags        = flag.NewFlagSet("delete-survey", flag.ExitOnError)
 		surveyDeleteSurveySurveyIDFlag = surveyDeleteSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
 		surveyDeleteSurveyTokenFlag    = surveyDeleteSurveyFlags.String("token", "", "")
+
+		surveyBulkResendSurveyFlags        = flag.NewFlagSet("bulk-resend-survey", flag.ExitOnError)
+		surveyBulkResendSurveyBodyFlag     = surveyBulkResendSurveyFlags.String("body", "REQUIRED", "")
+		surveyBulkResendSurveySurveyIDFlag = surveyBulkResendSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
+		surveyBulkResendSurveyTokenFlag    = surveyBulkResendSurveyFlags.String("token", "", "")
+
+		surveyPreviewSendSurveyFlags           = flag.NewFlagSet("preview-send-survey", flag.ExitOnError)
+		surveyPreviewSendSurveySurveyIDFlag    = surveyPreviewSendSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
+		surveyPreviewSendSurveyCommitteeIDFlag = surveyPreviewSendSurveyFlags.String("committee-id", "", "")
+		surveyPreviewSendSurveyTokenFlag       = surveyPreviewSendSurveyFlags.String("token", "", "")
+
+		surveySendMissingRecipientsFlags           = flag.NewFlagSet("send-missing-recipients", flag.ExitOnError)
+		surveySendMissingRecipientsSurveyIDFlag    = surveySendMissingRecipientsFlags.String("survey-id", "REQUIRED", "Survey identifier")
+		surveySendMissingRecipientsCommitteeIDFlag = surveySendMissingRecipientsFlags.String("committee-id", "", "")
+		surveySendMissingRecipientsTokenFlag       = surveySendMissingRecipientsFlags.String("token", "", "")
 	)
 	surveyFlags.Usage = surveyUsage
 	surveyScheduleSurveyFlags.Usage = surveyScheduleSurveyUsage
 	surveyGetSurveyFlags.Usage = surveyGetSurveyUsage
 	surveyUpdateSurveyFlags.Usage = surveyUpdateSurveyUsage
 	surveyDeleteSurveyFlags.Usage = surveyDeleteSurveyUsage
+	surveyBulkResendSurveyFlags.Usage = surveyBulkResendSurveyUsage
+	surveyPreviewSendSurveyFlags.Usage = surveyPreviewSendSurveyUsage
+	surveySendMissingRecipientsFlags.Usage = surveySendMissingRecipientsUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -115,6 +133,15 @@ func ParseEndpoint(
 			case "delete-survey":
 				epf = surveyDeleteSurveyFlags
 
+			case "bulk-resend-survey":
+				epf = surveyBulkResendSurveyFlags
+
+			case "preview-send-survey":
+				epf = surveyPreviewSendSurveyFlags
+
+			case "send-missing-recipients":
+				epf = surveySendMissingRecipientsFlags
+
 			}
 
 		}
@@ -152,6 +179,15 @@ func ParseEndpoint(
 			case "delete-survey":
 				endpoint = c.DeleteSurvey()
 				data, err = surveyc.BuildDeleteSurveyPayload(*surveyDeleteSurveySurveyIDFlag, *surveyDeleteSurveyTokenFlag)
+			case "bulk-resend-survey":
+				endpoint = c.BulkResendSurvey()
+				data, err = surveyc.BuildBulkResendSurveyPayload(*surveyBulkResendSurveyBodyFlag, *surveyBulkResendSurveySurveyIDFlag, *surveyBulkResendSurveyTokenFlag)
+			case "preview-send-survey":
+				endpoint = c.PreviewSendSurvey()
+				data, err = surveyc.BuildPreviewSendSurveyPayload(*surveyPreviewSendSurveySurveyIDFlag, *surveyPreviewSendSurveyCommitteeIDFlag, *surveyPreviewSendSurveyTokenFlag)
+			case "send-missing-recipients":
+				endpoint = c.SendMissingRecipients()
+				data, err = surveyc.BuildSendMissingRecipientsPayload(*surveySendMissingRecipientsSurveyIDFlag, *surveySendMissingRecipientsCommitteeIDFlag, *surveySendMissingRecipientsTokenFlag)
 			}
 		}
 	}
@@ -171,6 +207,9 @@ func surveyUsage() {
 	fmt.Fprintln(os.Stderr, `    get-survey: Get survey details (proxies to ITX GET /v2/surveys/{survey_id})`)
 	fmt.Fprintln(os.Stderr, `    update-survey: Update survey (proxies to ITX PUT /v2/surveys/{survey_id}). Only allowed when status is 'disabled'`)
 	fmt.Fprintln(os.Stderr, `    delete-survey: Delete survey (proxies to ITX DELETE /v2/surveys/{survey_id}). Only allowed when status is 'disabled'`)
+	fmt.Fprintln(os.Stderr, `    bulk-resend-survey: Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_id}/bulk_resend)`)
+	fmt.Fprintln(os.Stderr, `    preview-send-survey: Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_id}/preview_send)`)
+	fmt.Fprintln(os.Stderr, `    send-missing-recipients: Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_id}/send_missing_recipients)`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s survey COMMAND --help\n", os.Args[0])
@@ -192,7 +231,7 @@ func surveyScheduleSurveyUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey schedule-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Omnis placeat rerum ad eum.\",\n         \"Sapiente et corporis.\"\n      ],\n      \"creator_id\": \"Quasi nisi.\",\n      \"creator_name\": \"Aut molestiae officiis nihil et voluptas possimus.\",\n      \"creator_username\": \"Consequatur animi odit nostrum nostrum.\",\n      \"email_body\": \"Sapiente qui.\",\n      \"email_body_text\": \"Eos porro voluptatem doloremque qui mollitia sit.\",\n      \"email_subject\": \"Qui consequatur delectus.\",\n      \"is_project_survey\": false,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Sed molestiae.\",\n      \"survey_cutoff_date\": \"Nisi harum delectus veniam delectus.\",\n      \"survey_monkey_id\": \"Fuga maiores quis incidunt pariatur et unde.\",\n      \"survey_reminder_rate_days\": 5299522033241582586,\n      \"survey_send_date\": \"Itaque quidem saepe et saepe corrupti quis.\",\n      \"survey_title\": \"Voluptates sunt accusamus.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey schedule-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Consequuntur sapiente et corporis quis numquam autem.\",\n         \"Quia aut.\"\n      ],\n      \"creator_id\": \"Unde consequatur.\",\n      \"creator_name\": \"Illum fuga maiores quis incidunt pariatur.\",\n      \"creator_username\": \"Voluptas possimus iste quasi.\",\n      \"email_body\": \"Voluptatem doloremque qui.\",\n      \"email_body_text\": \"Sit qui ut omnis placeat rerum.\",\n      \"email_subject\": \"Ut sapiente qui numquam eos.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": false,\n      \"stage_filter\": \"Nostrum nostrum repellat aut molestiae officiis nihil.\",\n      \"survey_cutoff_date\": \"Fugit qui.\",\n      \"survey_monkey_id\": \"Sunt accusamus pariatur quia itaque quidem.\",\n      \"survey_reminder_rate_days\": 2463719811884759918,\n      \"survey_send_date\": \"Delectus veniam delectus.\",\n      \"survey_title\": \"Et saepe corrupti quis nostrum.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyGetSurveyUsage() {
@@ -255,4 +294,70 @@ func surveyDeleteSurveyUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-survey --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveyBulkResendSurveyUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey bulk-resend-survey", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
+	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_id}/bulk_resend)`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
+	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey bulk-resend-survey --body '{\n      \"recipient_ids\": [\n         \"cba14f40-1636-11ec-9621-0242ac130002\",\n         \"cba14f40-1636-11ec-9621-0242ac130003\"\n      ]\n   }' --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveyPreviewSendSurveyUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey preview-send-survey", os.Args[0])
+	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -committee-id STRING")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_id}/preview_send)`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -committee-id STRING: `)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey preview-send-survey --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --committee-id \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveySendMissingRecipientsUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey send-missing-recipients", os.Args[0])
+	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -committee-id STRING")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_id}/send_missing_recipients)`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -committee-id STRING: `)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey send-missing-recipients --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --committee-id \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }

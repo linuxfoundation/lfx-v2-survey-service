@@ -43,6 +43,21 @@ func (api *SurveyAPI) DeleteSurvey(ctx context.Context, p *survey.DeleteSurveyPa
 	return api.surveyService.DeleteSurvey(ctx, p)
 }
 
+// BulkResendSurvey implements survey.Service.BulkResendSurvey
+func (api *SurveyAPI) BulkResendSurvey(ctx context.Context, p *survey.BulkResendSurveyPayload) error {
+	return api.surveyService.BulkResendSurvey(ctx, p)
+}
+
+// PreviewSendSurvey implements survey.Service.PreviewSendSurvey
+func (api *SurveyAPI) PreviewSendSurvey(ctx context.Context, p *survey.PreviewSendSurveyPayload) (*survey.PreviewSendResult, error) {
+	return api.surveyService.PreviewSendSurvey(ctx, p)
+}
+
+// SendMissingRecipients implements survey.Service.SendMissingRecipients
+func (api *SurveyAPI) SendMissingRecipients(ctx context.Context, p *survey.SendMissingRecipientsPayload) error {
+	return api.surveyService.SendMissingRecipients(ctx, p)
+}
+
 // JWTAuth implements survey.Auther.JWTAuth
 // This is called by goa to validate JWT tokens before calling service methods
 func (api *SurveyAPI) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {

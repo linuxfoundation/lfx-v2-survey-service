@@ -191,4 +191,110 @@ var _ = Service("survey", func() {
 			Response("ServiceUnavailable", StatusServiceUnavailable)
 		})
 	})
+
+	Method("bulk_resend_survey", func() {
+		Description("Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_id}/bulk_resend)")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("survey_id", String, "Survey identifier", func() {
+				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
+			})
+
+			Attribute("recipient_ids", ArrayOf(String), "Array of recipient IDs to resend survey emails to", func() {
+				Example([]string{"cba14f40-1636-11ec-9621-0242ac130002", "cba14f40-1636-11ec-9621-0242ac130003"})
+			})
+
+			Required("survey_id", "recipient_ids")
+		})
+
+		HTTP(func() {
+			POST("/surveys/{survey_id}/bulk_resend")
+			Response(StatusNoContent)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("NotFound", StatusNotFound)
+			Response("InternalServerError", StatusInternalServerError)
+			Response("ServiceUnavailable", StatusServiceUnavailable)
+		})
+	})
+
+	Method("preview_send_survey", func() {
+		Description("Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_id}/preview_send)")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("survey_id", String, "Survey identifier", func() {
+				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
+			})
+
+			Attribute("committee_id", String, "Optional committee ID to filter preview", func() {
+				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
+			})
+
+			Required("survey_id")
+		})
+
+		Result(PreviewSendResult)
+
+		HTTP(func() {
+			GET("/surveys/{survey_id}/preview_send")
+			Param("committee_id")
+			Response(StatusOK)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("NotFound", StatusNotFound)
+			Response("InternalServerError", StatusInternalServerError)
+			Response("ServiceUnavailable", StatusServiceUnavailable)
+		})
+	})
+
+	Method("send_missing_recipients", func() {
+		Description("Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_id}/send_missing_recipients)")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("survey_id", String, "Survey identifier", func() {
+				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
+			})
+
+			Attribute("committee_id", String, "Optional committee ID to resync only that committee", func() {
+				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
+			})
+
+			Required("survey_id")
+		})
+
+		HTTP(func() {
+			POST("/surveys/{survey_id}/send_missing_recipients")
+			Param("committee_id")
+			Response(StatusNoContent)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("NotFound", StatusNotFound)
+			Response("InternalServerError", StatusInternalServerError)
+			Response("ServiceUnavailable", StatusServiceUnavailable)
+		})
+	})
 })
