@@ -126,7 +126,7 @@ func (c *Client) ScheduleSurvey(ctx context.Context, req *itx.ScheduleSurveyRequ
 	}
 
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/schedule", c.config.BaseURL)
+	url := fmt.Sprintf("%sv2/surveys/schedule", c.config.BaseURL)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return nil, domain.NewInternalError("failed to create request", err)
@@ -169,7 +169,7 @@ func (c *Client) ScheduleSurvey(ctx context.Context, req *itx.ScheduleSurveyRequ
 // GetSurvey retrieves survey details from ITX
 func (c *Client) GetSurvey(ctx context.Context, surveyID string) (*itx.SurveyScheduleResponse, error) {
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/%s", c.config.BaseURL, surveyID)
+	url := fmt.Sprintf("%sv2/surveys/%s", c.config.BaseURL, surveyID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, domain.NewInternalError("failed to create request", err)
@@ -217,7 +217,7 @@ func (c *Client) CreateResponse(ctx context.Context, req *itx.CreateSurveyRespon
 	}
 
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/responses", c.config.BaseURL)
+	url := fmt.Sprintf("%sv2/surveys/responses", c.config.BaseURL)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return domain.NewInternalError("failed to create request", err)
@@ -253,7 +253,7 @@ func (c *Client) CreateResponse(ctx context.Context, req *itx.CreateSurveyRespon
 // GetResponse retrieves survey response details from ITX
 func (c *Client) GetResponse(ctx context.Context, responseID string) (*itx.SurveyResponse, error) {
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/responses/%s", c.config.BaseURL, responseID)
+	url := fmt.Sprintf("%sv2/surveys/responses/%s", c.config.BaseURL, responseID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, domain.NewInternalError("failed to create request", err)
@@ -301,7 +301,7 @@ func (c *Client) UpdateSurvey(ctx context.Context, surveyID string, req *itx.Upd
 	}
 
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/%s", c.config.BaseURL, surveyID)
+	url := fmt.Sprintf("%sv2/surveys/%s", c.config.BaseURL, surveyID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bytes.NewReader(body))
 	if err != nil {
 		return nil, domain.NewInternalError("failed to create request", err)
@@ -344,7 +344,7 @@ func (c *Client) UpdateSurvey(ctx context.Context, surveyID string, req *itx.Upd
 // DeleteSurvey deletes a survey in ITX (only when status is "disabled")
 func (c *Client) DeleteSurvey(ctx context.Context, surveyID string) error {
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/%s", c.config.BaseURL, surveyID)
+	url := fmt.Sprintf("%sv2/surveys/%s", c.config.BaseURL, surveyID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
 	if err != nil {
 		return domain.NewInternalError("failed to create request", err)
@@ -385,7 +385,7 @@ func (c *Client) ExtendSurvey(ctx context.Context, surveyID string, req *itx.Ext
 	}
 
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/%s/extend", c.config.BaseURL, surveyID)
+	url := fmt.Sprintf("%sv2/surveys/%s/extend", c.config.BaseURL, surveyID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return nil, domain.NewInternalError("failed to create request", err)
@@ -428,7 +428,7 @@ func (c *Client) ExtendSurvey(ctx context.Context, surveyID string, req *itx.Ext
 // EnableSurvey enables a survey for responses in ITX
 func (c *Client) EnableSurvey(ctx context.Context, surveyID string) error {
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/%s/enable", c.config.BaseURL, surveyID)
+	url := fmt.Sprintf("%sv2/surveys/%s/enable", c.config.BaseURL, surveyID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPut, url, nil)
 	if err != nil {
 		return domain.NewInternalError("failed to create request", err)
@@ -469,7 +469,7 @@ func (c *Client) BulkResendSurvey(ctx context.Context, surveyID string, req *itx
 	}
 
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/%s/bulk_resend", c.config.BaseURL, surveyID)
+	url := fmt.Sprintf("%sv2/surveys/%s/bulk_resend", c.config.BaseURL, surveyID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return domain.NewInternalError("failed to create request", err)
@@ -505,7 +505,7 @@ func (c *Client) BulkResendSurvey(ctx context.Context, surveyID string, req *itx
 // GetSurveyResults retrieves aggregated survey results from ITX
 func (c *Client) GetSurveyResults(ctx context.Context, surveyID string) (*itx.SurveyResults, error) {
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/%s/results", c.config.BaseURL, surveyID)
+	url := fmt.Sprintf("%sv2/surveys/%s/results", c.config.BaseURL, surveyID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, domain.NewInternalError("failed to create request", err)
@@ -553,7 +553,7 @@ func (c *Client) UpdateResponse(ctx context.Context, responseID string, req *itx
 	}
 
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/responses/%s", c.config.BaseURL, responseID)
+	url := fmt.Sprintf("%sv2/surveys/responses/%s", c.config.BaseURL, responseID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bytes.NewReader(body))
 	if err != nil {
 		return domain.NewInternalError("failed to create request", err)
@@ -589,7 +589,7 @@ func (c *Client) UpdateResponse(ctx context.Context, responseID string, req *itx
 // ResendResponse resends the survey email in ITX
 func (c *Client) ResendResponse(ctx context.Context, responseID string) error {
 	// Create HTTP request
-	url := fmt.Sprintf("%ssurveys/responses/%s/resend", c.config.BaseURL, responseID)
+	url := fmt.Sprintf("%sv2/surveys/responses/%s/resend", c.config.BaseURL, responseID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
 	if err != nil {
 		return domain.NewInternalError("failed to create request", err)
@@ -627,6 +627,8 @@ func (c *Client) mapHTTPError(statusCode int, body []byte) error {
 		Message string `json:"message"`
 		Error   string `json:"error"`
 	}
+
+	// Try to parse JSON error response
 	_ = json.Unmarshal(body, &errMsg)
 
 	message := errMsg.Message
@@ -634,7 +636,12 @@ func (c *Client) mapHTTPError(statusCode int, body []byte) error {
 		message = errMsg.Error
 	}
 	if message == "" {
-		message = fmt.Sprintf("ITX API error: HTTP %d", statusCode)
+		// If no message fields found, include the raw body in the error
+		if len(body) > 0 {
+			message = fmt.Sprintf("ITX API error: HTTP %d - %s", statusCode, string(body))
+		} else {
+			message = fmt.Sprintf("ITX API error: HTTP %d", statusCode)
+		}
 	}
 
 	switch statusCode {
