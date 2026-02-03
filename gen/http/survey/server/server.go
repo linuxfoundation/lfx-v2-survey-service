@@ -21,6 +21,9 @@ import (
 type Server struct {
 	Mounts         []*MountPoint
 	ScheduleSurvey http.Handler
+	GetSurvey      http.Handler
+	UpdateSurvey   http.Handler
+	DeleteSurvey   http.Handler
 }
 
 // MountPoint holds information about the mounted endpoints.
@@ -51,8 +54,14 @@ func New(
 	return &Server{
 		Mounts: []*MountPoint{
 			{"ScheduleSurvey", "POST", "/surveys/schedule"},
+			{"GetSurvey", "GET", "/surveys/{survey_id}"},
+			{"UpdateSurvey", "PUT", "/surveys/{survey_id}"},
+			{"DeleteSurvey", "DELETE", "/surveys/{survey_id}"},
 		},
 		ScheduleSurvey: NewScheduleSurveyHandler(e.ScheduleSurvey, mux, decoder, encoder, errhandler, formatter),
+		GetSurvey:      NewGetSurveyHandler(e.GetSurvey, mux, decoder, encoder, errhandler, formatter),
+		UpdateSurvey:   NewUpdateSurveyHandler(e.UpdateSurvey, mux, decoder, encoder, errhandler, formatter),
+		DeleteSurvey:   NewDeleteSurveyHandler(e.DeleteSurvey, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -62,6 +71,9 @@ func (s *Server) Service() string { return "survey" }
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.ScheduleSurvey = m(s.ScheduleSurvey)
+	s.GetSurvey = m(s.GetSurvey)
+	s.UpdateSurvey = m(s.UpdateSurvey)
+	s.DeleteSurvey = m(s.DeleteSurvey)
 }
 
 // MethodNames returns the methods served.
@@ -70,6 +82,9 @@ func (s *Server) MethodNames() []string { return survey.MethodNames[:] }
 // Mount configures the mux to serve the survey endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountScheduleSurveyHandler(mux, h.ScheduleSurvey)
+	MountGetSurveyHandler(mux, h.GetSurvey)
+	MountUpdateSurveyHandler(mux, h.UpdateSurvey)
+	MountDeleteSurveyHandler(mux, h.DeleteSurvey)
 }
 
 // Mount configures the mux to serve the survey endpoints.
@@ -107,6 +122,165 @@ func NewScheduleSurveyHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "schedule_survey")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountGetSurveyHandler configures the mux to serve the "survey" service
+// "get_survey" endpoint.
+func MountGetSurveyHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/surveys/{survey_id}", f)
+}
+
+// NewGetSurveyHandler creates a HTTP handler which loads the HTTP request and
+// calls the "survey" service "get_survey" endpoint.
+func NewGetSurveyHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeGetSurveyRequest(mux, decoder)
+		encodeResponse = EncodeGetSurveyResponse(encoder)
+		encodeError    = EncodeGetSurveyError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "get_survey")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountUpdateSurveyHandler configures the mux to serve the "survey" service
+// "update_survey" endpoint.
+func MountUpdateSurveyHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("PUT", "/surveys/{survey_id}", f)
+}
+
+// NewUpdateSurveyHandler creates a HTTP handler which loads the HTTP request
+// and calls the "survey" service "update_survey" endpoint.
+func NewUpdateSurveyHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeUpdateSurveyRequest(mux, decoder)
+		encodeResponse = EncodeUpdateSurveyResponse(encoder)
+		encodeError    = EncodeUpdateSurveyError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "update_survey")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountDeleteSurveyHandler configures the mux to serve the "survey" service
+// "delete_survey" endpoint.
+func MountDeleteSurveyHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("DELETE", "/surveys/{survey_id}", f)
+}
+
+// NewDeleteSurveyHandler creates a HTTP handler which loads the HTTP request
+// and calls the "survey" service "delete_survey" endpoint.
+func NewDeleteSurveyHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeDeleteSurveyRequest(mux, decoder)
+		encodeResponse = EncodeDeleteSurveyResponse(encoder)
+		encodeError    = EncodeDeleteSurveyError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "delete_survey")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
 		payload, err := decodeRequest(r)
 		if err != nil {

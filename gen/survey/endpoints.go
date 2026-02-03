@@ -18,6 +18,9 @@ import (
 // Endpoints wraps the "survey" service endpoints.
 type Endpoints struct {
 	ScheduleSurvey goa.Endpoint
+	GetSurvey      goa.Endpoint
+	UpdateSurvey   goa.Endpoint
+	DeleteSurvey   goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "survey" service with endpoints.
@@ -26,12 +29,18 @@ func NewEndpoints(s Service) *Endpoints {
 	a := s.(Auther)
 	return &Endpoints{
 		ScheduleSurvey: NewScheduleSurveyEndpoint(s, a.JWTAuth),
+		GetSurvey:      NewGetSurveyEndpoint(s, a.JWTAuth),
+		UpdateSurvey:   NewUpdateSurveyEndpoint(s, a.JWTAuth),
+		DeleteSurvey:   NewDeleteSurveyEndpoint(s, a.JWTAuth),
 	}
 }
 
 // Use applies the given middleware to all the "survey" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.ScheduleSurvey = m(e.ScheduleSurvey)
+	e.GetSurvey = m(e.GetSurvey)
+	e.UpdateSurvey = m(e.UpdateSurvey)
+	e.DeleteSurvey = m(e.DeleteSurvey)
 }
 
 // NewScheduleSurveyEndpoint returns an endpoint function that calls the method
@@ -54,5 +63,74 @@ func NewScheduleSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.En
 			return nil, err
 		}
 		return s.ScheduleSurvey(ctx, p)
+	}
+}
+
+// NewGetSurveyEndpoint returns an endpoint function that calls the method
+// "get_survey" of service "survey".
+func NewGetSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*GetSurveyPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.GetSurvey(ctx, p)
+	}
+}
+
+// NewUpdateSurveyEndpoint returns an endpoint function that calls the method
+// "update_survey" of service "survey".
+func NewUpdateSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*UpdateSurveyPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.UpdateSurvey(ctx, p)
+	}
+}
+
+// NewDeleteSurveyEndpoint returns an endpoint function that calls the method
+// "delete_survey" of service "survey".
+func NewDeleteSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*DeleteSurveyPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.DeleteSurvey(ctx, p)
 	}
 }

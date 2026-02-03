@@ -84,7 +84,144 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 	}
 
 	// Map response back to goa result
-	result := &survey.SurveyScheduleResult{
+	result := mapITXResponseToResult(itxResponse)
+
+	s.logger.InfoContext(ctx, "survey scheduled successfully",
+		"survey_id", result.ID,
+		"survey_status", result.SurveyStatus,
+	)
+
+	return result, nil
+}
+
+// GetSurvey implements survey.Service.GetSurvey
+func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayload) (*survey.SurveyScheduleResult, error) {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return nil, &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "getting survey",
+		"principal", principal,
+		"survey_id", p.SurveyID,
+	)
+
+	// Call ITX API
+	itxResponse, err := s.proxy.GetSurvey(ctx, p.SurveyID)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+
+	// Map response back to goa result
+	result := mapITXResponseToResult(itxResponse)
+
+	s.logger.InfoContext(ctx, "survey retrieved successfully",
+		"survey_id", result.ID,
+	)
+
+	return result, nil
+}
+
+// UpdateSurvey implements survey.Service.UpdateSurvey
+func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurveyPayload) (*survey.SurveyScheduleResult, error) {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return nil, &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "updating survey",
+		"principal", principal,
+		"survey_id", p.SurveyID,
+		"survey_title", p.SurveyTitle,
+	)
+
+	// Build ITX request
+	itxRequest := &itx.UpdateSurveyRequest{
+		CreatorID:              p.CreatorID,
+		SurveyTitle:            p.SurveyTitle,
+		SurveySendDate:         p.SurveySendDate,
+		SurveyCutoffDate:       p.SurveyCutoffDate,
+		SurveyReminderRateDays: p.SurveyReminderRateDays,
+		EmailSubject:           p.EmailSubject,
+		EmailBody:              p.EmailBody,
+		EmailBodyText:          p.EmailBodyText,
+		Committees:             p.Committees,
+		CommitteeVotingEnabled: p.CommitteeVotingEnabled,
+	}
+
+	// Call ITX API
+	itxResponse, err := s.proxy.UpdateSurvey(ctx, p.SurveyID, itxRequest)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+
+	// Map response back to goa result
+	result := mapITXResponseToResult(itxResponse)
+
+	s.logger.InfoContext(ctx, "survey updated successfully",
+		"survey_id", result.ID,
+	)
+
+	return result, nil
+}
+
+// DeleteSurvey implements survey.Service.DeleteSurvey
+func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurveyPayload) error {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "deleting survey",
+		"principal", principal,
+		"survey_id", p.SurveyID,
+	)
+
+	// Call ITX API
+	err = s.proxy.DeleteSurvey(ctx, p.SurveyID)
+	if err != nil {
+		return mapDomainError(err)
+	}
+
+	s.logger.InfoContext(ctx, "survey deleted successfully",
+		"survey_id", p.SurveyID,
+	)
+
+	return nil
+}
+
+// Helper functions
+
+// mapITXResponseToResult maps ITX response to Goa result (extracted to avoid duplication)
+func mapITXResponseToResult(itxResponse *itx.SurveyScheduleResponse) *survey.SurveyScheduleResult {
+	return &survey.SurveyScheduleResult{
 		ID:                            itxResponse.ID,
 		SurveyMonkeyID:                itxResponse.SurveyMonkeyID,
 		IsProjectSurvey:               itxResponse.IsProjectSurvey,
@@ -122,16 +259,7 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 		NextAutomatedReminderAt:       itxResponse.NextAutomatedReminderAt,
 		LatestAutomatedReminderSentAt: itxResponse.LatestAutomatedReminderSentAt,
 	}
-
-	s.logger.InfoContext(ctx, "survey scheduled successfully",
-		"survey_id", result.ID,
-		"survey_status", result.SurveyStatus,
-	)
-
-	return result, nil
 }
-
-// Helper functions
 
 func mapSurveyCommitteesToResult(committees []itx.SurveyCommittee) []*survey.SurveyCommittee {
 	if committees == nil {

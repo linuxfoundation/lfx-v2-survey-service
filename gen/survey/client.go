@@ -17,12 +17,18 @@ import (
 // Client is the "survey" service client.
 type Client struct {
 	ScheduleSurveyEndpoint goa.Endpoint
+	GetSurveyEndpoint      goa.Endpoint
+	UpdateSurveyEndpoint   goa.Endpoint
+	DeleteSurveyEndpoint   goa.Endpoint
 }
 
 // NewClient initializes a "survey" service client given the endpoints.
-func NewClient(scheduleSurvey goa.Endpoint) *Client {
+func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey goa.Endpoint) *Client {
 	return &Client{
 		ScheduleSurveyEndpoint: scheduleSurvey,
+		GetSurveyEndpoint:      getSurvey,
+		UpdateSurveyEndpoint:   updateSurvey,
+		DeleteSurveyEndpoint:   deleteSurvey,
 	}
 }
 
@@ -43,4 +49,57 @@ func (c *Client) ScheduleSurvey(ctx context.Context, p *ScheduleSurveyPayload) (
 		return
 	}
 	return ires.(*SurveyScheduleResult), nil
+}
+
+// GetSurvey calls the "get_survey" endpoint of the "survey" service.
+// GetSurvey may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) GetSurvey(ctx context.Context, p *GetSurveyPayload) (res *SurveyScheduleResult, err error) {
+	var ires any
+	ires, err = c.GetSurveyEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*SurveyScheduleResult), nil
+}
+
+// UpdateSurvey calls the "update_survey" endpoint of the "survey" service.
+// UpdateSurvey may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) UpdateSurvey(ctx context.Context, p *UpdateSurveyPayload) (res *SurveyScheduleResult, err error) {
+	var ires any
+	ires, err = c.UpdateSurveyEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*SurveyScheduleResult), nil
+}
+
+// DeleteSurvey calls the "delete_survey" endpoint of the "survey" service.
+// DeleteSurvey may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) DeleteSurvey(ctx context.Context, p *DeleteSurveyPayload) (err error) {
+	_, err = c.DeleteSurveyEndpoint(ctx, p)
+	return
 }

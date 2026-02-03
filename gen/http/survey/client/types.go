@@ -50,9 +50,188 @@ type ScheduleSurveyRequestBody struct {
 	CommitteeVotingEnabled *bool `form:"committee_voting_enabled,omitempty" json:"committee_voting_enabled,omitempty" xml:"committee_voting_enabled,omitempty"`
 }
 
+// UpdateSurveyRequestBody is the type of the "survey" service "update_survey"
+// endpoint HTTP request body.
+type UpdateSurveyRequestBody struct {
+	// Creator's user ID
+	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
+	// Survey title
+	SurveyTitle *string `form:"survey_title,omitempty" json:"survey_title,omitempty" xml:"survey_title,omitempty"`
+	// Date to send the survey (RFC3339 format)
+	SurveySendDate *string `form:"survey_send_date,omitempty" json:"survey_send_date,omitempty" xml:"survey_send_date,omitempty"`
+	// Survey cutoff/end date (RFC3339 format)
+	SurveyCutoffDate *string `form:"survey_cutoff_date,omitempty" json:"survey_cutoff_date,omitempty" xml:"survey_cutoff_date,omitempty"`
+	// Days between automatic reminder emails (0 = no reminders)
+	SurveyReminderRateDays *int `form:"survey_reminder_rate_days,omitempty" json:"survey_reminder_rate_days,omitempty" xml:"survey_reminder_rate_days,omitempty"`
+	// Email subject line
+	EmailSubject *string `form:"email_subject,omitempty" json:"email_subject,omitempty" xml:"email_subject,omitempty"`
+	// Email body HTML content
+	EmailBody *string `form:"email_body,omitempty" json:"email_body,omitempty" xml:"email_body,omitempty"`
+	// Email body plain text content
+	EmailBodyText *string `form:"email_body_text,omitempty" json:"email_body_text,omitempty" xml:"email_body_text,omitempty"`
+	// Array of committee IDs to send survey to
+	Committees []string `form:"committees,omitempty" json:"committees,omitempty" xml:"committees,omitempty"`
+	// Whether committee voting is enabled
+	CommitteeVotingEnabled *bool `form:"committee_voting_enabled,omitempty" json:"committee_voting_enabled,omitempty" xml:"committee_voting_enabled,omitempty"`
+}
+
 // ScheduleSurveyResponseBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP response body.
 type ScheduleSurveyResponseBody struct {
+	// Survey identifier
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// SurveyMonkey survey ID
+	SurveyMonkeyID *string `form:"survey_monkey_id,omitempty" json:"survey_monkey_id,omitempty" xml:"survey_monkey_id,omitempty"`
+	// Whether project-level or global-level survey
+	IsProjectSurvey *bool `form:"is_project_survey,omitempty" json:"is_project_survey,omitempty" xml:"is_project_survey,omitempty"`
+	// Project stage filter
+	StageFilter *string `form:"stage_filter,omitempty" json:"stage_filter,omitempty" xml:"stage_filter,omitempty"`
+	// Creator's username
+	CreatorUsername *string `form:"creator_username,omitempty" json:"creator_username,omitempty" xml:"creator_username,omitempty"`
+	// Creator's full name
+	CreatorName *string `form:"creator_name,omitempty" json:"creator_name,omitempty" xml:"creator_name,omitempty"`
+	// Creator's user ID
+	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
+	// Creation timestamp
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// Last modification timestamp
+	LastModifiedAt *string `form:"last_modified_at,omitempty" json:"last_modified_at,omitempty" xml:"last_modified_at,omitempty"`
+	// User ID of last modifier
+	LastModifiedBy *string `form:"last_modified_by,omitempty" json:"last_modified_by,omitempty" xml:"last_modified_by,omitempty"`
+	// Survey title
+	SurveyTitle *string `form:"survey_title,omitempty" json:"survey_title,omitempty" xml:"survey_title,omitempty"`
+	// Survey status
+	SurveyStatus *string `form:"survey_status,omitempty" json:"survey_status,omitempty" xml:"survey_status,omitempty"`
+	// Response status
+	ResponseStatus *string `form:"response_status,omitempty" json:"response_status,omitempty" xml:"response_status,omitempty"`
+	// Survey send date
+	SurveySendDate *string `form:"survey_send_date,omitempty" json:"survey_send_date,omitempty" xml:"survey_send_date,omitempty"`
+	// Survey cutoff date
+	SurveyCutoffDate *string `form:"survey_cutoff_date,omitempty" json:"survey_cutoff_date,omitempty" xml:"survey_cutoff_date,omitempty"`
+	// Days between reminder emails
+	SurveyReminderRateDays *int `form:"survey_reminder_rate_days,omitempty" json:"survey_reminder_rate_days,omitempty" xml:"survey_reminder_rate_days,omitempty"`
+	// Email subject line
+	EmailSubject *string `form:"email_subject,omitempty" json:"email_subject,omitempty" xml:"email_subject,omitempty"`
+	// Email body HTML
+	EmailBody *string `form:"email_body,omitempty" json:"email_body,omitempty" xml:"email_body,omitempty"`
+	// Email body plain text
+	EmailBodyText *string `form:"email_body_text,omitempty" json:"email_body_text,omitempty" xml:"email_body_text,omitempty"`
+	// Committee category
+	CommitteeCategory *string `form:"committee_category,omitempty" json:"committee_category,omitempty" xml:"committee_category,omitempty"`
+	// Survey committees
+	Committees []*SurveyCommitteeResponseBody `form:"committees,omitempty" json:"committees,omitempty" xml:"committees,omitempty"`
+	// Committee voting enabled
+	CommitteeVotingEnabled *bool `form:"committee_voting_enabled,omitempty" json:"committee_voting_enabled,omitempty" xml:"committee_voting_enabled,omitempty"`
+	// Survey URL
+	SurveyURL *string `form:"survey_url,omitempty" json:"survey_url,omitempty" xml:"survey_url,omitempty"`
+	// Whether survey is sent immediately
+	SendImmediately *bool `form:"send_immediately,omitempty" json:"send_immediately,omitempty" xml:"send_immediately,omitempty"`
+	// Total number of recipients
+	TotalRecipients *int `form:"total_recipients,omitempty" json:"total_recipients,omitempty" xml:"total_recipients,omitempty"`
+	// Total number of responses
+	TotalResponses *int `form:"total_responses,omitempty" json:"total_responses,omitempty" xml:"total_responses,omitempty"`
+	// Whether this is an NPS survey
+	IsNpsSurvey *bool `form:"is_nps_survey,omitempty" json:"is_nps_survey,omitempty" xml:"is_nps_survey,omitempty"`
+	// NPS value
+	NpsValue *float64 `form:"nps_value,omitempty" json:"nps_value,omitempty" xml:"nps_value,omitempty"`
+	// Number of promoters
+	NumPromoters *int `form:"num_promoters,omitempty" json:"num_promoters,omitempty" xml:"num_promoters,omitempty"`
+	// Number of passives
+	NumPassives *int `form:"num_passives,omitempty" json:"num_passives,omitempty" xml:"num_passives,omitempty"`
+	// Number of detractors
+	NumDetractors *int `form:"num_detractors,omitempty" json:"num_detractors,omitempty" xml:"num_detractors,omitempty"`
+	// Number of bounced emails
+	TotalBouncedEmails *int `form:"total_bounced_emails,omitempty" json:"total_bounced_emails,omitempty" xml:"total_bounced_emails,omitempty"`
+	// Number of automated reminders to send
+	NumAutomatedRemindersToSend *int `form:"num_automated_reminders_to_send,omitempty" json:"num_automated_reminders_to_send,omitempty" xml:"num_automated_reminders_to_send,omitempty"`
+	// Number of automated reminders sent
+	NumAutomatedRemindersSent *int `form:"num_automated_reminders_sent,omitempty" json:"num_automated_reminders_sent,omitempty" xml:"num_automated_reminders_sent,omitempty"`
+	// Next automated reminder date
+	NextAutomatedReminderAt *string `form:"next_automated_reminder_at,omitempty" json:"next_automated_reminder_at,omitempty" xml:"next_automated_reminder_at,omitempty"`
+	// Latest automated reminder sent date
+	LatestAutomatedReminderSentAt *string `form:"latest_automated_reminder_sent_at,omitempty" json:"latest_automated_reminder_sent_at,omitempty" xml:"latest_automated_reminder_sent_at,omitempty"`
+}
+
+// GetSurveyResponseBody is the type of the "survey" service "get_survey"
+// endpoint HTTP response body.
+type GetSurveyResponseBody struct {
+	// Survey identifier
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// SurveyMonkey survey ID
+	SurveyMonkeyID *string `form:"survey_monkey_id,omitempty" json:"survey_monkey_id,omitempty" xml:"survey_monkey_id,omitempty"`
+	// Whether project-level or global-level survey
+	IsProjectSurvey *bool `form:"is_project_survey,omitempty" json:"is_project_survey,omitempty" xml:"is_project_survey,omitempty"`
+	// Project stage filter
+	StageFilter *string `form:"stage_filter,omitempty" json:"stage_filter,omitempty" xml:"stage_filter,omitempty"`
+	// Creator's username
+	CreatorUsername *string `form:"creator_username,omitempty" json:"creator_username,omitempty" xml:"creator_username,omitempty"`
+	// Creator's full name
+	CreatorName *string `form:"creator_name,omitempty" json:"creator_name,omitempty" xml:"creator_name,omitempty"`
+	// Creator's user ID
+	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
+	// Creation timestamp
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// Last modification timestamp
+	LastModifiedAt *string `form:"last_modified_at,omitempty" json:"last_modified_at,omitempty" xml:"last_modified_at,omitempty"`
+	// User ID of last modifier
+	LastModifiedBy *string `form:"last_modified_by,omitempty" json:"last_modified_by,omitempty" xml:"last_modified_by,omitempty"`
+	// Survey title
+	SurveyTitle *string `form:"survey_title,omitempty" json:"survey_title,omitempty" xml:"survey_title,omitempty"`
+	// Survey status
+	SurveyStatus *string `form:"survey_status,omitempty" json:"survey_status,omitempty" xml:"survey_status,omitempty"`
+	// Response status
+	ResponseStatus *string `form:"response_status,omitempty" json:"response_status,omitempty" xml:"response_status,omitempty"`
+	// Survey send date
+	SurveySendDate *string `form:"survey_send_date,omitempty" json:"survey_send_date,omitempty" xml:"survey_send_date,omitempty"`
+	// Survey cutoff date
+	SurveyCutoffDate *string `form:"survey_cutoff_date,omitempty" json:"survey_cutoff_date,omitempty" xml:"survey_cutoff_date,omitempty"`
+	// Days between reminder emails
+	SurveyReminderRateDays *int `form:"survey_reminder_rate_days,omitempty" json:"survey_reminder_rate_days,omitempty" xml:"survey_reminder_rate_days,omitempty"`
+	// Email subject line
+	EmailSubject *string `form:"email_subject,omitempty" json:"email_subject,omitempty" xml:"email_subject,omitempty"`
+	// Email body HTML
+	EmailBody *string `form:"email_body,omitempty" json:"email_body,omitempty" xml:"email_body,omitempty"`
+	// Email body plain text
+	EmailBodyText *string `form:"email_body_text,omitempty" json:"email_body_text,omitempty" xml:"email_body_text,omitempty"`
+	// Committee category
+	CommitteeCategory *string `form:"committee_category,omitempty" json:"committee_category,omitempty" xml:"committee_category,omitempty"`
+	// Survey committees
+	Committees []*SurveyCommitteeResponseBody `form:"committees,omitempty" json:"committees,omitempty" xml:"committees,omitempty"`
+	// Committee voting enabled
+	CommitteeVotingEnabled *bool `form:"committee_voting_enabled,omitempty" json:"committee_voting_enabled,omitempty" xml:"committee_voting_enabled,omitempty"`
+	// Survey URL
+	SurveyURL *string `form:"survey_url,omitempty" json:"survey_url,omitempty" xml:"survey_url,omitempty"`
+	// Whether survey is sent immediately
+	SendImmediately *bool `form:"send_immediately,omitempty" json:"send_immediately,omitempty" xml:"send_immediately,omitempty"`
+	// Total number of recipients
+	TotalRecipients *int `form:"total_recipients,omitempty" json:"total_recipients,omitempty" xml:"total_recipients,omitempty"`
+	// Total number of responses
+	TotalResponses *int `form:"total_responses,omitempty" json:"total_responses,omitempty" xml:"total_responses,omitempty"`
+	// Whether this is an NPS survey
+	IsNpsSurvey *bool `form:"is_nps_survey,omitempty" json:"is_nps_survey,omitempty" xml:"is_nps_survey,omitempty"`
+	// NPS value
+	NpsValue *float64 `form:"nps_value,omitempty" json:"nps_value,omitempty" xml:"nps_value,omitempty"`
+	// Number of promoters
+	NumPromoters *int `form:"num_promoters,omitempty" json:"num_promoters,omitempty" xml:"num_promoters,omitempty"`
+	// Number of passives
+	NumPassives *int `form:"num_passives,omitempty" json:"num_passives,omitempty" xml:"num_passives,omitempty"`
+	// Number of detractors
+	NumDetractors *int `form:"num_detractors,omitempty" json:"num_detractors,omitempty" xml:"num_detractors,omitempty"`
+	// Number of bounced emails
+	TotalBouncedEmails *int `form:"total_bounced_emails,omitempty" json:"total_bounced_emails,omitempty" xml:"total_bounced_emails,omitempty"`
+	// Number of automated reminders to send
+	NumAutomatedRemindersToSend *int `form:"num_automated_reminders_to_send,omitempty" json:"num_automated_reminders_to_send,omitempty" xml:"num_automated_reminders_to_send,omitempty"`
+	// Number of automated reminders sent
+	NumAutomatedRemindersSent *int `form:"num_automated_reminders_sent,omitempty" json:"num_automated_reminders_sent,omitempty" xml:"num_automated_reminders_sent,omitempty"`
+	// Next automated reminder date
+	NextAutomatedReminderAt *string `form:"next_automated_reminder_at,omitempty" json:"next_automated_reminder_at,omitempty" xml:"next_automated_reminder_at,omitempty"`
+	// Latest automated reminder sent date
+	LatestAutomatedReminderSentAt *string `form:"latest_automated_reminder_sent_at,omitempty" json:"latest_automated_reminder_sent_at,omitempty" xml:"latest_automated_reminder_sent_at,omitempty"`
+}
+
+// UpdateSurveyResponseBody is the type of the "survey" service "update_survey"
+// endpoint HTTP response body.
+type UpdateSurveyResponseBody struct {
 	// Survey identifier
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// SurveyMonkey survey ID
@@ -192,6 +371,172 @@ type ScheduleSurveyUnauthorizedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// GetSurveyBadRequestResponseBody is the type of the "survey" service
+// "get_survey" endpoint HTTP response body for the "BadRequest" error.
+type GetSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// GetSurveyForbiddenResponseBody is the type of the "survey" service
+// "get_survey" endpoint HTTP response body for the "Forbidden" error.
+type GetSurveyForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// GetSurveyInternalServerErrorResponseBody is the type of the "survey" service
+// "get_survey" endpoint HTTP response body for the "InternalServerError" error.
+type GetSurveyInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// GetSurveyNotFoundResponseBody is the type of the "survey" service
+// "get_survey" endpoint HTTP response body for the "NotFound" error.
+type GetSurveyNotFoundResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// GetSurveyServiceUnavailableResponseBody is the type of the "survey" service
+// "get_survey" endpoint HTTP response body for the "ServiceUnavailable" error.
+type GetSurveyServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// GetSurveyUnauthorizedResponseBody is the type of the "survey" service
+// "get_survey" endpoint HTTP response body for the "Unauthorized" error.
+type GetSurveyUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateSurveyBadRequestResponseBody is the type of the "survey" service
+// "update_survey" endpoint HTTP response body for the "BadRequest" error.
+type UpdateSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateSurveyForbiddenResponseBody is the type of the "survey" service
+// "update_survey" endpoint HTTP response body for the "Forbidden" error.
+type UpdateSurveyForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateSurveyInternalServerErrorResponseBody is the type of the "survey"
+// service "update_survey" endpoint HTTP response body for the
+// "InternalServerError" error.
+type UpdateSurveyInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateSurveyNotFoundResponseBody is the type of the "survey" service
+// "update_survey" endpoint HTTP response body for the "NotFound" error.
+type UpdateSurveyNotFoundResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateSurveyServiceUnavailableResponseBody is the type of the "survey"
+// service "update_survey" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type UpdateSurveyServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateSurveyUnauthorizedResponseBody is the type of the "survey" service
+// "update_survey" endpoint HTTP response body for the "Unauthorized" error.
+type UpdateSurveyUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyBadRequestResponseBody is the type of the "survey" service
+// "delete_survey" endpoint HTTP response body for the "BadRequest" error.
+type DeleteSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyForbiddenResponseBody is the type of the "survey" service
+// "delete_survey" endpoint HTTP response body for the "Forbidden" error.
+type DeleteSurveyForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyInternalServerErrorResponseBody is the type of the "survey"
+// service "delete_survey" endpoint HTTP response body for the
+// "InternalServerError" error.
+type DeleteSurveyInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyNotFoundResponseBody is the type of the "survey" service
+// "delete_survey" endpoint HTTP response body for the "NotFound" error.
+type DeleteSurveyNotFoundResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyServiceUnavailableResponseBody is the type of the "survey"
+// service "delete_survey" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type DeleteSurveyServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyUnauthorizedResponseBody is the type of the "survey" service
+// "delete_survey" endpoint HTTP response body for the "Unauthorized" error.
+type DeleteSurveyUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // SurveyCommitteeResponseBody is used to define fields on response body types.
 type SurveyCommitteeResponseBody struct {
 	// Committee name
@@ -224,6 +569,29 @@ func NewScheduleSurveyRequestBody(p *survey.ScheduleSurveyPayload) *ScheduleSurv
 		SurveyMonkeyID:         p.SurveyMonkeyID,
 		SurveyTitle:            p.SurveyTitle,
 		SendImmediately:        p.SendImmediately,
+		SurveySendDate:         p.SurveySendDate,
+		SurveyCutoffDate:       p.SurveyCutoffDate,
+		SurveyReminderRateDays: p.SurveyReminderRateDays,
+		EmailSubject:           p.EmailSubject,
+		EmailBody:              p.EmailBody,
+		EmailBodyText:          p.EmailBodyText,
+		CommitteeVotingEnabled: p.CommitteeVotingEnabled,
+	}
+	if p.Committees != nil {
+		body.Committees = make([]string, len(p.Committees))
+		for i, val := range p.Committees {
+			body.Committees[i] = val
+		}
+	}
+	return body
+}
+
+// NewUpdateSurveyRequestBody builds the HTTP request body from the payload of
+// the "update_survey" endpoint of the "survey" service.
+func NewUpdateSurveyRequestBody(p *survey.UpdateSurveyPayload) *UpdateSurveyRequestBody {
+	body := &UpdateSurveyRequestBody{
+		CreatorID:              p.CreatorID,
+		SurveyTitle:            p.SurveyTitle,
 		SurveySendDate:         p.SurveySendDate,
 		SurveyCutoffDate:       p.SurveyCutoffDate,
 		SurveyReminderRateDays: p.SurveyReminderRateDays,
@@ -372,9 +740,395 @@ func NewScheduleSurveyUnauthorized(body *ScheduleSurveyUnauthorizedResponseBody)
 	return v
 }
 
+// NewGetSurveySurveyScheduleResultOK builds a "survey" service "get_survey"
+// endpoint result from a HTTP "OK" response.
+func NewGetSurveySurveyScheduleResultOK(body *GetSurveyResponseBody) *survey.SurveyScheduleResult {
+	v := &survey.SurveyScheduleResult{
+		ID:                            *body.ID,
+		SurveyMonkeyID:                body.SurveyMonkeyID,
+		IsProjectSurvey:               body.IsProjectSurvey,
+		StageFilter:                   body.StageFilter,
+		CreatorUsername:               body.CreatorUsername,
+		CreatorName:                   body.CreatorName,
+		CreatorID:                     body.CreatorID,
+		CreatedAt:                     body.CreatedAt,
+		LastModifiedAt:                body.LastModifiedAt,
+		LastModifiedBy:                body.LastModifiedBy,
+		SurveyTitle:                   body.SurveyTitle,
+		SurveyStatus:                  *body.SurveyStatus,
+		ResponseStatus:                body.ResponseStatus,
+		SurveySendDate:                body.SurveySendDate,
+		SurveyCutoffDate:              body.SurveyCutoffDate,
+		SurveyReminderRateDays:        body.SurveyReminderRateDays,
+		EmailSubject:                  body.EmailSubject,
+		EmailBody:                     body.EmailBody,
+		EmailBodyText:                 body.EmailBodyText,
+		CommitteeCategory:             body.CommitteeCategory,
+		CommitteeVotingEnabled:        body.CommitteeVotingEnabled,
+		SurveyURL:                     body.SurveyURL,
+		SendImmediately:               body.SendImmediately,
+		TotalRecipients:               body.TotalRecipients,
+		TotalResponses:                body.TotalResponses,
+		IsNpsSurvey:                   body.IsNpsSurvey,
+		NpsValue:                      body.NpsValue,
+		NumPromoters:                  body.NumPromoters,
+		NumPassives:                   body.NumPassives,
+		NumDetractors:                 body.NumDetractors,
+		TotalBouncedEmails:            body.TotalBouncedEmails,
+		NumAutomatedRemindersToSend:   body.NumAutomatedRemindersToSend,
+		NumAutomatedRemindersSent:     body.NumAutomatedRemindersSent,
+		NextAutomatedReminderAt:       body.NextAutomatedReminderAt,
+		LatestAutomatedReminderSentAt: body.LatestAutomatedReminderSentAt,
+	}
+	if body.Committees != nil {
+		v.Committees = make([]*survey.SurveyCommittee, len(body.Committees))
+		for i, val := range body.Committees {
+			if val == nil {
+				v.Committees[i] = nil
+				continue
+			}
+			v.Committees[i] = unmarshalSurveyCommitteeResponseBodyToSurveySurveyCommittee(val)
+		}
+	}
+
+	return v
+}
+
+// NewGetSurveyBadRequest builds a survey service get_survey endpoint
+// BadRequest error.
+func NewGetSurveyBadRequest(body *GetSurveyBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewGetSurveyForbidden builds a survey service get_survey endpoint Forbidden
+// error.
+func NewGetSurveyForbidden(body *GetSurveyForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewGetSurveyInternalServerError builds a survey service get_survey endpoint
+// InternalServerError error.
+func NewGetSurveyInternalServerError(body *GetSurveyInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewGetSurveyNotFound builds a survey service get_survey endpoint NotFound
+// error.
+func NewGetSurveyNotFound(body *GetSurveyNotFoundResponseBody) *survey.NotFoundError {
+	v := &survey.NotFoundError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewGetSurveyServiceUnavailable builds a survey service get_survey endpoint
+// ServiceUnavailable error.
+func NewGetSurveyServiceUnavailable(body *GetSurveyServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewGetSurveyUnauthorized builds a survey service get_survey endpoint
+// Unauthorized error.
+func NewGetSurveyUnauthorized(body *GetSurveyUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateSurveySurveyScheduleResultOK builds a "survey" service
+// "update_survey" endpoint result from a HTTP "OK" response.
+func NewUpdateSurveySurveyScheduleResultOK(body *UpdateSurveyResponseBody) *survey.SurveyScheduleResult {
+	v := &survey.SurveyScheduleResult{
+		ID:                            *body.ID,
+		SurveyMonkeyID:                body.SurveyMonkeyID,
+		IsProjectSurvey:               body.IsProjectSurvey,
+		StageFilter:                   body.StageFilter,
+		CreatorUsername:               body.CreatorUsername,
+		CreatorName:                   body.CreatorName,
+		CreatorID:                     body.CreatorID,
+		CreatedAt:                     body.CreatedAt,
+		LastModifiedAt:                body.LastModifiedAt,
+		LastModifiedBy:                body.LastModifiedBy,
+		SurveyTitle:                   body.SurveyTitle,
+		SurveyStatus:                  *body.SurveyStatus,
+		ResponseStatus:                body.ResponseStatus,
+		SurveySendDate:                body.SurveySendDate,
+		SurveyCutoffDate:              body.SurveyCutoffDate,
+		SurveyReminderRateDays:        body.SurveyReminderRateDays,
+		EmailSubject:                  body.EmailSubject,
+		EmailBody:                     body.EmailBody,
+		EmailBodyText:                 body.EmailBodyText,
+		CommitteeCategory:             body.CommitteeCategory,
+		CommitteeVotingEnabled:        body.CommitteeVotingEnabled,
+		SurveyURL:                     body.SurveyURL,
+		SendImmediately:               body.SendImmediately,
+		TotalRecipients:               body.TotalRecipients,
+		TotalResponses:                body.TotalResponses,
+		IsNpsSurvey:                   body.IsNpsSurvey,
+		NpsValue:                      body.NpsValue,
+		NumPromoters:                  body.NumPromoters,
+		NumPassives:                   body.NumPassives,
+		NumDetractors:                 body.NumDetractors,
+		TotalBouncedEmails:            body.TotalBouncedEmails,
+		NumAutomatedRemindersToSend:   body.NumAutomatedRemindersToSend,
+		NumAutomatedRemindersSent:     body.NumAutomatedRemindersSent,
+		NextAutomatedReminderAt:       body.NextAutomatedReminderAt,
+		LatestAutomatedReminderSentAt: body.LatestAutomatedReminderSentAt,
+	}
+	if body.Committees != nil {
+		v.Committees = make([]*survey.SurveyCommittee, len(body.Committees))
+		for i, val := range body.Committees {
+			if val == nil {
+				v.Committees[i] = nil
+				continue
+			}
+			v.Committees[i] = unmarshalSurveyCommitteeResponseBodyToSurveySurveyCommittee(val)
+		}
+	}
+
+	return v
+}
+
+// NewUpdateSurveyBadRequest builds a survey service update_survey endpoint
+// BadRequest error.
+func NewUpdateSurveyBadRequest(body *UpdateSurveyBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateSurveyForbidden builds a survey service update_survey endpoint
+// Forbidden error.
+func NewUpdateSurveyForbidden(body *UpdateSurveyForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateSurveyInternalServerError builds a survey service update_survey
+// endpoint InternalServerError error.
+func NewUpdateSurveyInternalServerError(body *UpdateSurveyInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateSurveyNotFound builds a survey service update_survey endpoint
+// NotFound error.
+func NewUpdateSurveyNotFound(body *UpdateSurveyNotFoundResponseBody) *survey.NotFoundError {
+	v := &survey.NotFoundError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateSurveyServiceUnavailable builds a survey service update_survey
+// endpoint ServiceUnavailable error.
+func NewUpdateSurveyServiceUnavailable(body *UpdateSurveyServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateSurveyUnauthorized builds a survey service update_survey endpoint
+// Unauthorized error.
+func NewUpdateSurveyUnauthorized(body *UpdateSurveyUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyBadRequest builds a survey service delete_survey endpoint
+// BadRequest error.
+func NewDeleteSurveyBadRequest(body *DeleteSurveyBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyForbidden builds a survey service delete_survey endpoint
+// Forbidden error.
+func NewDeleteSurveyForbidden(body *DeleteSurveyForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyInternalServerError builds a survey service delete_survey
+// endpoint InternalServerError error.
+func NewDeleteSurveyInternalServerError(body *DeleteSurveyInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyNotFound builds a survey service delete_survey endpoint
+// NotFound error.
+func NewDeleteSurveyNotFound(body *DeleteSurveyNotFoundResponseBody) *survey.NotFoundError {
+	v := &survey.NotFoundError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyServiceUnavailable builds a survey service delete_survey
+// endpoint ServiceUnavailable error.
+func NewDeleteSurveyServiceUnavailable(body *DeleteSurveyServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyUnauthorized builds a survey service delete_survey endpoint
+// Unauthorized error.
+func NewDeleteSurveyUnauthorized(body *DeleteSurveyUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // ValidateScheduleSurveyResponseBody runs the validations defined on
 // schedule_survey_response_body
 func ValidateScheduleSurveyResponseBody(body *ScheduleSurveyResponseBody) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.SurveyStatus == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("survey_status", "body"))
+	}
+	if body.CreatedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.created_at", *body.CreatedAt, goa.FormatDateTime))
+	}
+	if body.LastModifiedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.last_modified_at", *body.LastModifiedAt, goa.FormatDateTime))
+	}
+	if body.SurveyStatus != nil {
+		if !(*body.SurveyStatus == "scheduled" || *body.SurveyStatus == "sending" || *body.SurveyStatus == "sent" || *body.SurveyStatus == "cancelled") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.survey_status", *body.SurveyStatus, []any{"scheduled", "sending", "sent", "cancelled"}))
+		}
+	}
+	if body.ResponseStatus != nil {
+		if !(*body.ResponseStatus == "scheduled" || *body.ResponseStatus == "open" || *body.ResponseStatus == "closed") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.response_status", *body.ResponseStatus, []any{"scheduled", "open", "closed"}))
+		}
+	}
+	if body.SurveySendDate != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.survey_send_date", *body.SurveySendDate, goa.FormatDateTime))
+	}
+	if body.SurveyCutoffDate != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.survey_cutoff_date", *body.SurveyCutoffDate, goa.FormatDateTime))
+	}
+	if body.NextAutomatedReminderAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.next_automated_reminder_at", *body.NextAutomatedReminderAt, goa.FormatDateTime))
+	}
+	if body.LatestAutomatedReminderSentAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.latest_automated_reminder_sent_at", *body.LatestAutomatedReminderSentAt, goa.FormatDateTime))
+	}
+	return
+}
+
+// ValidateGetSurveyResponseBody runs the validations defined on
+// get_survey_response_body
+func ValidateGetSurveyResponseBody(body *GetSurveyResponseBody) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.SurveyStatus == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("survey_status", "body"))
+	}
+	if body.CreatedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.created_at", *body.CreatedAt, goa.FormatDateTime))
+	}
+	if body.LastModifiedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.last_modified_at", *body.LastModifiedAt, goa.FormatDateTime))
+	}
+	if body.SurveyStatus != nil {
+		if !(*body.SurveyStatus == "scheduled" || *body.SurveyStatus == "sending" || *body.SurveyStatus == "sent" || *body.SurveyStatus == "cancelled") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.survey_status", *body.SurveyStatus, []any{"scheduled", "sending", "sent", "cancelled"}))
+		}
+	}
+	if body.ResponseStatus != nil {
+		if !(*body.ResponseStatus == "scheduled" || *body.ResponseStatus == "open" || *body.ResponseStatus == "closed") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.response_status", *body.ResponseStatus, []any{"scheduled", "open", "closed"}))
+		}
+	}
+	if body.SurveySendDate != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.survey_send_date", *body.SurveySendDate, goa.FormatDateTime))
+	}
+	if body.SurveyCutoffDate != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.survey_cutoff_date", *body.SurveyCutoffDate, goa.FormatDateTime))
+	}
+	if body.NextAutomatedReminderAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.next_automated_reminder_at", *body.NextAutomatedReminderAt, goa.FormatDateTime))
+	}
+	if body.LatestAutomatedReminderSentAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.latest_automated_reminder_sent_at", *body.LatestAutomatedReminderSentAt, goa.FormatDateTime))
+	}
+	return
+}
+
+// ValidateUpdateSurveyResponseBody runs the validations defined on
+// update_survey_response_body
+func ValidateUpdateSurveyResponseBody(body *UpdateSurveyResponseBody) (err error) {
 	if body.ID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
 	}
@@ -487,6 +1241,222 @@ func ValidateScheduleSurveyServiceUnavailableResponseBody(body *ScheduleSurveySe
 // ValidateScheduleSurveyUnauthorizedResponseBody runs the validations defined
 // on schedule_survey_Unauthorized_response_body
 func ValidateScheduleSurveyUnauthorizedResponseBody(body *ScheduleSurveyUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateGetSurveyBadRequestResponseBody runs the validations defined on
+// get_survey_BadRequest_response_body
+func ValidateGetSurveyBadRequestResponseBody(body *GetSurveyBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateGetSurveyForbiddenResponseBody runs the validations defined on
+// get_survey_Forbidden_response_body
+func ValidateGetSurveyForbiddenResponseBody(body *GetSurveyForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateGetSurveyInternalServerErrorResponseBody runs the validations
+// defined on get_survey_InternalServerError_response_body
+func ValidateGetSurveyInternalServerErrorResponseBody(body *GetSurveyInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateGetSurveyNotFoundResponseBody runs the validations defined on
+// get_survey_NotFound_response_body
+func ValidateGetSurveyNotFoundResponseBody(body *GetSurveyNotFoundResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateGetSurveyServiceUnavailableResponseBody runs the validations defined
+// on get_survey_ServiceUnavailable_response_body
+func ValidateGetSurveyServiceUnavailableResponseBody(body *GetSurveyServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateGetSurveyUnauthorizedResponseBody runs the validations defined on
+// get_survey_Unauthorized_response_body
+func ValidateGetSurveyUnauthorizedResponseBody(body *GetSurveyUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateSurveyBadRequestResponseBody runs the validations defined on
+// update_survey_BadRequest_response_body
+func ValidateUpdateSurveyBadRequestResponseBody(body *UpdateSurveyBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateSurveyForbiddenResponseBody runs the validations defined on
+// update_survey_Forbidden_response_body
+func ValidateUpdateSurveyForbiddenResponseBody(body *UpdateSurveyForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateSurveyInternalServerErrorResponseBody runs the validations
+// defined on update_survey_InternalServerError_response_body
+func ValidateUpdateSurveyInternalServerErrorResponseBody(body *UpdateSurveyInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateSurveyNotFoundResponseBody runs the validations defined on
+// update_survey_NotFound_response_body
+func ValidateUpdateSurveyNotFoundResponseBody(body *UpdateSurveyNotFoundResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateSurveyServiceUnavailableResponseBody runs the validations
+// defined on update_survey_ServiceUnavailable_response_body
+func ValidateUpdateSurveyServiceUnavailableResponseBody(body *UpdateSurveyServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateSurveyUnauthorizedResponseBody runs the validations defined on
+// update_survey_Unauthorized_response_body
+func ValidateUpdateSurveyUnauthorizedResponseBody(body *UpdateSurveyUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyBadRequestResponseBody runs the validations defined on
+// delete_survey_BadRequest_response_body
+func ValidateDeleteSurveyBadRequestResponseBody(body *DeleteSurveyBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyForbiddenResponseBody runs the validations defined on
+// delete_survey_Forbidden_response_body
+func ValidateDeleteSurveyForbiddenResponseBody(body *DeleteSurveyForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyInternalServerErrorResponseBody runs the validations
+// defined on delete_survey_InternalServerError_response_body
+func ValidateDeleteSurveyInternalServerErrorResponseBody(body *DeleteSurveyInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyNotFoundResponseBody runs the validations defined on
+// delete_survey_NotFound_response_body
+func ValidateDeleteSurveyNotFoundResponseBody(body *DeleteSurveyNotFoundResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyServiceUnavailableResponseBody runs the validations
+// defined on delete_survey_ServiceUnavailable_response_body
+func ValidateDeleteSurveyServiceUnavailableResponseBody(body *DeleteSurveyServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyUnauthorizedResponseBody runs the validations defined on
+// delete_survey_Unauthorized_response_body
+func ValidateDeleteSurveyUnauthorizedResponseBody(body *DeleteSurveyUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
 	}

@@ -28,6 +28,21 @@ func (api *SurveyAPI) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSurv
 	return api.surveyService.ScheduleSurvey(ctx, p)
 }
 
+// GetSurvey implements survey.Service.GetSurvey
+func (api *SurveyAPI) GetSurvey(ctx context.Context, p *survey.GetSurveyPayload) (*survey.SurveyScheduleResult, error) {
+	return api.surveyService.GetSurvey(ctx, p)
+}
+
+// UpdateSurvey implements survey.Service.UpdateSurvey
+func (api *SurveyAPI) UpdateSurvey(ctx context.Context, p *survey.UpdateSurveyPayload) (*survey.SurveyScheduleResult, error) {
+	return api.surveyService.UpdateSurvey(ctx, p)
+}
+
+// DeleteSurvey implements survey.Service.DeleteSurvey
+func (api *SurveyAPI) DeleteSurvey(ctx context.Context, p *survey.DeleteSurveyPayload) error {
+	return api.surveyService.DeleteSurvey(ctx, p)
+}
+
 // JWTAuth implements survey.Auther.JWTAuth
 // This is called by goa to validate JWT tokens before calling service methods
 func (api *SurveyAPI) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {

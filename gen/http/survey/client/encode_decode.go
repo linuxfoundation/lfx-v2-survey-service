@@ -206,6 +206,528 @@ func DecodeScheduleSurveyResponse(decoder func(*http.Response) goahttp.Decoder, 
 	}
 }
 
+// BuildGetSurveyRequest instantiates a HTTP request object with method and
+// path set to call the "survey" service "get_survey" endpoint
+func (c *Client) BuildGetSurveyRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		surveyID string
+	)
+	{
+		p, ok := v.(*survey.GetSurveyPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("survey", "get_survey", "*survey.GetSurveyPayload", v)
+		}
+		surveyID = p.SurveyID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: GetSurveySurveyPath(surveyID)}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "get_survey", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeGetSurveyRequest returns an encoder for requests sent to the survey
+// get_survey server.
+func EncodeGetSurveyRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.GetSurveyPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "get_survey", "*survey.GetSurveyPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		return nil
+	}
+}
+
+// DecodeGetSurveyResponse returns a decoder for responses returned by the
+// survey get_survey endpoint. restoreBody controls whether the response body
+// should be restored after having been read.
+// DecodeGetSurveyResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "NotFound" (type *survey.NotFoundError): http.StatusNotFound
+//   - "ServiceUnavailable" (type *survey.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeGetSurveyResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body GetSurveyResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_survey", err)
+			}
+			err = ValidateGetSurveyResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_survey", err)
+			}
+			res := NewGetSurveySurveyScheduleResultOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body GetSurveyBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_survey", err)
+			}
+			err = ValidateGetSurveyBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_survey", err)
+			}
+			return nil, NewGetSurveyBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body GetSurveyForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_survey", err)
+			}
+			err = ValidateGetSurveyForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_survey", err)
+			}
+			return nil, NewGetSurveyForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body GetSurveyInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_survey", err)
+			}
+			err = ValidateGetSurveyInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_survey", err)
+			}
+			return nil, NewGetSurveyInternalServerError(&body)
+		case http.StatusNotFound:
+			var (
+				body GetSurveyNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_survey", err)
+			}
+			err = ValidateGetSurveyNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_survey", err)
+			}
+			return nil, NewGetSurveyNotFound(&body)
+		case http.StatusServiceUnavailable:
+			var (
+				body GetSurveyServiceUnavailableResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_survey", err)
+			}
+			err = ValidateGetSurveyServiceUnavailableResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_survey", err)
+			}
+			return nil, NewGetSurveyServiceUnavailable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body GetSurveyUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_survey", err)
+			}
+			err = ValidateGetSurveyUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_survey", err)
+			}
+			return nil, NewGetSurveyUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "get_survey", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildUpdateSurveyRequest instantiates a HTTP request object with method and
+// path set to call the "survey" service "update_survey" endpoint
+func (c *Client) BuildUpdateSurveyRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		surveyID string
+	)
+	{
+		p, ok := v.(*survey.UpdateSurveyPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("survey", "update_survey", "*survey.UpdateSurveyPayload", v)
+		}
+		surveyID = p.SurveyID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateSurveySurveyPath(surveyID)}
+	req, err := http.NewRequest("PUT", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "update_survey", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeUpdateSurveyRequest returns an encoder for requests sent to the survey
+// update_survey server.
+func EncodeUpdateSurveyRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.UpdateSurveyPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "update_survey", "*survey.UpdateSurveyPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		body := NewUpdateSurveyRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("survey", "update_survey", err)
+		}
+		return nil
+	}
+}
+
+// DecodeUpdateSurveyResponse returns a decoder for responses returned by the
+// survey update_survey endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+// DecodeUpdateSurveyResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "NotFound" (type *survey.NotFoundError): http.StatusNotFound
+//   - "ServiceUnavailable" (type *survey.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeUpdateSurveyResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body UpdateSurveyResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "update_survey", err)
+			}
+			err = ValidateUpdateSurveyResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "update_survey", err)
+			}
+			res := NewUpdateSurveySurveyScheduleResultOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body UpdateSurveyBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "update_survey", err)
+			}
+			err = ValidateUpdateSurveyBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "update_survey", err)
+			}
+			return nil, NewUpdateSurveyBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body UpdateSurveyForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "update_survey", err)
+			}
+			err = ValidateUpdateSurveyForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "update_survey", err)
+			}
+			return nil, NewUpdateSurveyForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body UpdateSurveyInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "update_survey", err)
+			}
+			err = ValidateUpdateSurveyInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "update_survey", err)
+			}
+			return nil, NewUpdateSurveyInternalServerError(&body)
+		case http.StatusNotFound:
+			var (
+				body UpdateSurveyNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "update_survey", err)
+			}
+			err = ValidateUpdateSurveyNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "update_survey", err)
+			}
+			return nil, NewUpdateSurveyNotFound(&body)
+		case http.StatusServiceUnavailable:
+			var (
+				body UpdateSurveyServiceUnavailableResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "update_survey", err)
+			}
+			err = ValidateUpdateSurveyServiceUnavailableResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "update_survey", err)
+			}
+			return nil, NewUpdateSurveyServiceUnavailable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body UpdateSurveyUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "update_survey", err)
+			}
+			err = ValidateUpdateSurveyUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "update_survey", err)
+			}
+			return nil, NewUpdateSurveyUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "update_survey", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildDeleteSurveyRequest instantiates a HTTP request object with method and
+// path set to call the "survey" service "delete_survey" endpoint
+func (c *Client) BuildDeleteSurveyRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		surveyID string
+	)
+	{
+		p, ok := v.(*survey.DeleteSurveyPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("survey", "delete_survey", "*survey.DeleteSurveyPayload", v)
+		}
+		surveyID = p.SurveyID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteSurveySurveyPath(surveyID)}
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "delete_survey", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeDeleteSurveyRequest returns an encoder for requests sent to the survey
+// delete_survey server.
+func EncodeDeleteSurveyRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.DeleteSurveyPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "delete_survey", "*survey.DeleteSurveyPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		return nil
+	}
+}
+
+// DecodeDeleteSurveyResponse returns a decoder for responses returned by the
+// survey delete_survey endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+// DecodeDeleteSurveyResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "NotFound" (type *survey.NotFoundError): http.StatusNotFound
+//   - "ServiceUnavailable" (type *survey.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeDeleteSurveyResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		case http.StatusBadRequest:
+			var (
+				body DeleteSurveyBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_survey", err)
+			}
+			err = ValidateDeleteSurveyBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_survey", err)
+			}
+			return nil, NewDeleteSurveyBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body DeleteSurveyForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_survey", err)
+			}
+			err = ValidateDeleteSurveyForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_survey", err)
+			}
+			return nil, NewDeleteSurveyForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body DeleteSurveyInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_survey", err)
+			}
+			err = ValidateDeleteSurveyInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_survey", err)
+			}
+			return nil, NewDeleteSurveyInternalServerError(&body)
+		case http.StatusNotFound:
+			var (
+				body DeleteSurveyNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_survey", err)
+			}
+			err = ValidateDeleteSurveyNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_survey", err)
+			}
+			return nil, NewDeleteSurveyNotFound(&body)
+		case http.StatusServiceUnavailable:
+			var (
+				body DeleteSurveyServiceUnavailableResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_survey", err)
+			}
+			err = ValidateDeleteSurveyServiceUnavailableResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_survey", err)
+			}
+			return nil, NewDeleteSurveyServiceUnavailable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body DeleteSurveyUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_survey", err)
+			}
+			err = ValidateDeleteSurveyUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_survey", err)
+			}
+			return nil, NewDeleteSurveyUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "delete_survey", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // unmarshalSurveyCommitteeResponseBodyToSurveySurveyCommittee builds a value
 // of type *survey.SurveyCommittee from a value of type
 // *SurveyCommitteeResponseBody.

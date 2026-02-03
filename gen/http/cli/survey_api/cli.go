@@ -24,13 +24,13 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"survey schedule-survey",
+		"survey (schedule-survey|get-survey|update-survey|delete-survey)",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + " " + "survey schedule-survey --body '{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Maiores quis incidunt pariatur.\",\n         \"Unde consequatur.\",\n         \"Sunt accusamus pariatur quia itaque quidem.\",\n         \"Et saepe corrupti quis nostrum.\"\n      ],\n      \"creator_id\": \"Eligendi corporis enim.\",\n      \"creator_name\": \"Aliquid aut excepturi.\",\n      \"creator_username\": \"Enim amet quia maxime rerum modi labore.\",\n      \"email_body\": \"Odit nostrum nostrum repellat aut molestiae officiis.\",\n      \"email_body_text\": \"Et voluptas possimus iste quasi nisi.\",\n      \"email_subject\": \"Ratione sed molestiae aliquam consequatur.\",\n      \"is_project_survey\": false,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Voluptas est autem voluptas ea molestiae repudiandae.\",\n      \"survey_cutoff_date\": \"Iste eos adipisci itaque vel.\",\n      \"survey_monkey_id\": \"Consectetur nisi quisquam.\",\n      \"survey_reminder_rate_days\": 5042865997269094452,\n      \"survey_send_date\": \"Aliquid illum quia sed asperiores rerum molestiae.\",\n      \"survey_title\": \"Eum mollitia.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"" + "\n" +
+	return os.Args[0] + " " + "survey schedule-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Omnis placeat rerum ad eum.\",\n         \"Sapiente et corporis.\"\n      ],\n      \"creator_id\": \"Quasi nisi.\",\n      \"creator_name\": \"Aut molestiae officiis nihil et voluptas possimus.\",\n      \"creator_username\": \"Consequatur animi odit nostrum nostrum.\",\n      \"email_body\": \"Sapiente qui.\",\n      \"email_body_text\": \"Eos porro voluptatem doloremque qui mollitia sit.\",\n      \"email_subject\": \"Qui consequatur delectus.\",\n      \"is_project_survey\": false,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Sed molestiae.\",\n      \"survey_cutoff_date\": \"Nisi harum delectus veniam delectus.\",\n      \"survey_monkey_id\": \"Fuga maiores quis incidunt pariatur et unde.\",\n      \"survey_reminder_rate_days\": 5299522033241582586,\n      \"survey_send_date\": \"Itaque quidem saepe et saepe corrupti quis.\",\n      \"survey_title\": \"Voluptates sunt accusamus.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"" + "\n" +
 		""
 }
 
@@ -49,9 +49,25 @@ func ParseEndpoint(
 		surveyScheduleSurveyFlags     = flag.NewFlagSet("schedule-survey", flag.ExitOnError)
 		surveyScheduleSurveyBodyFlag  = surveyScheduleSurveyFlags.String("body", "REQUIRED", "")
 		surveyScheduleSurveyTokenFlag = surveyScheduleSurveyFlags.String("token", "", "")
+
+		surveyGetSurveyFlags        = flag.NewFlagSet("get-survey", flag.ExitOnError)
+		surveyGetSurveySurveyIDFlag = surveyGetSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
+		surveyGetSurveyTokenFlag    = surveyGetSurveyFlags.String("token", "", "")
+
+		surveyUpdateSurveyFlags        = flag.NewFlagSet("update-survey", flag.ExitOnError)
+		surveyUpdateSurveyBodyFlag     = surveyUpdateSurveyFlags.String("body", "REQUIRED", "")
+		surveyUpdateSurveySurveyIDFlag = surveyUpdateSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
+		surveyUpdateSurveyTokenFlag    = surveyUpdateSurveyFlags.String("token", "", "")
+
+		surveyDeleteSurveyFlags        = flag.NewFlagSet("delete-survey", flag.ExitOnError)
+		surveyDeleteSurveySurveyIDFlag = surveyDeleteSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
+		surveyDeleteSurveyTokenFlag    = surveyDeleteSurveyFlags.String("token", "", "")
 	)
 	surveyFlags.Usage = surveyUsage
 	surveyScheduleSurveyFlags.Usage = surveyScheduleSurveyUsage
+	surveyGetSurveyFlags.Usage = surveyGetSurveyUsage
+	surveyUpdateSurveyFlags.Usage = surveyUpdateSurveyUsage
+	surveyDeleteSurveyFlags.Usage = surveyDeleteSurveyUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -90,6 +106,15 @@ func ParseEndpoint(
 			case "schedule-survey":
 				epf = surveyScheduleSurveyFlags
 
+			case "get-survey":
+				epf = surveyGetSurveyFlags
+
+			case "update-survey":
+				epf = surveyUpdateSurveyFlags
+
+			case "delete-survey":
+				epf = surveyDeleteSurveyFlags
+
 			}
 
 		}
@@ -118,6 +143,15 @@ func ParseEndpoint(
 			case "schedule-survey":
 				endpoint = c.ScheduleSurvey()
 				data, err = surveyc.BuildScheduleSurveyPayload(*surveyScheduleSurveyBodyFlag, *surveyScheduleSurveyTokenFlag)
+			case "get-survey":
+				endpoint = c.GetSurvey()
+				data, err = surveyc.BuildGetSurveyPayload(*surveyGetSurveySurveyIDFlag, *surveyGetSurveyTokenFlag)
+			case "update-survey":
+				endpoint = c.UpdateSurvey()
+				data, err = surveyc.BuildUpdateSurveyPayload(*surveyUpdateSurveyBodyFlag, *surveyUpdateSurveySurveyIDFlag, *surveyUpdateSurveyTokenFlag)
+			case "delete-survey":
+				endpoint = c.DeleteSurvey()
+				data, err = surveyc.BuildDeleteSurveyPayload(*surveyDeleteSurveySurveyIDFlag, *surveyDeleteSurveyTokenFlag)
 			}
 		}
 	}
@@ -134,6 +168,9 @@ func surveyUsage() {
 	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] survey COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    schedule-survey: Create a scheduled survey for ITX project committees (proxies to ITX POST /surveys/schedule)`)
+	fmt.Fprintln(os.Stderr, `    get-survey: Get survey details (proxies to ITX GET /v2/surveys/{survey_id})`)
+	fmt.Fprintln(os.Stderr, `    update-survey: Update survey (proxies to ITX PUT /v2/surveys/{survey_id}). Only allowed when status is 'disabled'`)
+	fmt.Fprintln(os.Stderr, `    delete-survey: Delete survey (proxies to ITX DELETE /v2/surveys/{survey_id}). Only allowed when status is 'disabled'`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s survey COMMAND --help\n", os.Args[0])
@@ -155,5 +192,67 @@ func surveyScheduleSurveyUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey schedule-survey --body '{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Maiores quis incidunt pariatur.\",\n         \"Unde consequatur.\",\n         \"Sunt accusamus pariatur quia itaque quidem.\",\n         \"Et saepe corrupti quis nostrum.\"\n      ],\n      \"creator_id\": \"Eligendi corporis enim.\",\n      \"creator_name\": \"Aliquid aut excepturi.\",\n      \"creator_username\": \"Enim amet quia maxime rerum modi labore.\",\n      \"email_body\": \"Odit nostrum nostrum repellat aut molestiae officiis.\",\n      \"email_body_text\": \"Et voluptas possimus iste quasi nisi.\",\n      \"email_subject\": \"Ratione sed molestiae aliquam consequatur.\",\n      \"is_project_survey\": false,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Voluptas est autem voluptas ea molestiae repudiandae.\",\n      \"survey_cutoff_date\": \"Iste eos adipisci itaque vel.\",\n      \"survey_monkey_id\": \"Consectetur nisi quisquam.\",\n      \"survey_reminder_rate_days\": 5042865997269094452,\n      \"survey_send_date\": \"Aliquid illum quia sed asperiores rerum molestiae.\",\n      \"survey_title\": \"Eum mollitia.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey schedule-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Omnis placeat rerum ad eum.\",\n         \"Sapiente et corporis.\"\n      ],\n      \"creator_id\": \"Quasi nisi.\",\n      \"creator_name\": \"Aut molestiae officiis nihil et voluptas possimus.\",\n      \"creator_username\": \"Consequatur animi odit nostrum nostrum.\",\n      \"email_body\": \"Sapiente qui.\",\n      \"email_body_text\": \"Eos porro voluptatem doloremque qui mollitia sit.\",\n      \"email_subject\": \"Qui consequatur delectus.\",\n      \"is_project_survey\": false,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Sed molestiae.\",\n      \"survey_cutoff_date\": \"Nisi harum delectus veniam delectus.\",\n      \"survey_monkey_id\": \"Fuga maiores quis incidunt pariatur et unde.\",\n      \"survey_reminder_rate_days\": 5299522033241582586,\n      \"survey_send_date\": \"Itaque quidem saepe et saepe corrupti quis.\",\n      \"survey_title\": \"Voluptates sunt accusamus.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveyGetSurveyUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey get-survey", os.Args[0])
+	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Get survey details (proxies to ITX GET /v2/surveys/{survey_id})`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey get-survey --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveyUpdateSurveyUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey update-survey", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
+	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Update survey (proxies to ITX PUT /v2/surveys/{survey_id}). Only allowed when status is 'disabled'`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
+	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey update-survey --body '{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Quaerat doloribus.\",\n         \"Et vel et dolorem.\",\n         \"Rerum ut suscipit.\"\n      ],\n      \"creator_id\": \"Et hic consequuntur inventore vel.\",\n      \"email_body\": \"Quaerat voluptas iure nemo.\",\n      \"email_body_text\": \"Dolor voluptatem.\",\n      \"email_subject\": \"Dolorem atque alias possimus eum qui et.\",\n      \"survey_cutoff_date\": \"Maiores dolorem aut odit dolorem repudiandae est.\",\n      \"survey_reminder_rate_days\": 3049090884903950296,\n      \"survey_send_date\": \"Saepe sed temporibus et est.\",\n      \"survey_title\": \"Non inventore quis voluptas dolore qui.\"\n   }' --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveyDeleteSurveyUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey delete-survey", os.Args[0])
+	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Delete survey (proxies to ITX DELETE /v2/surveys/{survey_id}). Only allowed when status is 'disabled'`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-survey --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }

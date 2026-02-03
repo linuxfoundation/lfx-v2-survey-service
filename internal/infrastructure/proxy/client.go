@@ -169,7 +169,7 @@ func (c *Client) ScheduleSurvey(ctx context.Context, req *itx.ScheduleSurveyRequ
 // GetSurvey retrieves survey details from ITX
 func (c *Client) GetSurvey(ctx context.Context, surveyID string) (*itx.SurveyScheduleResponse, error) {
 	// Create HTTP request
-	url := fmt.Sprintf("%sv2/surveys/%s", c.config.BaseURL, surveyID)
+	url := fmt.Sprintf("%sv2/surveys/%s/schedule", c.config.BaseURL, surveyID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, domain.NewInternalError("failed to create request", err)
@@ -301,7 +301,7 @@ func (c *Client) UpdateSurvey(ctx context.Context, surveyID string, req *itx.Upd
 	}
 
 	// Create HTTP request
-	url := fmt.Sprintf("%sv2/surveys/%s", c.config.BaseURL, surveyID)
+	url := fmt.Sprintf("%sv2/surveys/%s/schedule", c.config.BaseURL, surveyID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bytes.NewReader(body))
 	if err != nil {
 		return nil, domain.NewInternalError("failed to create request", err)
@@ -344,7 +344,7 @@ func (c *Client) UpdateSurvey(ctx context.Context, surveyID string, req *itx.Upd
 // DeleteSurvey deletes a survey in ITX (only when status is "disabled")
 func (c *Client) DeleteSurvey(ctx context.Context, surveyID string) error {
 	// Create HTTP request
-	url := fmt.Sprintf("%sv2/surveys/%s", c.config.BaseURL, surveyID)
+	url := fmt.Sprintf("%sv2/surveys/%s/schedule", c.config.BaseURL, surveyID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
 	if err != nil {
 		return domain.NewInternalError("failed to create request", err)

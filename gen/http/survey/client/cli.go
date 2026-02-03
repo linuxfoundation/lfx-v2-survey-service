@@ -23,7 +23,7 @@ func BuildScheduleSurveyPayload(surveyScheduleSurveyBody string, surveyScheduleS
 	{
 		err = json.Unmarshal([]byte(surveyScheduleSurveyBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Maiores quis incidunt pariatur.\",\n         \"Unde consequatur.\",\n         \"Sunt accusamus pariatur quia itaque quidem.\",\n         \"Et saepe corrupti quis nostrum.\"\n      ],\n      \"creator_id\": \"Eligendi corporis enim.\",\n      \"creator_name\": \"Aliquid aut excepturi.\",\n      \"creator_username\": \"Enim amet quia maxime rerum modi labore.\",\n      \"email_body\": \"Odit nostrum nostrum repellat aut molestiae officiis.\",\n      \"email_body_text\": \"Et voluptas possimus iste quasi nisi.\",\n      \"email_subject\": \"Ratione sed molestiae aliquam consequatur.\",\n      \"is_project_survey\": false,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Voluptas est autem voluptas ea molestiae repudiandae.\",\n      \"survey_cutoff_date\": \"Iste eos adipisci itaque vel.\",\n      \"survey_monkey_id\": \"Consectetur nisi quisquam.\",\n      \"survey_reminder_rate_days\": 5042865997269094452,\n      \"survey_send_date\": \"Aliquid illum quia sed asperiores rerum molestiae.\",\n      \"survey_title\": \"Eum mollitia.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Omnis placeat rerum ad eum.\",\n         \"Sapiente et corporis.\"\n      ],\n      \"creator_id\": \"Quasi nisi.\",\n      \"creator_name\": \"Aut molestiae officiis nihil et voluptas possimus.\",\n      \"creator_username\": \"Consequatur animi odit nostrum nostrum.\",\n      \"email_body\": \"Sapiente qui.\",\n      \"email_body_text\": \"Eos porro voluptatem doloremque qui mollitia sit.\",\n      \"email_subject\": \"Qui consequatur delectus.\",\n      \"is_project_survey\": false,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Sed molestiae.\",\n      \"survey_cutoff_date\": \"Nisi harum delectus veniam delectus.\",\n      \"survey_monkey_id\": \"Fuga maiores quis incidunt pariatur et unde.\",\n      \"survey_reminder_rate_days\": 5299522033241582586,\n      \"survey_send_date\": \"Itaque quidem saepe et saepe corrupti quis.\",\n      \"survey_title\": \"Voluptates sunt accusamus.\"\n   }'")
 		}
 	}
 	var token *string
@@ -55,6 +55,90 @@ func BuildScheduleSurveyPayload(surveyScheduleSurveyBody string, surveyScheduleS
 			v.Committees[i] = val
 		}
 	}
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildGetSurveyPayload builds the payload for the survey get_survey endpoint
+// from CLI flags.
+func BuildGetSurveyPayload(surveyGetSurveySurveyID string, surveyGetSurveyToken string) (*survey.GetSurveyPayload, error) {
+	var surveyID string
+	{
+		surveyID = surveyGetSurveySurveyID
+	}
+	var token *string
+	{
+		if surveyGetSurveyToken != "" {
+			token = &surveyGetSurveyToken
+		}
+	}
+	v := &survey.GetSurveyPayload{}
+	v.SurveyID = surveyID
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildUpdateSurveyPayload builds the payload for the survey update_survey
+// endpoint from CLI flags.
+func BuildUpdateSurveyPayload(surveyUpdateSurveyBody string, surveyUpdateSurveySurveyID string, surveyUpdateSurveyToken string) (*survey.UpdateSurveyPayload, error) {
+	var err error
+	var body UpdateSurveyRequestBody
+	{
+		err = json.Unmarshal([]byte(surveyUpdateSurveyBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Quaerat doloribus.\",\n         \"Et vel et dolorem.\",\n         \"Rerum ut suscipit.\"\n      ],\n      \"creator_id\": \"Et hic consequuntur inventore vel.\",\n      \"email_body\": \"Quaerat voluptas iure nemo.\",\n      \"email_body_text\": \"Dolor voluptatem.\",\n      \"email_subject\": \"Dolorem atque alias possimus eum qui et.\",\n      \"survey_cutoff_date\": \"Maiores dolorem aut odit dolorem repudiandae est.\",\n      \"survey_reminder_rate_days\": 3049090884903950296,\n      \"survey_send_date\": \"Saepe sed temporibus et est.\",\n      \"survey_title\": \"Non inventore quis voluptas dolore qui.\"\n   }'")
+		}
+	}
+	var surveyID string
+	{
+		surveyID = surveyUpdateSurveySurveyID
+	}
+	var token *string
+	{
+		if surveyUpdateSurveyToken != "" {
+			token = &surveyUpdateSurveyToken
+		}
+	}
+	v := &survey.UpdateSurveyPayload{
+		CreatorID:              body.CreatorID,
+		SurveyTitle:            body.SurveyTitle,
+		SurveySendDate:         body.SurveySendDate,
+		SurveyCutoffDate:       body.SurveyCutoffDate,
+		SurveyReminderRateDays: body.SurveyReminderRateDays,
+		EmailSubject:           body.EmailSubject,
+		EmailBody:              body.EmailBody,
+		EmailBodyText:          body.EmailBodyText,
+		CommitteeVotingEnabled: body.CommitteeVotingEnabled,
+	}
+	if body.Committees != nil {
+		v.Committees = make([]string, len(body.Committees))
+		for i, val := range body.Committees {
+			v.Committees[i] = val
+		}
+	}
+	v.SurveyID = surveyID
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildDeleteSurveyPayload builds the payload for the survey delete_survey
+// endpoint from CLI flags.
+func BuildDeleteSurveyPayload(surveyDeleteSurveySurveyID string, surveyDeleteSurveyToken string) (*survey.DeleteSurveyPayload, error) {
+	var surveyID string
+	{
+		surveyID = surveyDeleteSurveySurveyID
+	}
+	var token *string
+	{
+		if surveyDeleteSurveyToken != "" {
+			token = &surveyDeleteSurveyToken
+		}
+	}
+	v := &survey.DeleteSurveyPayload{}
+	v.SurveyID = surveyID
 	v.Token = token
 
 	return v, nil

@@ -19,6 +19,14 @@ type Service interface {
 	// Create a scheduled survey for ITX project committees (proxies to ITX POST
 	// /surveys/schedule)
 	ScheduleSurvey(context.Context, *ScheduleSurveyPayload) (res *SurveyScheduleResult, err error)
+	// Get survey details (proxies to ITX GET /v2/surveys/{survey_id})
+	GetSurvey(context.Context, *GetSurveyPayload) (res *SurveyScheduleResult, err error)
+	// Update survey (proxies to ITX PUT /v2/surveys/{survey_id}). Only allowed
+	// when status is 'disabled'
+	UpdateSurvey(context.Context, *UpdateSurveyPayload) (res *SurveyScheduleResult, err error)
+	// Delete survey (proxies to ITX DELETE /v2/surveys/{survey_id}). Only allowed
+	// when status is 'disabled'
+	DeleteSurvey(context.Context, *DeleteSurveyPayload) (err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -41,7 +49,7 @@ const ServiceName = "survey"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [1]string{"schedule_survey"}
+var MethodNames = [4]string{"schedule_survey", "get_survey", "update_survey", "delete_survey"}
 
 // Bad request error response
 type BadRequestError struct {
@@ -59,12 +67,29 @@ type ConflictError struct {
 	Message string
 }
 
+// DeleteSurveyPayload is the payload type of the survey service delete_survey
+// method.
+type DeleteSurveyPayload struct {
+	// JWT token
+	Token *string
+	// Survey identifier
+	SurveyID string
+}
+
 // Forbidden error response
 type ForbiddenError struct {
 	// HTTP status code
 	Code string
 	// Error message
 	Message string
+}
+
+// GetSurveyPayload is the payload type of the survey service get_survey method.
+type GetSurveyPayload struct {
+	// JWT token
+	Token *string
+	// Survey identifier
+	SurveyID string
 }
 
 // Internal server error response
@@ -233,6 +258,35 @@ type UnauthorizedError struct {
 	Code string
 	// Error message
 	Message string
+}
+
+// UpdateSurveyPayload is the payload type of the survey service update_survey
+// method.
+type UpdateSurveyPayload struct {
+	// JWT token
+	Token *string
+	// Survey identifier
+	SurveyID string
+	// Creator's user ID
+	CreatorID *string
+	// Survey title
+	SurveyTitle *string
+	// Date to send the survey (RFC3339 format)
+	SurveySendDate *string
+	// Survey cutoff/end date (RFC3339 format)
+	SurveyCutoffDate *string
+	// Days between automatic reminder emails (0 = no reminders)
+	SurveyReminderRateDays *int
+	// Email subject line
+	EmailSubject *string
+	// Email body HTML content
+	EmailBody *string
+	// Email body plain text content
+	EmailBodyText *string
+	// Array of committee IDs to send survey to
+	Committees []string
+	// Whether committee voting is enabled
+	CommitteeVotingEnabled *bool
 }
 
 // Error returns an error description.

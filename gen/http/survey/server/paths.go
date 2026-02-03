@@ -8,7 +8,26 @@
 
 package server
 
+import (
+	"fmt"
+)
+
 // ScheduleSurveySurveyPath returns the URL path to the survey service schedule_survey HTTP endpoint.
 func ScheduleSurveySurveyPath() string {
 	return "/surveys/schedule"
+}
+
+// GetSurveySurveyPath returns the URL path to the survey service get_survey HTTP endpoint.
+func GetSurveySurveyPath(surveyID string) string {
+	return fmt.Sprintf("/surveys/%v", surveyID)
+}
+
+// UpdateSurveySurveyPath returns the URL path to the survey service update_survey HTTP endpoint.
+func UpdateSurveySurveyPath(surveyID string) string {
+	return fmt.Sprintf("/surveys/%v", surveyID)
+}
+
+// DeleteSurveySurveyPath returns the URL path to the survey service delete_survey HTTP endpoint.
+func DeleteSurveySurveyPath(surveyID string) string {
+	return fmt.Sprintf("/surveys/%v", surveyID)
 }

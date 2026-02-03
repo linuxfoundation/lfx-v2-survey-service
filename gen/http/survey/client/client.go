@@ -22,6 +22,18 @@ type Client struct {
 	// schedule_survey endpoint.
 	ScheduleSurveyDoer goahttp.Doer
 
+	// GetSurvey Doer is the HTTP client used to make requests to the get_survey
+	// endpoint.
+	GetSurveyDoer goahttp.Doer
+
+	// UpdateSurvey Doer is the HTTP client used to make requests to the
+	// update_survey endpoint.
+	UpdateSurveyDoer goahttp.Doer
+
+	// DeleteSurvey Doer is the HTTP client used to make requests to the
+	// delete_survey endpoint.
+	DeleteSurveyDoer goahttp.Doer
+
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
 	RestoreResponseBody bool
@@ -43,6 +55,9 @@ func NewClient(
 ) *Client {
 	return &Client{
 		ScheduleSurveyDoer:  doer,
+		GetSurveyDoer:       doer,
+		UpdateSurveyDoer:    doer,
+		DeleteSurveyDoer:    doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
@@ -70,6 +85,78 @@ func (c *Client) ScheduleSurvey() goa.Endpoint {
 		resp, err := c.ScheduleSurveyDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("survey", "schedule_survey", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// GetSurvey returns an endpoint that makes HTTP requests to the survey service
+// get_survey server.
+func (c *Client) GetSurvey() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeGetSurveyRequest(c.encoder)
+		decodeResponse = DecodeGetSurveyResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildGetSurveyRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.GetSurveyDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "get_survey", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// UpdateSurvey returns an endpoint that makes HTTP requests to the survey
+// service update_survey server.
+func (c *Client) UpdateSurvey() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeUpdateSurveyRequest(c.encoder)
+		decodeResponse = DecodeUpdateSurveyResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildUpdateSurveyRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.UpdateSurveyDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "update_survey", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// DeleteSurvey returns an endpoint that makes HTTP requests to the survey
+// service delete_survey server.
+func (c *Client) DeleteSurvey() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeDeleteSurveyRequest(c.encoder)
+		decodeResponse = DecodeDeleteSurveyResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildDeleteSurveyRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.DeleteSurveyDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "delete_survey", err)
 		}
 		return decodeResponse(resp)
 	}
