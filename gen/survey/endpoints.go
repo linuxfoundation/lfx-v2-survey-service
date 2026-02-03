@@ -24,6 +24,9 @@ type Endpoints struct {
 	BulkResendSurvey      goa.Endpoint
 	PreviewSendSurvey     goa.Endpoint
 	SendMissingRecipients goa.Endpoint
+	DeleteSurveyResponse  goa.Endpoint
+	ResendSurveyResponse  goa.Endpoint
+	DeleteRecipientGroup  goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "survey" service with endpoints.
@@ -38,6 +41,9 @@ func NewEndpoints(s Service) *Endpoints {
 		BulkResendSurvey:      NewBulkResendSurveyEndpoint(s, a.JWTAuth),
 		PreviewSendSurvey:     NewPreviewSendSurveyEndpoint(s, a.JWTAuth),
 		SendMissingRecipients: NewSendMissingRecipientsEndpoint(s, a.JWTAuth),
+		DeleteSurveyResponse:  NewDeleteSurveyResponseEndpoint(s, a.JWTAuth),
+		ResendSurveyResponse:  NewResendSurveyResponseEndpoint(s, a.JWTAuth),
+		DeleteRecipientGroup:  NewDeleteRecipientGroupEndpoint(s, a.JWTAuth),
 	}
 }
 
@@ -50,6 +56,9 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.BulkResendSurvey = m(e.BulkResendSurvey)
 	e.PreviewSendSurvey = m(e.PreviewSendSurvey)
 	e.SendMissingRecipients = m(e.SendMissingRecipients)
+	e.DeleteSurveyResponse = m(e.DeleteSurveyResponse)
+	e.ResendSurveyResponse = m(e.ResendSurveyResponse)
+	e.DeleteRecipientGroup = m(e.DeleteRecipientGroup)
 }
 
 // NewScheduleSurveyEndpoint returns an endpoint function that calls the method
@@ -210,5 +219,74 @@ func NewSendMissingRecipientsEndpoint(s Service, authJWTFn security.AuthJWTFunc)
 			return nil, err
 		}
 		return nil, s.SendMissingRecipients(ctx, p)
+	}
+}
+
+// NewDeleteSurveyResponseEndpoint returns an endpoint function that calls the
+// method "delete_survey_response" of service "survey".
+func NewDeleteSurveyResponseEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*DeleteSurveyResponsePayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.DeleteSurveyResponse(ctx, p)
+	}
+}
+
+// NewResendSurveyResponseEndpoint returns an endpoint function that calls the
+// method "resend_survey_response" of service "survey".
+func NewResendSurveyResponseEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*ResendSurveyResponsePayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.ResendSurveyResponse(ctx, p)
+	}
+}
+
+// NewDeleteRecipientGroupEndpoint returns an endpoint function that calls the
+// method "delete_recipient_group" of service "survey".
+func NewDeleteRecipientGroupEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*DeleteRecipientGroupPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.DeleteRecipientGroup(ctx, p)
 	}
 }

@@ -240,3 +240,94 @@ func BuildSendMissingRecipientsPayload(surveySendMissingRecipientsSurveyID strin
 
 	return v, nil
 }
+
+// BuildDeleteSurveyResponsePayload builds the payload for the survey
+// delete_survey_response endpoint from CLI flags.
+func BuildDeleteSurveyResponsePayload(surveyDeleteSurveyResponseSurveyID string, surveyDeleteSurveyResponseResponseID string, surveyDeleteSurveyResponseToken string) (*survey.DeleteSurveyResponsePayload, error) {
+	var surveyID string
+	{
+		surveyID = surveyDeleteSurveyResponseSurveyID
+	}
+	var responseID string
+	{
+		responseID = surveyDeleteSurveyResponseResponseID
+	}
+	var token *string
+	{
+		if surveyDeleteSurveyResponseToken != "" {
+			token = &surveyDeleteSurveyResponseToken
+		}
+	}
+	v := &survey.DeleteSurveyResponsePayload{}
+	v.SurveyID = surveyID
+	v.ResponseID = responseID
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildResendSurveyResponsePayload builds the payload for the survey
+// resend_survey_response endpoint from CLI flags.
+func BuildResendSurveyResponsePayload(surveyResendSurveyResponseSurveyID string, surveyResendSurveyResponseResponseID string, surveyResendSurveyResponseToken string) (*survey.ResendSurveyResponsePayload, error) {
+	var surveyID string
+	{
+		surveyID = surveyResendSurveyResponseSurveyID
+	}
+	var responseID string
+	{
+		responseID = surveyResendSurveyResponseResponseID
+	}
+	var token *string
+	{
+		if surveyResendSurveyResponseToken != "" {
+			token = &surveyResendSurveyResponseToken
+		}
+	}
+	v := &survey.ResendSurveyResponsePayload{}
+	v.SurveyID = surveyID
+	v.ResponseID = responseID
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildDeleteRecipientGroupPayload builds the payload for the survey
+// delete_recipient_group endpoint from CLI flags.
+func BuildDeleteRecipientGroupPayload(surveyDeleteRecipientGroupSurveyID string, surveyDeleteRecipientGroupCommitteeID string, surveyDeleteRecipientGroupProjectID string, surveyDeleteRecipientGroupFoundationID string, surveyDeleteRecipientGroupToken string) (*survey.DeleteRecipientGroupPayload, error) {
+	var surveyID string
+	{
+		surveyID = surveyDeleteRecipientGroupSurveyID
+	}
+	var committeeID *string
+	{
+		if surveyDeleteRecipientGroupCommitteeID != "" {
+			committeeID = &surveyDeleteRecipientGroupCommitteeID
+		}
+	}
+	var projectID *string
+	{
+		if surveyDeleteRecipientGroupProjectID != "" {
+			projectID = &surveyDeleteRecipientGroupProjectID
+		}
+	}
+	var foundationID *string
+	{
+		if surveyDeleteRecipientGroupFoundationID != "" {
+			foundationID = &surveyDeleteRecipientGroupFoundationID
+		}
+	}
+	var token *string
+	{
+		if surveyDeleteRecipientGroupToken != "" {
+			token = &surveyDeleteRecipientGroupToken
+		}
+	}
+	v := &survey.DeleteRecipientGroupPayload{}
+	v.SurveyID = surveyID
+	v.CommitteeID = committeeID
+	v.ProjectID = projectID
+	v.FoundationID = foundationID
+	v.Token = token
+
+	return v, nil
+}

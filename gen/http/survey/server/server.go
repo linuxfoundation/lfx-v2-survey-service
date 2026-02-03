@@ -27,6 +27,9 @@ type Server struct {
 	BulkResendSurvey      http.Handler
 	PreviewSendSurvey     http.Handler
 	SendMissingRecipients http.Handler
+	DeleteSurveyResponse  http.Handler
+	ResendSurveyResponse  http.Handler
+	DeleteRecipientGroup  http.Handler
 }
 
 // MountPoint holds information about the mounted endpoints.
@@ -63,6 +66,9 @@ func New(
 			{"BulkResendSurvey", "POST", "/surveys/{survey_id}/bulk_resend"},
 			{"PreviewSendSurvey", "GET", "/surveys/{survey_id}/preview_send"},
 			{"SendMissingRecipients", "POST", "/surveys/{survey_id}/send_missing_recipients"},
+			{"DeleteSurveyResponse", "DELETE", "/surveys/{survey_id}/responses/{response_id}"},
+			{"ResendSurveyResponse", "POST", "/surveys/{survey_id}/responses/{response_id}/resend"},
+			{"DeleteRecipientGroup", "DELETE", "/surveys/{survey_id}/recipient_group"},
 		},
 		ScheduleSurvey:        NewScheduleSurveyHandler(e.ScheduleSurvey, mux, decoder, encoder, errhandler, formatter),
 		GetSurvey:             NewGetSurveyHandler(e.GetSurvey, mux, decoder, encoder, errhandler, formatter),
@@ -71,6 +77,9 @@ func New(
 		BulkResendSurvey:      NewBulkResendSurveyHandler(e.BulkResendSurvey, mux, decoder, encoder, errhandler, formatter),
 		PreviewSendSurvey:     NewPreviewSendSurveyHandler(e.PreviewSendSurvey, mux, decoder, encoder, errhandler, formatter),
 		SendMissingRecipients: NewSendMissingRecipientsHandler(e.SendMissingRecipients, mux, decoder, encoder, errhandler, formatter),
+		DeleteSurveyResponse:  NewDeleteSurveyResponseHandler(e.DeleteSurveyResponse, mux, decoder, encoder, errhandler, formatter),
+		ResendSurveyResponse:  NewResendSurveyResponseHandler(e.ResendSurveyResponse, mux, decoder, encoder, errhandler, formatter),
+		DeleteRecipientGroup:  NewDeleteRecipientGroupHandler(e.DeleteRecipientGroup, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -86,6 +95,9 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.BulkResendSurvey = m(s.BulkResendSurvey)
 	s.PreviewSendSurvey = m(s.PreviewSendSurvey)
 	s.SendMissingRecipients = m(s.SendMissingRecipients)
+	s.DeleteSurveyResponse = m(s.DeleteSurveyResponse)
+	s.ResendSurveyResponse = m(s.ResendSurveyResponse)
+	s.DeleteRecipientGroup = m(s.DeleteRecipientGroup)
 }
 
 // MethodNames returns the methods served.
@@ -100,6 +112,9 @@ func Mount(mux goahttp.Muxer, h *Server) {
 	MountBulkResendSurveyHandler(mux, h.BulkResendSurvey)
 	MountPreviewSendSurveyHandler(mux, h.PreviewSendSurvey)
 	MountSendMissingRecipientsHandler(mux, h.SendMissingRecipients)
+	MountDeleteSurveyResponseHandler(mux, h.DeleteSurveyResponse)
+	MountResendSurveyResponseHandler(mux, h.ResendSurveyResponse)
+	MountDeleteRecipientGroupHandler(mux, h.DeleteRecipientGroup)
 }
 
 // Mount configures the mux to serve the survey endpoints.
@@ -455,6 +470,165 @@ func NewSendMissingRecipientsHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "send_missing_recipients")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountDeleteSurveyResponseHandler configures the mux to serve the "survey"
+// service "delete_survey_response" endpoint.
+func MountDeleteSurveyResponseHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("DELETE", "/surveys/{survey_id}/responses/{response_id}", f)
+}
+
+// NewDeleteSurveyResponseHandler creates a HTTP handler which loads the HTTP
+// request and calls the "survey" service "delete_survey_response" endpoint.
+func NewDeleteSurveyResponseHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeDeleteSurveyResponseRequest(mux, decoder)
+		encodeResponse = EncodeDeleteSurveyResponseResponse(encoder)
+		encodeError    = EncodeDeleteSurveyResponseError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "delete_survey_response")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountResendSurveyResponseHandler configures the mux to serve the "survey"
+// service "resend_survey_response" endpoint.
+func MountResendSurveyResponseHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("POST", "/surveys/{survey_id}/responses/{response_id}/resend", f)
+}
+
+// NewResendSurveyResponseHandler creates a HTTP handler which loads the HTTP
+// request and calls the "survey" service "resend_survey_response" endpoint.
+func NewResendSurveyResponseHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeResendSurveyResponseRequest(mux, decoder)
+		encodeResponse = EncodeResendSurveyResponseResponse(encoder)
+		encodeError    = EncodeResendSurveyResponseError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "resend_survey_response")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountDeleteRecipientGroupHandler configures the mux to serve the "survey"
+// service "delete_recipient_group" endpoint.
+func MountDeleteRecipientGroupHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("DELETE", "/surveys/{survey_id}/recipient_group", f)
+}
+
+// NewDeleteRecipientGroupHandler creates a HTTP handler which loads the HTTP
+// request and calls the "survey" service "delete_recipient_group" endpoint.
+func NewDeleteRecipientGroupHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeDeleteRecipientGroupRequest(mux, decoder)
+		encodeResponse = EncodeDeleteRecipientGroupResponse(encoder)
+		encodeError    = EncodeDeleteRecipientGroupError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "delete_recipient_group")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
 		payload, err := decodeRequest(r)
 		if err != nil {

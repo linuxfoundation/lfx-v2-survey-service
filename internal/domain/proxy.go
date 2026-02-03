@@ -38,6 +38,9 @@ type SurveyClient interface {
 	// SendMissingRecipients sends survey emails to committee members who haven't received it in ITX
 	SendMissingRecipients(ctx context.Context, surveyID string, committeeID *string) error
 
+	// DeleteRecipientGroup removes a recipient group from survey and recalculates statistics in ITX
+	DeleteRecipientGroup(ctx context.Context, surveyID string, committeeID *string, projectID *string, foundationID *string) error
+
 	// GetSurveyResults retrieves aggregated survey results from ITX
 	GetSurveyResults(ctx context.Context, surveyID string) (*itx.SurveyResults, error)
 }
@@ -53,8 +56,11 @@ type SurveyResponseClient interface {
 	// UpdateResponse updates a survey response in ITX
 	UpdateResponse(ctx context.Context, responseID string, req *itx.UpdateResponseRequest) error
 
-	// ResendResponse resends the survey email in ITX
-	ResendResponse(ctx context.Context, responseID string) error
+	// DeleteResponse removes a recipient from survey and recalculates statistics in ITX
+	DeleteResponse(ctx context.Context, surveyID string, responseID string) error
+
+	// ResendResponse resends the survey email to a specific user in ITX
+	ResendResponse(ctx context.Context, surveyID string, responseID string) error
 }
 
 // ITXProxyClient combines both survey and survey response operations

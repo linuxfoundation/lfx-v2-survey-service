@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/auth0/go-auth0/authentication"
@@ -587,6 +588,62 @@ func (c *Client) SendMissingRecipients(ctx context.Context, surveyID string, com
 	return nil
 }
 
+// DeleteRecipientGroup removes a recipient group from survey and recalculates statistics in ITX
+func (c *Client) DeleteRecipientGroup(ctx context.Context, surveyID string, committeeID *string, projectID *string, foundationID *string) error {
+	// Create base URL
+	baseURL := fmt.Sprintf("%sv2/surveys/%s/recipient_group", c.config.BaseURL, surveyID)
+
+	// Parse URL
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return domain.NewInternalError("failed to parse URL", err)
+	}
+
+	// Build query parameters
+	query := u.Query()
+	if committeeID != nil && *committeeID != "" {
+		query.Set("committee_id", *committeeID)
+	}
+	if projectID != nil && *projectID != "" {
+		query.Set("project_id", *projectID)
+	}
+	if foundationID != nil && *foundationID != "" {
+		query.Set("foundation_id", *foundationID)
+	}
+	u.RawQuery = query.Encode()
+
+	// Create HTTP request
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodDelete, u.String(), nil)
+	if err != nil {
+		return domain.NewInternalError("failed to create request", err)
+	}
+
+	// Set headers (Authorization header is automatically set by OAuth2 transport)
+	httpReq.Header.Set("x-scope", "manage:surveys")
+
+	// Execute request
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return domain.NewUnavailableError("ITX service request failed", err)
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	// Read response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return domain.NewInternalError("failed to read response", err)
+	}
+
+	// Handle non-2xx status codes (ITX returns 204 on success)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return c.mapHTTPError(resp.StatusCode, respBody)
+	}
+
+	return nil
+}
+
 // GetSurveyResults retrieves aggregated survey results from ITX
 func (c *Client) GetSurveyResults(ctx context.Context, surveyID string) (*itx.SurveyResults, error) {
 	// Create HTTP request
@@ -671,10 +728,45 @@ func (c *Client) UpdateResponse(ctx context.Context, responseID string, req *itx
 	return nil
 }
 
-// ResendResponse resends the survey email in ITX
-func (c *Client) ResendResponse(ctx context.Context, responseID string) error {
+// DeleteResponse removes a recipient from survey and recalculates statistics in ITX
+func (c *Client) DeleteResponse(ctx context.Context, surveyID string, responseID string) error {
 	// Create HTTP request
-	url := fmt.Sprintf("%sv2/surveys/responses/%s/resend", c.config.BaseURL, responseID)
+	url := fmt.Sprintf("%sv2/surveys/%s/responses/%s", c.config.BaseURL, surveyID, responseID)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
+	if err != nil {
+		return domain.NewInternalError("failed to create request", err)
+	}
+
+	// Set headers (Authorization header is automatically set by OAuth2 transport)
+	httpReq.Header.Set("x-scope", "manage:surveys")
+
+	// Execute request
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return domain.NewUnavailableError("ITX service request failed", err)
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	// Read response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return domain.NewInternalError("failed to read response", err)
+	}
+
+	// Handle non-2xx status codes (ITX returns 204 on success)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return c.mapHTTPError(resp.StatusCode, respBody)
+	}
+
+	return nil
+}
+
+// ResendResponse resends the survey email to a specific user in ITX
+func (c *Client) ResendResponse(ctx context.Context, surveyID string, responseID string) error {
+	// Create HTTP request
+	url := fmt.Sprintf("%sv2/surveys/%s/responses/%s/resend", c.config.BaseURL, surveyID, responseID)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
 	if err != nil {
 		return domain.NewInternalError("failed to create request", err)

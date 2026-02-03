@@ -36,6 +36,17 @@ type Service interface {
 	// Send survey emails to committee members who haven't received it (proxies to
 	// ITX POST /v2/surveys/{survey_id}/send_missing_recipients)
 	SendMissingRecipients(context.Context, *SendMissingRecipientsPayload) (err error)
+	// Delete survey response - removes recipient from survey and recalculates
+	// statistics (proxies to ITX DELETE
+	// /v2/surveys/{survey_id}/responses/{response_id})
+	DeleteSurveyResponse(context.Context, *DeleteSurveyResponsePayload) (err error)
+	// Resend survey email to a specific user (proxies to ITX POST
+	// /v2/surveys/{survey_id}/responses/{response_id}/resend)
+	ResendSurveyResponse(context.Context, *ResendSurveyResponsePayload) (err error)
+	// Remove a recipient group (committee, project, or foundation) from survey and
+	// recalculate statistics (proxies to ITX DELETE
+	// /v2/surveys/{survey_id}/recipient_group)
+	DeleteRecipientGroup(context.Context, *DeleteRecipientGroupPayload) (err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -58,7 +69,7 @@ const ServiceName = "survey"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [7]string{"schedule_survey", "get_survey", "update_survey", "delete_survey", "bulk_resend_survey", "preview_send_survey", "send_missing_recipients"}
+var MethodNames = [10]string{"schedule_survey", "get_survey", "update_survey", "delete_survey", "bulk_resend_survey", "preview_send_survey", "send_missing_recipients", "delete_survey_response", "resend_survey_response", "delete_recipient_group"}
 
 // Bad request error response
 type BadRequestError struct {
@@ -87,6 +98,22 @@ type ConflictError struct {
 	Message string
 }
 
+// DeleteRecipientGroupPayload is the payload type of the survey service
+// delete_recipient_group method.
+type DeleteRecipientGroupPayload struct {
+	// JWT token
+	Token *string
+	// Survey identifier
+	SurveyID string
+	// Committee ID to remove (indicates specific committee in project)
+	CommitteeID *string
+	// Project ID to remove (all removals are attached to a project)
+	ProjectID *string
+	// Foundation ID (indicates project_id references a foundation and all
+	// subprojects should be removed)
+	FoundationID *string
+}
+
 // DeleteSurveyPayload is the payload type of the survey service delete_survey
 // method.
 type DeleteSurveyPayload struct {
@@ -94,6 +121,17 @@ type DeleteSurveyPayload struct {
 	Token *string
 	// Survey identifier
 	SurveyID string
+}
+
+// DeleteSurveyResponsePayload is the payload type of the survey service
+// delete_survey_response method.
+type DeleteSurveyResponsePayload struct {
+	// JWT token
+	Token *string
+	// Survey identifier
+	SurveyID string
+	// Response identifier
+	ResponseID string
 }
 
 // Committee information for preview send
@@ -194,6 +232,17 @@ type PreviewSendSurveyPayload struct {
 	SurveyID string
 	// Optional committee ID to filter preview
 	CommitteeID *string
+}
+
+// ResendSurveyResponsePayload is the payload type of the survey service
+// resend_survey_response method.
+type ResendSurveyResponsePayload struct {
+	// JWT token
+	Token *string
+	// Survey identifier
+	SurveyID string
+	// Response identifier
+	ResponseID string
 }
 
 // ScheduleSurveyPayload is the payload type of the survey service

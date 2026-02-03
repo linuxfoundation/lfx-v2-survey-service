@@ -729,6 +729,186 @@ type SendMissingRecipientsUnauthorizedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// DeleteSurveyResponseBadRequestResponseBody is the type of the "survey"
+// service "delete_survey_response" endpoint HTTP response body for the
+// "BadRequest" error.
+type DeleteSurveyResponseBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyResponseForbiddenResponseBody is the type of the "survey"
+// service "delete_survey_response" endpoint HTTP response body for the
+// "Forbidden" error.
+type DeleteSurveyResponseForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyResponseInternalServerErrorResponseBody is the type of the
+// "survey" service "delete_survey_response" endpoint HTTP response body for
+// the "InternalServerError" error.
+type DeleteSurveyResponseInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyResponseNotFoundResponseBody is the type of the "survey" service
+// "delete_survey_response" endpoint HTTP response body for the "NotFound"
+// error.
+type DeleteSurveyResponseNotFoundResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyResponseServiceUnavailableResponseBody is the type of the
+// "survey" service "delete_survey_response" endpoint HTTP response body for
+// the "ServiceUnavailable" error.
+type DeleteSurveyResponseServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyResponseUnauthorizedResponseBody is the type of the "survey"
+// service "delete_survey_response" endpoint HTTP response body for the
+// "Unauthorized" error.
+type DeleteSurveyResponseUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ResendSurveyResponseBadRequestResponseBody is the type of the "survey"
+// service "resend_survey_response" endpoint HTTP response body for the
+// "BadRequest" error.
+type ResendSurveyResponseBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ResendSurveyResponseForbiddenResponseBody is the type of the "survey"
+// service "resend_survey_response" endpoint HTTP response body for the
+// "Forbidden" error.
+type ResendSurveyResponseForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ResendSurveyResponseInternalServerErrorResponseBody is the type of the
+// "survey" service "resend_survey_response" endpoint HTTP response body for
+// the "InternalServerError" error.
+type ResendSurveyResponseInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ResendSurveyResponseNotFoundResponseBody is the type of the "survey" service
+// "resend_survey_response" endpoint HTTP response body for the "NotFound"
+// error.
+type ResendSurveyResponseNotFoundResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ResendSurveyResponseServiceUnavailableResponseBody is the type of the
+// "survey" service "resend_survey_response" endpoint HTTP response body for
+// the "ServiceUnavailable" error.
+type ResendSurveyResponseServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ResendSurveyResponseUnauthorizedResponseBody is the type of the "survey"
+// service "resend_survey_response" endpoint HTTP response body for the
+// "Unauthorized" error.
+type ResendSurveyResponseUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteRecipientGroupBadRequestResponseBody is the type of the "survey"
+// service "delete_recipient_group" endpoint HTTP response body for the
+// "BadRequest" error.
+type DeleteRecipientGroupBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteRecipientGroupForbiddenResponseBody is the type of the "survey"
+// service "delete_recipient_group" endpoint HTTP response body for the
+// "Forbidden" error.
+type DeleteRecipientGroupForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteRecipientGroupInternalServerErrorResponseBody is the type of the
+// "survey" service "delete_recipient_group" endpoint HTTP response body for
+// the "InternalServerError" error.
+type DeleteRecipientGroupInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteRecipientGroupNotFoundResponseBody is the type of the "survey" service
+// "delete_recipient_group" endpoint HTTP response body for the "NotFound"
+// error.
+type DeleteRecipientGroupNotFoundResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteRecipientGroupServiceUnavailableResponseBody is the type of the
+// "survey" service "delete_recipient_group" endpoint HTTP response body for
+// the "ServiceUnavailable" error.
+type DeleteRecipientGroupServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteRecipientGroupUnauthorizedResponseBody is the type of the "survey"
+// service "delete_recipient_group" endpoint HTTP response body for the
+// "Unauthorized" error.
+type DeleteRecipientGroupUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // SurveyCommitteeResponseBody is used to define fields on response body types.
 type SurveyCommitteeResponseBody struct {
 	// Committee name
@@ -1537,6 +1717,204 @@ func NewSendMissingRecipientsUnauthorized(body *SendMissingRecipientsUnauthorize
 	return v
 }
 
+// NewDeleteSurveyResponseBadRequest builds a survey service
+// delete_survey_response endpoint BadRequest error.
+func NewDeleteSurveyResponseBadRequest(body *DeleteSurveyResponseBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyResponseForbidden builds a survey service
+// delete_survey_response endpoint Forbidden error.
+func NewDeleteSurveyResponseForbidden(body *DeleteSurveyResponseForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyResponseInternalServerError builds a survey service
+// delete_survey_response endpoint InternalServerError error.
+func NewDeleteSurveyResponseInternalServerError(body *DeleteSurveyResponseInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyResponseNotFound builds a survey service
+// delete_survey_response endpoint NotFound error.
+func NewDeleteSurveyResponseNotFound(body *DeleteSurveyResponseNotFoundResponseBody) *survey.NotFoundError {
+	v := &survey.NotFoundError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyResponseServiceUnavailable builds a survey service
+// delete_survey_response endpoint ServiceUnavailable error.
+func NewDeleteSurveyResponseServiceUnavailable(body *DeleteSurveyResponseServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyResponseUnauthorized builds a survey service
+// delete_survey_response endpoint Unauthorized error.
+func NewDeleteSurveyResponseUnauthorized(body *DeleteSurveyResponseUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewResendSurveyResponseBadRequest builds a survey service
+// resend_survey_response endpoint BadRequest error.
+func NewResendSurveyResponseBadRequest(body *ResendSurveyResponseBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewResendSurveyResponseForbidden builds a survey service
+// resend_survey_response endpoint Forbidden error.
+func NewResendSurveyResponseForbidden(body *ResendSurveyResponseForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewResendSurveyResponseInternalServerError builds a survey service
+// resend_survey_response endpoint InternalServerError error.
+func NewResendSurveyResponseInternalServerError(body *ResendSurveyResponseInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewResendSurveyResponseNotFound builds a survey service
+// resend_survey_response endpoint NotFound error.
+func NewResendSurveyResponseNotFound(body *ResendSurveyResponseNotFoundResponseBody) *survey.NotFoundError {
+	v := &survey.NotFoundError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewResendSurveyResponseServiceUnavailable builds a survey service
+// resend_survey_response endpoint ServiceUnavailable error.
+func NewResendSurveyResponseServiceUnavailable(body *ResendSurveyResponseServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewResendSurveyResponseUnauthorized builds a survey service
+// resend_survey_response endpoint Unauthorized error.
+func NewResendSurveyResponseUnauthorized(body *ResendSurveyResponseUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteRecipientGroupBadRequest builds a survey service
+// delete_recipient_group endpoint BadRequest error.
+func NewDeleteRecipientGroupBadRequest(body *DeleteRecipientGroupBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteRecipientGroupForbidden builds a survey service
+// delete_recipient_group endpoint Forbidden error.
+func NewDeleteRecipientGroupForbidden(body *DeleteRecipientGroupForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteRecipientGroupInternalServerError builds a survey service
+// delete_recipient_group endpoint InternalServerError error.
+func NewDeleteRecipientGroupInternalServerError(body *DeleteRecipientGroupInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteRecipientGroupNotFound builds a survey service
+// delete_recipient_group endpoint NotFound error.
+func NewDeleteRecipientGroupNotFound(body *DeleteRecipientGroupNotFoundResponseBody) *survey.NotFoundError {
+	v := &survey.NotFoundError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteRecipientGroupServiceUnavailable builds a survey service
+// delete_recipient_group endpoint ServiceUnavailable error.
+func NewDeleteRecipientGroupServiceUnavailable(body *DeleteRecipientGroupServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteRecipientGroupUnauthorized builds a survey service
+// delete_recipient_group endpoint Unauthorized error.
+func NewDeleteRecipientGroupUnauthorized(body *DeleteRecipientGroupUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // ValidateScheduleSurveyResponseBody runs the validations defined on
 // schedule_survey_response_body
 func ValidateScheduleSurveyResponseBody(body *ScheduleSurveyResponseBody) (err error) {
@@ -2193,6 +2571,228 @@ func ValidateSendMissingRecipientsServiceUnavailableResponseBody(body *SendMissi
 // ValidateSendMissingRecipientsUnauthorizedResponseBody runs the validations
 // defined on send_missing_recipients_Unauthorized_response_body
 func ValidateSendMissingRecipientsUnauthorizedResponseBody(body *SendMissingRecipientsUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyResponseBadRequestResponseBody runs the validations
+// defined on delete_survey_response_BadRequest_response_body
+func ValidateDeleteSurveyResponseBadRequestResponseBody(body *DeleteSurveyResponseBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyResponseForbiddenResponseBody runs the validations
+// defined on delete_survey_response_Forbidden_response_body
+func ValidateDeleteSurveyResponseForbiddenResponseBody(body *DeleteSurveyResponseForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyResponseInternalServerErrorResponseBody runs the
+// validations defined on
+// delete_survey_response_InternalServerError_response_body
+func ValidateDeleteSurveyResponseInternalServerErrorResponseBody(body *DeleteSurveyResponseInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyResponseNotFoundResponseBody runs the validations
+// defined on delete_survey_response_NotFound_response_body
+func ValidateDeleteSurveyResponseNotFoundResponseBody(body *DeleteSurveyResponseNotFoundResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyResponseServiceUnavailableResponseBody runs the
+// validations defined on
+// delete_survey_response_ServiceUnavailable_response_body
+func ValidateDeleteSurveyResponseServiceUnavailableResponseBody(body *DeleteSurveyResponseServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyResponseUnauthorizedResponseBody runs the validations
+// defined on delete_survey_response_Unauthorized_response_body
+func ValidateDeleteSurveyResponseUnauthorizedResponseBody(body *DeleteSurveyResponseUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateResendSurveyResponseBadRequestResponseBody runs the validations
+// defined on resend_survey_response_BadRequest_response_body
+func ValidateResendSurveyResponseBadRequestResponseBody(body *ResendSurveyResponseBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateResendSurveyResponseForbiddenResponseBody runs the validations
+// defined on resend_survey_response_Forbidden_response_body
+func ValidateResendSurveyResponseForbiddenResponseBody(body *ResendSurveyResponseForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateResendSurveyResponseInternalServerErrorResponseBody runs the
+// validations defined on
+// resend_survey_response_InternalServerError_response_body
+func ValidateResendSurveyResponseInternalServerErrorResponseBody(body *ResendSurveyResponseInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateResendSurveyResponseNotFoundResponseBody runs the validations
+// defined on resend_survey_response_NotFound_response_body
+func ValidateResendSurveyResponseNotFoundResponseBody(body *ResendSurveyResponseNotFoundResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateResendSurveyResponseServiceUnavailableResponseBody runs the
+// validations defined on
+// resend_survey_response_ServiceUnavailable_response_body
+func ValidateResendSurveyResponseServiceUnavailableResponseBody(body *ResendSurveyResponseServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateResendSurveyResponseUnauthorizedResponseBody runs the validations
+// defined on resend_survey_response_Unauthorized_response_body
+func ValidateResendSurveyResponseUnauthorizedResponseBody(body *ResendSurveyResponseUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteRecipientGroupBadRequestResponseBody runs the validations
+// defined on delete_recipient_group_BadRequest_response_body
+func ValidateDeleteRecipientGroupBadRequestResponseBody(body *DeleteRecipientGroupBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteRecipientGroupForbiddenResponseBody runs the validations
+// defined on delete_recipient_group_Forbidden_response_body
+func ValidateDeleteRecipientGroupForbiddenResponseBody(body *DeleteRecipientGroupForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteRecipientGroupInternalServerErrorResponseBody runs the
+// validations defined on
+// delete_recipient_group_InternalServerError_response_body
+func ValidateDeleteRecipientGroupInternalServerErrorResponseBody(body *DeleteRecipientGroupInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteRecipientGroupNotFoundResponseBody runs the validations
+// defined on delete_recipient_group_NotFound_response_body
+func ValidateDeleteRecipientGroupNotFoundResponseBody(body *DeleteRecipientGroupNotFoundResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteRecipientGroupServiceUnavailableResponseBody runs the
+// validations defined on
+// delete_recipient_group_ServiceUnavailable_response_body
+func ValidateDeleteRecipientGroupServiceUnavailableResponseBody(body *DeleteRecipientGroupServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteRecipientGroupUnauthorizedResponseBody runs the validations
+// defined on delete_recipient_group_Unauthorized_response_body
+func ValidateDeleteRecipientGroupUnauthorizedResponseBody(body *DeleteRecipientGroupUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
 	}

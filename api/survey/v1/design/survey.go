@@ -297,4 +297,117 @@ var _ = Service("survey", func() {
 			Response("ServiceUnavailable", StatusServiceUnavailable)
 		})
 	})
+
+	Method("delete_survey_response", func() {
+		Description("Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/responses/{response_id})")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("survey_id", String, "Survey identifier", func() {
+				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
+			})
+
+			Attribute("response_id", String, "Response identifier", func() {
+				Example("cba14f40-1636-11ec-9621-0242ac130002")
+			})
+
+			Required("survey_id", "response_id")
+		})
+
+		HTTP(func() {
+			DELETE("/surveys/{survey_id}/responses/{response_id}")
+			Response(StatusNoContent)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("NotFound", StatusNotFound)
+			Response("InternalServerError", StatusInternalServerError)
+			Response("ServiceUnavailable", StatusServiceUnavailable)
+		})
+	})
+
+	Method("resend_survey_response", func() {
+		Description("Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_id}/responses/{response_id}/resend)")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("survey_id", String, "Survey identifier", func() {
+				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
+			})
+
+			Attribute("response_id", String, "Response identifier", func() {
+				Example("cba14f40-1636-11ec-9621-0242ac130002")
+			})
+
+			Required("survey_id", "response_id")
+		})
+
+		HTTP(func() {
+			POST("/surveys/{survey_id}/responses/{response_id}/resend")
+			Response(StatusNoContent)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("NotFound", StatusNotFound)
+			Response("InternalServerError", StatusInternalServerError)
+			Response("ServiceUnavailable", StatusServiceUnavailable)
+		})
+	})
+
+	Method("delete_recipient_group", func() {
+		Description("Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/recipient_group)")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("survey_id", String, "Survey identifier", func() {
+				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
+			})
+
+			Attribute("committee_id", String, "Committee ID to remove (indicates specific committee in project)", func() {
+				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
+			})
+
+			Attribute("project_id", String, "Project ID to remove (all removals are attached to a project)", func() {
+				Example("003170000123XHTAA2")
+			})
+
+			Attribute("foundation_id", String, "Foundation ID (indicates project_id references a foundation and all subprojects should be removed)", func() {
+				Example("003170000123XHTAA2")
+			})
+
+			Required("survey_id")
+		})
+
+		HTTP(func() {
+			DELETE("/surveys/{survey_id}/recipient_group")
+			Param("committee_id")
+			Param("project_id")
+			Param("foundation_id")
+			Response(StatusNoContent)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("NotFound", StatusNotFound)
+			Response("InternalServerError", StatusInternalServerError)
+			Response("ServiceUnavailable", StatusServiceUnavailable)
+		})
+	})
 })

@@ -331,6 +331,85 @@ func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.Sen
 	return nil
 }
 
+// DeleteSurveyResponse removes a recipient from survey and recalculates statistics
+func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.DeleteSurveyResponsePayload) error {
+	s.logger.InfoContext(ctx, "deleting survey response",
+		"survey_id", p.SurveyID,
+		"response_id", p.ResponseID,
+	)
+
+	// Call ITX API
+	err := s.proxy.DeleteResponse(ctx, p.SurveyID, p.ResponseID)
+	if err != nil {
+		return mapDomainError(err)
+	}
+
+	s.logger.InfoContext(ctx, "survey response deleted successfully",
+		"survey_id", p.SurveyID,
+		"response_id", p.ResponseID,
+	)
+
+	return nil
+}
+
+// ResendSurveyResponse resends the survey email to a specific user
+func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.ResendSurveyResponsePayload) error {
+	s.logger.InfoContext(ctx, "resending survey response",
+		"survey_id", p.SurveyID,
+		"response_id", p.ResponseID,
+	)
+
+	// Call ITX API
+	err := s.proxy.ResendResponse(ctx, p.SurveyID, p.ResponseID)
+	if err != nil {
+		return mapDomainError(err)
+	}
+
+	s.logger.InfoContext(ctx, "survey response resent successfully",
+		"survey_id", p.SurveyID,
+		"response_id", p.ResponseID,
+	)
+
+	return nil
+}
+
+// DeleteRecipientGroup removes a recipient group from survey and recalculates statistics
+func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.DeleteRecipientGroupPayload) error {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "deleting recipient group from survey",
+		"principal", principal,
+		"survey_id", p.SurveyID,
+		"committee_id", p.CommitteeID,
+		"project_id", p.ProjectID,
+		"foundation_id", p.FoundationID,
+	)
+
+	// Call ITX API
+	err = s.proxy.DeleteRecipientGroup(ctx, p.SurveyID, p.CommitteeID, p.ProjectID, p.FoundationID)
+	if err != nil {
+		return mapDomainError(err)
+	}
+
+	s.logger.InfoContext(ctx, "recipient group deleted successfully",
+		"survey_id", p.SurveyID,
+	)
+
+	return nil
+}
+
 // Helper functions
 
 // mapITXResponseToResult maps ITX response to Goa result (extracted to avoid duplication)

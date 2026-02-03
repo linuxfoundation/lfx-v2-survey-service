@@ -23,10 +23,13 @@ type Client struct {
 	BulkResendSurveyEndpoint      goa.Endpoint
 	PreviewSendSurveyEndpoint     goa.Endpoint
 	SendMissingRecipientsEndpoint goa.Endpoint
+	DeleteSurveyResponseEndpoint  goa.Endpoint
+	ResendSurveyResponseEndpoint  goa.Endpoint
+	DeleteRecipientGroupEndpoint  goa.Endpoint
 }
 
 // NewClient initializes a "survey" service client given the endpoints.
-func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResendSurvey, previewSendSurvey, sendMissingRecipients goa.Endpoint) *Client {
+func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResendSurvey, previewSendSurvey, sendMissingRecipients, deleteSurveyResponse, resendSurveyResponse, deleteRecipientGroup goa.Endpoint) *Client {
 	return &Client{
 		ScheduleSurveyEndpoint:        scheduleSurvey,
 		GetSurveyEndpoint:             getSurvey,
@@ -35,6 +38,9 @@ func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResend
 		BulkResendSurveyEndpoint:      bulkResendSurvey,
 		PreviewSendSurveyEndpoint:     previewSendSurvey,
 		SendMissingRecipientsEndpoint: sendMissingRecipients,
+		DeleteSurveyResponseEndpoint:  deleteSurveyResponse,
+		ResendSurveyResponseEndpoint:  resendSurveyResponse,
+		DeleteRecipientGroupEndpoint:  deleteRecipientGroup,
 	}
 }
 
@@ -159,5 +165,53 @@ func (c *Client) PreviewSendSurvey(ctx context.Context, p *PreviewSendSurveyPayl
 //   - error: internal error
 func (c *Client) SendMissingRecipients(ctx context.Context, p *SendMissingRecipientsPayload) (err error) {
 	_, err = c.SendMissingRecipientsEndpoint(ctx, p)
+	return
+}
+
+// DeleteSurveyResponse calls the "delete_survey_response" endpoint of the
+// "survey" service.
+// DeleteSurveyResponse may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) DeleteSurveyResponse(ctx context.Context, p *DeleteSurveyResponsePayload) (err error) {
+	_, err = c.DeleteSurveyResponseEndpoint(ctx, p)
+	return
+}
+
+// ResendSurveyResponse calls the "resend_survey_response" endpoint of the
+// "survey" service.
+// ResendSurveyResponse may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) ResendSurveyResponse(ctx context.Context, p *ResendSurveyResponsePayload) (err error) {
+	_, err = c.ResendSurveyResponseEndpoint(ctx, p)
+	return
+}
+
+// DeleteRecipientGroup calls the "delete_recipient_group" endpoint of the
+// "survey" service.
+// DeleteRecipientGroup may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) DeleteRecipientGroup(ctx context.Context, p *DeleteRecipientGroupPayload) (err error) {
+	_, err = c.DeleteRecipientGroupEndpoint(ctx, p)
 	return
 }

@@ -46,3 +46,18 @@ func PreviewSendSurveySurveyPath(surveyID string) string {
 func SendMissingRecipientsSurveyPath(surveyID string) string {
 	return fmt.Sprintf("/surveys/%v/send_missing_recipients", surveyID)
 }
+
+// DeleteSurveyResponseSurveyPath returns the URL path to the survey service delete_survey_response HTTP endpoint.
+func DeleteSurveyResponseSurveyPath(surveyID string, responseID string) string {
+	return fmt.Sprintf("/surveys/%v/responses/%v", surveyID, responseID)
+}
+
+// ResendSurveyResponseSurveyPath returns the URL path to the survey service resend_survey_response HTTP endpoint.
+func ResendSurveyResponseSurveyPath(surveyID string, responseID string) string {
+	return fmt.Sprintf("/surveys/%v/responses/%v/resend", surveyID, responseID)
+}
+
+// DeleteRecipientGroupSurveyPath returns the URL path to the survey service delete_recipient_group HTTP endpoint.
+func DeleteRecipientGroupSurveyPath(surveyID string) string {
+	return fmt.Sprintf("/surveys/%v/recipient_group", surveyID)
+}
