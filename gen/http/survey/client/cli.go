@@ -63,10 +63,10 @@ func BuildScheduleSurveyPayload(surveyScheduleSurveyBody string, surveyScheduleS
 
 // BuildGetSurveyPayload builds the payload for the survey get_survey endpoint
 // from CLI flags.
-func BuildGetSurveyPayload(surveyGetSurveySurveyID string, surveyGetSurveyToken string) (*survey.GetSurveyPayload, error) {
-	var surveyID string
+func BuildGetSurveyPayload(surveyGetSurveySurveyUID string, surveyGetSurveyToken string) (*survey.GetSurveyPayload, error) {
+	var surveyUID string
 	{
-		surveyID = surveyGetSurveySurveyID
+		surveyUID = surveyGetSurveySurveyUID
 	}
 	var token *string
 	{
@@ -75,7 +75,7 @@ func BuildGetSurveyPayload(surveyGetSurveySurveyID string, surveyGetSurveyToken 
 		}
 	}
 	v := &survey.GetSurveyPayload{}
-	v.SurveyID = surveyID
+	v.SurveyUID = surveyUID
 	v.Token = token
 
 	return v, nil
@@ -83,7 +83,7 @@ func BuildGetSurveyPayload(surveyGetSurveySurveyID string, surveyGetSurveyToken 
 
 // BuildUpdateSurveyPayload builds the payload for the survey update_survey
 // endpoint from CLI flags.
-func BuildUpdateSurveyPayload(surveyUpdateSurveyBody string, surveyUpdateSurveySurveyID string, surveyUpdateSurveyToken string) (*survey.UpdateSurveyPayload, error) {
+func BuildUpdateSurveyPayload(surveyUpdateSurveyBody string, surveyUpdateSurveySurveyUID string, surveyUpdateSurveyToken string) (*survey.UpdateSurveyPayload, error) {
 	var err error
 	var body UpdateSurveyRequestBody
 	{
@@ -92,9 +92,9 @@ func BuildUpdateSurveyPayload(surveyUpdateSurveyBody string, surveyUpdateSurveyS
 			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Excepturi et quas autem dolores corporis.\",\n         \"Harum earum autem et.\"\n      ],\n      \"creator_id\": \"Omnis quo.\",\n      \"email_body\": \"Quo qui sint.\",\n      \"email_body_text\": \"Explicabo autem sit id modi corporis.\",\n      \"email_subject\": \"Et sed.\",\n      \"survey_cutoff_date\": \"Sapiente sunt.\",\n      \"survey_reminder_rate_days\": 5570276177094928842,\n      \"survey_send_date\": \"Aliquid similique.\",\n      \"survey_title\": \"Maiores impedit omnis veniam consequuntur sed.\"\n   }'")
 		}
 	}
-	var surveyID string
+	var surveyUID string
 	{
-		surveyID = surveyUpdateSurveySurveyID
+		surveyUID = surveyUpdateSurveySurveyUID
 	}
 	var token *string
 	{
@@ -119,7 +119,7 @@ func BuildUpdateSurveyPayload(surveyUpdateSurveyBody string, surveyUpdateSurveyS
 			v.Committees[i] = val
 		}
 	}
-	v.SurveyID = surveyID
+	v.SurveyUID = surveyUID
 	v.Token = token
 
 	return v, nil
@@ -127,10 +127,10 @@ func BuildUpdateSurveyPayload(surveyUpdateSurveyBody string, surveyUpdateSurveyS
 
 // BuildDeleteSurveyPayload builds the payload for the survey delete_survey
 // endpoint from CLI flags.
-func BuildDeleteSurveyPayload(surveyDeleteSurveySurveyID string, surveyDeleteSurveyToken string) (*survey.DeleteSurveyPayload, error) {
-	var surveyID string
+func BuildDeleteSurveyPayload(surveyDeleteSurveySurveyUID string, surveyDeleteSurveyToken string) (*survey.DeleteSurveyPayload, error) {
+	var surveyUID string
 	{
-		surveyID = surveyDeleteSurveySurveyID
+		surveyUID = surveyDeleteSurveySurveyUID
 	}
 	var token *string
 	{
@@ -139,7 +139,7 @@ func BuildDeleteSurveyPayload(surveyDeleteSurveySurveyID string, surveyDeleteSur
 		}
 	}
 	v := &survey.DeleteSurveyPayload{}
-	v.SurveyID = surveyID
+	v.SurveyUID = surveyUID
 	v.Token = token
 
 	return v, nil
@@ -147,7 +147,7 @@ func BuildDeleteSurveyPayload(surveyDeleteSurveySurveyID string, surveyDeleteSur
 
 // BuildBulkResendSurveyPayload builds the payload for the survey
 // bulk_resend_survey endpoint from CLI flags.
-func BuildBulkResendSurveyPayload(surveyBulkResendSurveyBody string, surveyBulkResendSurveySurveyID string, surveyBulkResendSurveyToken string) (*survey.BulkResendSurveyPayload, error) {
+func BuildBulkResendSurveyPayload(surveyBulkResendSurveyBody string, surveyBulkResendSurveySurveyUID string, surveyBulkResendSurveyToken string) (*survey.BulkResendSurveyPayload, error) {
 	var err error
 	var body BulkResendSurveyRequestBody
 	{
@@ -162,9 +162,9 @@ func BuildBulkResendSurveyPayload(surveyBulkResendSurveyBody string, surveyBulkR
 			return nil, err
 		}
 	}
-	var surveyID string
+	var surveyUID string
 	{
-		surveyID = surveyBulkResendSurveySurveyID
+		surveyUID = surveyBulkResendSurveySurveyUID
 	}
 	var token *string
 	{
@@ -181,7 +181,7 @@ func BuildBulkResendSurveyPayload(surveyBulkResendSurveyBody string, surveyBulkR
 	} else {
 		v.RecipientIds = []string{}
 	}
-	v.SurveyID = surveyID
+	v.SurveyUID = surveyUID
 	v.Token = token
 
 	return v, nil
@@ -189,15 +189,15 @@ func BuildBulkResendSurveyPayload(surveyBulkResendSurveyBody string, surveyBulkR
 
 // BuildPreviewSendSurveyPayload builds the payload for the survey
 // preview_send_survey endpoint from CLI flags.
-func BuildPreviewSendSurveyPayload(surveyPreviewSendSurveySurveyID string, surveyPreviewSendSurveyCommitteeID string, surveyPreviewSendSurveyToken string) (*survey.PreviewSendSurveyPayload, error) {
-	var surveyID string
+func BuildPreviewSendSurveyPayload(surveyPreviewSendSurveySurveyUID string, surveyPreviewSendSurveyCommitteeUID string, surveyPreviewSendSurveyToken string) (*survey.PreviewSendSurveyPayload, error) {
+	var surveyUID string
 	{
-		surveyID = surveyPreviewSendSurveySurveyID
+		surveyUID = surveyPreviewSendSurveySurveyUID
 	}
-	var committeeID *string
+	var committeeUID *string
 	{
-		if surveyPreviewSendSurveyCommitteeID != "" {
-			committeeID = &surveyPreviewSendSurveyCommitteeID
+		if surveyPreviewSendSurveyCommitteeUID != "" {
+			committeeUID = &surveyPreviewSendSurveyCommitteeUID
 		}
 	}
 	var token *string
@@ -207,8 +207,8 @@ func BuildPreviewSendSurveyPayload(surveyPreviewSendSurveySurveyID string, surve
 		}
 	}
 	v := &survey.PreviewSendSurveyPayload{}
-	v.SurveyID = surveyID
-	v.CommitteeID = committeeID
+	v.SurveyUID = surveyUID
+	v.CommitteeUID = committeeUID
 	v.Token = token
 
 	return v, nil
@@ -216,15 +216,15 @@ func BuildPreviewSendSurveyPayload(surveyPreviewSendSurveySurveyID string, surve
 
 // BuildSendMissingRecipientsPayload builds the payload for the survey
 // send_missing_recipients endpoint from CLI flags.
-func BuildSendMissingRecipientsPayload(surveySendMissingRecipientsSurveyID string, surveySendMissingRecipientsCommitteeID string, surveySendMissingRecipientsToken string) (*survey.SendMissingRecipientsPayload, error) {
-	var surveyID string
+func BuildSendMissingRecipientsPayload(surveySendMissingRecipientsSurveyUID string, surveySendMissingRecipientsCommitteeUID string, surveySendMissingRecipientsToken string) (*survey.SendMissingRecipientsPayload, error) {
+	var surveyUID string
 	{
-		surveyID = surveySendMissingRecipientsSurveyID
+		surveyUID = surveySendMissingRecipientsSurveyUID
 	}
-	var committeeID *string
+	var committeeUID *string
 	{
-		if surveySendMissingRecipientsCommitteeID != "" {
-			committeeID = &surveySendMissingRecipientsCommitteeID
+		if surveySendMissingRecipientsCommitteeUID != "" {
+			committeeUID = &surveySendMissingRecipientsCommitteeUID
 		}
 	}
 	var token *string
@@ -234,8 +234,8 @@ func BuildSendMissingRecipientsPayload(surveySendMissingRecipientsSurveyID strin
 		}
 	}
 	v := &survey.SendMissingRecipientsPayload{}
-	v.SurveyID = surveyID
-	v.CommitteeID = committeeID
+	v.SurveyUID = surveyUID
+	v.CommitteeUID = committeeUID
 	v.Token = token
 
 	return v, nil
@@ -243,10 +243,10 @@ func BuildSendMissingRecipientsPayload(surveySendMissingRecipientsSurveyID strin
 
 // BuildDeleteSurveyResponsePayload builds the payload for the survey
 // delete_survey_response endpoint from CLI flags.
-func BuildDeleteSurveyResponsePayload(surveyDeleteSurveyResponseSurveyID string, surveyDeleteSurveyResponseResponseID string, surveyDeleteSurveyResponseToken string) (*survey.DeleteSurveyResponsePayload, error) {
-	var surveyID string
+func BuildDeleteSurveyResponsePayload(surveyDeleteSurveyResponseSurveyUID string, surveyDeleteSurveyResponseResponseID string, surveyDeleteSurveyResponseToken string) (*survey.DeleteSurveyResponsePayload, error) {
+	var surveyUID string
 	{
-		surveyID = surveyDeleteSurveyResponseSurveyID
+		surveyUID = surveyDeleteSurveyResponseSurveyUID
 	}
 	var responseID string
 	{
@@ -259,7 +259,7 @@ func BuildDeleteSurveyResponsePayload(surveyDeleteSurveyResponseSurveyID string,
 		}
 	}
 	v := &survey.DeleteSurveyResponsePayload{}
-	v.SurveyID = surveyID
+	v.SurveyUID = surveyUID
 	v.ResponseID = responseID
 	v.Token = token
 
@@ -268,10 +268,10 @@ func BuildDeleteSurveyResponsePayload(surveyDeleteSurveyResponseSurveyID string,
 
 // BuildResendSurveyResponsePayload builds the payload for the survey
 // resend_survey_response endpoint from CLI flags.
-func BuildResendSurveyResponsePayload(surveyResendSurveyResponseSurveyID string, surveyResendSurveyResponseResponseID string, surveyResendSurveyResponseToken string) (*survey.ResendSurveyResponsePayload, error) {
-	var surveyID string
+func BuildResendSurveyResponsePayload(surveyResendSurveyResponseSurveyUID string, surveyResendSurveyResponseResponseID string, surveyResendSurveyResponseToken string) (*survey.ResendSurveyResponsePayload, error) {
+	var surveyUID string
 	{
-		surveyID = surveyResendSurveyResponseSurveyID
+		surveyUID = surveyResendSurveyResponseSurveyUID
 	}
 	var responseID string
 	{
@@ -284,7 +284,7 @@ func BuildResendSurveyResponsePayload(surveyResendSurveyResponseSurveyID string,
 		}
 	}
 	v := &survey.ResendSurveyResponsePayload{}
-	v.SurveyID = surveyID
+	v.SurveyUID = surveyUID
 	v.ResponseID = responseID
 	v.Token = token
 
@@ -293,21 +293,21 @@ func BuildResendSurveyResponsePayload(surveyResendSurveyResponseSurveyID string,
 
 // BuildDeleteRecipientGroupPayload builds the payload for the survey
 // delete_recipient_group endpoint from CLI flags.
-func BuildDeleteRecipientGroupPayload(surveyDeleteRecipientGroupSurveyID string, surveyDeleteRecipientGroupCommitteeID string, surveyDeleteRecipientGroupProjectID string, surveyDeleteRecipientGroupFoundationID string, surveyDeleteRecipientGroupToken string) (*survey.DeleteRecipientGroupPayload, error) {
-	var surveyID string
+func BuildDeleteRecipientGroupPayload(surveyDeleteRecipientGroupSurveyUID string, surveyDeleteRecipientGroupCommitteeUID string, surveyDeleteRecipientGroupProjectUID string, surveyDeleteRecipientGroupFoundationID string, surveyDeleteRecipientGroupToken string) (*survey.DeleteRecipientGroupPayload, error) {
+	var surveyUID string
 	{
-		surveyID = surveyDeleteRecipientGroupSurveyID
+		surveyUID = surveyDeleteRecipientGroupSurveyUID
 	}
-	var committeeID *string
+	var committeeUID *string
 	{
-		if surveyDeleteRecipientGroupCommitteeID != "" {
-			committeeID = &surveyDeleteRecipientGroupCommitteeID
+		if surveyDeleteRecipientGroupCommitteeUID != "" {
+			committeeUID = &surveyDeleteRecipientGroupCommitteeUID
 		}
 	}
-	var projectID *string
+	var projectUID *string
 	{
-		if surveyDeleteRecipientGroupProjectID != "" {
-			projectID = &surveyDeleteRecipientGroupProjectID
+		if surveyDeleteRecipientGroupProjectUID != "" {
+			projectUID = &surveyDeleteRecipientGroupProjectUID
 		}
 	}
 	var foundationID *string
@@ -323,9 +323,9 @@ func BuildDeleteRecipientGroupPayload(surveyDeleteRecipientGroupSurveyID string,
 		}
 	}
 	v := &survey.DeleteRecipientGroupPayload{}
-	v.SurveyID = surveyID
-	v.CommitteeID = committeeID
-	v.ProjectID = projectID
+	v.SurveyUID = surveyUID
+	v.CommitteeUID = committeeUID
+	v.ProjectUID = projectUID
 	v.FoundationID = foundationID
 	v.Token = token
 
@@ -340,7 +340,7 @@ func BuildCreateExclusionPayload(surveyCreateExclusionBody string, surveyCreateE
 	{
 		err = json.Unmarshal([]byte(surveyCreateExclusionBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_id\": \"Blanditiis harum quis debitis voluptatem laborum.\",\n      \"email\": \"Nihil eos molestiae numquam.\",\n      \"global_exclusion\": \"Laudantium aut consectetur pariatur omnis.\",\n      \"survey_id\": \"Amet deleniti aut.\",\n      \"user_id\": \"Tenetur omnis.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_uid\": \"Blanditiis harum quis debitis voluptatem laborum.\",\n      \"email\": \"Nihil eos molestiae numquam.\",\n      \"global_exclusion\": \"Laudantium aut consectetur pariatur omnis.\",\n      \"survey_uid\": \"Amet deleniti aut.\",\n      \"user_id\": \"Tenetur omnis.\"\n   }'")
 		}
 	}
 	var token *string
@@ -352,8 +352,8 @@ func BuildCreateExclusionPayload(surveyCreateExclusionBody string, surveyCreateE
 	v := &survey.CreateExclusionPayload{
 		Email:           body.Email,
 		UserID:          body.UserID,
-		SurveyID:        body.SurveyID,
-		CommitteeID:     body.CommitteeID,
+		SurveyUID:       body.SurveyUID,
+		CommitteeUID:    body.CommitteeUID,
 		GlobalExclusion: body.GlobalExclusion,
 	}
 	v.Token = token
@@ -369,7 +369,7 @@ func BuildDeleteExclusionPayload(surveyDeleteExclusionBody string, surveyDeleteE
 	{
 		err = json.Unmarshal([]byte(surveyDeleteExclusionBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_id\": \"Ut iusto eius qui.\",\n      \"email\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"global_exclusion\": \"Recusandae itaque consequatur.\",\n      \"survey_id\": \"Soluta facilis rerum exercitationem.\",\n      \"user_id\": \"Asperiores at dicta iusto adipisci est est.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_uid\": \"Ut iusto eius qui.\",\n      \"email\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"global_exclusion\": \"Recusandae itaque consequatur.\",\n      \"survey_uid\": \"Soluta facilis rerum exercitationem.\",\n      \"user_id\": \"Asperiores at dicta iusto adipisci est est.\"\n   }'")
 		}
 	}
 	var token *string
@@ -381,8 +381,8 @@ func BuildDeleteExclusionPayload(surveyDeleteExclusionBody string, surveyDeleteE
 	v := &survey.DeleteExclusionPayload{
 		Email:           body.Email,
 		UserID:          body.UserID,
-		SurveyID:        body.SurveyID,
-		CommitteeID:     body.CommitteeID,
+		SurveyUID:       body.SurveyUID,
+		CommitteeUID:    body.CommitteeUID,
 		GlobalExclusion: body.GlobalExclusion,
 	}
 	v.Token = token

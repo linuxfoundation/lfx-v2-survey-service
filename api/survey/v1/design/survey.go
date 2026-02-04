@@ -87,7 +87,7 @@ var _ = Service("survey", func() {
 	})
 
 	Method("get_survey", func() {
-		Description("Get survey details (proxies to ITX GET /v2/surveys/{survey_id})")
+		Description("Get survey details (proxies to ITX GET /v2/surveys/{survey_uid})")
 
 		Security(JWTAuth, func() {
 			Scope("manage:projects")
@@ -97,17 +97,17 @@ var _ = Service("survey", func() {
 		Payload(func() {
 			BearerTokenAttribute()
 
-			Attribute("survey_id", String, "Survey identifier", func() {
+			Attribute("survey_uid", String, "Survey identifier", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
 
-			Required("survey_id")
+			Required("survey_uid")
 		})
 
 		Result(SurveyScheduleResult)
 
 		HTTP(func() {
-			GET("/surveys/{survey_id}")
+			GET("/surveys/{survey_uid}")
 			Response(StatusOK)
 			Response("BadRequest", StatusBadRequest)
 			Response("Unauthorized", StatusUnauthorized)
@@ -119,7 +119,7 @@ var _ = Service("survey", func() {
 	})
 
 	Method("update_survey", func() {
-		Description("Update survey (proxies to ITX PUT /v2/surveys/{survey_id}). Only allowed when status is 'disabled'")
+		Description("Update survey (proxies to ITX PUT /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'")
 
 		Security(JWTAuth, func() {
 			Scope("manage:projects")
@@ -129,7 +129,7 @@ var _ = Service("survey", func() {
 		Payload(func() {
 			BearerTokenAttribute()
 
-			Attribute("survey_id", String, "Survey identifier", func() {
+			Attribute("survey_uid", String, "Survey identifier", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
 			Attribute("creator_id", String, "Creator's user ID")
@@ -143,13 +143,13 @@ var _ = Service("survey", func() {
 			Attribute("committees", ArrayOf(String), "Array of committee IDs to send survey to")
 			Attribute("committee_voting_enabled", Boolean, "Whether committee voting is enabled")
 
-			Required("survey_id")
+			Required("survey_uid")
 		})
 
 		Result(SurveyScheduleResult)
 
 		HTTP(func() {
-			PUT("/surveys/{survey_id}")
+			PUT("/surveys/{survey_uid}")
 			Response(StatusOK)
 			Response("BadRequest", StatusBadRequest)
 			Response("Unauthorized", StatusUnauthorized)
@@ -161,7 +161,7 @@ var _ = Service("survey", func() {
 	})
 
 	Method("delete_survey", func() {
-		Description("Delete survey (proxies to ITX DELETE /v2/surveys/{survey_id}). Only allowed when status is 'disabled'")
+		Description("Delete survey (proxies to ITX DELETE /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'")
 
 		Security(JWTAuth, func() {
 			Scope("manage:projects")
@@ -171,15 +171,15 @@ var _ = Service("survey", func() {
 		Payload(func() {
 			BearerTokenAttribute()
 
-			Attribute("survey_id", String, "Survey identifier", func() {
+			Attribute("survey_uid", String, "Survey identifier", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
 
-			Required("survey_id")
+			Required("survey_uid")
 		})
 
 		HTTP(func() {
-			DELETE("/surveys/{survey_id}")
+			DELETE("/surveys/{survey_uid}")
 			Response(StatusNoContent)
 			Response("BadRequest", StatusBadRequest)
 			Response("Unauthorized", StatusUnauthorized)
@@ -191,7 +191,7 @@ var _ = Service("survey", func() {
 	})
 
 	Method("bulk_resend_survey", func() {
-		Description("Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_id}/bulk_resend)")
+		Description("Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_uid}/bulk_resend)")
 
 		Security(JWTAuth, func() {
 			Scope("manage:projects")
@@ -201,7 +201,7 @@ var _ = Service("survey", func() {
 		Payload(func() {
 			BearerTokenAttribute()
 
-			Attribute("survey_id", String, "Survey identifier", func() {
+			Attribute("survey_uid", String, "Survey identifier", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
 
@@ -209,11 +209,11 @@ var _ = Service("survey", func() {
 				Example([]string{"cba14f40-1636-11ec-9621-0242ac130002", "cba14f40-1636-11ec-9621-0242ac130003"})
 			})
 
-			Required("survey_id", "recipient_ids")
+			Required("survey_uid", "recipient_ids")
 		})
 
 		HTTP(func() {
-			POST("/surveys/{survey_id}/bulk_resend")
+			POST("/surveys/{survey_uid}/bulk_resend")
 			Response(StatusNoContent)
 			Response("BadRequest", StatusBadRequest)
 			Response("Unauthorized", StatusUnauthorized)
@@ -225,7 +225,7 @@ var _ = Service("survey", func() {
 	})
 
 	Method("preview_send_survey", func() {
-		Description("Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_id}/preview_send)")
+		Description("Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_uid}/preview_send)")
 
 		Security(JWTAuth, func() {
 			Scope("manage:projects")
@@ -235,22 +235,22 @@ var _ = Service("survey", func() {
 		Payload(func() {
 			BearerTokenAttribute()
 
-			Attribute("survey_id", String, "Survey identifier", func() {
+			Attribute("survey_uid", String, "Survey identifier", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
 
-			Attribute("committee_id", String, "Optional committee ID to filter preview", func() {
+			Attribute("committee_uid", String, "Optional committee UID to filter preview", func() {
 				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
 			})
 
-			Required("survey_id")
+			Required("survey_uid")
 		})
 
 		Result(PreviewSendResult)
 
 		HTTP(func() {
-			GET("/surveys/{survey_id}/preview_send")
-			Param("committee_id")
+			GET("/surveys/{survey_uid}/preview_send")
+			Param("committee_uid")
 			Response(StatusOK)
 			Response("BadRequest", StatusBadRequest)
 			Response("Unauthorized", StatusUnauthorized)
@@ -262,7 +262,7 @@ var _ = Service("survey", func() {
 	})
 
 	Method("send_missing_recipients", func() {
-		Description("Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_id}/send_missing_recipients)")
+		Description("Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_uid}/send_missing_recipients)")
 
 		Security(JWTAuth, func() {
 			Scope("manage:projects")
@@ -272,20 +272,20 @@ var _ = Service("survey", func() {
 		Payload(func() {
 			BearerTokenAttribute()
 
-			Attribute("survey_id", String, "Survey identifier", func() {
+			Attribute("survey_uid", String, "Survey identifier", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
 
-			Attribute("committee_id", String, "Optional committee ID to resync only that committee", func() {
+			Attribute("committee_uid", String, "Optional committee UID to resync only that committee", func() {
 				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
 			})
 
-			Required("survey_id")
+			Required("survey_uid")
 		})
 
 		HTTP(func() {
-			POST("/surveys/{survey_id}/send_missing_recipients")
-			Param("committee_id")
+			POST("/surveys/{survey_uid}/send_missing_recipients")
+			Param("committee_uid")
 			Response(StatusNoContent)
 			Response("BadRequest", StatusBadRequest)
 			Response("Unauthorized", StatusUnauthorized)
@@ -297,7 +297,7 @@ var _ = Service("survey", func() {
 	})
 
 	Method("delete_survey_response", func() {
-		Description("Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/responses/{response_id})")
+		Description("Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_uid}/responses/{response_id})")
 
 		Security(JWTAuth, func() {
 			Scope("manage:projects")
@@ -307,7 +307,7 @@ var _ = Service("survey", func() {
 		Payload(func() {
 			BearerTokenAttribute()
 
-			Attribute("survey_id", String, "Survey identifier", func() {
+			Attribute("survey_uid", String, "Survey identifier", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
 
@@ -315,11 +315,11 @@ var _ = Service("survey", func() {
 				Example("cba14f40-1636-11ec-9621-0242ac130002")
 			})
 
-			Required("survey_id", "response_id")
+			Required("survey_uid", "response_id")
 		})
 
 		HTTP(func() {
-			DELETE("/surveys/{survey_id}/responses/{response_id}")
+			DELETE("/surveys/{survey_uid}/responses/{response_id}")
 			Response(StatusNoContent)
 			Response("BadRequest", StatusBadRequest)
 			Response("Unauthorized", StatusUnauthorized)
@@ -331,7 +331,7 @@ var _ = Service("survey", func() {
 	})
 
 	Method("resend_survey_response", func() {
-		Description("Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_id}/responses/{response_id}/resend)")
+		Description("Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_uid}/responses/{response_id}/resend)")
 
 		Security(JWTAuth, func() {
 			Scope("manage:projects")
@@ -341,7 +341,7 @@ var _ = Service("survey", func() {
 		Payload(func() {
 			BearerTokenAttribute()
 
-			Attribute("survey_id", String, "Survey identifier", func() {
+			Attribute("survey_uid", String, "Survey identifier", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
 
@@ -349,11 +349,11 @@ var _ = Service("survey", func() {
 				Example("cba14f40-1636-11ec-9621-0242ac130002")
 			})
 
-			Required("survey_id", "response_id")
+			Required("survey_uid", "response_id")
 		})
 
 		HTTP(func() {
-			POST("/surveys/{survey_id}/responses/{response_id}/resend")
+			POST("/surveys/{survey_uid}/responses/{response_id}/resend")
 			Response(StatusNoContent)
 			Response("BadRequest", StatusBadRequest)
 			Response("Unauthorized", StatusUnauthorized)
@@ -365,7 +365,7 @@ var _ = Service("survey", func() {
 	})
 
 	Method("delete_recipient_group", func() {
-		Description("Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/recipient_group)")
+		Description("Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_uid}/recipient_group)")
 
 		Security(JWTAuth, func() {
 			Scope("manage:projects")
@@ -375,29 +375,29 @@ var _ = Service("survey", func() {
 		Payload(func() {
 			BearerTokenAttribute()
 
-			Attribute("survey_id", String, "Survey identifier", func() {
+			Attribute("survey_uid", String, "Survey identifier", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
 
-			Attribute("committee_id", String, "Committee ID to remove (indicates specific committee in project)", func() {
+			Attribute("committee_uid", String, "Committee UID to remove (indicates specific committee in project)", func() {
 				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
 			})
 
-			Attribute("project_id", String, "Project ID to remove (all removals are attached to a project)", func() {
+			Attribute("project_uid", String, "Project UID to remove (all removals are attached to a project)", func() {
 				Example("003170000123XHTAA2")
 			})
 
-			Attribute("foundation_id", String, "Foundation ID (indicates project_id references a foundation and all subprojects should be removed)", func() {
+			Attribute("foundation_id", String, "Foundation ID (indicates project_uid references a foundation and all subprojects should be removed)", func() {
 				Example("003170000123XHTAA2")
 			})
 
-			Required("survey_id")
+			Required("survey_uid")
 		})
 
 		HTTP(func() {
-			DELETE("/surveys/{survey_id}/recipient_group")
-			Param("committee_id")
-			Param("project_id")
+			DELETE("/surveys/{survey_uid}/recipient_group")
+			Param("committee_uid")
+			Param("project_uid")
 			Param("foundation_id")
 			Response(StatusNoContent)
 			Response("BadRequest", StatusBadRequest)
@@ -422,8 +422,8 @@ var _ = Service("survey", func() {
 
 			Attribute("email", String, "Survey responder's email")
 			Attribute("user_id", String, "Recipient's user ID")
-			Attribute("survey_id", String, "Survey ID for survey-specific exclusion")
-			Attribute("committee_id", String, "Committee ID for survey-specific exclusion")
+			Attribute("survey_uid", String, "Survey UID for survey-specific exclusion")
+			Attribute("committee_uid", String, "Committee UID for survey-specific exclusion")
 			Attribute("global_exclusion", String, "Global exclusion flag")
 		})
 
@@ -452,8 +452,8 @@ var _ = Service("survey", func() {
 
 			Attribute("email", String, "Survey responder's email")
 			Attribute("user_id", String, "Recipient's user ID")
-			Attribute("survey_id", String, "Survey ID for survey-specific exclusion")
-			Attribute("committee_id", String, "Committee ID for survey-specific exclusion")
+			Attribute("survey_uid", String, "Survey UID for survey-specific exclusion")
+			Attribute("committee_uid", String, "Committee UID for survey-specific exclusion")
 			Attribute("global_exclusion", String, "Global exclusion flag")
 		})
 

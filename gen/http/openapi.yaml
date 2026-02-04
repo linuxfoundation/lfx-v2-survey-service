@@ -42,7 +42,7 @@ paths:
                     schema:
                         $ref: '#/definitions/SurveyScheduleResult'
                         required:
-                            - id
+                            - uid
                             - survey_status
                 "400":
                     description: Bad Request response.
@@ -83,20 +83,20 @@ paths:
                 - http
             security:
                 - jwt_header_Authorization: []
-    /surveys/{survey_id}:
+    /surveys/{survey_uid}:
         get:
             tags:
                 - survey
             summary: get_survey survey
             description: |-
-                Get survey details (proxies to ITX GET /v2/surveys/{survey_id})
+                Get survey details (proxies to ITX GET /v2/surveys/{survey_uid})
 
                 **Required security scopes for jwt**:
                   * `manage:projects`
                   * `manage:surveys`
             operationId: survey#get_survey
             parameters:
-                - name: survey_id
+                - name: survey_uid
                   in: path
                   description: Survey identifier
                   required: true
@@ -112,7 +112,7 @@ paths:
                     schema:
                         $ref: '#/definitions/SurveyScheduleResult'
                         required:
-                            - id
+                            - uid
                             - survey_status
                 "400":
                     description: Bad Request response.
@@ -165,14 +165,14 @@ paths:
                 - survey
             summary: update_survey survey
             description: |-
-                Update survey (proxies to ITX PUT /v2/surveys/{survey_id}). Only allowed when status is 'disabled'
+                Update survey (proxies to ITX PUT /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'
 
                 **Required security scopes for jwt**:
                   * `manage:projects`
                   * `manage:surveys`
             operationId: survey#update_survey
             parameters:
-                - name: survey_id
+                - name: survey_uid
                   in: path
                   description: Survey identifier
                   required: true
@@ -193,7 +193,7 @@ paths:
                     schema:
                         $ref: '#/definitions/SurveyScheduleResult'
                         required:
-                            - id
+                            - uid
                             - survey_status
                 "400":
                     description: Bad Request response.
@@ -246,14 +246,14 @@ paths:
                 - survey
             summary: delete_survey survey
             description: |-
-                Delete survey (proxies to ITX DELETE /v2/surveys/{survey_id}). Only allowed when status is 'disabled'
+                Delete survey (proxies to ITX DELETE /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'
 
                 **Required security scopes for jwt**:
                   * `manage:projects`
                   * `manage:surveys`
             operationId: survey#delete_survey
             parameters:
-                - name: survey_id
+                - name: survey_uid
                   in: path
                   description: Survey identifier
                   required: true
@@ -312,20 +312,20 @@ paths:
                 - http
             security:
                 - jwt_header_Authorization: []
-    /surveys/{survey_id}/bulk_resend:
+    /surveys/{survey_uid}/bulk_resend:
         post:
             tags:
                 - survey
             summary: bulk_resend_survey survey
             description: |-
-                Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_id}/bulk_resend)
+                Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_uid}/bulk_resend)
 
                 **Required security scopes for jwt**:
                   * `manage:projects`
                   * `manage:surveys`
             operationId: survey#bulk_resend_survey
             parameters:
-                - name: survey_id
+                - name: survey_uid
                   in: path
                   description: Survey identifier
                   required: true
@@ -391,25 +391,25 @@ paths:
                 - http
             security:
                 - jwt_header_Authorization: []
-    /surveys/{survey_id}/preview_send:
+    /surveys/{survey_uid}/preview_send:
         get:
             tags:
                 - survey
             summary: preview_send_survey survey
             description: |-
-                Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_id}/preview_send)
+                Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_uid}/preview_send)
 
                 **Required security scopes for jwt**:
                   * `manage:projects`
                   * `manage:surveys`
             operationId: survey#preview_send_survey
             parameters:
-                - name: committee_id
+                - name: committee_uid
                   in: query
-                  description: Optional committee ID to filter preview
+                  description: Optional committee UID to filter preview
                   required: false
                   type: string
-                - name: survey_id
+                - name: survey_uid
                   in: path
                   description: Survey identifier
                   required: true
@@ -470,35 +470,35 @@ paths:
                 - http
             security:
                 - jwt_header_Authorization: []
-    /surveys/{survey_id}/recipient_group:
+    /surveys/{survey_uid}/recipient_group:
         delete:
             tags:
                 - survey
             summary: delete_recipient_group survey
             description: |-
-                Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/recipient_group)
+                Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_uid}/recipient_group)
 
                 **Required security scopes for jwt**:
                   * `manage:projects`
                   * `manage:surveys`
             operationId: survey#delete_recipient_group
             parameters:
-                - name: committee_id
+                - name: committee_uid
                   in: query
-                  description: Committee ID to remove (indicates specific committee in project)
+                  description: Committee UID to remove (indicates specific committee in project)
                   required: false
                   type: string
-                - name: project_id
+                - name: project_uid
                   in: query
-                  description: Project ID to remove (all removals are attached to a project)
+                  description: Project UID to remove (all removals are attached to a project)
                   required: false
                   type: string
                 - name: foundation_id
                   in: query
-                  description: Foundation ID (indicates project_id references a foundation and all subprojects should be removed)
+                  description: Foundation ID (indicates project_uid references a foundation and all subprojects should be removed)
                   required: false
                   type: string
-                - name: survey_id
+                - name: survey_uid
                   in: path
                   description: Survey identifier
                   required: true
@@ -557,20 +557,20 @@ paths:
                 - http
             security:
                 - jwt_header_Authorization: []
-    /surveys/{survey_id}/responses/{response_id}:
+    /surveys/{survey_uid}/responses/{response_id}:
         delete:
             tags:
                 - survey
             summary: delete_survey_response survey
             description: |-
-                Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/responses/{response_id})
+                Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_uid}/responses/{response_id})
 
                 **Required security scopes for jwt**:
                   * `manage:projects`
                   * `manage:surveys`
             operationId: survey#delete_survey_response
             parameters:
-                - name: survey_id
+                - name: survey_uid
                   in: path
                   description: Survey identifier
                   required: true
@@ -634,20 +634,20 @@ paths:
                 - http
             security:
                 - jwt_header_Authorization: []
-    /surveys/{survey_id}/responses/{response_id}/resend:
+    /surveys/{survey_uid}/responses/{response_id}/resend:
         post:
             tags:
                 - survey
             summary: resend_survey_response survey
             description: |-
-                Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_id}/responses/{response_id}/resend)
+                Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_uid}/responses/{response_id}/resend)
 
                 **Required security scopes for jwt**:
                   * `manage:projects`
                   * `manage:surveys`
             operationId: survey#resend_survey_response
             parameters:
-                - name: survey_id
+                - name: survey_uid
                   in: path
                   description: Survey identifier
                   required: true
@@ -711,25 +711,25 @@ paths:
                 - http
             security:
                 - jwt_header_Authorization: []
-    /surveys/{survey_id}/send_missing_recipients:
+    /surveys/{survey_uid}/send_missing_recipients:
         post:
             tags:
                 - survey
             summary: send_missing_recipients survey
             description: |-
-                Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_id}/send_missing_recipients)
+                Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_uid}/send_missing_recipients)
 
                 **Required security scopes for jwt**:
                   * `manage:projects`
                   * `manage:surveys`
             operationId: survey#send_missing_recipients
             parameters:
-                - name: committee_id
+                - name: committee_uid
                   in: query
-                  description: Optional committee ID to resync only that committee
+                  description: Optional committee UID to resync only that committee
                   required: false
                   type: string
-                - name: survey_id
+                - name: survey_uid
                   in: path
                   description: Survey identifier
                   required: true
@@ -817,7 +817,7 @@ paths:
                     schema:
                         $ref: '#/definitions/ExclusionResult'
                         required:
-                            - id
+                            - uid
                 "400":
                     description: Bad Request response.
                     schema:
@@ -936,7 +936,7 @@ paths:
                     schema:
                         $ref: '#/definitions/ExtendedExclusionResult'
                         required:
-                            - id
+                            - uid
                 "400":
                     description: Bad Request response.
                     schema:
@@ -1131,42 +1131,42 @@ definitions:
                     - Board
                     - Technical Oversight Committee/Technical Advisory Committee
                     - Technical Steering Committee
-            committee_id:
-                type: string
-                description: Committee ID
-                example: qa1e8536-a985-4cf5-b981-a170927a1d11
             committee_name:
                 type: string
                 description: Committee name
                 example: Technical Steering Committee
-            project_id:
+            committee_uid:
                 type: string
-                description: Project ID
-                example: 003170000123XHTAA2
+                description: Committee UID
+                example: qa1e8536-a985-4cf5-b981-a170927a1d11
             project_name:
                 type: string
                 description: Project name
                 example: Kubernetes
+            project_uid:
+                type: string
+                description: Project UID
+                example: 003170000123XHTAA2
         description: Committee information for preview send
         example:
             committee_category: Technical Steering Committee
-            committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
             committee_name: Technical Steering Committee
-            project_id: 003170000123XHTAA2
+            committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
             project_name: Kubernetes
+            project_uid: 003170000123XHTAA2
         required:
-            - project_id
+            - project_uid
             - project_name
-            - committee_id
+            - committee_uid
             - committee_name
             - committee_category
     ExclusionResult:
         title: ExclusionResult
         type: object
         properties:
-            committee_id:
+            committee_uid:
                 type: string
-                description: Committee ID
+                description: Committee UID
                 example: In odio doloribus quis molestiae ut.
             email:
                 type: string
@@ -1176,27 +1176,27 @@ definitions:
                 type: string
                 description: Global exclusion flag
                 example: Nulla ducimus ratione et.
-            id:
+            survey_uid:
                 type: string
-                description: Exclusion ID
-                example: "12345"
-            survey_id:
-                type: string
-                description: Survey ID
+                description: Survey UID
                 example: Eveniet et.
+            uid:
+                type: string
+                description: Exclusion unique identifier
+                example: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
             user_id:
                 type: string
                 description: Recipient's user ID
                 example: Sit delectus illum iure.
         example:
-            committee_id: Rerum pariatur.
+            committee_uid: Rerum pariatur.
             email: test@email.com
             global_exclusion: Cumque ad ut.
-            id: "12345"
-            survey_id: Beatae cum exercitationem autem natus quae.
+            survey_uid: Beatae cum exercitationem autem natus quae.
+            uid: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
             user_id: Ut quo reprehenderit.
         required:
-            - id
+            - uid
     ExclusionUser:
         title: ExclusionUser
         type: object
@@ -1242,9 +1242,9 @@ definitions:
         title: ExtendedExclusionResult
         type: object
         properties:
-            committee_id:
+            committee_uid:
                 type: string
-                description: Committee ID
+                description: Committee UID
                 example: Hic est.
             email:
                 type: string
@@ -1254,14 +1254,14 @@ definitions:
                 type: string
                 description: Global exclusion flag
                 example: Quas ut et magni repellendus ea.
-            id:
+            survey_uid:
                 type: string
-                description: Exclusion ID
-                example: "12345"
-            survey_id:
-                type: string
-                description: Survey ID
+                description: Survey UID
                 example: Autem et sit molestiae nobis.
+            uid:
+                type: string
+                description: Exclusion unique identifier
+                example: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
             user:
                 $ref: '#/definitions/ExclusionUser'
             user_id:
@@ -1269,11 +1269,11 @@ definitions:
                 description: Recipient's user ID
                 example: Odio aut.
         example:
-            committee_id: Et vitae.
+            committee_uid: Et vitae.
             email: test@email.com
             global_exclusion: Quis dolores.
-            id: "12345"
-            survey_id: Assumenda quam rerum sed omnis.
+            survey_uid: Assumenda quam rerum sed omnis.
+            uid: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
             user:
                 emails:
                     - email_address: Quis non quod pariatur.
@@ -1286,7 +1286,7 @@ definitions:
                 username: Aut eum eum sint excepturi totam et.
             user_id: Perspiciatis eos earum voluptate.
         required:
-            - id
+            - uid
     ForbiddenError:
         title: ForbiddenError
         type: object
@@ -1449,25 +1449,25 @@ definitions:
                 description: List of affected committees
                 example:
                     - committee_category: Technical Steering Committee
-                      committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                       committee_name: Technical Steering Committee
-                      project_id: 003170000123XHTAA2
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       project_name: Kubernetes
+                      project_uid: 003170000123XHTAA2
                     - committee_category: Technical Steering Committee
-                      committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                       committee_name: Technical Steering Committee
-                      project_id: 003170000123XHTAA2
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       project_name: Kubernetes
+                      project_uid: 003170000123XHTAA2
                     - committee_category: Technical Steering Committee
-                      committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                       committee_name: Technical Steering Committee
-                      project_id: 003170000123XHTAA2
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       project_name: Kubernetes
+                      project_uid: 003170000123XHTAA2
                     - committee_category: Technical Steering Committee
-                      committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                       committee_name: Technical Steering Committee
-                      project_id: 003170000123XHTAA2
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       project_name: Kubernetes
+                      project_uid: 003170000123XHTAA2
             affected_projects:
                 type: array
                 items:
@@ -1507,25 +1507,25 @@ definitions:
         example:
             affected_committees:
                 - committee_category: Technical Steering Committee
-                  committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                   committee_name: Technical Steering Committee
-                  project_id: 003170000123XHTAA2
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   project_name: Kubernetes
+                  project_uid: 003170000123XHTAA2
                 - committee_category: Technical Steering Committee
-                  committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                   committee_name: Technical Steering Committee
-                  project_id: 003170000123XHTAA2
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   project_name: Kubernetes
+                  project_uid: 003170000123XHTAA2
                 - committee_category: Technical Steering Committee
-                  committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                   committee_name: Technical Steering Committee
-                  project_id: 003170000123XHTAA2
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   project_name: Kubernetes
+                  project_uid: 003170000123XHTAA2
                 - committee_category: Technical Steering Committee
-                  committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                   committee_name: Technical Steering Committee
-                  project_id: 003170000123XHTAA2
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   project_name: Kubernetes
+                  project_uid: 003170000123XHTAA2
             affected_projects:
                 - id: 003170000123XHTAA2
                   logo_url: Aliquam harum.
@@ -1618,27 +1618,27 @@ definitions:
         title: SurveyCommittee
         type: object
         properties:
-            committee_id:
-                type: string
-                description: Committee ID
-                example: qa1e8536-a985-4cf5-b981-a170927a1d11
             committee_name:
                 type: string
                 description: Committee name
                 example: Technical Steering Committee
+            committee_uid:
+                type: string
+                description: Committee UID
+                example: qa1e8536-a985-4cf5-b981-a170927a1d11
             nps_value:
                 type: number
                 description: NPS value for this committee
                 example: 0.9942227592720773
                 format: double
-            project_id:
-                type: string
-                description: Project ID
-                example: qa1e8536-a985-4cf5-b981-a170927a1d11
             project_name:
                 type: string
                 description: Project name
                 example: Kubernetes
+            project_uid:
+                type: string
+                description: Project UID
+                example: qa1e8536-a985-4cf5-b981-a170927a1d11
             survey_url:
                 type: string
                 description: Survey URL for this committee
@@ -1655,11 +1655,11 @@ definitions:
                 format: int64
         description: Survey committee details
         example:
-            committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
             committee_name: Technical Steering Committee
+            committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
             nps_value: 0.6075367583389751
-            project_id: qa1e8536-a985-4cf5-b981-a170927a1d11
             project_name: Kubernetes
+            project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
             survey_url: https://surveymonkey.com/r/abc123
             total_recipients: 2323679704152398664
             total_responses: 99423478662291821
@@ -1667,9 +1667,9 @@ definitions:
         title: SurveyCreateExclusionRequestBody
         type: object
         properties:
-            committee_id:
+            committee_uid:
                 type: string
-                description: Committee ID for survey-specific exclusion
+                description: Committee UID for survey-specific exclusion
                 example: Itaque saepe.
             email:
                 type: string
@@ -1679,27 +1679,27 @@ definitions:
                 type: string
                 description: Global exclusion flag
                 example: Modi quisquam inventore vitae sed beatae.
-            survey_id:
+            survey_uid:
                 type: string
-                description: Survey ID for survey-specific exclusion
+                description: Survey UID for survey-specific exclusion
                 example: Dolorem velit sit et.
             user_id:
                 type: string
                 description: Recipient's user ID
                 example: Mollitia et reprehenderit rerum.
         example:
-            committee_id: Sequi at unde quia est et quo.
+            committee_uid: Sequi at unde quia est et quo.
             email: Esse dolorem.
             global_exclusion: Et dicta ullam fuga in hic possimus.
-            survey_id: Molestias et voluptate nulla voluptatem.
+            survey_uid: Molestias et voluptate nulla voluptatem.
             user_id: Minima molestiae ut suscipit perspiciatis cupiditate harum.
     SurveyDeleteExclusionRequestBody:
         title: SurveyDeleteExclusionRequestBody
         type: object
         properties:
-            committee_id:
+            committee_uid:
                 type: string
-                description: Committee ID for survey-specific exclusion
+                description: Committee UID for survey-specific exclusion
                 example: Est beatae omnis veniam.
             email:
                 type: string
@@ -1709,19 +1709,19 @@ definitions:
                 type: string
                 description: Global exclusion flag
                 example: Eaque laboriosam aut.
-            survey_id:
+            survey_uid:
                 type: string
-                description: Survey ID for survey-specific exclusion
+                description: Survey UID for survey-specific exclusion
                 example: Quas quia eius dolorum nemo sit.
             user_id:
                 type: string
                 description: Recipient's user ID
                 example: Ipsa quia exercitationem ut eos rerum.
         example:
-            committee_id: Ut maiores et porro.
+            committee_uid: Ut maiores et porro.
             email: Officiis voluptatem ducimus et maiores exercitationem voluptas.
             global_exclusion: Earum explicabo tempore.
-            survey_id: Atque numquam.
+            survey_uid: Atque numquam.
             user_id: Nesciunt mollitia quis omnis.
     SurveyScheduleResult:
         title: SurveyScheduleResult
@@ -1741,19 +1741,19 @@ definitions:
                     $ref: '#/definitions/SurveyCommittee'
                 description: Survey committees
                 example:
-                    - committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
-                      committee_name: Technical Steering Committee
+                    - committee_name: Technical Steering Committee
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       nps_value: 0.24759276676729447
-                      project_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                       project_name: Kubernetes
+                      project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       survey_url: https://surveymonkey.com/r/abc123
                       total_recipients: 4948951016613182088
                       total_responses: 2809455758368137589
-                    - committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
-                      committee_name: Technical Steering Committee
+                    - committee_name: Technical Steering Committee
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       nps_value: 0.24759276676729447
-                      project_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                       project_name: Kubernetes
+                      project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       survey_url: https://surveymonkey.com/r/abc123
                       total_recipients: 4948951016613182088
                       total_responses: 2809455758368137589
@@ -1786,10 +1786,6 @@ definitions:
                 type: string
                 description: Email subject line
                 example: Officiis omnis voluptate odit repellat.
-            id:
-                type: string
-                description: Survey identifier
-                example: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
             is_nps_survey:
                 type: boolean
                 description: Whether this is an NPS survey
@@ -1914,39 +1910,43 @@ definitions:
                 description: Total number of responses
                 example: 3721412613282556941
                 format: int64
+            uid:
+                type: string
+                description: Survey unique identifier
+                example: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
         example:
             committee_category: Vitae et nesciunt culpa cupiditate.
             committee_voting_enabled: true
             committees:
-                - committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
-                  committee_name: Technical Steering Committee
+                - committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   nps_value: 0.24759276676729447
-                  project_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                   project_name: Kubernetes
+                  project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   survey_url: https://surveymonkey.com/r/abc123
                   total_recipients: 4948951016613182088
                   total_responses: 2809455758368137589
-                - committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
-                  committee_name: Technical Steering Committee
+                - committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   nps_value: 0.24759276676729447
-                  project_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                   project_name: Kubernetes
+                  project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   survey_url: https://surveymonkey.com/r/abc123
                   total_recipients: 4948951016613182088
                   total_responses: 2809455758368137589
-                - committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
-                  committee_name: Technical Steering Committee
+                - committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   nps_value: 0.24759276676729447
-                  project_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                   project_name: Kubernetes
+                  project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   survey_url: https://surveymonkey.com/r/abc123
                   total_recipients: 4948951016613182088
                   total_responses: 2809455758368137589
-                - committee_id: qa1e8536-a985-4cf5-b981-a170927a1d11
-                  committee_name: Technical Steering Committee
+                - committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   nps_value: 0.24759276676729447
-                  project_id: qa1e8536-a985-4cf5-b981-a170927a1d11
                   project_name: Kubernetes
+                  project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   survey_url: https://surveymonkey.com/r/abc123
                   total_recipients: 4948951016613182088
                   total_responses: 2809455758368137589
@@ -1957,7 +1957,6 @@ definitions:
             email_body: Qui dolores.
             email_body_text: Porro dicta ipsam cumque.
             email_subject: Nisi blanditiis veniam voluptatem.
-            id: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
             is_nps_survey: false
             is_project_survey: true
             last_modified_at: "2014-03-04T22:25:37Z"
@@ -1983,8 +1982,9 @@ definitions:
             total_bounced_emails: 2286647374539067270
             total_recipients: 1356697113763045090
             total_responses: 3035120764609076041
+            uid: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
         required:
-            - id
+            - uid
             - survey_status
     SurveyScheduleSurveyRequestBody:
         title: SurveyScheduleSurveyRequestBody

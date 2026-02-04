@@ -18,48 +18,48 @@ func ScheduleSurveySurveyPath() string {
 }
 
 // GetSurveySurveyPath returns the URL path to the survey service get_survey HTTP endpoint.
-func GetSurveySurveyPath(surveyID string) string {
-	return fmt.Sprintf("/surveys/%v", surveyID)
+func GetSurveySurveyPath(surveyUID string) string {
+	return fmt.Sprintf("/surveys/%v", surveyUID)
 }
 
 // UpdateSurveySurveyPath returns the URL path to the survey service update_survey HTTP endpoint.
-func UpdateSurveySurveyPath(surveyID string) string {
-	return fmt.Sprintf("/surveys/%v", surveyID)
+func UpdateSurveySurveyPath(surveyUID string) string {
+	return fmt.Sprintf("/surveys/%v", surveyUID)
 }
 
 // DeleteSurveySurveyPath returns the URL path to the survey service delete_survey HTTP endpoint.
-func DeleteSurveySurveyPath(surveyID string) string {
-	return fmt.Sprintf("/surveys/%v", surveyID)
+func DeleteSurveySurveyPath(surveyUID string) string {
+	return fmt.Sprintf("/surveys/%v", surveyUID)
 }
 
 // BulkResendSurveySurveyPath returns the URL path to the survey service bulk_resend_survey HTTP endpoint.
-func BulkResendSurveySurveyPath(surveyID string) string {
-	return fmt.Sprintf("/surveys/%v/bulk_resend", surveyID)
+func BulkResendSurveySurveyPath(surveyUID string) string {
+	return fmt.Sprintf("/surveys/%v/bulk_resend", surveyUID)
 }
 
 // PreviewSendSurveySurveyPath returns the URL path to the survey service preview_send_survey HTTP endpoint.
-func PreviewSendSurveySurveyPath(surveyID string) string {
-	return fmt.Sprintf("/surveys/%v/preview_send", surveyID)
+func PreviewSendSurveySurveyPath(surveyUID string) string {
+	return fmt.Sprintf("/surveys/%v/preview_send", surveyUID)
 }
 
 // SendMissingRecipientsSurveyPath returns the URL path to the survey service send_missing_recipients HTTP endpoint.
-func SendMissingRecipientsSurveyPath(surveyID string) string {
-	return fmt.Sprintf("/surveys/%v/send_missing_recipients", surveyID)
+func SendMissingRecipientsSurveyPath(surveyUID string) string {
+	return fmt.Sprintf("/surveys/%v/send_missing_recipients", surveyUID)
 }
 
 // DeleteSurveyResponseSurveyPath returns the URL path to the survey service delete_survey_response HTTP endpoint.
-func DeleteSurveyResponseSurveyPath(surveyID string, responseID string) string {
-	return fmt.Sprintf("/surveys/%v/responses/%v", surveyID, responseID)
+func DeleteSurveyResponseSurveyPath(surveyUID string, responseID string) string {
+	return fmt.Sprintf("/surveys/%v/responses/%v", surveyUID, responseID)
 }
 
 // ResendSurveyResponseSurveyPath returns the URL path to the survey service resend_survey_response HTTP endpoint.
-func ResendSurveyResponseSurveyPath(surveyID string, responseID string) string {
-	return fmt.Sprintf("/surveys/%v/responses/%v/resend", surveyID, responseID)
+func ResendSurveyResponseSurveyPath(surveyUID string, responseID string) string {
+	return fmt.Sprintf("/surveys/%v/responses/%v/resend", surveyUID, responseID)
 }
 
 // DeleteRecipientGroupSurveyPath returns the URL path to the survey service delete_recipient_group HTTP endpoint.
-func DeleteRecipientGroupSurveyPath(surveyID string) string {
-	return fmt.Sprintf("/surveys/%v/recipient_group", surveyID)
+func DeleteRecipientGroupSurveyPath(surveyUID string) string {
+	return fmt.Sprintf("/surveys/%v/recipient_group", surveyUID)
 }
 
 // CreateExclusionSurveyPath returns the URL path to the survey service create_exclusion HTTP endpoint.

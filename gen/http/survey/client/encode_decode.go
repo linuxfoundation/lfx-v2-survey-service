@@ -180,16 +180,16 @@ func DecodeScheduleSurveyResponse(decoder func(*http.Response) goahttp.Decoder, 
 // path set to call the "survey" service "get_survey" endpoint
 func (c *Client) BuildGetSurveyRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
-		surveyID string
+		surveyUID string
 	)
 	{
 		p, ok := v.(*survey.GetSurveyPayload)
 		if !ok {
 			return nil, goahttp.ErrInvalidType("survey", "get_survey", "*survey.GetSurveyPayload", v)
 		}
-		surveyID = p.SurveyID
+		surveyUID = p.SurveyUID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: GetSurveySurveyPath(surveyID)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: GetSurveySurveyPath(surveyUID)}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("survey", "get_survey", u.String(), err)
@@ -357,16 +357,16 @@ func DecodeGetSurveyResponse(decoder func(*http.Response) goahttp.Decoder, resto
 // path set to call the "survey" service "update_survey" endpoint
 func (c *Client) BuildUpdateSurveyRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
-		surveyID string
+		surveyUID string
 	)
 	{
 		p, ok := v.(*survey.UpdateSurveyPayload)
 		if !ok {
 			return nil, goahttp.ErrInvalidType("survey", "update_survey", "*survey.UpdateSurveyPayload", v)
 		}
-		surveyID = p.SurveyID
+		surveyUID = p.SurveyUID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateSurveySurveyPath(surveyID)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateSurveySurveyPath(surveyUID)}
 	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("survey", "update_survey", u.String(), err)
@@ -538,16 +538,16 @@ func DecodeUpdateSurveyResponse(decoder func(*http.Response) goahttp.Decoder, re
 // path set to call the "survey" service "delete_survey" endpoint
 func (c *Client) BuildDeleteSurveyRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
-		surveyID string
+		surveyUID string
 	)
 	{
 		p, ok := v.(*survey.DeleteSurveyPayload)
 		if !ok {
 			return nil, goahttp.ErrInvalidType("survey", "delete_survey", "*survey.DeleteSurveyPayload", v)
 		}
-		surveyID = p.SurveyID
+		surveyUID = p.SurveyUID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteSurveySurveyPath(surveyID)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteSurveySurveyPath(surveyUID)}
 	req, err := http.NewRequest("DELETE", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("survey", "delete_survey", u.String(), err)
@@ -702,16 +702,16 @@ func DecodeDeleteSurveyResponse(decoder func(*http.Response) goahttp.Decoder, re
 // and path set to call the "survey" service "bulk_resend_survey" endpoint
 func (c *Client) BuildBulkResendSurveyRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
-		surveyID string
+		surveyUID string
 	)
 	{
 		p, ok := v.(*survey.BulkResendSurveyPayload)
 		if !ok {
 			return nil, goahttp.ErrInvalidType("survey", "bulk_resend_survey", "*survey.BulkResendSurveyPayload", v)
 		}
-		surveyID = p.SurveyID
+		surveyUID = p.SurveyUID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: BulkResendSurveySurveyPath(surveyID)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: BulkResendSurveySurveyPath(surveyUID)}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("survey", "bulk_resend_survey", u.String(), err)
@@ -870,16 +870,16 @@ func DecodeBulkResendSurveyResponse(decoder func(*http.Response) goahttp.Decoder
 // and path set to call the "survey" service "preview_send_survey" endpoint
 func (c *Client) BuildPreviewSendSurveyRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
-		surveyID string
+		surveyUID string
 	)
 	{
 		p, ok := v.(*survey.PreviewSendSurveyPayload)
 		if !ok {
 			return nil, goahttp.ErrInvalidType("survey", "preview_send_survey", "*survey.PreviewSendSurveyPayload", v)
 		}
-		surveyID = p.SurveyID
+		surveyUID = p.SurveyUID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: PreviewSendSurveySurveyPath(surveyID)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: PreviewSendSurveySurveyPath(surveyUID)}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("survey", "preview_send_survey", u.String(), err)
@@ -908,8 +908,8 @@ func EncodePreviewSendSurveyRequest(encoder func(*http.Request) goahttp.Encoder)
 			}
 		}
 		values := req.URL.Query()
-		if p.CommitteeID != nil {
-			values.Add("committee_id", *p.CommitteeID)
+		if p.CommitteeUID != nil {
+			values.Add("committee_uid", *p.CommitteeUID)
 		}
 		req.URL.RawQuery = values.Encode()
 		return nil
@@ -1053,16 +1053,16 @@ func DecodePreviewSendSurveyResponse(decoder func(*http.Response) goahttp.Decode
 // endpoint
 func (c *Client) BuildSendMissingRecipientsRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
-		surveyID string
+		surveyUID string
 	)
 	{
 		p, ok := v.(*survey.SendMissingRecipientsPayload)
 		if !ok {
 			return nil, goahttp.ErrInvalidType("survey", "send_missing_recipients", "*survey.SendMissingRecipientsPayload", v)
 		}
-		surveyID = p.SurveyID
+		surveyUID = p.SurveyUID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: SendMissingRecipientsSurveyPath(surveyID)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: SendMissingRecipientsSurveyPath(surveyUID)}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("survey", "send_missing_recipients", u.String(), err)
@@ -1091,8 +1091,8 @@ func EncodeSendMissingRecipientsRequest(encoder func(*http.Request) goahttp.Enco
 			}
 		}
 		values := req.URL.Query()
-		if p.CommitteeID != nil {
-			values.Add("committee_id", *p.CommitteeID)
+		if p.CommitteeUID != nil {
+			values.Add("committee_uid", *p.CommitteeUID)
 		}
 		req.URL.RawQuery = values.Encode()
 		return nil
@@ -1223,7 +1223,7 @@ func DecodeSendMissingRecipientsResponse(decoder func(*http.Response) goahttp.De
 // endpoint
 func (c *Client) BuildDeleteSurveyResponseRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
-		surveyID   string
+		surveyUID  string
 		responseID string
 	)
 	{
@@ -1231,10 +1231,10 @@ func (c *Client) BuildDeleteSurveyResponseRequest(ctx context.Context, v any) (*
 		if !ok {
 			return nil, goahttp.ErrInvalidType("survey", "delete_survey_response", "*survey.DeleteSurveyResponsePayload", v)
 		}
-		surveyID = p.SurveyID
+		surveyUID = p.SurveyUID
 		responseID = p.ResponseID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteSurveyResponseSurveyPath(surveyID, responseID)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteSurveyResponseSurveyPath(surveyUID, responseID)}
 	req, err := http.NewRequest("DELETE", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("survey", "delete_survey_response", u.String(), err)
@@ -1390,7 +1390,7 @@ func DecodeDeleteSurveyResponseResponse(decoder func(*http.Response) goahttp.Dec
 // endpoint
 func (c *Client) BuildResendSurveyResponseRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
-		surveyID   string
+		surveyUID  string
 		responseID string
 	)
 	{
@@ -1398,10 +1398,10 @@ func (c *Client) BuildResendSurveyResponseRequest(ctx context.Context, v any) (*
 		if !ok {
 			return nil, goahttp.ErrInvalidType("survey", "resend_survey_response", "*survey.ResendSurveyResponsePayload", v)
 		}
-		surveyID = p.SurveyID
+		surveyUID = p.SurveyUID
 		responseID = p.ResponseID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ResendSurveyResponseSurveyPath(surveyID, responseID)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ResendSurveyResponseSurveyPath(surveyUID, responseID)}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("survey", "resend_survey_response", u.String(), err)
@@ -1557,16 +1557,16 @@ func DecodeResendSurveyResponseResponse(decoder func(*http.Response) goahttp.Dec
 // endpoint
 func (c *Client) BuildDeleteRecipientGroupRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
-		surveyID string
+		surveyUID string
 	)
 	{
 		p, ok := v.(*survey.DeleteRecipientGroupPayload)
 		if !ok {
 			return nil, goahttp.ErrInvalidType("survey", "delete_recipient_group", "*survey.DeleteRecipientGroupPayload", v)
 		}
-		surveyID = p.SurveyID
+		surveyUID = p.SurveyUID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteRecipientGroupSurveyPath(surveyID)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteRecipientGroupSurveyPath(surveyUID)}
 	req, err := http.NewRequest("DELETE", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("survey", "delete_recipient_group", u.String(), err)
@@ -1595,11 +1595,11 @@ func EncodeDeleteRecipientGroupRequest(encoder func(*http.Request) goahttp.Encod
 			}
 		}
 		values := req.URL.Query()
-		if p.CommitteeID != nil {
-			values.Add("committee_id", *p.CommitteeID)
+		if p.CommitteeUID != nil {
+			values.Add("committee_uid", *p.CommitteeUID)
 		}
-		if p.ProjectID != nil {
-			values.Add("project_id", *p.ProjectID)
+		if p.ProjectUID != nil {
+			values.Add("project_uid", *p.ProjectUID)
 		}
 		if p.FoundationID != nil {
 			values.Add("foundation_id", *p.FoundationID)
@@ -2444,8 +2444,8 @@ func unmarshalSurveyCommitteeResponseBodyToSurveySurveyCommittee(v *SurveyCommit
 	}
 	res := &survey.SurveyCommittee{
 		CommitteeName:   v.CommitteeName,
-		CommitteeID:     v.CommitteeID,
-		ProjectID:       v.ProjectID,
+		CommitteeUID:    v.CommitteeUID,
+		ProjectUID:      v.ProjectUID,
 		ProjectName:     v.ProjectName,
 		SurveyURL:       v.SurveyURL,
 		TotalRecipients: v.TotalRecipients,
@@ -2481,9 +2481,9 @@ func unmarshalExcludedCommitteeResponseBodyToSurveyExcludedCommittee(v *Excluded
 		return nil
 	}
 	res := &survey.ExcludedCommittee{
-		ProjectID:         *v.ProjectID,
+		ProjectUID:        *v.ProjectUID,
 		ProjectName:       *v.ProjectName,
-		CommitteeID:       *v.CommitteeID,
+		CommitteeUID:      *v.CommitteeUID,
 		CommitteeName:     *v.CommitteeName,
 		CommitteeCategory: *v.CommitteeCategory,
 	}

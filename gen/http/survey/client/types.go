@@ -89,10 +89,10 @@ type CreateExclusionRequestBody struct {
 	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
 	// Recipient's user ID
 	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
-	// Survey ID for survey-specific exclusion
-	SurveyID *string `form:"survey_id,omitempty" json:"survey_id,omitempty" xml:"survey_id,omitempty"`
-	// Committee ID for survey-specific exclusion
-	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
+	// Survey UID for survey-specific exclusion
+	SurveyUID *string `form:"survey_uid,omitempty" json:"survey_uid,omitempty" xml:"survey_uid,omitempty"`
+	// Committee UID for survey-specific exclusion
+	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
 	// Global exclusion flag
 	GlobalExclusion *string `form:"global_exclusion,omitempty" json:"global_exclusion,omitempty" xml:"global_exclusion,omitempty"`
 }
@@ -104,10 +104,10 @@ type DeleteExclusionRequestBody struct {
 	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
 	// Recipient's user ID
 	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
-	// Survey ID for survey-specific exclusion
-	SurveyID *string `form:"survey_id,omitempty" json:"survey_id,omitempty" xml:"survey_id,omitempty"`
-	// Committee ID for survey-specific exclusion
-	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
+	// Survey UID for survey-specific exclusion
+	SurveyUID *string `form:"survey_uid,omitempty" json:"survey_uid,omitempty" xml:"survey_uid,omitempty"`
+	// Committee UID for survey-specific exclusion
+	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
 	// Global exclusion flag
 	GlobalExclusion *string `form:"global_exclusion,omitempty" json:"global_exclusion,omitempty" xml:"global_exclusion,omitempty"`
 }
@@ -124,8 +124,8 @@ type ValidateEmailRequestBody struct {
 // ScheduleSurveyResponseBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP response body.
 type ScheduleSurveyResponseBody struct {
-	// Survey identifier
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Survey unique identifier
+	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
 	// SurveyMonkey survey ID
 	SurveyMonkeyID *string `form:"survey_monkey_id,omitempty" json:"survey_monkey_id,omitempty" xml:"survey_monkey_id,omitempty"`
 	// Whether project-level or global-level survey
@@ -201,8 +201,8 @@ type ScheduleSurveyResponseBody struct {
 // GetSurveyResponseBody is the type of the "survey" service "get_survey"
 // endpoint HTTP response body.
 type GetSurveyResponseBody struct {
-	// Survey identifier
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Survey unique identifier
+	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
 	// SurveyMonkey survey ID
 	SurveyMonkeyID *string `form:"survey_monkey_id,omitempty" json:"survey_monkey_id,omitempty" xml:"survey_monkey_id,omitempty"`
 	// Whether project-level or global-level survey
@@ -278,8 +278,8 @@ type GetSurveyResponseBody struct {
 // UpdateSurveyResponseBody is the type of the "survey" service "update_survey"
 // endpoint HTTP response body.
 type UpdateSurveyResponseBody struct {
-	// Survey identifier
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Survey unique identifier
+	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
 	// SurveyMonkey survey ID
 	SurveyMonkeyID *string `form:"survey_monkey_id,omitempty" json:"survey_monkey_id,omitempty" xml:"survey_monkey_id,omitempty"`
 	// Whether project-level or global-level survey
@@ -366,14 +366,14 @@ type PreviewSendSurveyResponseBody struct {
 // CreateExclusionResponseBody is the type of the "survey" service
 // "create_exclusion" endpoint HTTP response body.
 type CreateExclusionResponseBody struct {
-	// Exclusion ID
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Exclusion unique identifier
+	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
 	// Survey responder's email
 	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
-	// Survey ID
-	SurveyID *string `form:"survey_id,omitempty" json:"survey_id,omitempty" xml:"survey_id,omitempty"`
-	// Committee ID
-	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
+	// Survey UID
+	SurveyUID *string `form:"survey_uid,omitempty" json:"survey_uid,omitempty" xml:"survey_uid,omitempty"`
+	// Committee UID
+	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
 	// Global exclusion flag
 	GlobalExclusion *string `form:"global_exclusion,omitempty" json:"global_exclusion,omitempty" xml:"global_exclusion,omitempty"`
 	// Recipient's user ID
@@ -383,14 +383,14 @@ type CreateExclusionResponseBody struct {
 // GetExclusionResponseBody is the type of the "survey" service "get_exclusion"
 // endpoint HTTP response body.
 type GetExclusionResponseBody struct {
-	// Exclusion ID
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Exclusion unique identifier
+	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
 	// Survey responder's email
 	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
-	// Survey ID
-	SurveyID *string `form:"survey_id,omitempty" json:"survey_id,omitempty" xml:"survey_id,omitempty"`
-	// Committee ID
-	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
+	// Survey UID
+	SurveyUID *string `form:"survey_uid,omitempty" json:"survey_uid,omitempty" xml:"survey_uid,omitempty"`
+	// Committee UID
+	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
 	// Global exclusion flag
 	GlobalExclusion *string `form:"global_exclusion,omitempty" json:"global_exclusion,omitempty" xml:"global_exclusion,omitempty"`
 	// Recipient's user ID
@@ -1176,10 +1176,10 @@ type ValidateEmailUnauthorizedResponseBody struct {
 type SurveyCommitteeResponseBody struct {
 	// Committee name
 	CommitteeName *string `form:"committee_name,omitempty" json:"committee_name,omitempty" xml:"committee_name,omitempty"`
-	// Committee ID
-	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
-	// Project ID
-	ProjectID *string `form:"project_id,omitempty" json:"project_id,omitempty" xml:"project_id,omitempty"`
+	// Committee UID
+	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
+	// Project UID
+	ProjectUID *string `form:"project_uid,omitempty" json:"project_uid,omitempty" xml:"project_uid,omitempty"`
 	// Project name
 	ProjectName *string `form:"project_name,omitempty" json:"project_name,omitempty" xml:"project_name,omitempty"`
 	// Survey URL for this committee
@@ -1209,12 +1209,12 @@ type LFXProjectResponseBody struct {
 // ExcludedCommitteeResponseBody is used to define fields on response body
 // types.
 type ExcludedCommitteeResponseBody struct {
-	// Project ID
-	ProjectID *string `form:"project_id,omitempty" json:"project_id,omitempty" xml:"project_id,omitempty"`
+	// Project UID
+	ProjectUID *string `form:"project_uid,omitempty" json:"project_uid,omitempty" xml:"project_uid,omitempty"`
 	// Project name
 	ProjectName *string `form:"project_name,omitempty" json:"project_name,omitempty" xml:"project_name,omitempty"`
-	// Committee ID
-	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
+	// Committee UID
+	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
 	// Committee name
 	CommitteeName *string `form:"committee_name,omitempty" json:"committee_name,omitempty" xml:"committee_name,omitempty"`
 	// Committee category
@@ -1333,8 +1333,8 @@ func NewCreateExclusionRequestBody(p *survey.CreateExclusionPayload) *CreateExcl
 	body := &CreateExclusionRequestBody{
 		Email:           p.Email,
 		UserID:          p.UserID,
-		SurveyID:        p.SurveyID,
-		CommitteeID:     p.CommitteeID,
+		SurveyUID:       p.SurveyUID,
+		CommitteeUID:    p.CommitteeUID,
 		GlobalExclusion: p.GlobalExclusion,
 	}
 	return body
@@ -1346,8 +1346,8 @@ func NewDeleteExclusionRequestBody(p *survey.DeleteExclusionPayload) *DeleteExcl
 	body := &DeleteExclusionRequestBody{
 		Email:           p.Email,
 		UserID:          p.UserID,
-		SurveyID:        p.SurveyID,
-		CommitteeID:     p.CommitteeID,
+		SurveyUID:       p.SurveyUID,
+		CommitteeUID:    p.CommitteeUID,
 		GlobalExclusion: p.GlobalExclusion,
 	}
 	return body
@@ -1367,7 +1367,7 @@ func NewValidateEmailRequestBody(p *survey.ValidateEmailPayload) *ValidateEmailR
 // "schedule_survey" endpoint result from a HTTP "Created" response.
 func NewScheduleSurveySurveyScheduleResultCreated(body *ScheduleSurveyResponseBody) *survey.SurveyScheduleResult {
 	v := &survey.SurveyScheduleResult{
-		ID:                            *body.ID,
+		UID:                           *body.UID,
 		SurveyMonkeyID:                body.SurveyMonkeyID,
 		IsProjectSurvey:               body.IsProjectSurvey,
 		StageFilter:                   body.StageFilter,
@@ -1476,7 +1476,7 @@ func NewScheduleSurveyUnauthorized(body *ScheduleSurveyUnauthorizedResponseBody)
 // endpoint result from a HTTP "OK" response.
 func NewGetSurveySurveyScheduleResultOK(body *GetSurveyResponseBody) *survey.SurveyScheduleResult {
 	v := &survey.SurveyScheduleResult{
-		ID:                            *body.ID,
+		UID:                           *body.UID,
 		SurveyMonkeyID:                body.SurveyMonkeyID,
 		IsProjectSurvey:               body.IsProjectSurvey,
 		StageFilter:                   body.StageFilter,
@@ -1596,7 +1596,7 @@ func NewGetSurveyUnauthorized(body *GetSurveyUnauthorizedResponseBody) *survey.U
 // "update_survey" endpoint result from a HTTP "OK" response.
 func NewUpdateSurveySurveyScheduleResultOK(body *UpdateSurveyResponseBody) *survey.SurveyScheduleResult {
 	v := &survey.SurveyScheduleResult{
-		ID:                            *body.ID,
+		UID:                           *body.UID,
 		SurveyMonkeyID:                body.SurveyMonkeyID,
 		IsProjectSurvey:               body.IsProjectSurvey,
 		StageFilter:                   body.StageFilter,
@@ -2216,10 +2216,10 @@ func NewDeleteRecipientGroupUnauthorized(body *DeleteRecipientGroupUnauthorizedR
 // "create_exclusion" endpoint result from a HTTP "Created" response.
 func NewCreateExclusionExclusionResultCreated(body *CreateExclusionResponseBody) *survey.ExclusionResult {
 	v := &survey.ExclusionResult{
-		ID:              *body.ID,
+		UID:             *body.UID,
 		Email:           body.Email,
-		SurveyID:        body.SurveyID,
-		CommitteeID:     body.CommitteeID,
+		SurveyUID:       body.SurveyUID,
+		CommitteeUID:    body.CommitteeUID,
 		GlobalExclusion: body.GlobalExclusion,
 		UserID:          body.UserID,
 	}
@@ -2319,10 +2319,10 @@ func NewDeleteExclusionUnauthorized(body *DeleteExclusionUnauthorizedResponseBod
 // "get_exclusion" endpoint result from a HTTP "OK" response.
 func NewGetExclusionExtendedExclusionResultOK(body *GetExclusionResponseBody) *survey.ExtendedExclusionResult {
 	v := &survey.ExtendedExclusionResult{
-		ID:              *body.ID,
+		UID:             *body.UID,
 		Email:           body.Email,
-		SurveyID:        body.SurveyID,
-		CommitteeID:     body.CommitteeID,
+		SurveyUID:       body.SurveyUID,
+		CommitteeUID:    body.CommitteeUID,
 		GlobalExclusion: body.GlobalExclusion,
 		UserID:          body.UserID,
 	}
@@ -2490,8 +2490,8 @@ func NewValidateEmailUnauthorized(body *ValidateEmailUnauthorizedResponseBody) *
 // ValidateScheduleSurveyResponseBody runs the validations defined on
 // schedule_survey_response_body
 func ValidateScheduleSurveyResponseBody(body *ScheduleSurveyResponseBody) (err error) {
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.UID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
 	}
 	if body.SurveyStatus == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("survey_status", "body"))
@@ -2530,8 +2530,8 @@ func ValidateScheduleSurveyResponseBody(body *ScheduleSurveyResponseBody) (err e
 // ValidateGetSurveyResponseBody runs the validations defined on
 // get_survey_response_body
 func ValidateGetSurveyResponseBody(body *GetSurveyResponseBody) (err error) {
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.UID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
 	}
 	if body.SurveyStatus == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("survey_status", "body"))
@@ -2570,8 +2570,8 @@ func ValidateGetSurveyResponseBody(body *GetSurveyResponseBody) (err error) {
 // ValidateUpdateSurveyResponseBody runs the validations defined on
 // update_survey_response_body
 func ValidateUpdateSurveyResponseBody(body *UpdateSurveyResponseBody) (err error) {
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.UID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
 	}
 	if body.SurveyStatus == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("survey_status", "body"))
@@ -2637,8 +2637,8 @@ func ValidatePreviewSendSurveyResponseBody(body *PreviewSendSurveyResponseBody) 
 // ValidateCreateExclusionResponseBody runs the validations defined on
 // create_exclusion_response_body
 func ValidateCreateExclusionResponseBody(body *CreateExclusionResponseBody) (err error) {
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.UID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
 	}
 	return
 }
@@ -2646,8 +2646,8 @@ func ValidateCreateExclusionResponseBody(body *CreateExclusionResponseBody) (err
 // ValidateGetExclusionResponseBody runs the validations defined on
 // get_exclusion_response_body
 func ValidateGetExclusionResponseBody(body *GetExclusionResponseBody) (err error) {
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	if body.UID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
 	}
 	return
 }
@@ -3659,14 +3659,14 @@ func ValidateLFXProjectResponseBody(body *LFXProjectResponseBody) (err error) {
 // ValidateExcludedCommitteeResponseBody runs the validations defined on
 // ExcludedCommitteeResponseBody
 func ValidateExcludedCommitteeResponseBody(body *ExcludedCommitteeResponseBody) (err error) {
-	if body.ProjectID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("project_id", "body"))
+	if body.ProjectUID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("project_uid", "body"))
 	}
 	if body.ProjectName == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("project_name", "body"))
 	}
-	if body.CommitteeID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("committee_id", "body"))
+	if body.CommitteeUID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("committee_uid", "body"))
 	}
 	if body.CommitteeName == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("committee_name", "body"))

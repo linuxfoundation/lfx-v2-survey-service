@@ -170,17 +170,17 @@ func EncodeGetSurveyResponse(encoder func(context.Context, http.ResponseWriter) 
 func DecodeGetSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.GetSurveyPayload, error) {
 	return func(r *http.Request) (*survey.GetSurveyPayload, error) {
 		var (
-			surveyID string
-			token    *string
+			surveyUID string
+			token     *string
 
 			params = mux.Vars(r)
 		)
-		surveyID = params["survey_id"]
+		surveyUID = params["survey_uid"]
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewGetSurveyPayload(surveyID, token)
+		payload := NewGetSurveyPayload(surveyUID, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -320,17 +320,17 @@ func DecodeUpdateSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request) go
 		}
 
 		var (
-			surveyID string
-			token    *string
+			surveyUID string
+			token     *string
 
 			params = mux.Vars(r)
 		)
-		surveyID = params["survey_id"]
+		surveyUID = params["survey_uid"]
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewUpdateSurveyPayload(&body, surveyID, token)
+		payload := NewUpdateSurveyPayload(&body, surveyUID, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -451,17 +451,17 @@ func EncodeDeleteSurveyResponse(encoder func(context.Context, http.ResponseWrite
 func DecodeDeleteSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.DeleteSurveyPayload, error) {
 	return func(r *http.Request) (*survey.DeleteSurveyPayload, error) {
 		var (
-			surveyID string
-			token    *string
+			surveyUID string
+			token     *string
 
 			params = mux.Vars(r)
 		)
-		surveyID = params["survey_id"]
+		surveyUID = params["survey_uid"]
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewDeleteSurveyPayload(surveyID, token)
+		payload := NewDeleteSurveyPayload(surveyUID, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -602,17 +602,17 @@ func DecodeBulkResendSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request
 		}
 
 		var (
-			surveyID string
-			token    *string
+			surveyUID string
+			token     *string
 
 			params = mux.Vars(r)
 		)
-		surveyID = params["survey_id"]
+		surveyUID = params["survey_uid"]
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewBulkResendSurveyPayload(&body, surveyID, token)
+		payload := NewBulkResendSurveyPayload(&body, surveyUID, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -736,22 +736,22 @@ func EncodePreviewSendSurveyResponse(encoder func(context.Context, http.Response
 func DecodePreviewSendSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.PreviewSendSurveyPayload, error) {
 	return func(r *http.Request) (*survey.PreviewSendSurveyPayload, error) {
 		var (
-			surveyID    string
-			committeeID *string
-			token       *string
+			surveyUID    string
+			committeeUID *string
+			token        *string
 
 			params = mux.Vars(r)
 		)
-		surveyID = params["survey_id"]
-		committeeIDRaw := r.URL.Query().Get("committee_id")
-		if committeeIDRaw != "" {
-			committeeID = &committeeIDRaw
+		surveyUID = params["survey_uid"]
+		committeeUIDRaw := r.URL.Query().Get("committee_uid")
+		if committeeUIDRaw != "" {
+			committeeUID = &committeeUIDRaw
 		}
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewPreviewSendSurveyPayload(surveyID, committeeID, token)
+		payload := NewPreviewSendSurveyPayload(surveyUID, committeeUID, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -872,22 +872,22 @@ func EncodeSendMissingRecipientsResponse(encoder func(context.Context, http.Resp
 func DecodeSendMissingRecipientsRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.SendMissingRecipientsPayload, error) {
 	return func(r *http.Request) (*survey.SendMissingRecipientsPayload, error) {
 		var (
-			surveyID    string
-			committeeID *string
-			token       *string
+			surveyUID    string
+			committeeUID *string
+			token        *string
 
 			params = mux.Vars(r)
 		)
-		surveyID = params["survey_id"]
-		committeeIDRaw := r.URL.Query().Get("committee_id")
-		if committeeIDRaw != "" {
-			committeeID = &committeeIDRaw
+		surveyUID = params["survey_uid"]
+		committeeUIDRaw := r.URL.Query().Get("committee_uid")
+		if committeeUIDRaw != "" {
+			committeeUID = &committeeUIDRaw
 		}
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewSendMissingRecipientsPayload(surveyID, committeeID, token)
+		payload := NewSendMissingRecipientsPayload(surveyUID, committeeUID, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -1008,19 +1008,19 @@ func EncodeDeleteSurveyResponseResponse(encoder func(context.Context, http.Respo
 func DecodeDeleteSurveyResponseRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.DeleteSurveyResponsePayload, error) {
 	return func(r *http.Request) (*survey.DeleteSurveyResponsePayload, error) {
 		var (
-			surveyID   string
+			surveyUID  string
 			responseID string
 			token      *string
 
 			params = mux.Vars(r)
 		)
-		surveyID = params["survey_id"]
+		surveyUID = params["survey_uid"]
 		responseID = params["response_id"]
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewDeleteSurveyResponsePayload(surveyID, responseID, token)
+		payload := NewDeleteSurveyResponsePayload(surveyUID, responseID, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -1141,19 +1141,19 @@ func EncodeResendSurveyResponseResponse(encoder func(context.Context, http.Respo
 func DecodeResendSurveyResponseRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.ResendSurveyResponsePayload, error) {
 	return func(r *http.Request) (*survey.ResendSurveyResponsePayload, error) {
 		var (
-			surveyID   string
+			surveyUID  string
 			responseID string
 			token      *string
 
 			params = mux.Vars(r)
 		)
-		surveyID = params["survey_id"]
+		surveyUID = params["survey_uid"]
 		responseID = params["response_id"]
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewResendSurveyResponsePayload(surveyID, responseID, token)
+		payload := NewResendSurveyResponsePayload(surveyUID, responseID, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -1274,23 +1274,23 @@ func EncodeDeleteRecipientGroupResponse(encoder func(context.Context, http.Respo
 func DecodeDeleteRecipientGroupRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.DeleteRecipientGroupPayload, error) {
 	return func(r *http.Request) (*survey.DeleteRecipientGroupPayload, error) {
 		var (
-			surveyID     string
-			committeeID  *string
-			projectID    *string
+			surveyUID    string
+			committeeUID *string
+			projectUID   *string
 			foundationID *string
 			token        *string
 
 			params = mux.Vars(r)
 		)
-		surveyID = params["survey_id"]
+		surveyUID = params["survey_uid"]
 		qp := r.URL.Query()
-		committeeIDRaw := qp.Get("committee_id")
-		if committeeIDRaw != "" {
-			committeeID = &committeeIDRaw
+		committeeUIDRaw := qp.Get("committee_uid")
+		if committeeUIDRaw != "" {
+			committeeUID = &committeeUIDRaw
 		}
-		projectIDRaw := qp.Get("project_id")
-		if projectIDRaw != "" {
-			projectID = &projectIDRaw
+		projectUIDRaw := qp.Get("project_uid")
+		if projectUIDRaw != "" {
+			projectUID = &projectUIDRaw
 		}
 		foundationIDRaw := qp.Get("foundation_id")
 		if foundationIDRaw != "" {
@@ -1300,7 +1300,7 @@ func DecodeDeleteRecipientGroupRequest(mux goahttp.Muxer, decoder func(*http.Req
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewDeleteRecipientGroupPayload(surveyID, committeeID, projectID, foundationID, token)
+		payload := NewDeleteRecipientGroupPayload(surveyUID, committeeUID, projectUID, foundationID, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
@@ -1999,8 +1999,8 @@ func marshalSurveySurveyCommitteeToSurveyCommitteeResponseBody(v *survey.SurveyC
 	}
 	res := &SurveyCommitteeResponseBody{
 		CommitteeName:   v.CommitteeName,
-		CommitteeID:     v.CommitteeID,
-		ProjectID:       v.ProjectID,
+		CommitteeUID:    v.CommitteeUID,
+		ProjectUID:      v.ProjectUID,
 		ProjectName:     v.ProjectName,
 		SurveyURL:       v.SurveyURL,
 		TotalRecipients: v.TotalRecipients,
@@ -2036,9 +2036,9 @@ func marshalSurveyExcludedCommitteeToExcludedCommitteeResponseBody(v *survey.Exc
 		return nil
 	}
 	res := &ExcludedCommitteeResponseBody{
-		ProjectID:         v.ProjectID,
+		ProjectUID:        v.ProjectUID,
 		ProjectName:       v.ProjectName,
-		CommitteeID:       v.CommitteeID,
+		CommitteeUID:      v.CommitteeUID,
 		CommitteeName:     v.CommitteeName,
 		CommitteeCategory: v.CommitteeCategory,
 	}

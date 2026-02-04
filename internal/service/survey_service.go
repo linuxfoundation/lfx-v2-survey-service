@@ -79,7 +79,7 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 	result := mapITXResponseToResult(itxResponse)
 
 	s.logger.InfoContext(ctx, "survey scheduled successfully",
-		"survey_id", result.ID,
+		"survey_uid", result.UID,
 		"survey_status", result.SurveyStatus,
 	)
 
@@ -96,11 +96,11 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 
 	s.logger.InfoContext(ctx, "getting survey",
 		"principal", principal,
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 	)
 
 	// Call ITX API
-	itxResponse, err := s.proxy.GetSurvey(ctx, p.SurveyID)
+	itxResponse, err := s.proxy.GetSurvey(ctx, p.SurveyUID)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -109,7 +109,7 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 	result := mapITXResponseToResult(itxResponse)
 
 	s.logger.InfoContext(ctx, "survey retrieved successfully",
-		"survey_id", result.ID,
+		"survey_uid", result.UID,
 	)
 
 	return result, nil
@@ -125,7 +125,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 
 	s.logger.InfoContext(ctx, "updating survey",
 		"principal", principal,
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 		"survey_title", p.SurveyTitle,
 	)
 
@@ -144,7 +144,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.UpdateSurvey(ctx, p.SurveyID, itxRequest)
+	itxResponse, err := s.proxy.UpdateSurvey(ctx, p.SurveyUID, itxRequest)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -153,7 +153,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 	result := mapITXResponseToResult(itxResponse)
 
 	s.logger.InfoContext(ctx, "survey updated successfully",
-		"survey_id", result.ID,
+		"survey_uid", result.UID,
 	)
 
 	return result, nil
@@ -169,17 +169,17 @@ func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurvey
 
 	s.logger.InfoContext(ctx, "deleting survey",
 		"principal", principal,
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 	)
 
 	// Call ITX API
-	err = s.proxy.DeleteSurvey(ctx, p.SurveyID)
+	err = s.proxy.DeleteSurvey(ctx, p.SurveyUID)
 	if err != nil {
 		return mapDomainError(err)
 	}
 
 	s.logger.InfoContext(ctx, "survey deleted successfully",
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 	)
 
 	return nil
@@ -195,7 +195,7 @@ func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkRese
 
 	s.logger.InfoContext(ctx, "bulk resending survey",
 		"principal", principal,
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 		"recipient_count", len(p.RecipientIds),
 	)
 
@@ -205,13 +205,13 @@ func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkRese
 	}
 
 	// Call ITX API
-	err = s.proxy.BulkResendSurvey(ctx, p.SurveyID, itxRequest)
+	err = s.proxy.BulkResendSurvey(ctx, p.SurveyUID, itxRequest)
 	if err != nil {
 		return mapDomainError(err)
 	}
 
 	s.logger.InfoContext(ctx, "survey bulk resend dispatched successfully",
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 	)
 
 	return nil
@@ -227,12 +227,12 @@ func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.Preview
 
 	s.logger.InfoContext(ctx, "previewing survey send",
 		"principal", principal,
-		"survey_id", p.SurveyID,
-		"committee_id", p.CommitteeID,
+		"survey_uid", p.SurveyUID,
+		"committee_uid", p.CommitteeUID,
 	)
 
 	// Call ITX API
-	itxResponse, err := s.proxy.PreviewSend(ctx, p.SurveyID, p.CommitteeID)
+	itxResponse, err := s.proxy.PreviewSend(ctx, p.SurveyUID, p.CommitteeUID)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -241,7 +241,7 @@ func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.Preview
 	result := mapPreviewSendResponseToResult(itxResponse)
 
 	s.logger.InfoContext(ctx, "survey preview send retrieved successfully",
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 		"affected_recipients", len(result.AffectedRecipients),
 	)
 
@@ -258,18 +258,18 @@ func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.Sen
 
 	s.logger.InfoContext(ctx, "sending survey to missing recipients",
 		"principal", principal,
-		"survey_id", p.SurveyID,
-		"committee_id", p.CommitteeID,
+		"survey_uid", p.SurveyUID,
+		"committee_uid", p.CommitteeUID,
 	)
 
 	// Call ITX API
-	err = s.proxy.SendMissingRecipients(ctx, p.SurveyID, p.CommitteeID)
+	err = s.proxy.SendMissingRecipients(ctx, p.SurveyUID, p.CommitteeUID)
 	if err != nil {
 		return mapDomainError(err)
 	}
 
 	s.logger.InfoContext(ctx, "survey send to missing recipients dispatched successfully",
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 	)
 
 	return nil
@@ -285,18 +285,18 @@ func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.Dele
 
 	s.logger.InfoContext(ctx, "deleting survey response",
 		"principal", principal,
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 		"response_id", p.ResponseID,
 	)
 
 	// Call ITX API
-	err = s.proxy.DeleteResponse(ctx, p.SurveyID, p.ResponseID)
+	err = s.proxy.DeleteResponse(ctx, p.SurveyUID, p.ResponseID)
 	if err != nil {
 		return mapDomainError(err)
 	}
 
 	s.logger.InfoContext(ctx, "survey response deleted successfully",
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 		"response_id", p.ResponseID,
 	)
 
@@ -313,18 +313,18 @@ func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.Rese
 
 	s.logger.InfoContext(ctx, "resending survey response",
 		"principal", principal,
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 		"response_id", p.ResponseID,
 	)
 
 	// Call ITX API
-	err = s.proxy.ResendResponse(ctx, p.SurveyID, p.ResponseID)
+	err = s.proxy.ResendResponse(ctx, p.SurveyUID, p.ResponseID)
 	if err != nil {
 		return mapDomainError(err)
 	}
 
 	s.logger.InfoContext(ctx, "survey response resent successfully",
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 		"response_id", p.ResponseID,
 	)
 
@@ -341,20 +341,20 @@ func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.Dele
 
 	s.logger.InfoContext(ctx, "deleting recipient group from survey",
 		"principal", principal,
-		"survey_id", p.SurveyID,
-		"committee_id", p.CommitteeID,
-		"project_id", p.ProjectID,
+		"survey_uid", p.SurveyUID,
+		"committee_uid", p.CommitteeUID,
+		"project_uid", p.ProjectUID,
 		"foundation_id", p.FoundationID,
 	)
 
 	// Call ITX API
-	err = s.proxy.DeleteRecipientGroup(ctx, p.SurveyID, p.CommitteeID, p.ProjectID, p.FoundationID)
+	err = s.proxy.DeleteRecipientGroup(ctx, p.SurveyUID, p.CommitteeUID, p.ProjectUID, p.FoundationID)
 	if err != nil {
 		return mapDomainError(err)
 	}
 
 	s.logger.InfoContext(ctx, "recipient group deleted successfully",
-		"survey_id", p.SurveyID,
+		"survey_uid", p.SurveyUID,
 	)
 
 	return nil
@@ -378,8 +378,8 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 	itxRequest := &itx.ExclusionRequest{
 		Email:           p.Email,
 		UserID:          p.UserID,
-		SurveyID:        p.SurveyID,
-		CommitteeID:     p.CommitteeID,
+		SurveyID:        p.SurveyUID,
+		CommitteeID:     p.CommitteeUID,
 		GlobalExclusion: p.GlobalExclusion,
 	}
 
@@ -393,7 +393,7 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 	result := mapExclusionToResult(itxResponse)
 
 	s.logger.InfoContext(ctx, "exclusion created successfully",
-		"exclusion_id", result.ID,
+		"exclusion_uid", result.UID,
 	)
 
 	return result, nil
@@ -417,8 +417,8 @@ func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExc
 	itxRequest := &itx.ExclusionRequest{
 		Email:           p.Email,
 		UserID:          p.UserID,
-		SurveyID:        p.SurveyID,
-		CommitteeID:     p.CommitteeID,
+		SurveyID:        p.SurveyUID,
+		CommitteeID:     p.CommitteeUID,
 		GlobalExclusion: p.GlobalExclusion,
 	}
 
@@ -456,7 +456,7 @@ func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusion
 	result := mapExtendedExclusionToResult(itxResponse)
 
 	s.logger.InfoContext(ctx, "exclusion retrieved successfully",
-		"exclusion_id", result.ID,
+		"exclusion_uid", result.UID,
 	)
 
 	return result, nil
@@ -545,7 +545,7 @@ func (s *SurveyService) parsePrincipal(ctx context.Context, token *string) (stri
 // mapITXResponseToResult maps ITX response to Goa result (extracted to avoid duplication)
 func mapITXResponseToResult(itxResponse *itx.SurveyScheduleResponse) *survey.SurveyScheduleResult {
 	return &survey.SurveyScheduleResult{
-		ID:                            itxResponse.ID,
+		UID:                           itxResponse.ID,
 		SurveyMonkeyID:                itxResponse.SurveyMonkeyID,
 		IsProjectSurvey:               itxResponse.IsProjectSurvey,
 		StageFilter:                   itxResponse.StageFilter,
@@ -593,8 +593,8 @@ func mapSurveyCommitteesToResult(committees []itx.SurveyCommittee) []*survey.Sur
 	for i, c := range committees {
 		result[i] = &survey.SurveyCommittee{
 			CommitteeName:   c.CommitteeName,
-			CommitteeID:     c.CommitteeID,
-			ProjectID:       c.ProjectID,
+			CommitteeUID:    c.CommitteeID,
+			ProjectUID:      c.ProjectID,
 			ProjectName:     c.ProjectName,
 			SurveyURL:       c.SurveyURL,
 			TotalRecipients: c.TotalRecipients,
@@ -633,9 +633,9 @@ func mapExcludedCommitteesToResult(committees []itx.ExcludedCommittee) []*survey
 	result := make([]*survey.ExcludedCommittee, 0, len(committees))
 	for _, c := range committees {
 		result = append(result, &survey.ExcludedCommittee{
-			ProjectID:         c.ProjectID,
+			ProjectUID:        c.ProjectID,
 			ProjectName:       c.ProjectName,
-			CommitteeID:       c.CommitteeID,
+			CommitteeUID:      c.CommitteeID,
 			CommitteeName:     c.CommitteeName,
 			CommitteeCategory: c.CommitteeCategory,
 		})
@@ -662,10 +662,10 @@ func mapITXPreviewRecipientsToResult(recipients []itx.ITXPreviewRecipient) []*su
 
 func mapExclusionToResult(itxExclusion *itx.Exclusion) *survey.ExclusionResult {
 	return &survey.ExclusionResult{
-		ID:              itxExclusion.ID,
+		UID:             itxExclusion.ID,
 		Email:           itxExclusion.Email,
-		SurveyID:        itxExclusion.SurveyID,
-		CommitteeID:     itxExclusion.CommitteeID,
+		SurveyUID:       itxExclusion.SurveyID,
+		CommitteeUID:    itxExclusion.CommitteeID,
 		GlobalExclusion: itxExclusion.GlobalExclusion,
 		UserID:          itxExclusion.UserID,
 	}
@@ -673,10 +673,10 @@ func mapExclusionToResult(itxExclusion *itx.Exclusion) *survey.ExclusionResult {
 
 func mapExtendedExclusionToResult(itxExclusion *itx.ExtendedExclusion) *survey.ExtendedExclusionResult {
 	result := &survey.ExtendedExclusionResult{
-		ID:              itxExclusion.ID,
+		UID:             itxExclusion.ID,
 		Email:           itxExclusion.Email,
-		SurveyID:        itxExclusion.SurveyID,
-		CommitteeID:     itxExclusion.CommitteeID,
+		SurveyUID:       itxExclusion.SurveyID,
+		CommitteeUID:    itxExclusion.CommitteeID,
 		GlobalExclusion: itxExclusion.GlobalExclusion,
 		UserID:          itxExclusion.UserID,
 	}

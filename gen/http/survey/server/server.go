@@ -65,15 +65,15 @@ func New(
 	return &Server{
 		Mounts: []*MountPoint{
 			{"ScheduleSurvey", "POST", "/surveys"},
-			{"GetSurvey", "GET", "/surveys/{survey_id}"},
-			{"UpdateSurvey", "PUT", "/surveys/{survey_id}"},
-			{"DeleteSurvey", "DELETE", "/surveys/{survey_id}"},
-			{"BulkResendSurvey", "POST", "/surveys/{survey_id}/bulk_resend"},
-			{"PreviewSendSurvey", "GET", "/surveys/{survey_id}/preview_send"},
-			{"SendMissingRecipients", "POST", "/surveys/{survey_id}/send_missing_recipients"},
-			{"DeleteSurveyResponse", "DELETE", "/surveys/{survey_id}/responses/{response_id}"},
-			{"ResendSurveyResponse", "POST", "/surveys/{survey_id}/responses/{response_id}/resend"},
-			{"DeleteRecipientGroup", "DELETE", "/surveys/{survey_id}/recipient_group"},
+			{"GetSurvey", "GET", "/surveys/{survey_uid}"},
+			{"UpdateSurvey", "PUT", "/surveys/{survey_uid}"},
+			{"DeleteSurvey", "DELETE", "/surveys/{survey_uid}"},
+			{"BulkResendSurvey", "POST", "/surveys/{survey_uid}/bulk_resend"},
+			{"PreviewSendSurvey", "GET", "/surveys/{survey_uid}/preview_send"},
+			{"SendMissingRecipients", "POST", "/surveys/{survey_uid}/send_missing_recipients"},
+			{"DeleteSurveyResponse", "DELETE", "/surveys/{survey_uid}/responses/{response_id}"},
+			{"ResendSurveyResponse", "POST", "/surveys/{survey_uid}/responses/{response_id}/resend"},
+			{"DeleteRecipientGroup", "DELETE", "/surveys/{survey_uid}/recipient_group"},
 			{"CreateExclusion", "POST", "/surveys/exclusion"},
 			{"DeleteExclusion", "DELETE", "/surveys/exclusion"},
 			{"GetExclusion", "GET", "/surveys/exclusion/{exclusion_id}"},
@@ -209,7 +209,7 @@ func MountGetSurveyHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("GET", "/surveys/{survey_id}", f)
+	mux.Handle("GET", "/surveys/{survey_uid}", f)
 }
 
 // NewGetSurveyHandler creates a HTTP handler which loads the HTTP request and
@@ -262,7 +262,7 @@ func MountUpdateSurveyHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("PUT", "/surveys/{survey_id}", f)
+	mux.Handle("PUT", "/surveys/{survey_uid}", f)
 }
 
 // NewUpdateSurveyHandler creates a HTTP handler which loads the HTTP request
@@ -315,7 +315,7 @@ func MountDeleteSurveyHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("DELETE", "/surveys/{survey_id}", f)
+	mux.Handle("DELETE", "/surveys/{survey_uid}", f)
 }
 
 // NewDeleteSurveyHandler creates a HTTP handler which loads the HTTP request
@@ -368,7 +368,7 @@ func MountBulkResendSurveyHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/surveys/{survey_id}/bulk_resend", f)
+	mux.Handle("POST", "/surveys/{survey_uid}/bulk_resend", f)
 }
 
 // NewBulkResendSurveyHandler creates a HTTP handler which loads the HTTP
@@ -421,7 +421,7 @@ func MountPreviewSendSurveyHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("GET", "/surveys/{survey_id}/preview_send", f)
+	mux.Handle("GET", "/surveys/{survey_uid}/preview_send", f)
 }
 
 // NewPreviewSendSurveyHandler creates a HTTP handler which loads the HTTP
@@ -474,7 +474,7 @@ func MountSendMissingRecipientsHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/surveys/{survey_id}/send_missing_recipients", f)
+	mux.Handle("POST", "/surveys/{survey_uid}/send_missing_recipients", f)
 }
 
 // NewSendMissingRecipientsHandler creates a HTTP handler which loads the HTTP
@@ -527,7 +527,7 @@ func MountDeleteSurveyResponseHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("DELETE", "/surveys/{survey_id}/responses/{response_id}", f)
+	mux.Handle("DELETE", "/surveys/{survey_uid}/responses/{response_id}", f)
 }
 
 // NewDeleteSurveyResponseHandler creates a HTTP handler which loads the HTTP
@@ -580,7 +580,7 @@ func MountResendSurveyResponseHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/surveys/{survey_id}/responses/{response_id}/resend", f)
+	mux.Handle("POST", "/surveys/{survey_uid}/responses/{response_id}/resend", f)
 }
 
 // NewResendSurveyResponseHandler creates a HTTP handler which loads the HTTP
@@ -633,7 +633,7 @@ func MountDeleteRecipientGroupHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("DELETE", "/surveys/{survey_id}/recipient_group", f)
+	mux.Handle("DELETE", "/surveys/{survey_uid}/recipient_group", f)
 }
 
 // NewDeleteRecipientGroupHandler creates a HTTP handler which loads the HTTP

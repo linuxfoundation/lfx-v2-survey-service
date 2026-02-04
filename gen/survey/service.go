@@ -19,33 +19,33 @@ type Service interface {
 	// Create a scheduled survey for ITX project committees (proxies to ITX POST
 	// /surveys/schedule)
 	ScheduleSurvey(context.Context, *ScheduleSurveyPayload) (res *SurveyScheduleResult, err error)
-	// Get survey details (proxies to ITX GET /v2/surveys/{survey_id})
+	// Get survey details (proxies to ITX GET /v2/surveys/{survey_uid})
 	GetSurvey(context.Context, *GetSurveyPayload) (res *SurveyScheduleResult, err error)
-	// Update survey (proxies to ITX PUT /v2/surveys/{survey_id}). Only allowed
+	// Update survey (proxies to ITX PUT /v2/surveys/{survey_uid}). Only allowed
 	// when status is 'disabled'
 	UpdateSurvey(context.Context, *UpdateSurveyPayload) (res *SurveyScheduleResult, err error)
-	// Delete survey (proxies to ITX DELETE /v2/surveys/{survey_id}). Only allowed
+	// Delete survey (proxies to ITX DELETE /v2/surveys/{survey_uid}). Only allowed
 	// when status is 'disabled'
 	DeleteSurvey(context.Context, *DeleteSurveyPayload) (err error)
 	// Bulk resend survey emails to select recipients (proxies to ITX POST
-	// /v2/surveys/{survey_id}/bulk_resend)
+	// /v2/surveys/{survey_uid}/bulk_resend)
 	BulkResendSurvey(context.Context, *BulkResendSurveyPayload) (err error)
 	// Preview which recipients, committees, and projects would be affected by a
-	// resend (proxies to ITX GET /v2/surveys/{survey_id}/preview_send)
+	// resend (proxies to ITX GET /v2/surveys/{survey_uid}/preview_send)
 	PreviewSendSurvey(context.Context, *PreviewSendSurveyPayload) (res *PreviewSendResult, err error)
 	// Send survey emails to committee members who haven't received it (proxies to
-	// ITX POST /v2/surveys/{survey_id}/send_missing_recipients)
+	// ITX POST /v2/surveys/{survey_uid}/send_missing_recipients)
 	SendMissingRecipients(context.Context, *SendMissingRecipientsPayload) (err error)
 	// Delete survey response - removes recipient from survey and recalculates
 	// statistics (proxies to ITX DELETE
-	// /v2/surveys/{survey_id}/responses/{response_id})
+	// /v2/surveys/{survey_uid}/responses/{response_id})
 	DeleteSurveyResponse(context.Context, *DeleteSurveyResponsePayload) (err error)
 	// Resend survey email to a specific user (proxies to ITX POST
-	// /v2/surveys/{survey_id}/responses/{response_id}/resend)
+	// /v2/surveys/{survey_uid}/responses/{response_id}/resend)
 	ResendSurveyResponse(context.Context, *ResendSurveyResponsePayload) (err error)
 	// Remove a recipient group (committee, project, or foundation) from survey and
 	// recalculate statistics (proxies to ITX DELETE
-	// /v2/surveys/{survey_id}/recipient_group)
+	// /v2/surveys/{survey_uid}/recipient_group)
 	DeleteRecipientGroup(context.Context, *DeleteRecipientGroupPayload) (err error)
 	// Create a survey or global exclusion (proxies to ITX POST
 	// /v2/surveys/exclusion)
@@ -99,7 +99,7 @@ type BulkResendSurveyPayload struct {
 	// JWT token
 	Token *string
 	// Survey identifier
-	SurveyID string
+	SurveyUID string
 	// Array of recipient IDs to resend survey emails to
 	RecipientIds []string
 }
@@ -121,10 +121,10 @@ type CreateExclusionPayload struct {
 	Email *string
 	// Recipient's user ID
 	UserID *string
-	// Survey ID for survey-specific exclusion
-	SurveyID *string
-	// Committee ID for survey-specific exclusion
-	CommitteeID *string
+	// Survey UID for survey-specific exclusion
+	SurveyUID *string
+	// Committee UID for survey-specific exclusion
+	CommitteeUID *string
 	// Global exclusion flag
 	GlobalExclusion *string
 }
@@ -147,10 +147,10 @@ type DeleteExclusionPayload struct {
 	Email *string
 	// Recipient's user ID
 	UserID *string
-	// Survey ID for survey-specific exclusion
-	SurveyID *string
-	// Committee ID for survey-specific exclusion
-	CommitteeID *string
+	// Survey UID for survey-specific exclusion
+	SurveyUID *string
+	// Committee UID for survey-specific exclusion
+	CommitteeUID *string
 	// Global exclusion flag
 	GlobalExclusion *string
 }
@@ -161,12 +161,12 @@ type DeleteRecipientGroupPayload struct {
 	// JWT token
 	Token *string
 	// Survey identifier
-	SurveyID string
-	// Committee ID to remove (indicates specific committee in project)
-	CommitteeID *string
-	// Project ID to remove (all removals are attached to a project)
-	ProjectID *string
-	// Foundation ID (indicates project_id references a foundation and all
+	SurveyUID string
+	// Committee UID to remove (indicates specific committee in project)
+	CommitteeUID *string
+	// Project UID to remove (all removals are attached to a project)
+	ProjectUID *string
+	// Foundation ID (indicates project_uid references a foundation and all
 	// subprojects should be removed)
 	FoundationID *string
 }
@@ -177,7 +177,7 @@ type DeleteSurveyPayload struct {
 	// JWT token
 	Token *string
 	// Survey identifier
-	SurveyID string
+	SurveyUID string
 }
 
 // DeleteSurveyResponsePayload is the payload type of the survey service
@@ -186,19 +186,19 @@ type DeleteSurveyResponsePayload struct {
 	// JWT token
 	Token *string
 	// Survey identifier
-	SurveyID string
+	SurveyUID string
 	// Response identifier
 	ResponseID string
 }
 
 // Committee information for preview send
 type ExcludedCommittee struct {
-	// Project ID
-	ProjectID string
+	// Project UID
+	ProjectUID string
 	// Project name
 	ProjectName string
-	// Committee ID
-	CommitteeID string
+	// Committee UID
+	CommitteeUID string
 	// Committee name
 	CommitteeName string
 	// Committee category
@@ -208,14 +208,14 @@ type ExcludedCommittee struct {
 // ExclusionResult is the result type of the survey service create_exclusion
 // method.
 type ExclusionResult struct {
-	// Exclusion ID
-	ID string
+	// Exclusion unique identifier
+	UID string
 	// Survey responder's email
 	Email *string
-	// Survey ID
-	SurveyID *string
-	// Committee ID
-	CommitteeID *string
+	// Survey UID
+	SurveyUID *string
+	// Committee UID
+	CommitteeUID *string
 	// Global exclusion flag
 	GlobalExclusion *string
 	// Recipient's user ID
@@ -235,14 +235,14 @@ type ExclusionUser struct {
 // ExtendedExclusionResult is the result type of the survey service
 // get_exclusion method.
 type ExtendedExclusionResult struct {
-	// Exclusion ID
-	ID string
+	// Exclusion unique identifier
+	UID string
 	// Survey responder's email
 	Email *string
-	// Survey ID
-	SurveyID *string
-	// Committee ID
-	CommitteeID *string
+	// Survey UID
+	SurveyUID *string
+	// Committee UID
+	CommitteeUID *string
 	// Global exclusion flag
 	GlobalExclusion *string
 	// Recipient's user ID
@@ -273,7 +273,7 @@ type GetSurveyPayload struct {
 	// JWT token
 	Token *string
 	// Survey identifier
-	SurveyID string
+	SurveyUID string
 }
 
 // Recipient information for preview send
@@ -341,9 +341,9 @@ type PreviewSendSurveyPayload struct {
 	// JWT token
 	Token *string
 	// Survey identifier
-	SurveyID string
-	// Optional committee ID to filter preview
-	CommitteeID *string
+	SurveyUID string
+	// Optional committee UID to filter preview
+	CommitteeUID *string
 }
 
 // ResendSurveyResponsePayload is the payload type of the survey service
@@ -352,7 +352,7 @@ type ResendSurveyResponsePayload struct {
 	// JWT token
 	Token *string
 	// Survey identifier
-	SurveyID string
+	SurveyUID string
 	// Response identifier
 	ResponseID string
 }
@@ -402,9 +402,9 @@ type SendMissingRecipientsPayload struct {
 	// JWT token
 	Token *string
 	// Survey identifier
-	SurveyID string
-	// Optional committee ID to resync only that committee
-	CommitteeID *string
+	SurveyUID string
+	// Optional committee UID to resync only that committee
+	CommitteeUID *string
 }
 
 // Service unavailable error response
@@ -419,10 +419,10 @@ type ServiceUnavailableError struct {
 type SurveyCommittee struct {
 	// Committee name
 	CommitteeName *string
-	// Committee ID
-	CommitteeID *string
-	// Project ID
-	ProjectID *string
+	// Committee UID
+	CommitteeUID *string
+	// Project UID
+	ProjectUID *string
 	// Project name
 	ProjectName *string
 	// Survey URL for this committee
@@ -438,8 +438,8 @@ type SurveyCommittee struct {
 // SurveyScheduleResult is the result type of the survey service
 // schedule_survey method.
 type SurveyScheduleResult struct {
-	// Survey identifier
-	ID string
+	// Survey unique identifier
+	UID string
 	// SurveyMonkey survey ID
 	SurveyMonkeyID *string
 	// Whether project-level or global-level survey
@@ -526,7 +526,7 @@ type UpdateSurveyPayload struct {
 	// JWT token
 	Token *string
 	// Survey identifier
-	SurveyID string
+	SurveyUID string
 	// Creator's user ID
 	CreatorID *string
 	// Survey title

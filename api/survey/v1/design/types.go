@@ -105,7 +105,7 @@ var SurveySchedulePayload = Type("SurveySchedulePayload", func() {
 var SurveyScheduleResult = Type("SurveyScheduleResult", func() {
 	Description("Scheduled survey details")
 
-	Attribute("id", String, "Survey identifier", func() {
+	Attribute("uid", String, "Survey unique identifier", func() {
 		Example("4e8165a9-9b29-4506-b093-ab0a4aae9b84")
 	})
 
@@ -183,7 +183,7 @@ var SurveyScheduleResult = Type("SurveyScheduleResult", func() {
 		Format(FormatDateTime)
 	})
 
-	Required("id", "survey_status")
+	Required("uid", "survey_status")
 })
 
 // SurveyCommittee represents a committee associated with a survey
@@ -194,11 +194,11 @@ var SurveyCommittee = Type("SurveyCommittee", func() {
 		Example("Technical Steering Committee")
 	})
 
-	Attribute("committee_id", String, "Committee ID", func() {
+	Attribute("committee_uid", String, "Committee UID", func() {
 		Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
 	})
 
-	Attribute("project_id", String, "Project ID", func() {
+	Attribute("project_uid", String, "Project UID", func() {
 		Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
 	})
 
@@ -310,7 +310,7 @@ var LFXProject = Type("LFXProject", func() {
 var ExcludedCommittee = Type("ExcludedCommittee", func() {
 	Description("Committee information for preview send")
 
-	Attribute("project_id", String, "Project ID", func() {
+	Attribute("project_uid", String, "Project UID", func() {
 		Example("003170000123XHTAA2")
 	})
 
@@ -318,7 +318,7 @@ var ExcludedCommittee = Type("ExcludedCommittee", func() {
 		Example("Kubernetes")
 	})
 
-	Attribute("committee_id", String, "Committee ID", func() {
+	Attribute("committee_uid", String, "Committee UID", func() {
 		Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
 	})
 
@@ -331,7 +331,7 @@ var ExcludedCommittee = Type("ExcludedCommittee", func() {
 		Example("Technical Steering Committee")
 	})
 
-	Required("project_id", "project_name", "committee_id", "committee_name", "committee_category")
+	Required("project_uid", "project_name", "committee_uid", "committee_name", "committee_category")
 })
 
 // ITXPreviewRecipient represents a recipient in the preview send response
@@ -375,23 +375,23 @@ var ITXPreviewRecipient = Type("ITXPreviewRecipient", func() {
 var ExclusionResult = Type("ExclusionResult", func() {
 	Description("A survey or global exclusion")
 
-	Attribute("id", String, "Exclusion ID", func() {
-		Example("12345")
+	Attribute("uid", String, "Exclusion unique identifier", func() {
+		Example("5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e")
 	})
 
 	Attribute("email", String, "Survey responder's email", func() {
 		Example("test@email.com")
 	})
 
-	Attribute("survey_id", String, "Survey ID")
+	Attribute("survey_uid", String, "Survey UID")
 
-	Attribute("committee_id", String, "Committee ID")
+	Attribute("committee_uid", String, "Committee UID")
 
 	Attribute("global_exclusion", String, "Global exclusion flag")
 
 	Attribute("user_id", String, "Recipient's user ID")
 
-	Required("id")
+	Required("uid")
 })
 
 // UserEmail represents a user email address
@@ -416,17 +416,17 @@ var ExclusionUser = Type("ExclusionUser", func() {
 var ExtendedExclusionResult = Type("ExtendedExclusionResult", func() {
 	Description("A survey or global exclusion with user information")
 
-	Attribute("id", String, "Exclusion ID", func() {
-		Example("12345")
+	Attribute("uid", String, "Exclusion unique identifier", func() {
+		Example("5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e")
 	})
 
 	Attribute("email", String, "Survey responder's email", func() {
 		Example("test@email.com")
 	})
 
-	Attribute("survey_id", String, "Survey ID")
+	Attribute("survey_uid", String, "Survey UID")
 
-	Attribute("committee_id", String, "Committee ID")
+	Attribute("committee_uid", String, "Committee UID")
 
 	Attribute("global_exclusion", String, "Global exclusion flag")
 
@@ -434,7 +434,7 @@ var ExtendedExclusionResult = Type("ExtendedExclusionResult", func() {
 
 	Attribute("user", ExclusionUser, "User information")
 
-	Required("id")
+	Required("uid")
 })
 
 // ValidateEmailResult represents the validated email template response

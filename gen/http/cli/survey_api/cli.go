@@ -50,48 +50,48 @@ func ParseEndpoint(
 		surveyScheduleSurveyBodyFlag  = surveyScheduleSurveyFlags.String("body", "REQUIRED", "")
 		surveyScheduleSurveyTokenFlag = surveyScheduleSurveyFlags.String("token", "", "")
 
-		surveyGetSurveyFlags        = flag.NewFlagSet("get-survey", flag.ExitOnError)
-		surveyGetSurveySurveyIDFlag = surveyGetSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
-		surveyGetSurveyTokenFlag    = surveyGetSurveyFlags.String("token", "", "")
+		surveyGetSurveyFlags         = flag.NewFlagSet("get-survey", flag.ExitOnError)
+		surveyGetSurveySurveyUIDFlag = surveyGetSurveyFlags.String("survey-uid", "REQUIRED", "Survey identifier")
+		surveyGetSurveyTokenFlag     = surveyGetSurveyFlags.String("token", "", "")
 
-		surveyUpdateSurveyFlags        = flag.NewFlagSet("update-survey", flag.ExitOnError)
-		surveyUpdateSurveyBodyFlag     = surveyUpdateSurveyFlags.String("body", "REQUIRED", "")
-		surveyUpdateSurveySurveyIDFlag = surveyUpdateSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
-		surveyUpdateSurveyTokenFlag    = surveyUpdateSurveyFlags.String("token", "", "")
+		surveyUpdateSurveyFlags         = flag.NewFlagSet("update-survey", flag.ExitOnError)
+		surveyUpdateSurveyBodyFlag      = surveyUpdateSurveyFlags.String("body", "REQUIRED", "")
+		surveyUpdateSurveySurveyUIDFlag = surveyUpdateSurveyFlags.String("survey-uid", "REQUIRED", "Survey identifier")
+		surveyUpdateSurveyTokenFlag     = surveyUpdateSurveyFlags.String("token", "", "")
 
-		surveyDeleteSurveyFlags        = flag.NewFlagSet("delete-survey", flag.ExitOnError)
-		surveyDeleteSurveySurveyIDFlag = surveyDeleteSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
-		surveyDeleteSurveyTokenFlag    = surveyDeleteSurveyFlags.String("token", "", "")
+		surveyDeleteSurveyFlags         = flag.NewFlagSet("delete-survey", flag.ExitOnError)
+		surveyDeleteSurveySurveyUIDFlag = surveyDeleteSurveyFlags.String("survey-uid", "REQUIRED", "Survey identifier")
+		surveyDeleteSurveyTokenFlag     = surveyDeleteSurveyFlags.String("token", "", "")
 
-		surveyBulkResendSurveyFlags        = flag.NewFlagSet("bulk-resend-survey", flag.ExitOnError)
-		surveyBulkResendSurveyBodyFlag     = surveyBulkResendSurveyFlags.String("body", "REQUIRED", "")
-		surveyBulkResendSurveySurveyIDFlag = surveyBulkResendSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
-		surveyBulkResendSurveyTokenFlag    = surveyBulkResendSurveyFlags.String("token", "", "")
+		surveyBulkResendSurveyFlags         = flag.NewFlagSet("bulk-resend-survey", flag.ExitOnError)
+		surveyBulkResendSurveyBodyFlag      = surveyBulkResendSurveyFlags.String("body", "REQUIRED", "")
+		surveyBulkResendSurveySurveyUIDFlag = surveyBulkResendSurveyFlags.String("survey-uid", "REQUIRED", "Survey identifier")
+		surveyBulkResendSurveyTokenFlag     = surveyBulkResendSurveyFlags.String("token", "", "")
 
-		surveyPreviewSendSurveyFlags           = flag.NewFlagSet("preview-send-survey", flag.ExitOnError)
-		surveyPreviewSendSurveySurveyIDFlag    = surveyPreviewSendSurveyFlags.String("survey-id", "REQUIRED", "Survey identifier")
-		surveyPreviewSendSurveyCommitteeIDFlag = surveyPreviewSendSurveyFlags.String("committee-id", "", "")
-		surveyPreviewSendSurveyTokenFlag       = surveyPreviewSendSurveyFlags.String("token", "", "")
+		surveyPreviewSendSurveyFlags            = flag.NewFlagSet("preview-send-survey", flag.ExitOnError)
+		surveyPreviewSendSurveySurveyUIDFlag    = surveyPreviewSendSurveyFlags.String("survey-uid", "REQUIRED", "Survey identifier")
+		surveyPreviewSendSurveyCommitteeUIDFlag = surveyPreviewSendSurveyFlags.String("committee-uid", "", "")
+		surveyPreviewSendSurveyTokenFlag        = surveyPreviewSendSurveyFlags.String("token", "", "")
 
-		surveySendMissingRecipientsFlags           = flag.NewFlagSet("send-missing-recipients", flag.ExitOnError)
-		surveySendMissingRecipientsSurveyIDFlag    = surveySendMissingRecipientsFlags.String("survey-id", "REQUIRED", "Survey identifier")
-		surveySendMissingRecipientsCommitteeIDFlag = surveySendMissingRecipientsFlags.String("committee-id", "", "")
-		surveySendMissingRecipientsTokenFlag       = surveySendMissingRecipientsFlags.String("token", "", "")
+		surveySendMissingRecipientsFlags            = flag.NewFlagSet("send-missing-recipients", flag.ExitOnError)
+		surveySendMissingRecipientsSurveyUIDFlag    = surveySendMissingRecipientsFlags.String("survey-uid", "REQUIRED", "Survey identifier")
+		surveySendMissingRecipientsCommitteeUIDFlag = surveySendMissingRecipientsFlags.String("committee-uid", "", "")
+		surveySendMissingRecipientsTokenFlag        = surveySendMissingRecipientsFlags.String("token", "", "")
 
 		surveyDeleteSurveyResponseFlags          = flag.NewFlagSet("delete-survey-response", flag.ExitOnError)
-		surveyDeleteSurveyResponseSurveyIDFlag   = surveyDeleteSurveyResponseFlags.String("survey-id", "REQUIRED", "Survey identifier")
+		surveyDeleteSurveyResponseSurveyUIDFlag  = surveyDeleteSurveyResponseFlags.String("survey-uid", "REQUIRED", "Survey identifier")
 		surveyDeleteSurveyResponseResponseIDFlag = surveyDeleteSurveyResponseFlags.String("response-id", "REQUIRED", "Response identifier")
 		surveyDeleteSurveyResponseTokenFlag      = surveyDeleteSurveyResponseFlags.String("token", "", "")
 
 		surveyResendSurveyResponseFlags          = flag.NewFlagSet("resend-survey-response", flag.ExitOnError)
-		surveyResendSurveyResponseSurveyIDFlag   = surveyResendSurveyResponseFlags.String("survey-id", "REQUIRED", "Survey identifier")
+		surveyResendSurveyResponseSurveyUIDFlag  = surveyResendSurveyResponseFlags.String("survey-uid", "REQUIRED", "Survey identifier")
 		surveyResendSurveyResponseResponseIDFlag = surveyResendSurveyResponseFlags.String("response-id", "REQUIRED", "Response identifier")
 		surveyResendSurveyResponseTokenFlag      = surveyResendSurveyResponseFlags.String("token", "", "")
 
 		surveyDeleteRecipientGroupFlags            = flag.NewFlagSet("delete-recipient-group", flag.ExitOnError)
-		surveyDeleteRecipientGroupSurveyIDFlag     = surveyDeleteRecipientGroupFlags.String("survey-id", "REQUIRED", "Survey identifier")
-		surveyDeleteRecipientGroupCommitteeIDFlag  = surveyDeleteRecipientGroupFlags.String("committee-id", "", "")
-		surveyDeleteRecipientGroupProjectIDFlag    = surveyDeleteRecipientGroupFlags.String("project-id", "", "")
+		surveyDeleteRecipientGroupSurveyUIDFlag    = surveyDeleteRecipientGroupFlags.String("survey-uid", "REQUIRED", "Survey identifier")
+		surveyDeleteRecipientGroupCommitteeUIDFlag = surveyDeleteRecipientGroupFlags.String("committee-uid", "", "")
+		surveyDeleteRecipientGroupProjectUIDFlag   = surveyDeleteRecipientGroupFlags.String("project-uid", "", "")
 		surveyDeleteRecipientGroupFoundationIDFlag = surveyDeleteRecipientGroupFlags.String("foundation-id", "", "")
 		surveyDeleteRecipientGroupTokenFlag        = surveyDeleteRecipientGroupFlags.String("token", "", "")
 
@@ -241,31 +241,31 @@ func ParseEndpoint(
 				data, err = surveyc.BuildScheduleSurveyPayload(*surveyScheduleSurveyBodyFlag, *surveyScheduleSurveyTokenFlag)
 			case "get-survey":
 				endpoint = c.GetSurvey()
-				data, err = surveyc.BuildGetSurveyPayload(*surveyGetSurveySurveyIDFlag, *surveyGetSurveyTokenFlag)
+				data, err = surveyc.BuildGetSurveyPayload(*surveyGetSurveySurveyUIDFlag, *surveyGetSurveyTokenFlag)
 			case "update-survey":
 				endpoint = c.UpdateSurvey()
-				data, err = surveyc.BuildUpdateSurveyPayload(*surveyUpdateSurveyBodyFlag, *surveyUpdateSurveySurveyIDFlag, *surveyUpdateSurveyTokenFlag)
+				data, err = surveyc.BuildUpdateSurveyPayload(*surveyUpdateSurveyBodyFlag, *surveyUpdateSurveySurveyUIDFlag, *surveyUpdateSurveyTokenFlag)
 			case "delete-survey":
 				endpoint = c.DeleteSurvey()
-				data, err = surveyc.BuildDeleteSurveyPayload(*surveyDeleteSurveySurveyIDFlag, *surveyDeleteSurveyTokenFlag)
+				data, err = surveyc.BuildDeleteSurveyPayload(*surveyDeleteSurveySurveyUIDFlag, *surveyDeleteSurveyTokenFlag)
 			case "bulk-resend-survey":
 				endpoint = c.BulkResendSurvey()
-				data, err = surveyc.BuildBulkResendSurveyPayload(*surveyBulkResendSurveyBodyFlag, *surveyBulkResendSurveySurveyIDFlag, *surveyBulkResendSurveyTokenFlag)
+				data, err = surveyc.BuildBulkResendSurveyPayload(*surveyBulkResendSurveyBodyFlag, *surveyBulkResendSurveySurveyUIDFlag, *surveyBulkResendSurveyTokenFlag)
 			case "preview-send-survey":
 				endpoint = c.PreviewSendSurvey()
-				data, err = surveyc.BuildPreviewSendSurveyPayload(*surveyPreviewSendSurveySurveyIDFlag, *surveyPreviewSendSurveyCommitteeIDFlag, *surveyPreviewSendSurveyTokenFlag)
+				data, err = surveyc.BuildPreviewSendSurveyPayload(*surveyPreviewSendSurveySurveyUIDFlag, *surveyPreviewSendSurveyCommitteeUIDFlag, *surveyPreviewSendSurveyTokenFlag)
 			case "send-missing-recipients":
 				endpoint = c.SendMissingRecipients()
-				data, err = surveyc.BuildSendMissingRecipientsPayload(*surveySendMissingRecipientsSurveyIDFlag, *surveySendMissingRecipientsCommitteeIDFlag, *surveySendMissingRecipientsTokenFlag)
+				data, err = surveyc.BuildSendMissingRecipientsPayload(*surveySendMissingRecipientsSurveyUIDFlag, *surveySendMissingRecipientsCommitteeUIDFlag, *surveySendMissingRecipientsTokenFlag)
 			case "delete-survey-response":
 				endpoint = c.DeleteSurveyResponse()
-				data, err = surveyc.BuildDeleteSurveyResponsePayload(*surveyDeleteSurveyResponseSurveyIDFlag, *surveyDeleteSurveyResponseResponseIDFlag, *surveyDeleteSurveyResponseTokenFlag)
+				data, err = surveyc.BuildDeleteSurveyResponsePayload(*surveyDeleteSurveyResponseSurveyUIDFlag, *surveyDeleteSurveyResponseResponseIDFlag, *surveyDeleteSurveyResponseTokenFlag)
 			case "resend-survey-response":
 				endpoint = c.ResendSurveyResponse()
-				data, err = surveyc.BuildResendSurveyResponsePayload(*surveyResendSurveyResponseSurveyIDFlag, *surveyResendSurveyResponseResponseIDFlag, *surveyResendSurveyResponseTokenFlag)
+				data, err = surveyc.BuildResendSurveyResponsePayload(*surveyResendSurveyResponseSurveyUIDFlag, *surveyResendSurveyResponseResponseIDFlag, *surveyResendSurveyResponseTokenFlag)
 			case "delete-recipient-group":
 				endpoint = c.DeleteRecipientGroup()
-				data, err = surveyc.BuildDeleteRecipientGroupPayload(*surveyDeleteRecipientGroupSurveyIDFlag, *surveyDeleteRecipientGroupCommitteeIDFlag, *surveyDeleteRecipientGroupProjectIDFlag, *surveyDeleteRecipientGroupFoundationIDFlag, *surveyDeleteRecipientGroupTokenFlag)
+				data, err = surveyc.BuildDeleteRecipientGroupPayload(*surveyDeleteRecipientGroupSurveyUIDFlag, *surveyDeleteRecipientGroupCommitteeUIDFlag, *surveyDeleteRecipientGroupProjectUIDFlag, *surveyDeleteRecipientGroupFoundationIDFlag, *surveyDeleteRecipientGroupTokenFlag)
 			case "create-exclusion":
 				endpoint = c.CreateExclusion()
 				data, err = surveyc.BuildCreateExclusionPayload(*surveyCreateExclusionBodyFlag, *surveyCreateExclusionTokenFlag)
@@ -297,15 +297,15 @@ func surveyUsage() {
 	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] survey COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    schedule-survey: Create a scheduled survey for ITX project committees (proxies to ITX POST /surveys/schedule)`)
-	fmt.Fprintln(os.Stderr, `    get-survey: Get survey details (proxies to ITX GET /v2/surveys/{survey_id})`)
-	fmt.Fprintln(os.Stderr, `    update-survey: Update survey (proxies to ITX PUT /v2/surveys/{survey_id}). Only allowed when status is 'disabled'`)
-	fmt.Fprintln(os.Stderr, `    delete-survey: Delete survey (proxies to ITX DELETE /v2/surveys/{survey_id}). Only allowed when status is 'disabled'`)
-	fmt.Fprintln(os.Stderr, `    bulk-resend-survey: Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_id}/bulk_resend)`)
-	fmt.Fprintln(os.Stderr, `    preview-send-survey: Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_id}/preview_send)`)
-	fmt.Fprintln(os.Stderr, `    send-missing-recipients: Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_id}/send_missing_recipients)`)
-	fmt.Fprintln(os.Stderr, `    delete-survey-response: Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/responses/{response_id})`)
-	fmt.Fprintln(os.Stderr, `    resend-survey-response: Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_id}/responses/{response_id}/resend)`)
-	fmt.Fprintln(os.Stderr, `    delete-recipient-group: Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/recipient_group)`)
+	fmt.Fprintln(os.Stderr, `    get-survey: Get survey details (proxies to ITX GET /v2/surveys/{survey_uid})`)
+	fmt.Fprintln(os.Stderr, `    update-survey: Update survey (proxies to ITX PUT /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'`)
+	fmt.Fprintln(os.Stderr, `    delete-survey: Delete survey (proxies to ITX DELETE /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'`)
+	fmt.Fprintln(os.Stderr, `    bulk-resend-survey: Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_uid}/bulk_resend)`)
+	fmt.Fprintln(os.Stderr, `    preview-send-survey: Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_uid}/preview_send)`)
+	fmt.Fprintln(os.Stderr, `    send-missing-recipients: Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_uid}/send_missing_recipients)`)
+	fmt.Fprintln(os.Stderr, `    delete-survey-response: Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_uid}/responses/{response_id})`)
+	fmt.Fprintln(os.Stderr, `    resend-survey-response: Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_uid}/responses/{response_id}/resend)`)
+	fmt.Fprintln(os.Stderr, `    delete-recipient-group: Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_uid}/recipient_group)`)
 	fmt.Fprintln(os.Stderr, `    create-exclusion: Create a survey or global exclusion (proxies to ITX POST /v2/surveys/exclusion)`)
 	fmt.Fprintln(os.Stderr, `    delete-exclusion: Delete a survey or global exclusion (proxies to ITX DELETE /v2/surveys/exclusion)`)
 	fmt.Fprintln(os.Stderr, `    get-exclusion: Get exclusion by ID (proxies to ITX GET /v2/surveys/exclusion/{exclusion_id})`)
@@ -338,199 +338,199 @@ func surveyScheduleSurveyUsage() {
 func surveyGetSurveyUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey get-survey", os.Args[0])
-	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -survey-uid STRING")
 	fmt.Fprint(os.Stderr, " -token STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Get survey details (proxies to ITX GET /v2/surveys/{survey_id})`)
+	fmt.Fprintln(os.Stderr, `Get survey details (proxies to ITX GET /v2/surveys/{survey_uid})`)
 
 	// Flags list
-	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
 	fmt.Fprintln(os.Stderr, `    -token STRING: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey get-survey --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey get-survey --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyUpdateSurveyUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey update-survey", os.Args[0])
 	fmt.Fprint(os.Stderr, " -body JSON")
-	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -survey-uid STRING")
 	fmt.Fprint(os.Stderr, " -token STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Update survey (proxies to ITX PUT /v2/surveys/{survey_id}). Only allowed when status is 'disabled'`)
+	fmt.Fprintln(os.Stderr, `Update survey (proxies to ITX PUT /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'`)
 
 	// Flags list
 	fmt.Fprintln(os.Stderr, `    -body JSON: `)
-	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
 	fmt.Fprintln(os.Stderr, `    -token STRING: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey update-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Excepturi et quas autem dolores corporis.\",\n         \"Harum earum autem et.\"\n      ],\n      \"creator_id\": \"Omnis quo.\",\n      \"email_body\": \"Quo qui sint.\",\n      \"email_body_text\": \"Explicabo autem sit id modi corporis.\",\n      \"email_subject\": \"Et sed.\",\n      \"survey_cutoff_date\": \"Sapiente sunt.\",\n      \"survey_reminder_rate_days\": 5570276177094928842,\n      \"survey_send_date\": \"Aliquid similique.\",\n      \"survey_title\": \"Maiores impedit omnis veniam consequuntur sed.\"\n   }' --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey update-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Excepturi et quas autem dolores corporis.\",\n         \"Harum earum autem et.\"\n      ],\n      \"creator_id\": \"Omnis quo.\",\n      \"email_body\": \"Quo qui sint.\",\n      \"email_body_text\": \"Explicabo autem sit id modi corporis.\",\n      \"email_subject\": \"Et sed.\",\n      \"survey_cutoff_date\": \"Sapiente sunt.\",\n      \"survey_reminder_rate_days\": 5570276177094928842,\n      \"survey_send_date\": \"Aliquid similique.\",\n      \"survey_title\": \"Maiores impedit omnis veniam consequuntur sed.\"\n   }' --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyDeleteSurveyUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey delete-survey", os.Args[0])
-	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -survey-uid STRING")
 	fmt.Fprint(os.Stderr, " -token STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Delete survey (proxies to ITX DELETE /v2/surveys/{survey_id}). Only allowed when status is 'disabled'`)
+	fmt.Fprintln(os.Stderr, `Delete survey (proxies to ITX DELETE /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'`)
 
 	// Flags list
-	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
 	fmt.Fprintln(os.Stderr, `    -token STRING: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-survey --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-survey --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyBulkResendSurveyUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey bulk-resend-survey", os.Args[0])
 	fmt.Fprint(os.Stderr, " -body JSON")
-	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -survey-uid STRING")
 	fmt.Fprint(os.Stderr, " -token STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_id}/bulk_resend)`)
+	fmt.Fprintln(os.Stderr, `Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_uid}/bulk_resend)`)
 
 	// Flags list
 	fmt.Fprintln(os.Stderr, `    -body JSON: `)
-	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
 	fmt.Fprintln(os.Stderr, `    -token STRING: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey bulk-resend-survey --body '{\n      \"recipient_ids\": [\n         \"cba14f40-1636-11ec-9621-0242ac130002\",\n         \"cba14f40-1636-11ec-9621-0242ac130003\"\n      ]\n   }' --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey bulk-resend-survey --body '{\n      \"recipient_ids\": [\n         \"cba14f40-1636-11ec-9621-0242ac130002\",\n         \"cba14f40-1636-11ec-9621-0242ac130003\"\n      ]\n   }' --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyPreviewSendSurveyUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey preview-send-survey", os.Args[0])
-	fmt.Fprint(os.Stderr, " -survey-id STRING")
-	fmt.Fprint(os.Stderr, " -committee-id STRING")
+	fmt.Fprint(os.Stderr, " -survey-uid STRING")
+	fmt.Fprint(os.Stderr, " -committee-uid STRING")
 	fmt.Fprint(os.Stderr, " -token STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_id}/preview_send)`)
+	fmt.Fprintln(os.Stderr, `Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_uid}/preview_send)`)
 
 	// Flags list
-	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
-	fmt.Fprintln(os.Stderr, `    -committee-id STRING: `)
+	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -committee-uid STRING: `)
 	fmt.Fprintln(os.Stderr, `    -token STRING: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey preview-send-survey --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --committee-id \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey preview-send-survey --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --committee-uid \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveySendMissingRecipientsUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey send-missing-recipients", os.Args[0])
-	fmt.Fprint(os.Stderr, " -survey-id STRING")
-	fmt.Fprint(os.Stderr, " -committee-id STRING")
+	fmt.Fprint(os.Stderr, " -survey-uid STRING")
+	fmt.Fprint(os.Stderr, " -committee-uid STRING")
 	fmt.Fprint(os.Stderr, " -token STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_id}/send_missing_recipients)`)
+	fmt.Fprintln(os.Stderr, `Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_uid}/send_missing_recipients)`)
 
 	// Flags list
-	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
-	fmt.Fprintln(os.Stderr, `    -committee-id STRING: `)
+	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -committee-uid STRING: `)
 	fmt.Fprintln(os.Stderr, `    -token STRING: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey send-missing-recipients --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --committee-id \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey send-missing-recipients --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --committee-uid \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyDeleteSurveyResponseUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey delete-survey-response", os.Args[0])
-	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -survey-uid STRING")
 	fmt.Fprint(os.Stderr, " -response-id STRING")
 	fmt.Fprint(os.Stderr, " -token STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/responses/{response_id})`)
+	fmt.Fprintln(os.Stderr, `Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_uid}/responses/{response_id})`)
 
 	// Flags list
-	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
 	fmt.Fprintln(os.Stderr, `    -response-id STRING: Response identifier`)
 	fmt.Fprintln(os.Stderr, `    -token STRING: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-survey-response --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --response-id \"cba14f40-1636-11ec-9621-0242ac130002\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-survey-response --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --response-id \"cba14f40-1636-11ec-9621-0242ac130002\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyResendSurveyResponseUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey resend-survey-response", os.Args[0])
-	fmt.Fprint(os.Stderr, " -survey-id STRING")
+	fmt.Fprint(os.Stderr, " -survey-uid STRING")
 	fmt.Fprint(os.Stderr, " -response-id STRING")
 	fmt.Fprint(os.Stderr, " -token STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_id}/responses/{response_id}/resend)`)
+	fmt.Fprintln(os.Stderr, `Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_uid}/responses/{response_id}/resend)`)
 
 	// Flags list
-	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
 	fmt.Fprintln(os.Stderr, `    -response-id STRING: Response identifier`)
 	fmt.Fprintln(os.Stderr, `    -token STRING: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey resend-survey-response --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --response-id \"cba14f40-1636-11ec-9621-0242ac130002\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey resend-survey-response --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --response-id \"cba14f40-1636-11ec-9621-0242ac130002\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyDeleteRecipientGroupUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey delete-recipient-group", os.Args[0])
-	fmt.Fprint(os.Stderr, " -survey-id STRING")
-	fmt.Fprint(os.Stderr, " -committee-id STRING")
-	fmt.Fprint(os.Stderr, " -project-id STRING")
+	fmt.Fprint(os.Stderr, " -survey-uid STRING")
+	fmt.Fprint(os.Stderr, " -committee-uid STRING")
+	fmt.Fprint(os.Stderr, " -project-uid STRING")
 	fmt.Fprint(os.Stderr, " -foundation-id STRING")
 	fmt.Fprint(os.Stderr, " -token STRING")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/recipient_group)`)
+	fmt.Fprintln(os.Stderr, `Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_uid}/recipient_group)`)
 
 	// Flags list
-	fmt.Fprintln(os.Stderr, `    -survey-id STRING: Survey identifier`)
-	fmt.Fprintln(os.Stderr, `    -committee-id STRING: `)
-	fmt.Fprintln(os.Stderr, `    -project-id STRING: `)
+	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -committee-uid STRING: `)
+	fmt.Fprintln(os.Stderr, `    -project-uid STRING: `)
 	fmt.Fprintln(os.Stderr, `    -foundation-id STRING: `)
 	fmt.Fprintln(os.Stderr, `    -token STRING: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-recipient-group --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --committee-id \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --project-id \"003170000123XHTAA2\" --foundation-id \"003170000123XHTAA2\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-recipient-group --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --committee-uid \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --project-uid \"003170000123XHTAA2\" --foundation-id \"003170000123XHTAA2\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyCreateExclusionUsage() {
@@ -550,7 +550,7 @@ func surveyCreateExclusionUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey create-exclusion --body '{\n      \"committee_id\": \"Blanditiis harum quis debitis voluptatem laborum.\",\n      \"email\": \"Nihil eos molestiae numquam.\",\n      \"global_exclusion\": \"Laudantium aut consectetur pariatur omnis.\",\n      \"survey_id\": \"Amet deleniti aut.\",\n      \"user_id\": \"Tenetur omnis.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey create-exclusion --body '{\n      \"committee_uid\": \"Blanditiis harum quis debitis voluptatem laborum.\",\n      \"email\": \"Nihil eos molestiae numquam.\",\n      \"global_exclusion\": \"Laudantium aut consectetur pariatur omnis.\",\n      \"survey_uid\": \"Amet deleniti aut.\",\n      \"user_id\": \"Tenetur omnis.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyDeleteExclusionUsage() {
@@ -570,7 +570,7 @@ func surveyDeleteExclusionUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-exclusion --body '{\n      \"committee_id\": \"Ut iusto eius qui.\",\n      \"email\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"global_exclusion\": \"Recusandae itaque consequatur.\",\n      \"survey_id\": \"Soluta facilis rerum exercitationem.\",\n      \"user_id\": \"Asperiores at dicta iusto adipisci est est.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-exclusion --body '{\n      \"committee_uid\": \"Ut iusto eius qui.\",\n      \"email\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"global_exclusion\": \"Recusandae itaque consequatur.\",\n      \"survey_uid\": \"Soluta facilis rerum exercitationem.\",\n      \"user_id\": \"Asperiores at dicta iusto adipisci est est.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyGetExclusionUsage() {
