@@ -499,6 +499,7 @@ func mapDomainError(err error) error {
 ### Environment Variables
 
 **Server Configuration**:
+
 ```bash
 PORT=8080
 LOG_LEVEL=info
@@ -506,6 +507,7 @@ LOG_ADD_SOURCE=true
 ```
 
 **Authentication**:
+
 ```bash
 JWKS_URL=https://heimdall.dev.lfx.linuxfoundation.org/.well-known/jwks.json
 AUDIENCE=lfx-v2-survey-service
@@ -514,6 +516,7 @@ JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=test-user
 ```
 
 **ITX Integration** (OAuth2 M2M with Auth0):
+
 ```bash
 ITX_BASE_URL=https://api.dev.itx.linuxfoundation.org
 ITX_AUTH0_DOMAIN=linuxfoundation-dev.us.auth0.com
@@ -523,6 +526,7 @@ ITX_AUDIENCE=https://api.dev.itx.linuxfoundation.org/
 ```
 
 **ID Mapping** (NATS):
+
 ```bash
 NATS_URL=nats://localhost:4222
 # For local dev only:
@@ -556,10 +560,10 @@ app:
   # Secrets loaded from AWS Secrets Manager via External Secrets Operator
   secrets:
     - name: ITX_CLIENT_ID
-      path: /cloudops/managed-secrets/auth0/LFX_V2_Survey_Service
+      path: /cloudops/managed-secrets/auth0/LFX_V2_Surveys_Service
       key: client_id
     - name: ITX_CLIENT_PRIVATE_KEY
-      path: /cloudops/managed-secrets/auth0/LFX_V2_Survey_Service
+      path: /cloudops/managed-secrets/auth0/LFX_V2_Surveys_Service
       key: client_private_key
 ```
 

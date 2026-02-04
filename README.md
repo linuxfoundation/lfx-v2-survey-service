@@ -213,7 +213,7 @@ make helm-install-local
 The service requires Auth0 credentials stored in AWS Secrets Manager:
 
 1. Create a secret in AWS Secrets Manager at path:
-   `/cloudops/managed-secrets/auth0/LFX_V2_Survey_Service`
+   `/cloudops/managed-secrets/auth0/LFX_V2_Surveys_Service`
 
 2. Add the following keys:
    - `client_id` - Auth0 client ID
