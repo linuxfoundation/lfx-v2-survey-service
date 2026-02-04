@@ -1,0 +1,2232 @@
+swagger: "2.0"
+info:
+    title: LFX V2 - Survey Service
+    description: Proxy service for ITX survey system
+    version: "1.0"
+host: localhost:8080
+consumes:
+    - application/json
+    - application/xml
+    - application/gob
+produces:
+    - application/json
+    - application/xml
+    - application/gob
+paths:
+    /surveys:
+        post:
+            tags:
+                - survey
+            summary: schedule_survey survey
+            description: |-
+                Create a scheduled survey for ITX project committees (proxies to ITX POST /surveys/schedule)
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#schedule_survey
+            parameters:
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+                - name: schedule_survey_request_body
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/SurveyScheduleSurveyRequestBody'
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/SurveyScheduleResult'
+                        required:
+                            - uid
+                            - survey_status
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/ServiceUnavailableError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /surveys/{survey_uid}:
+        get:
+            tags:
+                - survey
+            summary: get_survey survey
+            description: |-
+                Get survey details (proxies to ITX GET /v2/surveys/{survey_uid})
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#get_survey
+            parameters:
+                - name: survey_uid
+                  in: path
+                  description: Survey identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/SurveyScheduleResult'
+                        required:
+                            - uid
+                            - survey_status
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/NotFoundError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/ServiceUnavailableError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+        put:
+            tags:
+                - survey
+            summary: update_survey survey
+            description: |-
+                Update survey (proxies to ITX PUT /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#update_survey
+            parameters:
+                - name: survey_uid
+                  in: path
+                  description: Survey identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+                - name: update_survey_request_body
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/SurveyUpdateSurveyRequestBody'
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/SurveyScheduleResult'
+                        required:
+                            - uid
+                            - survey_status
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/NotFoundError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/ServiceUnavailableError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+        delete:
+            tags:
+                - survey
+            summary: delete_survey survey
+            description: |-
+                Delete survey (proxies to ITX DELETE /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#delete_survey
+            parameters:
+                - name: survey_uid
+                  in: path
+                  description: Survey identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+            responses:
+                "204":
+                    description: No Content response.
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/NotFoundError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/ServiceUnavailableError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /surveys/{survey_uid}/bulk_resend:
+        post:
+            tags:
+                - survey
+            summary: bulk_resend_survey survey
+            description: |-
+                Bulk resend survey emails to select recipients (proxies to ITX POST /v2/surveys/{survey_uid}/bulk_resend)
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#bulk_resend_survey
+            parameters:
+                - name: survey_uid
+                  in: path
+                  description: Survey identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+                - name: bulk_resend_survey_request_body
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/SurveyBulkResendSurveyRequestBody'
+                    required:
+                        - recipient_ids
+            responses:
+                "204":
+                    description: No Content response.
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/NotFoundError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/ServiceUnavailableError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /surveys/{survey_uid}/preview_send:
+        get:
+            tags:
+                - survey
+            summary: preview_send_survey survey
+            description: |-
+                Preview which recipients, committees, and projects would be affected by a resend (proxies to ITX GET /v2/surveys/{survey_uid}/preview_send)
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#preview_send_survey
+            parameters:
+                - name: committee_uid
+                  in: query
+                  description: Optional committee UID to filter preview
+                  required: false
+                  type: string
+                - name: survey_uid
+                  in: path
+                  description: Survey identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/PreviewSendResult'
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/NotFoundError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/ServiceUnavailableError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /surveys/{survey_uid}/recipient_group:
+        delete:
+            tags:
+                - survey
+            summary: delete_recipient_group survey
+            description: |-
+                Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_uid}/recipient_group)
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#delete_recipient_group
+            parameters:
+                - name: committee_uid
+                  in: query
+                  description: Committee UID to remove (indicates specific committee in project)
+                  required: false
+                  type: string
+                - name: project_uid
+                  in: query
+                  description: Project UID to remove (all removals are attached to a project)
+                  required: false
+                  type: string
+                - name: foundation_id
+                  in: query
+                  description: Foundation ID (indicates project_uid references a foundation and all subprojects should be removed)
+                  required: false
+                  type: string
+                - name: survey_uid
+                  in: path
+                  description: Survey identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+            responses:
+                "204":
+                    description: No Content response.
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/NotFoundError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/ServiceUnavailableError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /surveys/{survey_uid}/responses/{response_id}:
+        delete:
+            tags:
+                - survey
+            summary: delete_survey_response survey
+            description: |-
+                Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_uid}/responses/{response_id})
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#delete_survey_response
+            parameters:
+                - name: survey_uid
+                  in: path
+                  description: Survey identifier
+                  required: true
+                  type: string
+                - name: response_id
+                  in: path
+                  description: Response identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+            responses:
+                "204":
+                    description: No Content response.
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/NotFoundError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/ServiceUnavailableError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /surveys/{survey_uid}/responses/{response_id}/resend:
+        post:
+            tags:
+                - survey
+            summary: resend_survey_response survey
+            description: |-
+                Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_uid}/responses/{response_id}/resend)
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#resend_survey_response
+            parameters:
+                - name: survey_uid
+                  in: path
+                  description: Survey identifier
+                  required: true
+                  type: string
+                - name: response_id
+                  in: path
+                  description: Response identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+            responses:
+                "204":
+                    description: No Content response.
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/NotFoundError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/ServiceUnavailableError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /surveys/{survey_uid}/send_missing_recipients:
+        post:
+            tags:
+                - survey
+            summary: send_missing_recipients survey
+            description: |-
+                Send survey emails to committee members who haven't received it (proxies to ITX POST /v2/surveys/{survey_uid}/send_missing_recipients)
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#send_missing_recipients
+            parameters:
+                - name: committee_uid
+                  in: query
+                  description: Optional committee UID to resync only that committee
+                  required: false
+                  type: string
+                - name: survey_uid
+                  in: path
+                  description: Survey identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+            responses:
+                "204":
+                    description: No Content response.
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/NotFoundError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+                "503":
+                    description: Service Unavailable response.
+                    schema:
+                        $ref: '#/definitions/ServiceUnavailableError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /surveys/exclusion:
+        post:
+            tags:
+                - survey
+            summary: create_exclusion survey
+            description: |-
+                Create a survey or global exclusion (proxies to ITX POST /v2/surveys/exclusion)
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#create_exclusion
+            parameters:
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+                - name: create_exclusion_request_body
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/SurveyCreateExclusionRequestBody'
+            responses:
+                "201":
+                    description: Created response.
+                    schema:
+                        $ref: '#/definitions/ExclusionResult'
+                        required:
+                            - uid
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+        delete:
+            tags:
+                - survey
+            summary: delete_exclusion survey
+            description: |-
+                Delete a survey or global exclusion (proxies to ITX DELETE /v2/surveys/exclusion)
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#delete_exclusion
+            parameters:
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+                - name: delete_exclusion_request_body
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/SurveyDeleteExclusionRequestBody'
+            responses:
+                "204":
+                    description: No Content response.
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /surveys/exclusion/{exclusion_id}:
+        get:
+            tags:
+                - survey
+            summary: get_exclusion survey
+            description: |-
+                Get exclusion by ID (proxies to ITX GET /v2/surveys/exclusion/{exclusion_id})
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#get_exclusion
+            parameters:
+                - name: exclusion_id
+                  in: path
+                  description: Exclusion identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/ExtendedExclusionResult'
+                        required:
+                            - uid
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "404":
+                    description: Not Found response.
+                    schema:
+                        $ref: '#/definitions/NotFoundError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+        delete:
+            tags:
+                - survey
+            summary: delete_exclusion_by_id survey
+            description: |-
+                Delete exclusion by ID (proxies to ITX DELETE /v2/surveys/exclusion/{exclusion_id})
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#delete_exclusion_by_id
+            parameters:
+                - name: exclusion_id
+                  in: path
+                  description: Exclusion identifier
+                  required: true
+                  type: string
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+            responses:
+                "204":
+                    description: No Content response.
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+    /surveys/validate_email:
+        post:
+            tags:
+                - survey
+            summary: validate_email survey
+            description: |-
+                Validate email template body and subject (proxies to ITX POST /v2/surveys/validate_email)
+
+                **Required security scopes for jwt**:
+                  * `manage:projects`
+                  * `manage:surveys`
+            operationId: survey#validate_email
+            parameters:
+                - name: Authorization
+                  in: header
+                  description: JWT token
+                  required: false
+                  type: string
+                - name: validate_email_request_body
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/SurveyValidateEmailRequestBody'
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/ValidateEmailResult'
+                        required:
+                            - body
+                            - subject
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/BadRequestError'
+                        required:
+                            - code
+                            - message
+                "401":
+                    description: Unauthorized response.
+                    schema:
+                        $ref: '#/definitions/UnauthorizedError'
+                        required:
+                            - code
+                            - message
+                "403":
+                    description: Forbidden response.
+                    schema:
+                        $ref: '#/definitions/ForbiddenError'
+                        required:
+                            - code
+                            - message
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/InternalServerError'
+                        required:
+                            - code
+                            - message
+            schemes:
+                - http
+            security:
+                - jwt_header_Authorization: []
+definitions:
+    BadRequestError:
+        title: BadRequestError
+        type: object
+        properties:
+            code:
+                type: string
+                description: HTTP status code
+                example: Dolor culpa.
+            message:
+                type: string
+                description: Error message
+                example: Qui ut cumque accusamus velit fugiat numquam.
+        description: Bad request
+        example:
+            code: Aut sapiente.
+            message: Nam voluptate accusantium voluptatem.
+        required:
+            - code
+            - message
+    ExcludedCommittee:
+        title: ExcludedCommittee
+        type: object
+        properties:
+            committee_category:
+                type: string
+                description: Committee category
+                example: Technical Steering Committee
+                enum:
+                    - Legal Committee
+                    - Finance Committee
+                    - Special Interest Group
+                    - Board
+                    - Technical Oversight Committee/Technical Advisory Committee
+                    - Technical Steering Committee
+            committee_name:
+                type: string
+                description: Committee name
+                example: Technical Steering Committee
+            committee_uid:
+                type: string
+                description: Committee UID
+                example: qa1e8536-a985-4cf5-b981-a170927a1d11
+            project_name:
+                type: string
+                description: Project name
+                example: Kubernetes
+            project_uid:
+                type: string
+                description: Project UID
+                example: 003170000123XHTAA2
+        description: Committee information for preview send
+        example:
+            committee_category: Technical Steering Committee
+            committee_name: Technical Steering Committee
+            committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+            project_name: Kubernetes
+            project_uid: 003170000123XHTAA2
+        required:
+            - project_uid
+            - project_name
+            - committee_uid
+            - committee_name
+            - committee_category
+    ExclusionResult:
+        title: ExclusionResult
+        type: object
+        properties:
+            committee_uid:
+                type: string
+                description: Committee UID
+                example: In odio doloribus quis molestiae ut.
+            email:
+                type: string
+                description: Survey responder's email
+                example: test@email.com
+            global_exclusion:
+                type: string
+                description: Global exclusion flag
+                example: Nulla ducimus ratione et.
+            survey_uid:
+                type: string
+                description: Survey UID
+                example: Eveniet et.
+            uid:
+                type: string
+                description: Exclusion unique identifier
+                example: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
+            user_id:
+                type: string
+                description: Recipient's user ID
+                example: Sit delectus illum iure.
+        example:
+            committee_uid: Rerum pariatur.
+            email: test@email.com
+            global_exclusion: Cumque ad ut.
+            survey_uid: Beatae cum exercitationem autem natus quae.
+            uid: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
+            user_id: Ut quo reprehenderit.
+        required:
+            - uid
+    ExclusionUser:
+        title: ExclusionUser
+        type: object
+        properties:
+            emails:
+                type: array
+                items:
+                    $ref: '#/definitions/UserEmail'
+                description: User emails
+                example:
+                    - email_address: Quis non quod pariatur.
+                      id: Alias natus doloremque quia occaecati sunt.
+                      is_primary: false
+                    - email_address: Quis non quod pariatur.
+                      id: Alias natus doloremque quia occaecati sunt.
+                      is_primary: false
+                    - email_address: Quis non quod pariatur.
+                      id: Alias natus doloremque quia occaecati sunt.
+                      is_primary: false
+            id:
+                type: string
+                description: User ID
+                example: Aut officia accusantium nihil.
+            username:
+                type: string
+                description: Username
+                example: Exercitationem maxime sunt quidem et.
+        description: User information for an exclusion
+        example:
+            emails:
+                - email_address: Quis non quod pariatur.
+                  id: Alias natus doloremque quia occaecati sunt.
+                  is_primary: false
+                - email_address: Quis non quod pariatur.
+                  id: Alias natus doloremque quia occaecati sunt.
+                  is_primary: false
+                - email_address: Quis non quod pariatur.
+                  id: Alias natus doloremque quia occaecati sunt.
+                  is_primary: false
+            id: Numquam reiciendis repudiandae vel aspernatur.
+            username: Est quos id voluptates odit velit.
+    ExtendedExclusionResult:
+        title: ExtendedExclusionResult
+        type: object
+        properties:
+            committee_uid:
+                type: string
+                description: Committee UID
+                example: Hic est.
+            email:
+                type: string
+                description: Survey responder's email
+                example: test@email.com
+            global_exclusion:
+                type: string
+                description: Global exclusion flag
+                example: Quas ut et magni repellendus ea.
+            survey_uid:
+                type: string
+                description: Survey UID
+                example: Autem et sit molestiae nobis.
+            uid:
+                type: string
+                description: Exclusion unique identifier
+                example: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
+            user:
+                $ref: '#/definitions/ExclusionUser'
+            user_id:
+                type: string
+                description: Recipient's user ID
+                example: Odio aut.
+        example:
+            committee_uid: Et vitae.
+            email: test@email.com
+            global_exclusion: Quis dolores.
+            survey_uid: Assumenda quam rerum sed omnis.
+            uid: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
+            user:
+                emails:
+                    - email_address: Quis non quod pariatur.
+                      id: Alias natus doloremque quia occaecati sunt.
+                      is_primary: false
+                    - email_address: Quis non quod pariatur.
+                      id: Alias natus doloremque quia occaecati sunt.
+                      is_primary: false
+                id: Sed officiis officiis quasi.
+                username: Aut eum eum sint excepturi totam et.
+            user_id: Perspiciatis eos earum voluptate.
+        required:
+            - uid
+    ForbiddenError:
+        title: ForbiddenError
+        type: object
+        properties:
+            code:
+                type: string
+                description: HTTP status code
+                example: Nam molestiae.
+            message:
+                type: string
+                description: Error message
+                example: Ipsam eius nisi consequatur.
+        description: Forbidden
+        example:
+            code: Molestias saepe ab laboriosam.
+            message: Eius dolor deserunt debitis.
+        required:
+            - code
+            - message
+    ITXPreviewRecipient:
+        title: ITXPreviewRecipient
+        type: object
+        properties:
+            email:
+                type: string
+                description: Email address
+                example: john.doe@example.com
+                format: email
+            first_name:
+                type: string
+                description: User first name
+                example: John
+            last_name:
+                type: string
+                description: User last name
+                example: Doe
+            name:
+                type: string
+                description: User full name
+                example: John Doe
+            role:
+                type: string
+                description: Role in committee
+                example: Voting Rep
+                enum:
+                    - Chair
+                    - Voting Rep
+                    - Member
+            user_id:
+                type: string
+                description: LF user ID
+                example: 005f1000009RbC4AAK
+            username:
+                type: string
+                description: Linux Foundation ID
+                example: jdoe
+        description: Recipient information for preview send
+        example:
+            email: john.doe@example.com
+            first_name: John
+            last_name: Doe
+            name: John Doe
+            role: Voting Rep
+            user_id: 005f1000009RbC4AAK
+            username: jdoe
+        required:
+            - user_id
+            - email
+    InternalServerError:
+        title: InternalServerError
+        type: object
+        properties:
+            code:
+                type: string
+                description: HTTP status code
+                example: Voluptatem perspiciatis omnis.
+            message:
+                type: string
+                description: Error message
+                example: Dicta dicta nesciunt quas.
+        description: Internal server error
+        example:
+            code: Sequi consequuntur rerum omnis quos aut.
+            message: Laborum quas corrupti voluptatum ea.
+        required:
+            - code
+            - message
+    LFXProject:
+        title: LFXProject
+        type: object
+        properties:
+            id:
+                type: string
+                description: Project ID
+                example: 003170000123XHTAA2
+            logo_url:
+                type: string
+                description: Project logo URL
+                example: Ad hic ut.
+            name:
+                type: string
+                description: Project name
+                example: Express JS
+            slug:
+                type: string
+                description: Project slug
+                example: express-gateway
+            status:
+                type: string
+                description: Project status/stage
+                example: Active
+                enum:
+                    - Formation - Exploratory
+                    - Formation - Engaged
+                    - Active
+                    - Archived
+                    - Formation - On Hold
+                    - Formation - Disengaged
+                    - Formation - Confidential
+                    - Prospect
+        description: LFX Project information
+        example:
+            id: 003170000123XHTAA2
+            logo_url: Dolorem animi deleniti officia numquam.
+            name: Express JS
+            slug: express-gateway
+            status: Active
+        required:
+            - id
+            - name
+            - slug
+            - status
+    NotFoundError:
+        title: NotFoundError
+        type: object
+        properties:
+            code:
+                type: string
+                description: HTTP status code
+                example: Et quia quia repellat aut.
+            message:
+                type: string
+                description: Error message
+                example: Rerum alias nisi.
+        description: Not found
+        example:
+            code: Ipsum sunt.
+            message: Eveniet aliquam provident quam dicta.
+        required:
+            - code
+            - message
+    PreviewSendResult:
+        title: PreviewSendResult
+        type: object
+        properties:
+            affected_committees:
+                type: array
+                items:
+                    $ref: '#/definitions/ExcludedCommittee'
+                description: List of affected committees
+                example:
+                    - committee_category: Technical Steering Committee
+                      committee_name: Technical Steering Committee
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      project_name: Kubernetes
+                      project_uid: 003170000123XHTAA2
+                    - committee_category: Technical Steering Committee
+                      committee_name: Technical Steering Committee
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      project_name: Kubernetes
+                      project_uid: 003170000123XHTAA2
+                    - committee_category: Technical Steering Committee
+                      committee_name: Technical Steering Committee
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      project_name: Kubernetes
+                      project_uid: 003170000123XHTAA2
+                    - committee_category: Technical Steering Committee
+                      committee_name: Technical Steering Committee
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      project_name: Kubernetes
+                      project_uid: 003170000123XHTAA2
+            affected_projects:
+                type: array
+                items:
+                    $ref: '#/definitions/LFXProject'
+                description: List of affected projects
+                example:
+                    - id: 003170000123XHTAA2
+                      logo_url: Aliquam harum.
+                      name: Express JS
+                      slug: express-gateway
+                      status: Active
+                    - id: 003170000123XHTAA2
+                      logo_url: Aliquam harum.
+                      name: Express JS
+                      slug: express-gateway
+                      status: Active
+            affected_recipients:
+                type: array
+                items:
+                    $ref: '#/definitions/ITXPreviewRecipient'
+                description: List of affected recipients
+                example:
+                    - email: john.doe@example.com
+                      first_name: John
+                      last_name: Doe
+                      name: John Doe
+                      role: Voting Rep
+                      user_id: 005f1000009RbC4AAK
+                      username: jdoe
+                    - email: john.doe@example.com
+                      first_name: John
+                      last_name: Doe
+                      name: John Doe
+                      role: Voting Rep
+                      user_id: 005f1000009RbC4AAK
+                      username: jdoe
+        example:
+            affected_committees:
+                - committee_category: Technical Steering Committee
+                  committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  project_name: Kubernetes
+                  project_uid: 003170000123XHTAA2
+                - committee_category: Technical Steering Committee
+                  committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  project_name: Kubernetes
+                  project_uid: 003170000123XHTAA2
+                - committee_category: Technical Steering Committee
+                  committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  project_name: Kubernetes
+                  project_uid: 003170000123XHTAA2
+                - committee_category: Technical Steering Committee
+                  committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  project_name: Kubernetes
+                  project_uid: 003170000123XHTAA2
+            affected_projects:
+                - id: 003170000123XHTAA2
+                  logo_url: Aliquam harum.
+                  name: Express JS
+                  slug: express-gateway
+                  status: Active
+                - id: 003170000123XHTAA2
+                  logo_url: Aliquam harum.
+                  name: Express JS
+                  slug: express-gateway
+                  status: Active
+                - id: 003170000123XHTAA2
+                  logo_url: Aliquam harum.
+                  name: Express JS
+                  slug: express-gateway
+                  status: Active
+                - id: 003170000123XHTAA2
+                  logo_url: Aliquam harum.
+                  name: Express JS
+                  slug: express-gateway
+                  status: Active
+            affected_recipients:
+                - email: john.doe@example.com
+                  first_name: John
+                  last_name: Doe
+                  name: John Doe
+                  role: Voting Rep
+                  user_id: 005f1000009RbC4AAK
+                  username: jdoe
+                - email: john.doe@example.com
+                  first_name: John
+                  last_name: Doe
+                  name: John Doe
+                  role: Voting Rep
+                  user_id: 005f1000009RbC4AAK
+                  username: jdoe
+                - email: john.doe@example.com
+                  first_name: John
+                  last_name: Doe
+                  name: John Doe
+                  role: Voting Rep
+                  user_id: 005f1000009RbC4AAK
+                  username: jdoe
+                - email: john.doe@example.com
+                  first_name: John
+                  last_name: Doe
+                  name: John Doe
+                  role: Voting Rep
+                  user_id: 005f1000009RbC4AAK
+                  username: jdoe
+    ServiceUnavailableError:
+        title: ServiceUnavailableError
+        type: object
+        properties:
+            code:
+                type: string
+                description: HTTP status code
+                example: Quis dolores ut et.
+            message:
+                type: string
+                description: Error message
+                example: Aspernatur praesentium est impedit ut ut quaerat.
+        description: Service unavailable
+        example:
+            code: Nisi perspiciatis.
+            message: Delectus et consectetur illum unde autem omnis.
+        required:
+            - code
+            - message
+    SurveyBulkResendSurveyRequestBody:
+        title: SurveyBulkResendSurveyRequestBody
+        type: object
+        properties:
+            recipient_ids:
+                type: array
+                items:
+                    type: string
+                    example: In fugiat et quasi.
+                description: Array of recipient IDs to resend survey emails to
+                example:
+                    - cba14f40-1636-11ec-9621-0242ac130002
+                    - cba14f40-1636-11ec-9621-0242ac130003
+        example:
+            recipient_ids:
+                - cba14f40-1636-11ec-9621-0242ac130002
+                - cba14f40-1636-11ec-9621-0242ac130003
+        required:
+            - recipient_ids
+    SurveyCommittee:
+        title: SurveyCommittee
+        type: object
+        properties:
+            committee_name:
+                type: string
+                description: Committee name
+                example: Technical Steering Committee
+            committee_uid:
+                type: string
+                description: Committee UID
+                example: qa1e8536-a985-4cf5-b981-a170927a1d11
+            nps_value:
+                type: number
+                description: NPS value for this committee
+                example: 0.9942227592720773
+                format: double
+            project_name:
+                type: string
+                description: Project name
+                example: Kubernetes
+            project_uid:
+                type: string
+                description: Project UID
+                example: qa1e8536-a985-4cf5-b981-a170927a1d11
+            survey_url:
+                type: string
+                description: Survey URL for this committee
+                example: https://surveymonkey.com/r/abc123
+            total_recipients:
+                type: integer
+                description: Total recipients for this committee
+                example: 3177357028191171536
+                format: int64
+            total_responses:
+                type: integer
+                description: Total responses for this committee
+                example: 3525121979760310962
+                format: int64
+        description: Survey committee details
+        example:
+            committee_name: Technical Steering Committee
+            committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+            nps_value: 0.6075367583389751
+            project_name: Kubernetes
+            project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+            survey_url: https://surveymonkey.com/r/abc123
+            total_recipients: 2323679704152398664
+            total_responses: 99423478662291821
+    SurveyCreateExclusionRequestBody:
+        title: SurveyCreateExclusionRequestBody
+        type: object
+        properties:
+            committee_uid:
+                type: string
+                description: Committee UID for survey-specific exclusion
+                example: Itaque saepe.
+            email:
+                type: string
+                description: Survey responder's email
+                example: Vel rem vel id nobis optio fugit.
+            global_exclusion:
+                type: string
+                description: Global exclusion flag
+                example: Modi quisquam inventore vitae sed beatae.
+            survey_uid:
+                type: string
+                description: Survey UID for survey-specific exclusion
+                example: Dolorem velit sit et.
+            user_id:
+                type: string
+                description: Recipient's user ID
+                example: Mollitia et reprehenderit rerum.
+        example:
+            committee_uid: Sequi at unde quia est et quo.
+            email: Esse dolorem.
+            global_exclusion: Et dicta ullam fuga in hic possimus.
+            survey_uid: Molestias et voluptate nulla voluptatem.
+            user_id: Minima molestiae ut suscipit perspiciatis cupiditate harum.
+    SurveyDeleteExclusionRequestBody:
+        title: SurveyDeleteExclusionRequestBody
+        type: object
+        properties:
+            committee_uid:
+                type: string
+                description: Committee UID for survey-specific exclusion
+                example: Est beatae omnis veniam.
+            email:
+                type: string
+                description: Survey responder's email
+                example: Animi quas.
+            global_exclusion:
+                type: string
+                description: Global exclusion flag
+                example: Eaque laboriosam aut.
+            survey_uid:
+                type: string
+                description: Survey UID for survey-specific exclusion
+                example: Quas quia eius dolorum nemo sit.
+            user_id:
+                type: string
+                description: Recipient's user ID
+                example: Ipsa quia exercitationem ut eos rerum.
+        example:
+            committee_uid: Ut maiores et porro.
+            email: Officiis voluptatem ducimus et maiores exercitationem voluptas.
+            global_exclusion: Earum explicabo tempore.
+            survey_uid: Atque numquam.
+            user_id: Nesciunt mollitia quis omnis.
+    SurveyScheduleResult:
+        title: SurveyScheduleResult
+        type: object
+        properties:
+            committee_category:
+                type: string
+                description: Committee category
+                example: Enim consequuntur et facilis non itaque.
+            committee_voting_enabled:
+                type: boolean
+                description: Committee voting enabled
+                example: false
+            committees:
+                type: array
+                items:
+                    $ref: '#/definitions/SurveyCommittee'
+                description: Survey committees
+                example:
+                    - committee_name: Technical Steering Committee
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      nps_value: 0.24759276676729447
+                      project_name: Kubernetes
+                      project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      survey_url: https://surveymonkey.com/r/abc123
+                      total_recipients: 4948951016613182088
+                      total_responses: 2809455758368137589
+                    - committee_name: Technical Steering Committee
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      nps_value: 0.24759276676729447
+                      project_name: Kubernetes
+                      project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      survey_url: https://surveymonkey.com/r/abc123
+                      total_recipients: 4948951016613182088
+                      total_responses: 2809455758368137589
+            created_at:
+                type: string
+                description: Creation timestamp
+                example: "2006-03-16T01:21:27Z"
+                format: date-time
+            creator_id:
+                type: string
+                description: Creator's user ID
+                example: Pariatur reprehenderit.
+            creator_name:
+                type: string
+                description: Creator's full name
+                example: Autem optio officia voluptate quis.
+            creator_username:
+                type: string
+                description: Creator's username
+                example: Quaerat dolor.
+            email_body:
+                type: string
+                description: Email body HTML
+                example: Non ut id asperiores hic.
+            email_body_text:
+                type: string
+                description: Email body plain text
+                example: Optio laudantium aliquam et sit vel ea.
+            email_subject:
+                type: string
+                description: Email subject line
+                example: Officiis omnis voluptate odit repellat.
+            is_nps_survey:
+                type: boolean
+                description: Whether this is an NPS survey
+                example: false
+            is_project_survey:
+                type: boolean
+                description: Whether project-level or global-level survey
+                example: false
+            last_modified_at:
+                type: string
+                description: Last modification timestamp
+                example: "1980-05-31T10:48:43Z"
+                format: date-time
+            last_modified_by:
+                type: string
+                description: User ID of last modifier
+                example: Incidunt velit qui.
+            latest_automated_reminder_sent_at:
+                type: string
+                description: Latest automated reminder sent date
+                example: "1980-09-28T22:49:57Z"
+                format: date-time
+            next_automated_reminder_at:
+                type: string
+                description: Next automated reminder date
+                example: "1985-10-30T17:18:00Z"
+                format: date-time
+            nps_value:
+                type: number
+                description: NPS value
+                example: 0.5195611510890328
+                format: double
+            num_automated_reminders_sent:
+                type: integer
+                description: Number of automated reminders sent
+                example: 6557200401299693091
+                format: int64
+            num_automated_reminders_to_send:
+                type: integer
+                description: Number of automated reminders to send
+                example: 2989051904865891355
+                format: int64
+            num_detractors:
+                type: integer
+                description: Number of detractors
+                example: 5901696142218809678
+                format: int64
+            num_passives:
+                type: integer
+                description: Number of passives
+                example: 6413455017907620262
+                format: int64
+            num_promoters:
+                type: integer
+                description: Number of promoters
+                example: 7423717503328996703
+                format: int64
+            response_status:
+                type: string
+                description: Response status
+                example: scheduled
+                enum:
+                    - scheduled
+                    - open
+                    - closed
+            send_immediately:
+                type: boolean
+                description: Whether survey is sent immediately
+                example: false
+            stage_filter:
+                type: string
+                description: Project stage filter
+                example: Et quos excepturi saepe voluptatum.
+            survey_cutoff_date:
+                type: string
+                description: Survey cutoff date
+                example: "2007-11-26T21:46:43Z"
+                format: date-time
+            survey_monkey_id:
+                type: string
+                description: SurveyMonkey survey ID
+                example: Et quisquam et qui consectetur.
+            survey_reminder_rate_days:
+                type: integer
+                description: Days between reminder emails
+                example: 4003992302868703861
+                format: int64
+            survey_send_date:
+                type: string
+                description: Survey send date
+                example: "2003-10-05T13:00:38Z"
+                format: date-time
+            survey_status:
+                type: string
+                description: Survey status
+                example: scheduled
+                enum:
+                    - scheduled
+                    - sending
+                    - sent
+                    - cancelled
+            survey_title:
+                type: string
+                description: Survey title
+                example: Eum consectetur inventore at nihil corporis.
+            survey_url:
+                type: string
+                description: Survey URL
+                example: Et distinctio et.
+            total_bounced_emails:
+                type: integer
+                description: Number of bounced emails
+                example: 7782973453192153390
+                format: int64
+            total_recipients:
+                type: integer
+                description: Total number of recipients
+                example: 630602705079431779
+                format: int64
+            total_responses:
+                type: integer
+                description: Total number of responses
+                example: 3721412613282556941
+                format: int64
+            uid:
+                type: string
+                description: Survey unique identifier
+                example: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
+        example:
+            committee_category: Vitae et nesciunt culpa cupiditate.
+            committee_voting_enabled: true
+            committees:
+                - committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  nps_value: 0.24759276676729447
+                  project_name: Kubernetes
+                  project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  survey_url: https://surveymonkey.com/r/abc123
+                  total_recipients: 4948951016613182088
+                  total_responses: 2809455758368137589
+                - committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  nps_value: 0.24759276676729447
+                  project_name: Kubernetes
+                  project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  survey_url: https://surveymonkey.com/r/abc123
+                  total_recipients: 4948951016613182088
+                  total_responses: 2809455758368137589
+                - committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  nps_value: 0.24759276676729447
+                  project_name: Kubernetes
+                  project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  survey_url: https://surveymonkey.com/r/abc123
+                  total_recipients: 4948951016613182088
+                  total_responses: 2809455758368137589
+                - committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  nps_value: 0.24759276676729447
+                  project_name: Kubernetes
+                  project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  survey_url: https://surveymonkey.com/r/abc123
+                  total_recipients: 4948951016613182088
+                  total_responses: 2809455758368137589
+            created_at: "1991-01-24T03:13:13Z"
+            creator_id: Rerum nostrum provident nihil quam quaerat.
+            creator_name: Voluptate eius nihil ut ut quos.
+            creator_username: Ipsam et nulla.
+            email_body: Qui dolores.
+            email_body_text: Porro dicta ipsam cumque.
+            email_subject: Nisi blanditiis veniam voluptatem.
+            is_nps_survey: false
+            is_project_survey: true
+            last_modified_at: "2014-03-04T22:25:37Z"
+            last_modified_by: Id quod.
+            latest_automated_reminder_sent_at: "2013-01-23T09:18:20Z"
+            next_automated_reminder_at: "2000-04-24T23:39:00Z"
+            nps_value: 0.8567202275814672
+            num_automated_reminders_sent: 4849997741128336544
+            num_automated_reminders_to_send: 8250981986975932702
+            num_detractors: 5455946721173509686
+            num_passives: 6396227727816532693
+            num_promoters: 2633350034400695879
+            response_status: scheduled
+            send_immediately: true
+            stage_filter: Doloribus perspiciatis expedita ipsam aut.
+            survey_cutoff_date: "1985-04-15T13:02:36Z"
+            survey_monkey_id: Sunt itaque.
+            survey_reminder_rate_days: 815636587156196874
+            survey_send_date: "2009-12-20T16:20:59Z"
+            survey_status: scheduled
+            survey_title: Ipsum fugiat.
+            survey_url: Nemo consequatur nihil aut neque.
+            total_bounced_emails: 2286647374539067270
+            total_recipients: 1356697113763045090
+            total_responses: 3035120764609076041
+            uid: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
+        required:
+            - uid
+            - survey_status
+    SurveyScheduleSurveyRequestBody:
+        title: SurveyScheduleSurveyRequestBody
+        type: object
+        properties:
+            committee_voting_enabled:
+                type: boolean
+                description: Whether committee voting is enabled
+                example: false
+            committees:
+                type: array
+                items:
+                    type: string
+                    example: Excepturi reprehenderit ipsam.
+                description: Array of committee IDs to send survey to
+                example:
+                    - Dolor aliquam alias.
+                    - Et voluptas non vel est.
+                    - Est maiores quibusdam.
+            creator_id:
+                type: string
+                description: Creator's user ID
+                example: Optio aut.
+            creator_name:
+                type: string
+                description: Creator's full name
+                example: Corporis magni nobis est neque sed ut.
+            creator_username:
+                type: string
+                description: Creator's username
+                example: Sed possimus.
+            email_body:
+                type: string
+                description: Email body HTML content
+                example: Aut earum odit dolorum.
+            email_body_text:
+                type: string
+                description: Email body plain text content
+                example: Commodi fugiat.
+            email_subject:
+                type: string
+                description: Email subject line
+                example: Harum sunt quasi ea aut id.
+            is_project_survey:
+                type: boolean
+                description: Whether the survey is project-level (true) or global-level (false)
+                example: true
+            send_immediately:
+                type: boolean
+                description: Send immediately (true) or schedule for later (false)
+                example: false
+            stage_filter:
+                type: string
+                description: Project stage filter for global surveys
+                example: Explicabo quidem perspiciatis quidem.
+            survey_cutoff_date:
+                type: string
+                description: Survey cutoff/end date (RFC3339 format)
+                example: Rerum voluptate doloribus praesentium qui explicabo quia.
+            survey_monkey_id:
+                type: string
+                description: SurveyMonkey survey ID
+                example: Est minus eveniet perspiciatis.
+            survey_reminder_rate_days:
+                type: integer
+                description: Days between automatic reminder emails (0 = no reminders)
+                example: 3101412374997671411
+                format: int64
+            survey_send_date:
+                type: string
+                description: Date to send the survey (RFC3339 format)
+                example: Quia hic.
+            survey_title:
+                type: string
+                description: Survey title
+                example: Natus pariatur dolor quae iure accusantium mollitia.
+        example:
+            committee_voting_enabled: true
+            committees:
+                - Nemo architecto exercitationem autem dolores.
+                - Praesentium voluptas nihil atque velit molestiae.
+                - Et aspernatur aliquid aut.
+            creator_id: Eos unde fugit omnis molestias.
+            creator_name: Sed porro.
+            creator_username: Aut iusto quae et.
+            email_body: Quia quas non iste magnam optio quidem.
+            email_body_text: Qui eos.
+            email_subject: Odio nostrum temporibus.
+            is_project_survey: true
+            send_immediately: false
+            stage_filter: Est maiores rem.
+            survey_cutoff_date: Eligendi et sed nulla unde nihil.
+            survey_monkey_id: Fuga eos omnis ea vitae odio.
+            survey_reminder_rate_days: 16777674760674216
+            survey_send_date: Corporis at aliquam.
+            survey_title: Quia sunt vel quidem.
+    SurveyUpdateSurveyRequestBody:
+        title: SurveyUpdateSurveyRequestBody
+        type: object
+        properties:
+            committee_voting_enabled:
+                type: boolean
+                description: Whether committee voting is enabled
+                example: false
+            committees:
+                type: array
+                items:
+                    type: string
+                    example: Perferendis hic fugit officiis cum rerum consequatur.
+                description: Array of committee IDs to send survey to
+                example:
+                    - Quibusdam non.
+                    - Sunt temporibus animi occaecati velit odio.
+                    - Eum molestias quis occaecati repellendus.
+            creator_id:
+                type: string
+                description: Creator's user ID
+                example: Sint sit unde laudantium voluptate.
+            email_body:
+                type: string
+                description: Email body HTML content
+                example: Officia et repellendus beatae.
+            email_body_text:
+                type: string
+                description: Email body plain text content
+                example: Impedit quis sint commodi.
+            email_subject:
+                type: string
+                description: Email subject line
+                example: Qui vero adipisci.
+            survey_cutoff_date:
+                type: string
+                description: Survey cutoff/end date (RFC3339 format)
+                example: Ducimus voluptas quos incidunt molestiae.
+            survey_reminder_rate_days:
+                type: integer
+                description: Days between automatic reminder emails (0 = no reminders)
+                example: 5816608886100476450
+                format: int64
+            survey_send_date:
+                type: string
+                description: Date to send the survey (RFC3339 format)
+                example: Sunt ipsam dolores voluptas est voluptatum quod.
+            survey_title:
+                type: string
+                description: Survey title
+                example: Sed velit.
+        example:
+            committee_voting_enabled: false
+            committees:
+                - Molestias et ipsam est.
+                - Modi ratione deleniti odit.
+            creator_id: Sapiente iure.
+            email_body: Cupiditate voluptatum et velit quaerat.
+            email_body_text: Sunt deleniti praesentium quaerat qui cum neque.
+            email_subject: Ut labore doloremque.
+            survey_cutoff_date: Molestiae aliquam quam.
+            survey_reminder_rate_days: 8233632652378014882
+            survey_send_date: Dicta rerum sapiente deserunt.
+            survey_title: Ipsam nam ut officiis qui sunt.
+    SurveyValidateEmailRequestBody:
+        title: SurveyValidateEmailRequestBody
+        type: object
+        properties:
+            body:
+                type: string
+                description: Email body template
+                example: Atque nemo voluptatem et id aut autem.
+            subject:
+                type: string
+                description: Email subject template
+                example: Qui omnis et ut asperiores.
+        example:
+            body: Cumque perspiciatis tempora aspernatur.
+            subject: Tempore ab velit quaerat in.
+    UnauthorizedError:
+        title: UnauthorizedError
+        type: object
+        properties:
+            code:
+                type: string
+                description: HTTP status code
+                example: Et quo voluptatem qui accusantium et.
+            message:
+                type: string
+                description: Error message
+                example: Qui nesciunt qui.
+        description: Unauthorized
+        example:
+            code: Vel neque dolorem totam ipsa iste omnis.
+            message: Autem odit voluptas voluptatibus.
+        required:
+            - code
+            - message
+    UserEmail:
+        title: UserEmail
+        type: object
+        properties:
+            email_address:
+                type: string
+                description: Email address
+                example: Tempore est eveniet illo.
+            id:
+                type: string
+                description: Email ID
+                example: Quidem rem ex nesciunt natus.
+            is_primary:
+                type: boolean
+                description: Whether this is the primary email
+                example: false
+        description: User email information
+        example:
+            email_address: Exercitationem beatae atque ducimus.
+            id: A provident ex.
+            is_primary: false
+    ValidateEmailResult:
+        title: ValidateEmailResult
+        type: object
+        properties:
+            body:
+                type: string
+                description: Validated email body
+                example: An example survey body with the quarter Q1
+            subject:
+                type: string
+                description: Validated email subject
+                example: An example survey subject with the year 2023
+        example:
+            body: An example survey body with the quarter Q1
+            subject: An example survey subject with the year 2023
+        required:
+            - body
+            - subject
+securityDefinitions:
+    jwt_header_Authorization:
+        type: apiKey
+        description: |-
+            Heimdall JWT authorization
+
+            **Security Scopes**:
+              * `read:projects`: Read project data
+              * `manage:projects`: Manage projects
+              * `manage:surveys`: Manage surveys
+        name: Authorization
+        in: header
