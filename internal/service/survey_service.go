@@ -37,17 +37,9 @@ func NewSurveyService(
 // ScheduleSurvey implements survey.Service.ScheduleSurvey
 func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSurveyPayload) (*survey.SurveyScheduleResult, error) {
 	// Parse JWT token to get principal (or use mock principal if configured)
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return nil, &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return nil, err
 	}
 
 	s.logger.InfoContext(ctx, "scheduling survey",
@@ -97,17 +89,9 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 // GetSurvey implements survey.Service.GetSurvey
 func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayload) (*survey.SurveyScheduleResult, error) {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return nil, &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return nil, err
 	}
 
 	s.logger.InfoContext(ctx, "getting survey",
@@ -134,17 +118,9 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 // UpdateSurvey implements survey.Service.UpdateSurvey
 func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurveyPayload) (*survey.SurveyScheduleResult, error) {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return nil, &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return nil, err
 	}
 
 	s.logger.InfoContext(ctx, "updating survey",
@@ -186,17 +162,9 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 // DeleteSurvey implements survey.Service.DeleteSurvey
 func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurveyPayload) error {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "deleting survey",
@@ -220,17 +188,9 @@ func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurvey
 // BulkResendSurvey implements survey.Service.BulkResendSurvey
 func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkResendSurveyPayload) error {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "bulk resending survey",
@@ -260,17 +220,9 @@ func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkRese
 // PreviewSendSurvey implements survey.Service.PreviewSendSurvey
 func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.PreviewSendSurveyPayload) (*survey.PreviewSendResult, error) {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return nil, &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return nil, err
 	}
 
 	s.logger.InfoContext(ctx, "previewing survey send",
@@ -299,17 +251,9 @@ func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.Preview
 // SendMissingRecipients implements survey.Service.SendMissingRecipients
 func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.SendMissingRecipientsPayload) error {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "sending survey to missing recipients",
@@ -333,13 +277,20 @@ func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.Sen
 
 // DeleteSurveyResponse removes a recipient from survey and recalculates statistics
 func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.DeleteSurveyResponsePayload) error {
+	// Parse JWT token to get principal
+	principal, err := s.parsePrincipal(ctx, p.Token)
+	if err != nil {
+		return err
+	}
+
 	s.logger.InfoContext(ctx, "deleting survey response",
+		"principal", principal,
 		"survey_id", p.SurveyID,
 		"response_id", p.ResponseID,
 	)
 
 	// Call ITX API
-	err := s.proxy.DeleteResponse(ctx, p.SurveyID, p.ResponseID)
+	err = s.proxy.DeleteResponse(ctx, p.SurveyID, p.ResponseID)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -354,13 +305,20 @@ func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.Dele
 
 // ResendSurveyResponse resends the survey email to a specific user
 func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.ResendSurveyResponsePayload) error {
+	// Parse JWT token to get principal
+	principal, err := s.parsePrincipal(ctx, p.Token)
+	if err != nil {
+		return err
+	}
+
 	s.logger.InfoContext(ctx, "resending survey response",
+		"principal", principal,
 		"survey_id", p.SurveyID,
 		"response_id", p.ResponseID,
 	)
 
 	// Call ITX API
-	err := s.proxy.ResendResponse(ctx, p.SurveyID, p.ResponseID)
+	err = s.proxy.ResendResponse(ctx, p.SurveyID, p.ResponseID)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -376,17 +334,9 @@ func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.Rese
 // DeleteRecipientGroup removes a recipient group from survey and recalculates statistics
 func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.DeleteRecipientGroupPayload) error {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "deleting recipient group from survey",
@@ -413,17 +363,9 @@ func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.Dele
 // CreateExclusion creates a survey or global exclusion
 func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExclusionPayload) (*survey.ExclusionResult, error) {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return nil, &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return nil, err
 	}
 
 	s.logger.InfoContext(ctx, "creating exclusion",
@@ -460,17 +402,9 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 // DeleteExclusion deletes a survey or global exclusion
 func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExclusionPayload) error {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "deleting exclusion",
@@ -502,17 +436,9 @@ func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExc
 // GetExclusion retrieves an exclusion by ID
 func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusionPayload) (*survey.ExtendedExclusionResult, error) {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return nil, &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return nil, err
 	}
 
 	s.logger.InfoContext(ctx, "getting exclusion",
@@ -539,17 +465,9 @@ func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusion
 // DeleteExclusionByID deletes an exclusion by its ID
 func (s *SurveyService) DeleteExclusionByID(ctx context.Context, p *survey.DeleteExclusionByIDPayload) error {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "deleting exclusion by ID",
@@ -573,17 +491,9 @@ func (s *SurveyService) DeleteExclusionByID(ctx context.Context, p *survey.Delet
 // ValidateEmail validates email template body and subject
 func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEmailPayload) (*survey.ValidateEmailResult, error) {
 	// Parse JWT token to get principal
-	token := ""
-	if p.Token != nil {
-		token = *p.Token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	principal, err := s.parsePrincipal(ctx, p.Token)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return nil, &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
+		return nil, err
 	}
 
 	s.logger.InfoContext(ctx, "validating email template",
@@ -614,6 +524,23 @@ func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEma
 }
 
 // Helper functions
+
+// parsePrincipal extracts and validates the JWT token, returning the principal
+func (s *SurveyService) parsePrincipal(ctx context.Context, token *string) (string, error) {
+	t := ""
+	if token != nil {
+		t = *token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, t, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return "", &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+	return principal, nil
+}
 
 // mapITXResponseToResult maps ITX response to Goa result (extracted to avoid duplication)
 func mapITXResponseToResult(itxResponse *itx.SurveyScheduleResponse) *survey.SurveyScheduleResult {

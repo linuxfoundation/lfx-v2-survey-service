@@ -137,7 +137,7 @@ func run() int {
 		Addr:         fmt.Sprintf(":%s", cfg.Port),
 		Handler:      handler,
 		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
+		WriteTimeout: 30 * time.Second, // Increased to handle long-running survey operations
 		IdleTimeout:  60 * time.Second,
 	}
 
@@ -189,7 +189,7 @@ type config struct {
 
 // loadConfig loads configuration from environment variables
 func loadConfig() config {
-	return config{
+	cfg := config{
 		Port:               getEnv("PORT", "8080"),
 		JWKSURL:            getEnv("JWKS_URL", "http://heimdall:4457/.well-known/jwks"),
 		Audience:           getEnv("AUDIENCE", "lfx-v2-survey-service"),
@@ -204,6 +204,27 @@ func loadConfig() config {
 		NATSTimeout:        5 * time.Second,
 		IDMappingDisabled:  getEnv("ID_MAPPING_DISABLED", "") == "true",
 	}
+
+	if err := cfg.validate(); err != nil {
+		slog.Error("Configuration validation failed", "error", err)
+		os.Exit(1)
+	}
+
+	return cfg
+}
+
+// validate checks that required configuration values are set
+func (c config) validate() error {
+	// Only validate ITX credentials if JWT auth is not disabled (not in local dev mode)
+	if c.MockLocalPrincipal == "" {
+		if c.ITXClientID == "" {
+			return fmt.Errorf("ITX_CLIENT_ID is required")
+		}
+		if c.ITXPrivateKey == "" {
+			return fmt.Errorf("ITX_CLIENT_PRIVATE_KEY is required")
+		}
+	}
+	return nil
 }
 
 // getEnv retrieves an environment variable or returns a default value
