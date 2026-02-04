@@ -73,6 +73,31 @@ func (api *SurveyAPI) DeleteRecipientGroup(ctx context.Context, p *survey.Delete
 	return api.surveyService.DeleteRecipientGroup(ctx, p)
 }
 
+// CreateExclusion implements survey.Service.CreateExclusion
+func (api *SurveyAPI) CreateExclusion(ctx context.Context, p *survey.CreateExclusionPayload) (*survey.ExclusionResult, error) {
+	return api.surveyService.CreateExclusion(ctx, p)
+}
+
+// DeleteExclusion implements survey.Service.DeleteExclusion
+func (api *SurveyAPI) DeleteExclusion(ctx context.Context, p *survey.DeleteExclusionPayload) error {
+	return api.surveyService.DeleteExclusion(ctx, p)
+}
+
+// GetExclusion implements survey.Service.GetExclusion
+func (api *SurveyAPI) GetExclusion(ctx context.Context, p *survey.GetExclusionPayload) (*survey.ExtendedExclusionResult, error) {
+	return api.surveyService.GetExclusion(ctx, p)
+}
+
+// DeleteExclusionByID implements survey.Service.DeleteExclusionByID
+func (api *SurveyAPI) DeleteExclusionByID(ctx context.Context, p *survey.DeleteExclusionByIDPayload) error {
+	return api.surveyService.DeleteExclusionByID(ctx, p)
+}
+
+// ValidateEmail implements survey.Service.ValidateEmail
+func (api *SurveyAPI) ValidateEmail(ctx context.Context, p *survey.ValidateEmailPayload) (*survey.ValidateEmailResult, error) {
+	return api.surveyService.ValidateEmail(ctx, p)
+}
+
 // JWTAuth implements survey.Auther.JWTAuth
 // This is called by goa to validate JWT tokens before calling service methods
 func (api *SurveyAPI) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {

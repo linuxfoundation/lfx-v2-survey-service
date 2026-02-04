@@ -64,10 +64,8 @@ func EncodeScheduleSurveyRequest(encoder func(*http.Request) goahttp.Encoder) fu
 // body should be restored after having been read.
 // DecodeScheduleSurveyResponse may return the following errors:
 //   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
-//   - "Conflict" (type *survey.ConflictError): http.StatusConflict
 //   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
 //   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
-//   - "NotFound" (type *survey.NotFoundError): http.StatusNotFound
 //   - "ServiceUnavailable" (type *survey.ServiceUnavailableError): http.StatusServiceUnavailable
 //   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
 //   - error: internal error
@@ -115,20 +113,6 @@ func DecodeScheduleSurveyResponse(decoder func(*http.Response) goahttp.Decoder, 
 				return nil, goahttp.ErrValidationError("survey", "schedule_survey", err)
 			}
 			return nil, NewScheduleSurveyBadRequest(&body)
-		case http.StatusConflict:
-			var (
-				body ScheduleSurveyConflictResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("survey", "schedule_survey", err)
-			}
-			err = ValidateScheduleSurveyConflictResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("survey", "schedule_survey", err)
-			}
-			return nil, NewScheduleSurveyConflict(&body)
 		case http.StatusForbidden:
 			var (
 				body ScheduleSurveyForbiddenResponseBody
@@ -157,20 +141,6 @@ func DecodeScheduleSurveyResponse(decoder func(*http.Response) goahttp.Decoder, 
 				return nil, goahttp.ErrValidationError("survey", "schedule_survey", err)
 			}
 			return nil, NewScheduleSurveyInternalServerError(&body)
-		case http.StatusNotFound:
-			var (
-				body ScheduleSurveyNotFoundResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("survey", "schedule_survey", err)
-			}
-			err = ValidateScheduleSurveyNotFoundResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("survey", "schedule_survey", err)
-			}
-			return nil, NewScheduleSurveyNotFound(&body)
 		case http.StatusServiceUnavailable:
 			var (
 				body ScheduleSurveyServiceUnavailableResponseBody
@@ -1758,6 +1728,713 @@ func DecodeDeleteRecipientGroupResponse(decoder func(*http.Response) goahttp.Dec
 	}
 }
 
+// BuildCreateExclusionRequest instantiates a HTTP request object with method
+// and path set to call the "survey" service "create_exclusion" endpoint
+func (c *Client) BuildCreateExclusionRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateExclusionSurveyPath()}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "create_exclusion", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeCreateExclusionRequest returns an encoder for requests sent to the
+// survey create_exclusion server.
+func EncodeCreateExclusionRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.CreateExclusionPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "create_exclusion", "*survey.CreateExclusionPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		body := NewCreateExclusionRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("survey", "create_exclusion", err)
+		}
+		return nil
+	}
+}
+
+// DecodeCreateExclusionResponse returns a decoder for responses returned by
+// the survey create_exclusion endpoint. restoreBody controls whether the
+// response body should be restored after having been read.
+// DecodeCreateExclusionResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeCreateExclusionResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusCreated:
+			var (
+				body CreateExclusionResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "create_exclusion", err)
+			}
+			err = ValidateCreateExclusionResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "create_exclusion", err)
+			}
+			res := NewCreateExclusionExclusionResultCreated(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body CreateExclusionBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "create_exclusion", err)
+			}
+			err = ValidateCreateExclusionBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "create_exclusion", err)
+			}
+			return nil, NewCreateExclusionBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body CreateExclusionForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "create_exclusion", err)
+			}
+			err = ValidateCreateExclusionForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "create_exclusion", err)
+			}
+			return nil, NewCreateExclusionForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body CreateExclusionInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "create_exclusion", err)
+			}
+			err = ValidateCreateExclusionInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "create_exclusion", err)
+			}
+			return nil, NewCreateExclusionInternalServerError(&body)
+		case http.StatusUnauthorized:
+			var (
+				body CreateExclusionUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "create_exclusion", err)
+			}
+			err = ValidateCreateExclusionUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "create_exclusion", err)
+			}
+			return nil, NewCreateExclusionUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "create_exclusion", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildDeleteExclusionRequest instantiates a HTTP request object with method
+// and path set to call the "survey" service "delete_exclusion" endpoint
+func (c *Client) BuildDeleteExclusionRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteExclusionSurveyPath()}
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "delete_exclusion", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeDeleteExclusionRequest returns an encoder for requests sent to the
+// survey delete_exclusion server.
+func EncodeDeleteExclusionRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.DeleteExclusionPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "delete_exclusion", "*survey.DeleteExclusionPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		body := NewDeleteExclusionRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("survey", "delete_exclusion", err)
+		}
+		return nil
+	}
+}
+
+// DecodeDeleteExclusionResponse returns a decoder for responses returned by
+// the survey delete_exclusion endpoint. restoreBody controls whether the
+// response body should be restored after having been read.
+// DecodeDeleteExclusionResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeDeleteExclusionResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		case http.StatusBadRequest:
+			var (
+				body DeleteExclusionBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_exclusion", err)
+			}
+			err = ValidateDeleteExclusionBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_exclusion", err)
+			}
+			return nil, NewDeleteExclusionBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body DeleteExclusionForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_exclusion", err)
+			}
+			err = ValidateDeleteExclusionForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_exclusion", err)
+			}
+			return nil, NewDeleteExclusionForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body DeleteExclusionInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_exclusion", err)
+			}
+			err = ValidateDeleteExclusionInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_exclusion", err)
+			}
+			return nil, NewDeleteExclusionInternalServerError(&body)
+		case http.StatusUnauthorized:
+			var (
+				body DeleteExclusionUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_exclusion", err)
+			}
+			err = ValidateDeleteExclusionUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_exclusion", err)
+			}
+			return nil, NewDeleteExclusionUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "delete_exclusion", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildGetExclusionRequest instantiates a HTTP request object with method and
+// path set to call the "survey" service "get_exclusion" endpoint
+func (c *Client) BuildGetExclusionRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		exclusionID string
+	)
+	{
+		p, ok := v.(*survey.GetExclusionPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("survey", "get_exclusion", "*survey.GetExclusionPayload", v)
+		}
+		exclusionID = p.ExclusionID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: GetExclusionSurveyPath(exclusionID)}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "get_exclusion", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeGetExclusionRequest returns an encoder for requests sent to the survey
+// get_exclusion server.
+func EncodeGetExclusionRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.GetExclusionPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "get_exclusion", "*survey.GetExclusionPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		return nil
+	}
+}
+
+// DecodeGetExclusionResponse returns a decoder for responses returned by the
+// survey get_exclusion endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+// DecodeGetExclusionResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "NotFound" (type *survey.NotFoundError): http.StatusNotFound
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeGetExclusionResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body GetExclusionResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_exclusion", err)
+			}
+			err = ValidateGetExclusionResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_exclusion", err)
+			}
+			res := NewGetExclusionExtendedExclusionResultOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body GetExclusionBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_exclusion", err)
+			}
+			err = ValidateGetExclusionBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_exclusion", err)
+			}
+			return nil, NewGetExclusionBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body GetExclusionForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_exclusion", err)
+			}
+			err = ValidateGetExclusionForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_exclusion", err)
+			}
+			return nil, NewGetExclusionForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body GetExclusionInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_exclusion", err)
+			}
+			err = ValidateGetExclusionInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_exclusion", err)
+			}
+			return nil, NewGetExclusionInternalServerError(&body)
+		case http.StatusNotFound:
+			var (
+				body GetExclusionNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_exclusion", err)
+			}
+			err = ValidateGetExclusionNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_exclusion", err)
+			}
+			return nil, NewGetExclusionNotFound(&body)
+		case http.StatusUnauthorized:
+			var (
+				body GetExclusionUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "get_exclusion", err)
+			}
+			err = ValidateGetExclusionUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "get_exclusion", err)
+			}
+			return nil, NewGetExclusionUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "get_exclusion", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildDeleteExclusionByIDRequest instantiates a HTTP request object with
+// method and path set to call the "survey" service "delete_exclusion_by_id"
+// endpoint
+func (c *Client) BuildDeleteExclusionByIDRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		exclusionID string
+	)
+	{
+		p, ok := v.(*survey.DeleteExclusionByIDPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("survey", "delete_exclusion_by_id", "*survey.DeleteExclusionByIDPayload", v)
+		}
+		exclusionID = p.ExclusionID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteExclusionByIDSurveyPath(exclusionID)}
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "delete_exclusion_by_id", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeDeleteExclusionByIDRequest returns an encoder for requests sent to the
+// survey delete_exclusion_by_id server.
+func EncodeDeleteExclusionByIDRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.DeleteExclusionByIDPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "delete_exclusion_by_id", "*survey.DeleteExclusionByIDPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		return nil
+	}
+}
+
+// DecodeDeleteExclusionByIDResponse returns a decoder for responses returned
+// by the survey delete_exclusion_by_id endpoint. restoreBody controls whether
+// the response body should be restored after having been read.
+// DecodeDeleteExclusionByIDResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeDeleteExclusionByIDResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		case http.StatusBadRequest:
+			var (
+				body DeleteExclusionByIDBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_exclusion_by_id", err)
+			}
+			err = ValidateDeleteExclusionByIDBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_exclusion_by_id", err)
+			}
+			return nil, NewDeleteExclusionByIDBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body DeleteExclusionByIDForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_exclusion_by_id", err)
+			}
+			err = ValidateDeleteExclusionByIDForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_exclusion_by_id", err)
+			}
+			return nil, NewDeleteExclusionByIDForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body DeleteExclusionByIDInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_exclusion_by_id", err)
+			}
+			err = ValidateDeleteExclusionByIDInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_exclusion_by_id", err)
+			}
+			return nil, NewDeleteExclusionByIDInternalServerError(&body)
+		case http.StatusUnauthorized:
+			var (
+				body DeleteExclusionByIDUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "delete_exclusion_by_id", err)
+			}
+			err = ValidateDeleteExclusionByIDUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "delete_exclusion_by_id", err)
+			}
+			return nil, NewDeleteExclusionByIDUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "delete_exclusion_by_id", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildValidateEmailRequest instantiates a HTTP request object with method and
+// path set to call the "survey" service "validate_email" endpoint
+func (c *Client) BuildValidateEmailRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ValidateEmailSurveyPath()}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "validate_email", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeValidateEmailRequest returns an encoder for requests sent to the
+// survey validate_email server.
+func EncodeValidateEmailRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.ValidateEmailPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "validate_email", "*survey.ValidateEmailPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		body := NewValidateEmailRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("survey", "validate_email", err)
+		}
+		return nil
+	}
+}
+
+// DecodeValidateEmailResponse returns a decoder for responses returned by the
+// survey validate_email endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+// DecodeValidateEmailResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeValidateEmailResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body ValidateEmailResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "validate_email", err)
+			}
+			err = ValidateValidateEmailResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "validate_email", err)
+			}
+			res := NewValidateEmailResultOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body ValidateEmailBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "validate_email", err)
+			}
+			err = ValidateValidateEmailBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "validate_email", err)
+			}
+			return nil, NewValidateEmailBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body ValidateEmailForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "validate_email", err)
+			}
+			err = ValidateValidateEmailForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "validate_email", err)
+			}
+			return nil, NewValidateEmailForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body ValidateEmailInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "validate_email", err)
+			}
+			err = ValidateValidateEmailInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "validate_email", err)
+			}
+			return nil, NewValidateEmailInternalServerError(&body)
+		case http.StatusUnauthorized:
+			var (
+				body ValidateEmailUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "validate_email", err)
+			}
+			err = ValidateValidateEmailUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "validate_email", err)
+			}
+			return nil, NewValidateEmailUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "validate_email", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // unmarshalSurveyCommitteeResponseBodyToSurveySurveyCommittee builds a value
 // of type *survey.SurveyCommittee from a value of type
 // *SurveyCommitteeResponseBody.
@@ -1829,6 +2506,45 @@ func unmarshalITXPreviewRecipientResponseBodyToSurveyITXPreviewRecipient(v *ITXP
 		Username:  v.Username,
 		Email:     *v.Email,
 		Role:      v.Role,
+	}
+
+	return res
+}
+
+// unmarshalExclusionUserResponseBodyToSurveyExclusionUser builds a value of
+// type *survey.ExclusionUser from a value of type *ExclusionUserResponseBody.
+func unmarshalExclusionUserResponseBodyToSurveyExclusionUser(v *ExclusionUserResponseBody) *survey.ExclusionUser {
+	if v == nil {
+		return nil
+	}
+	res := &survey.ExclusionUser{
+		ID:       v.ID,
+		Username: v.Username,
+	}
+	if v.Emails != nil {
+		res.Emails = make([]*survey.UserEmail, len(v.Emails))
+		for i, val := range v.Emails {
+			if val == nil {
+				res.Emails[i] = nil
+				continue
+			}
+			res.Emails[i] = unmarshalUserEmailResponseBodyToSurveyUserEmail(val)
+		}
+	}
+
+	return res
+}
+
+// unmarshalUserEmailResponseBodyToSurveyUserEmail builds a value of type
+// *survey.UserEmail from a value of type *UserEmailResponseBody.
+func unmarshalUserEmailResponseBodyToSurveyUserEmail(v *UserEmailResponseBody) *survey.UserEmail {
+	if v == nil {
+		return nil
+	}
+	res := &survey.UserEmail{
+		ID:           v.ID,
+		EmailAddress: v.EmailAddress,
+		IsPrimary:    v.IsPrimary,
 	}
 
 	return res

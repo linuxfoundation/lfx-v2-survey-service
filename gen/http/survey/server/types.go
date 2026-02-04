@@ -82,6 +82,45 @@ type BulkResendSurveyRequestBody struct {
 	RecipientIds []string `form:"recipient_ids,omitempty" json:"recipient_ids,omitempty" xml:"recipient_ids,omitempty"`
 }
 
+// CreateExclusionRequestBody is the type of the "survey" service
+// "create_exclusion" endpoint HTTP request body.
+type CreateExclusionRequestBody struct {
+	// Survey responder's email
+	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
+	// Recipient's user ID
+	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+	// Survey ID for survey-specific exclusion
+	SurveyID *string `form:"survey_id,omitempty" json:"survey_id,omitempty" xml:"survey_id,omitempty"`
+	// Committee ID for survey-specific exclusion
+	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
+	// Global exclusion flag
+	GlobalExclusion *string `form:"global_exclusion,omitempty" json:"global_exclusion,omitempty" xml:"global_exclusion,omitempty"`
+}
+
+// DeleteExclusionRequestBody is the type of the "survey" service
+// "delete_exclusion" endpoint HTTP request body.
+type DeleteExclusionRequestBody struct {
+	// Survey responder's email
+	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
+	// Recipient's user ID
+	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+	// Survey ID for survey-specific exclusion
+	SurveyID *string `form:"survey_id,omitempty" json:"survey_id,omitempty" xml:"survey_id,omitempty"`
+	// Committee ID for survey-specific exclusion
+	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
+	// Global exclusion flag
+	GlobalExclusion *string `form:"global_exclusion,omitempty" json:"global_exclusion,omitempty" xml:"global_exclusion,omitempty"`
+}
+
+// ValidateEmailRequestBody is the type of the "survey" service
+// "validate_email" endpoint HTTP request body.
+type ValidateEmailRequestBody struct {
+	// Email body template
+	Body *string `form:"body,omitempty" json:"body,omitempty" xml:"body,omitempty"`
+	// Email subject template
+	Subject *string `form:"subject,omitempty" json:"subject,omitempty" xml:"subject,omitempty"`
+}
+
 // ScheduleSurveyResponseBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP response body.
 type ScheduleSurveyResponseBody struct {
@@ -324,18 +363,54 @@ type PreviewSendSurveyResponseBody struct {
 	AffectedRecipients []*ITXPreviewRecipientResponseBody `form:"affected_recipients,omitempty" json:"affected_recipients,omitempty" xml:"affected_recipients,omitempty"`
 }
 
+// CreateExclusionResponseBody is the type of the "survey" service
+// "create_exclusion" endpoint HTTP response body.
+type CreateExclusionResponseBody struct {
+	// Exclusion ID
+	ID string `form:"id" json:"id" xml:"id"`
+	// Survey responder's email
+	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
+	// Survey ID
+	SurveyID *string `form:"survey_id,omitempty" json:"survey_id,omitempty" xml:"survey_id,omitempty"`
+	// Committee ID
+	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
+	// Global exclusion flag
+	GlobalExclusion *string `form:"global_exclusion,omitempty" json:"global_exclusion,omitempty" xml:"global_exclusion,omitempty"`
+	// Recipient's user ID
+	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+}
+
+// GetExclusionResponseBody is the type of the "survey" service "get_exclusion"
+// endpoint HTTP response body.
+type GetExclusionResponseBody struct {
+	// Exclusion ID
+	ID string `form:"id" json:"id" xml:"id"`
+	// Survey responder's email
+	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
+	// Survey ID
+	SurveyID *string `form:"survey_id,omitempty" json:"survey_id,omitempty" xml:"survey_id,omitempty"`
+	// Committee ID
+	CommitteeID *string `form:"committee_id,omitempty" json:"committee_id,omitempty" xml:"committee_id,omitempty"`
+	// Global exclusion flag
+	GlobalExclusion *string `form:"global_exclusion,omitempty" json:"global_exclusion,omitempty" xml:"global_exclusion,omitempty"`
+	// Recipient's user ID
+	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+	// User information
+	User *ExclusionUserResponseBody `form:"user,omitempty" json:"user,omitempty" xml:"user,omitempty"`
+}
+
+// ValidateEmailResponseBody is the type of the "survey" service
+// "validate_email" endpoint HTTP response body.
+type ValidateEmailResponseBody struct {
+	// Validated email body
+	Body string `form:"body" json:"body" xml:"body"`
+	// Validated email subject
+	Subject string `form:"subject" json:"subject" xml:"subject"`
+}
+
 // ScheduleSurveyBadRequestResponseBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP response body for the "BadRequest" error.
 type ScheduleSurveyBadRequestResponseBody struct {
-	// HTTP status code
-	Code string `form:"code" json:"code" xml:"code"`
-	// Error message
-	Message string `form:"message" json:"message" xml:"message"`
-}
-
-// ScheduleSurveyConflictResponseBody is the type of the "survey" service
-// "schedule_survey" endpoint HTTP response body for the "Conflict" error.
-type ScheduleSurveyConflictResponseBody struct {
 	// HTTP status code
 	Code string `form:"code" json:"code" xml:"code"`
 	// Error message
@@ -355,15 +430,6 @@ type ScheduleSurveyForbiddenResponseBody struct {
 // service "schedule_survey" endpoint HTTP response body for the
 // "InternalServerError" error.
 type ScheduleSurveyInternalServerErrorResponseBody struct {
-	// HTTP status code
-	Code string `form:"code" json:"code" xml:"code"`
-	// Error message
-	Message string `form:"message" json:"message" xml:"message"`
-}
-
-// ScheduleSurveyNotFoundResponseBody is the type of the "survey" service
-// "schedule_survey" endpoint HTTP response body for the "NotFound" error.
-type ScheduleSurveyNotFoundResponseBody struct {
 	// HTTP status code
 	Code string `form:"code" json:"code" xml:"code"`
 	// Error message
@@ -909,6 +975,203 @@ type DeleteRecipientGroupUnauthorizedResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// CreateExclusionBadRequestResponseBody is the type of the "survey" service
+// "create_exclusion" endpoint HTTP response body for the "BadRequest" error.
+type CreateExclusionBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// CreateExclusionForbiddenResponseBody is the type of the "survey" service
+// "create_exclusion" endpoint HTTP response body for the "Forbidden" error.
+type CreateExclusionForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// CreateExclusionInternalServerErrorResponseBody is the type of the "survey"
+// service "create_exclusion" endpoint HTTP response body for the
+// "InternalServerError" error.
+type CreateExclusionInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// CreateExclusionUnauthorizedResponseBody is the type of the "survey" service
+// "create_exclusion" endpoint HTTP response body for the "Unauthorized" error.
+type CreateExclusionUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteExclusionBadRequestResponseBody is the type of the "survey" service
+// "delete_exclusion" endpoint HTTP response body for the "BadRequest" error.
+type DeleteExclusionBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteExclusionForbiddenResponseBody is the type of the "survey" service
+// "delete_exclusion" endpoint HTTP response body for the "Forbidden" error.
+type DeleteExclusionForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteExclusionInternalServerErrorResponseBody is the type of the "survey"
+// service "delete_exclusion" endpoint HTTP response body for the
+// "InternalServerError" error.
+type DeleteExclusionInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteExclusionUnauthorizedResponseBody is the type of the "survey" service
+// "delete_exclusion" endpoint HTTP response body for the "Unauthorized" error.
+type DeleteExclusionUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// GetExclusionBadRequestResponseBody is the type of the "survey" service
+// "get_exclusion" endpoint HTTP response body for the "BadRequest" error.
+type GetExclusionBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// GetExclusionForbiddenResponseBody is the type of the "survey" service
+// "get_exclusion" endpoint HTTP response body for the "Forbidden" error.
+type GetExclusionForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// GetExclusionInternalServerErrorResponseBody is the type of the "survey"
+// service "get_exclusion" endpoint HTTP response body for the
+// "InternalServerError" error.
+type GetExclusionInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// GetExclusionNotFoundResponseBody is the type of the "survey" service
+// "get_exclusion" endpoint HTTP response body for the "NotFound" error.
+type GetExclusionNotFoundResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// GetExclusionUnauthorizedResponseBody is the type of the "survey" service
+// "get_exclusion" endpoint HTTP response body for the "Unauthorized" error.
+type GetExclusionUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteExclusionByIDBadRequestResponseBody is the type of the "survey"
+// service "delete_exclusion_by_id" endpoint HTTP response body for the
+// "BadRequest" error.
+type DeleteExclusionByIDBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteExclusionByIDForbiddenResponseBody is the type of the "survey" service
+// "delete_exclusion_by_id" endpoint HTTP response body for the "Forbidden"
+// error.
+type DeleteExclusionByIDForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteExclusionByIDInternalServerErrorResponseBody is the type of the
+// "survey" service "delete_exclusion_by_id" endpoint HTTP response body for
+// the "InternalServerError" error.
+type DeleteExclusionByIDInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteExclusionByIDUnauthorizedResponseBody is the type of the "survey"
+// service "delete_exclusion_by_id" endpoint HTTP response body for the
+// "Unauthorized" error.
+type DeleteExclusionByIDUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ValidateEmailBadRequestResponseBody is the type of the "survey" service
+// "validate_email" endpoint HTTP response body for the "BadRequest" error.
+type ValidateEmailBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ValidateEmailForbiddenResponseBody is the type of the "survey" service
+// "validate_email" endpoint HTTP response body for the "Forbidden" error.
+type ValidateEmailForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ValidateEmailInternalServerErrorResponseBody is the type of the "survey"
+// service "validate_email" endpoint HTTP response body for the
+// "InternalServerError" error.
+type ValidateEmailInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ValidateEmailUnauthorizedResponseBody is the type of the "survey" service
+// "validate_email" endpoint HTTP response body for the "Unauthorized" error.
+type ValidateEmailUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // SurveyCommitteeResponseBody is used to define fields on response body types.
 type SurveyCommitteeResponseBody struct {
 	// Committee name
@@ -975,6 +1238,26 @@ type ITXPreviewRecipientResponseBody struct {
 	Email string `form:"email" json:"email" xml:"email"`
 	// Role in committee
 	Role *string `form:"role,omitempty" json:"role,omitempty" xml:"role,omitempty"`
+}
+
+// ExclusionUserResponseBody is used to define fields on response body types.
+type ExclusionUserResponseBody struct {
+	// User ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Username
+	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
+	// User emails
+	Emails []*UserEmailResponseBody `form:"emails,omitempty" json:"emails,omitempty" xml:"emails,omitempty"`
+}
+
+// UserEmailResponseBody is used to define fields on response body types.
+type UserEmailResponseBody struct {
+	// Email ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Email address
+	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
+	// Whether this is the primary email
+	IsPrimary *bool `form:"is_primary,omitempty" json:"is_primary,omitempty" xml:"is_primary,omitempty"`
 }
 
 // NewScheduleSurveyResponseBody builds the HTTP response body from the result
@@ -1173,20 +1456,51 @@ func NewPreviewSendSurveyResponseBody(res *survey.PreviewSendResult) *PreviewSen
 	return body
 }
 
-// NewScheduleSurveyBadRequestResponseBody builds the HTTP response body from
-// the result of the "schedule_survey" endpoint of the "survey" service.
-func NewScheduleSurveyBadRequestResponseBody(res *survey.BadRequestError) *ScheduleSurveyBadRequestResponseBody {
-	body := &ScheduleSurveyBadRequestResponseBody{
-		Code:    res.Code,
-		Message: res.Message,
+// NewCreateExclusionResponseBody builds the HTTP response body from the result
+// of the "create_exclusion" endpoint of the "survey" service.
+func NewCreateExclusionResponseBody(res *survey.ExclusionResult) *CreateExclusionResponseBody {
+	body := &CreateExclusionResponseBody{
+		ID:              res.ID,
+		Email:           res.Email,
+		SurveyID:        res.SurveyID,
+		CommitteeID:     res.CommitteeID,
+		GlobalExclusion: res.GlobalExclusion,
+		UserID:          res.UserID,
 	}
 	return body
 }
 
-// NewScheduleSurveyConflictResponseBody builds the HTTP response body from the
-// result of the "schedule_survey" endpoint of the "survey" service.
-func NewScheduleSurveyConflictResponseBody(res *survey.ConflictError) *ScheduleSurveyConflictResponseBody {
-	body := &ScheduleSurveyConflictResponseBody{
+// NewGetExclusionResponseBody builds the HTTP response body from the result of
+// the "get_exclusion" endpoint of the "survey" service.
+func NewGetExclusionResponseBody(res *survey.ExtendedExclusionResult) *GetExclusionResponseBody {
+	body := &GetExclusionResponseBody{
+		ID:              res.ID,
+		Email:           res.Email,
+		SurveyID:        res.SurveyID,
+		CommitteeID:     res.CommitteeID,
+		GlobalExclusion: res.GlobalExclusion,
+		UserID:          res.UserID,
+	}
+	if res.User != nil {
+		body.User = marshalSurveyExclusionUserToExclusionUserResponseBody(res.User)
+	}
+	return body
+}
+
+// NewValidateEmailResponseBody builds the HTTP response body from the result
+// of the "validate_email" endpoint of the "survey" service.
+func NewValidateEmailResponseBody(res *survey.ValidateEmailResult) *ValidateEmailResponseBody {
+	body := &ValidateEmailResponseBody{
+		Body:    res.Body,
+		Subject: res.Subject,
+	}
+	return body
+}
+
+// NewScheduleSurveyBadRequestResponseBody builds the HTTP response body from
+// the result of the "schedule_survey" endpoint of the "survey" service.
+func NewScheduleSurveyBadRequestResponseBody(res *survey.BadRequestError) *ScheduleSurveyBadRequestResponseBody {
+	body := &ScheduleSurveyBadRequestResponseBody{
 		Code:    res.Code,
 		Message: res.Message,
 	}
@@ -1208,16 +1522,6 @@ func NewScheduleSurveyForbiddenResponseBody(res *survey.ForbiddenError) *Schedul
 // service.
 func NewScheduleSurveyInternalServerErrorResponseBody(res *survey.InternalServerError) *ScheduleSurveyInternalServerErrorResponseBody {
 	body := &ScheduleSurveyInternalServerErrorResponseBody{
-		Code:    res.Code,
-		Message: res.Message,
-	}
-	return body
-}
-
-// NewScheduleSurveyNotFoundResponseBody builds the HTTP response body from the
-// result of the "schedule_survey" endpoint of the "survey" service.
-func NewScheduleSurveyNotFoundResponseBody(res *survey.NotFoundError) *ScheduleSurveyNotFoundResponseBody {
-	body := &ScheduleSurveyNotFoundResponseBody{
 		Code:    res.Code,
 		Message: res.Message,
 	}
@@ -1815,6 +2119,223 @@ func NewDeleteRecipientGroupUnauthorizedResponseBody(res *survey.UnauthorizedErr
 	return body
 }
 
+// NewCreateExclusionBadRequestResponseBody builds the HTTP response body from
+// the result of the "create_exclusion" endpoint of the "survey" service.
+func NewCreateExclusionBadRequestResponseBody(res *survey.BadRequestError) *CreateExclusionBadRequestResponseBody {
+	body := &CreateExclusionBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewCreateExclusionForbiddenResponseBody builds the HTTP response body from
+// the result of the "create_exclusion" endpoint of the "survey" service.
+func NewCreateExclusionForbiddenResponseBody(res *survey.ForbiddenError) *CreateExclusionForbiddenResponseBody {
+	body := &CreateExclusionForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewCreateExclusionInternalServerErrorResponseBody builds the HTTP response
+// body from the result of the "create_exclusion" endpoint of the "survey"
+// service.
+func NewCreateExclusionInternalServerErrorResponseBody(res *survey.InternalServerError) *CreateExclusionInternalServerErrorResponseBody {
+	body := &CreateExclusionInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewCreateExclusionUnauthorizedResponseBody builds the HTTP response body
+// from the result of the "create_exclusion" endpoint of the "survey" service.
+func NewCreateExclusionUnauthorizedResponseBody(res *survey.UnauthorizedError) *CreateExclusionUnauthorizedResponseBody {
+	body := &CreateExclusionUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteExclusionBadRequestResponseBody builds the HTTP response body from
+// the result of the "delete_exclusion" endpoint of the "survey" service.
+func NewDeleteExclusionBadRequestResponseBody(res *survey.BadRequestError) *DeleteExclusionBadRequestResponseBody {
+	body := &DeleteExclusionBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteExclusionForbiddenResponseBody builds the HTTP response body from
+// the result of the "delete_exclusion" endpoint of the "survey" service.
+func NewDeleteExclusionForbiddenResponseBody(res *survey.ForbiddenError) *DeleteExclusionForbiddenResponseBody {
+	body := &DeleteExclusionForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteExclusionInternalServerErrorResponseBody builds the HTTP response
+// body from the result of the "delete_exclusion" endpoint of the "survey"
+// service.
+func NewDeleteExclusionInternalServerErrorResponseBody(res *survey.InternalServerError) *DeleteExclusionInternalServerErrorResponseBody {
+	body := &DeleteExclusionInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteExclusionUnauthorizedResponseBody builds the HTTP response body
+// from the result of the "delete_exclusion" endpoint of the "survey" service.
+func NewDeleteExclusionUnauthorizedResponseBody(res *survey.UnauthorizedError) *DeleteExclusionUnauthorizedResponseBody {
+	body := &DeleteExclusionUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewGetExclusionBadRequestResponseBody builds the HTTP response body from the
+// result of the "get_exclusion" endpoint of the "survey" service.
+func NewGetExclusionBadRequestResponseBody(res *survey.BadRequestError) *GetExclusionBadRequestResponseBody {
+	body := &GetExclusionBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewGetExclusionForbiddenResponseBody builds the HTTP response body from the
+// result of the "get_exclusion" endpoint of the "survey" service.
+func NewGetExclusionForbiddenResponseBody(res *survey.ForbiddenError) *GetExclusionForbiddenResponseBody {
+	body := &GetExclusionForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewGetExclusionInternalServerErrorResponseBody builds the HTTP response body
+// from the result of the "get_exclusion" endpoint of the "survey" service.
+func NewGetExclusionInternalServerErrorResponseBody(res *survey.InternalServerError) *GetExclusionInternalServerErrorResponseBody {
+	body := &GetExclusionInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewGetExclusionNotFoundResponseBody builds the HTTP response body from the
+// result of the "get_exclusion" endpoint of the "survey" service.
+func NewGetExclusionNotFoundResponseBody(res *survey.NotFoundError) *GetExclusionNotFoundResponseBody {
+	body := &GetExclusionNotFoundResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewGetExclusionUnauthorizedResponseBody builds the HTTP response body from
+// the result of the "get_exclusion" endpoint of the "survey" service.
+func NewGetExclusionUnauthorizedResponseBody(res *survey.UnauthorizedError) *GetExclusionUnauthorizedResponseBody {
+	body := &GetExclusionUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteExclusionByIDBadRequestResponseBody builds the HTTP response body
+// from the result of the "delete_exclusion_by_id" endpoint of the "survey"
+// service.
+func NewDeleteExclusionByIDBadRequestResponseBody(res *survey.BadRequestError) *DeleteExclusionByIDBadRequestResponseBody {
+	body := &DeleteExclusionByIDBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteExclusionByIDForbiddenResponseBody builds the HTTP response body
+// from the result of the "delete_exclusion_by_id" endpoint of the "survey"
+// service.
+func NewDeleteExclusionByIDForbiddenResponseBody(res *survey.ForbiddenError) *DeleteExclusionByIDForbiddenResponseBody {
+	body := &DeleteExclusionByIDForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteExclusionByIDInternalServerErrorResponseBody builds the HTTP
+// response body from the result of the "delete_exclusion_by_id" endpoint of
+// the "survey" service.
+func NewDeleteExclusionByIDInternalServerErrorResponseBody(res *survey.InternalServerError) *DeleteExclusionByIDInternalServerErrorResponseBody {
+	body := &DeleteExclusionByIDInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteExclusionByIDUnauthorizedResponseBody builds the HTTP response body
+// from the result of the "delete_exclusion_by_id" endpoint of the "survey"
+// service.
+func NewDeleteExclusionByIDUnauthorizedResponseBody(res *survey.UnauthorizedError) *DeleteExclusionByIDUnauthorizedResponseBody {
+	body := &DeleteExclusionByIDUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewValidateEmailBadRequestResponseBody builds the HTTP response body from
+// the result of the "validate_email" endpoint of the "survey" service.
+func NewValidateEmailBadRequestResponseBody(res *survey.BadRequestError) *ValidateEmailBadRequestResponseBody {
+	body := &ValidateEmailBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewValidateEmailForbiddenResponseBody builds the HTTP response body from the
+// result of the "validate_email" endpoint of the "survey" service.
+func NewValidateEmailForbiddenResponseBody(res *survey.ForbiddenError) *ValidateEmailForbiddenResponseBody {
+	body := &ValidateEmailForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewValidateEmailInternalServerErrorResponseBody builds the HTTP response
+// body from the result of the "validate_email" endpoint of the "survey"
+// service.
+func NewValidateEmailInternalServerErrorResponseBody(res *survey.InternalServerError) *ValidateEmailInternalServerErrorResponseBody {
+	body := &ValidateEmailInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewValidateEmailUnauthorizedResponseBody builds the HTTP response body from
+// the result of the "validate_email" endpoint of the "survey" service.
+func NewValidateEmailUnauthorizedResponseBody(res *survey.UnauthorizedError) *ValidateEmailUnauthorizedResponseBody {
+	body := &ValidateEmailUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewScheduleSurveyPayload builds a survey service schedule_survey endpoint
 // payload.
 func NewScheduleSurveyPayload(body *ScheduleSurveyRequestBody, token *string) *survey.ScheduleSurveyPayload {
@@ -1957,6 +2478,68 @@ func NewDeleteRecipientGroupPayload(surveyID string, committeeID *string, projec
 	v.CommitteeID = committeeID
 	v.ProjectID = projectID
 	v.FoundationID = foundationID
+	v.Token = token
+
+	return v
+}
+
+// NewCreateExclusionPayload builds a survey service create_exclusion endpoint
+// payload.
+func NewCreateExclusionPayload(body *CreateExclusionRequestBody, token *string) *survey.CreateExclusionPayload {
+	v := &survey.CreateExclusionPayload{
+		Email:           body.Email,
+		UserID:          body.UserID,
+		SurveyID:        body.SurveyID,
+		CommitteeID:     body.CommitteeID,
+		GlobalExclusion: body.GlobalExclusion,
+	}
+	v.Token = token
+
+	return v
+}
+
+// NewDeleteExclusionPayload builds a survey service delete_exclusion endpoint
+// payload.
+func NewDeleteExclusionPayload(body *DeleteExclusionRequestBody, token *string) *survey.DeleteExclusionPayload {
+	v := &survey.DeleteExclusionPayload{
+		Email:           body.Email,
+		UserID:          body.UserID,
+		SurveyID:        body.SurveyID,
+		CommitteeID:     body.CommitteeID,
+		GlobalExclusion: body.GlobalExclusion,
+	}
+	v.Token = token
+
+	return v
+}
+
+// NewGetExclusionPayload builds a survey service get_exclusion endpoint
+// payload.
+func NewGetExclusionPayload(exclusionID string, token *string) *survey.GetExclusionPayload {
+	v := &survey.GetExclusionPayload{}
+	v.ExclusionID = exclusionID
+	v.Token = token
+
+	return v
+}
+
+// NewDeleteExclusionByIDPayload builds a survey service delete_exclusion_by_id
+// endpoint payload.
+func NewDeleteExclusionByIDPayload(exclusionID string, token *string) *survey.DeleteExclusionByIDPayload {
+	v := &survey.DeleteExclusionByIDPayload{}
+	v.ExclusionID = exclusionID
+	v.Token = token
+
+	return v
+}
+
+// NewValidateEmailPayload builds a survey service validate_email endpoint
+// payload.
+func NewValidateEmailPayload(body *ValidateEmailRequestBody, token *string) *survey.ValidateEmailPayload {
+	v := &survey.ValidateEmailPayload{
+		Body:    body.Body,
+		Subject: body.Subject,
+	}
 	v.Token = token
 
 	return v

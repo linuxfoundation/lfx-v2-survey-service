@@ -75,14 +75,12 @@ var _ = Service("survey", func() {
 		Result(SurveyScheduleResult)
 
 		HTTP(func() {
-			POST("/surveys/schedule")
+			POST("/surveys")
 
 			Response(StatusCreated)
 			Response("BadRequest", StatusBadRequest)
 			Response("Unauthorized", StatusUnauthorized)
 			Response("Forbidden", StatusForbidden)
-			Response("NotFound", StatusNotFound)
-			Response("Conflict", StatusConflict)
 			Response("InternalServerError", StatusInternalServerError)
 			Response("ServiceUnavailable", StatusServiceUnavailable)
 		})
@@ -408,6 +406,150 @@ var _ = Service("survey", func() {
 			Response("NotFound", StatusNotFound)
 			Response("InternalServerError", StatusInternalServerError)
 			Response("ServiceUnavailable", StatusServiceUnavailable)
+		})
+	})
+
+	Method("create_exclusion", func() {
+		Description("Create a survey or global exclusion (proxies to ITX POST /v2/surveys/exclusion)")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("email", String, "Survey responder's email")
+			Attribute("user_id", String, "Recipient's user ID")
+			Attribute("survey_id", String, "Survey ID for survey-specific exclusion")
+			Attribute("committee_id", String, "Committee ID for survey-specific exclusion")
+			Attribute("global_exclusion", String, "Global exclusion flag")
+		})
+
+		Result(ExclusionResult)
+
+		HTTP(func() {
+			POST("/surveys/exclusion")
+			Response(StatusCreated)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("InternalServerError", StatusInternalServerError)
+		})
+	})
+
+	Method("delete_exclusion", func() {
+		Description("Delete a survey or global exclusion (proxies to ITX DELETE /v2/surveys/exclusion)")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("email", String, "Survey responder's email")
+			Attribute("user_id", String, "Recipient's user ID")
+			Attribute("survey_id", String, "Survey ID for survey-specific exclusion")
+			Attribute("committee_id", String, "Committee ID for survey-specific exclusion")
+			Attribute("global_exclusion", String, "Global exclusion flag")
+		})
+
+		HTTP(func() {
+			DELETE("/surveys/exclusion")
+			Response(StatusNoContent)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("InternalServerError", StatusInternalServerError)
+		})
+	})
+
+	Method("get_exclusion", func() {
+		Description("Get exclusion by ID (proxies to ITX GET /v2/surveys/exclusion/{exclusion_id})")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("exclusion_id", String, "Exclusion identifier", func() {
+				Example("12345")
+			})
+
+			Required("exclusion_id")
+		})
+
+		Result(ExtendedExclusionResult)
+
+		HTTP(func() {
+			GET("/surveys/exclusion/{exclusion_id}")
+			Response(StatusOK)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("NotFound", StatusNotFound)
+			Response("InternalServerError", StatusInternalServerError)
+		})
+	})
+
+	Method("delete_exclusion_by_id", func() {
+		Description("Delete exclusion by ID (proxies to ITX DELETE /v2/surveys/exclusion/{exclusion_id})")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("exclusion_id", String, "Exclusion identifier", func() {
+				Example("12345")
+			})
+
+			Required("exclusion_id")
+		})
+
+		HTTP(func() {
+			DELETE("/surveys/exclusion/{exclusion_id}")
+			Response(StatusNoContent)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("InternalServerError", StatusInternalServerError)
+		})
+	})
+
+	Method("validate_email", func() {
+		Description("Validate email template body and subject (proxies to ITX POST /v2/surveys/validate_email)")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("body", String, "Email body template")
+			Attribute("subject", String, "Email subject template")
+		})
+
+		Result(ValidateEmailResult)
+
+		HTTP(func() {
+			POST("/surveys/validate_email")
+			Response(StatusOK)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("InternalServerError", StatusInternalServerError)
 		})
 	})
 })

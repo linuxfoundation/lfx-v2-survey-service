@@ -41,8 +41,23 @@ type SurveyClient interface {
 	// DeleteRecipientGroup removes a recipient group from survey and recalculates statistics in ITX
 	DeleteRecipientGroup(ctx context.Context, surveyID string, committeeID *string, projectID *string, foundationID *string) error
 
+	// CreateExclusion creates a survey or global exclusion in ITX
+	CreateExclusion(ctx context.Context, req *itx.ExclusionRequest) (*itx.Exclusion, error)
+
+	// DeleteExclusion deletes a survey or global exclusion in ITX
+	DeleteExclusion(ctx context.Context, req *itx.ExclusionRequest) error
+
+	// GetExclusion retrieves an exclusion by ID from ITX
+	GetExclusion(ctx context.Context, exclusionID string) (*itx.ExtendedExclusion, error)
+
+	// DeleteExclusionByID deletes an exclusion by its ID from ITX
+	DeleteExclusionByID(ctx context.Context, exclusionID string) error
+
 	// GetSurveyResults retrieves aggregated survey results from ITX
 	GetSurveyResults(ctx context.Context, surveyID string) (*itx.SurveyResults, error)
+
+	// ValidateEmail validates email template body and subject in ITX
+	ValidateEmail(ctx context.Context, req *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error)
 }
 
 // SurveyResponseClient defines the interface for survey response operations in ITX

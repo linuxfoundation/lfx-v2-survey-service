@@ -370,3 +370,84 @@ var ITXPreviewRecipient = Type("ITXPreviewRecipient", func() {
 
 	Required("user_id", "email")
 })
+
+// ExclusionResult represents an exclusion response
+var ExclusionResult = Type("ExclusionResult", func() {
+	Description("A survey or global exclusion")
+
+	Attribute("id", String, "Exclusion ID", func() {
+		Example("12345")
+	})
+
+	Attribute("email", String, "Survey responder's email", func() {
+		Example("test@email.com")
+	})
+
+	Attribute("survey_id", String, "Survey ID")
+
+	Attribute("committee_id", String, "Committee ID")
+
+	Attribute("global_exclusion", String, "Global exclusion flag")
+
+	Attribute("user_id", String, "Recipient's user ID")
+
+	Required("id")
+})
+
+// UserEmail represents a user email address
+var UserEmail = Type("UserEmail", func() {
+	Description("User email information")
+
+	Attribute("id", String, "Email ID")
+	Attribute("email_address", String, "Email address")
+	Attribute("is_primary", Boolean, "Whether this is the primary email")
+})
+
+// ExclusionUser represents user information in an extended exclusion
+var ExclusionUser = Type("ExclusionUser", func() {
+	Description("User information for an exclusion")
+
+	Attribute("id", String, "User ID")
+	Attribute("username", String, "Username")
+	Attribute("emails", ArrayOf(UserEmail), "User emails")
+})
+
+// ExtendedExclusionResult represents an exclusion with user information
+var ExtendedExclusionResult = Type("ExtendedExclusionResult", func() {
+	Description("A survey or global exclusion with user information")
+
+	Attribute("id", String, "Exclusion ID", func() {
+		Example("12345")
+	})
+
+	Attribute("email", String, "Survey responder's email", func() {
+		Example("test@email.com")
+	})
+
+	Attribute("survey_id", String, "Survey ID")
+
+	Attribute("committee_id", String, "Committee ID")
+
+	Attribute("global_exclusion", String, "Global exclusion flag")
+
+	Attribute("user_id", String, "Recipient's user ID")
+
+	Attribute("user", ExclusionUser, "User information")
+
+	Required("id")
+})
+
+// ValidateEmailResult represents the validated email template response
+var ValidateEmailResult = Type("ValidateEmailResult", func() {
+	Description("Validated email template body and subject")
+
+	Attribute("body", String, "Validated email body", func() {
+		Example("An example survey body with the quarter Q1")
+	})
+
+	Attribute("subject", String, "Validated email subject", func() {
+		Example("An example survey subject with the year 2023")
+	})
+
+	Required("body", "subject")
+})

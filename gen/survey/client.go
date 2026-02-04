@@ -26,10 +26,15 @@ type Client struct {
 	DeleteSurveyResponseEndpoint  goa.Endpoint
 	ResendSurveyResponseEndpoint  goa.Endpoint
 	DeleteRecipientGroupEndpoint  goa.Endpoint
+	CreateExclusionEndpoint       goa.Endpoint
+	DeleteExclusionEndpoint       goa.Endpoint
+	GetExclusionEndpoint          goa.Endpoint
+	DeleteExclusionByIDEndpoint   goa.Endpoint
+	ValidateEmailEndpoint         goa.Endpoint
 }
 
 // NewClient initializes a "survey" service client given the endpoints.
-func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResendSurvey, previewSendSurvey, sendMissingRecipients, deleteSurveyResponse, resendSurveyResponse, deleteRecipientGroup goa.Endpoint) *Client {
+func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResendSurvey, previewSendSurvey, sendMissingRecipients, deleteSurveyResponse, resendSurveyResponse, deleteRecipientGroup, createExclusion, deleteExclusion, getExclusion, deleteExclusionByID, validateEmail goa.Endpoint) *Client {
 	return &Client{
 		ScheduleSurveyEndpoint:        scheduleSurvey,
 		GetSurveyEndpoint:             getSurvey,
@@ -41,6 +46,11 @@ func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResend
 		DeleteSurveyResponseEndpoint:  deleteSurveyResponse,
 		ResendSurveyResponseEndpoint:  resendSurveyResponse,
 		DeleteRecipientGroupEndpoint:  deleteRecipientGroup,
+		CreateExclusionEndpoint:       createExclusion,
+		DeleteExclusionEndpoint:       deleteExclusion,
+		GetExclusionEndpoint:          getExclusion,
+		DeleteExclusionByIDEndpoint:   deleteExclusionByID,
+		ValidateEmailEndpoint:         validateEmail,
 	}
 }
 
@@ -214,4 +224,94 @@ func (c *Client) ResendSurveyResponse(ctx context.Context, p *ResendSurveyRespon
 func (c *Client) DeleteRecipientGroup(ctx context.Context, p *DeleteRecipientGroupPayload) (err error) {
 	_, err = c.DeleteRecipientGroupEndpoint(ctx, p)
 	return
+}
+
+// CreateExclusion calls the "create_exclusion" endpoint of the "survey"
+// service.
+// CreateExclusion may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) CreateExclusion(ctx context.Context, p *CreateExclusionPayload) (res *ExclusionResult, err error) {
+	var ires any
+	ires, err = c.CreateExclusionEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*ExclusionResult), nil
+}
+
+// DeleteExclusion calls the "delete_exclusion" endpoint of the "survey"
+// service.
+// DeleteExclusion may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) DeleteExclusion(ctx context.Context, p *DeleteExclusionPayload) (err error) {
+	_, err = c.DeleteExclusionEndpoint(ctx, p)
+	return
+}
+
+// GetExclusion calls the "get_exclusion" endpoint of the "survey" service.
+// GetExclusion may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) GetExclusion(ctx context.Context, p *GetExclusionPayload) (res *ExtendedExclusionResult, err error) {
+	var ires any
+	ires, err = c.GetExclusionEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*ExtendedExclusionResult), nil
+}
+
+// DeleteExclusionByID calls the "delete_exclusion_by_id" endpoint of the
+// "survey" service.
+// DeleteExclusionByID may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) DeleteExclusionByID(ctx context.Context, p *DeleteExclusionByIDPayload) (err error) {
+	_, err = c.DeleteExclusionByIDEndpoint(ctx, p)
+	return
+}
+
+// ValidateEmail calls the "validate_email" endpoint of the "survey" service.
+// ValidateEmail may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) ValidateEmail(ctx context.Context, p *ValidateEmailPayload) (res *ValidateEmailResult, err error) {
+	var ires any
+	ires, err = c.ValidateEmailEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*ValidateEmailResult), nil
 }

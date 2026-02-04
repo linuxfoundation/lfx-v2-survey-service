@@ -209,3 +209,54 @@ type UpdateResponseRequest = UpdateSurveyResponseRequest
 
 // ResponseResponse is an alias for SurveyResponse (participant response)
 type ResponseResponse = SurveyResponse
+
+// ExclusionRequest represents the request to create or delete an exclusion
+type ExclusionRequest struct {
+	Email           *string `json:"email,omitempty"`
+	UserID          *string `json:"user_id,omitempty"`
+	SurveyID        *string `json:"survey_id,omitempty"`
+	CommitteeID     *string `json:"committee_id,omitempty"`
+	GlobalExclusion *string `json:"global_exclusion,omitempty"`
+}
+
+// Exclusion represents a survey or global exclusion
+type Exclusion struct {
+	ID              string  `json:"id"`
+	Email           *string `json:"email,omitempty"`
+	SurveyID        *string `json:"survey_id,omitempty"`
+	CommitteeID     *string `json:"committee_id,omitempty"`
+	GlobalExclusion *string `json:"global_exclusion,omitempty"`
+	UserID          *string `json:"user_id,omitempty"`
+}
+
+// UserEmail represents an email address for a user
+type UserEmail struct {
+	ID           *string `json:"id,omitempty"`
+	EmailAddress *string `json:"email_address,omitempty"`
+	IsPrimary    *bool   `json:"is_primary,omitempty"`
+}
+
+// ExclusionUser represents the user information in an extended exclusion
+type ExclusionUser struct {
+	ID       *string      `json:"id,omitempty"`
+	Username *string      `json:"username,omitempty"`
+	Emails   []UserEmail  `json:"emails,omitempty"`
+}
+
+// ExtendedExclusion represents an exclusion with user information
+type ExtendedExclusion struct {
+	Exclusion
+	User *ExclusionUser `json:"user,omitempty"`
+}
+
+// ValidateEmailRequest represents the request to validate email templates
+type ValidateEmailRequest struct {
+	Body    *string `json:"body,omitempty"`
+	Subject *string `json:"subject,omitempty"`
+}
+
+// ValidateEmailResponse represents the response from email validation
+type ValidateEmailResponse struct {
+	Body    string `json:"body"`
+	Subject string `json:"subject"`
+}

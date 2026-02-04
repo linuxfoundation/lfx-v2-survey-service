@@ -30,6 +30,11 @@ type Server struct {
 	DeleteSurveyResponse  http.Handler
 	ResendSurveyResponse  http.Handler
 	DeleteRecipientGroup  http.Handler
+	CreateExclusion       http.Handler
+	DeleteExclusion       http.Handler
+	GetExclusion          http.Handler
+	DeleteExclusionByID   http.Handler
+	ValidateEmail         http.Handler
 }
 
 // MountPoint holds information about the mounted endpoints.
@@ -59,7 +64,7 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"ScheduleSurvey", "POST", "/surveys/schedule"},
+			{"ScheduleSurvey", "POST", "/surveys"},
 			{"GetSurvey", "GET", "/surveys/{survey_id}"},
 			{"UpdateSurvey", "PUT", "/surveys/{survey_id}"},
 			{"DeleteSurvey", "DELETE", "/surveys/{survey_id}"},
@@ -69,6 +74,11 @@ func New(
 			{"DeleteSurveyResponse", "DELETE", "/surveys/{survey_id}/responses/{response_id}"},
 			{"ResendSurveyResponse", "POST", "/surveys/{survey_id}/responses/{response_id}/resend"},
 			{"DeleteRecipientGroup", "DELETE", "/surveys/{survey_id}/recipient_group"},
+			{"CreateExclusion", "POST", "/surveys/exclusion"},
+			{"DeleteExclusion", "DELETE", "/surveys/exclusion"},
+			{"GetExclusion", "GET", "/surveys/exclusion/{exclusion_id}"},
+			{"DeleteExclusionByID", "DELETE", "/surveys/exclusion/{exclusion_id}"},
+			{"ValidateEmail", "POST", "/surveys/validate_email"},
 		},
 		ScheduleSurvey:        NewScheduleSurveyHandler(e.ScheduleSurvey, mux, decoder, encoder, errhandler, formatter),
 		GetSurvey:             NewGetSurveyHandler(e.GetSurvey, mux, decoder, encoder, errhandler, formatter),
@@ -80,6 +90,11 @@ func New(
 		DeleteSurveyResponse:  NewDeleteSurveyResponseHandler(e.DeleteSurveyResponse, mux, decoder, encoder, errhandler, formatter),
 		ResendSurveyResponse:  NewResendSurveyResponseHandler(e.ResendSurveyResponse, mux, decoder, encoder, errhandler, formatter),
 		DeleteRecipientGroup:  NewDeleteRecipientGroupHandler(e.DeleteRecipientGroup, mux, decoder, encoder, errhandler, formatter),
+		CreateExclusion:       NewCreateExclusionHandler(e.CreateExclusion, mux, decoder, encoder, errhandler, formatter),
+		DeleteExclusion:       NewDeleteExclusionHandler(e.DeleteExclusion, mux, decoder, encoder, errhandler, formatter),
+		GetExclusion:          NewGetExclusionHandler(e.GetExclusion, mux, decoder, encoder, errhandler, formatter),
+		DeleteExclusionByID:   NewDeleteExclusionByIDHandler(e.DeleteExclusionByID, mux, decoder, encoder, errhandler, formatter),
+		ValidateEmail:         NewValidateEmailHandler(e.ValidateEmail, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -98,6 +113,11 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.DeleteSurveyResponse = m(s.DeleteSurveyResponse)
 	s.ResendSurveyResponse = m(s.ResendSurveyResponse)
 	s.DeleteRecipientGroup = m(s.DeleteRecipientGroup)
+	s.CreateExclusion = m(s.CreateExclusion)
+	s.DeleteExclusion = m(s.DeleteExclusion)
+	s.GetExclusion = m(s.GetExclusion)
+	s.DeleteExclusionByID = m(s.DeleteExclusionByID)
+	s.ValidateEmail = m(s.ValidateEmail)
 }
 
 // MethodNames returns the methods served.
@@ -115,6 +135,11 @@ func Mount(mux goahttp.Muxer, h *Server) {
 	MountDeleteSurveyResponseHandler(mux, h.DeleteSurveyResponse)
 	MountResendSurveyResponseHandler(mux, h.ResendSurveyResponse)
 	MountDeleteRecipientGroupHandler(mux, h.DeleteRecipientGroup)
+	MountCreateExclusionHandler(mux, h.CreateExclusion)
+	MountDeleteExclusionHandler(mux, h.DeleteExclusion)
+	MountGetExclusionHandler(mux, h.GetExclusion)
+	MountDeleteExclusionByIDHandler(mux, h.DeleteExclusionByID)
+	MountValidateEmailHandler(mux, h.ValidateEmail)
 }
 
 // Mount configures the mux to serve the survey endpoints.
@@ -131,7 +156,7 @@ func MountScheduleSurveyHandler(mux goahttp.Muxer, h http.Handler) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/surveys/schedule", f)
+	mux.Handle("POST", "/surveys", f)
 }
 
 // NewScheduleSurveyHandler creates a HTTP handler which loads the HTTP request
@@ -629,6 +654,271 @@ func NewDeleteRecipientGroupHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "delete_recipient_group")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountCreateExclusionHandler configures the mux to serve the "survey" service
+// "create_exclusion" endpoint.
+func MountCreateExclusionHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("POST", "/surveys/exclusion", f)
+}
+
+// NewCreateExclusionHandler creates a HTTP handler which loads the HTTP
+// request and calls the "survey" service "create_exclusion" endpoint.
+func NewCreateExclusionHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeCreateExclusionRequest(mux, decoder)
+		encodeResponse = EncodeCreateExclusionResponse(encoder)
+		encodeError    = EncodeCreateExclusionError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "create_exclusion")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountDeleteExclusionHandler configures the mux to serve the "survey" service
+// "delete_exclusion" endpoint.
+func MountDeleteExclusionHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("DELETE", "/surveys/exclusion", f)
+}
+
+// NewDeleteExclusionHandler creates a HTTP handler which loads the HTTP
+// request and calls the "survey" service "delete_exclusion" endpoint.
+func NewDeleteExclusionHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeDeleteExclusionRequest(mux, decoder)
+		encodeResponse = EncodeDeleteExclusionResponse(encoder)
+		encodeError    = EncodeDeleteExclusionError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "delete_exclusion")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountGetExclusionHandler configures the mux to serve the "survey" service
+// "get_exclusion" endpoint.
+func MountGetExclusionHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/surveys/exclusion/{exclusion_id}", f)
+}
+
+// NewGetExclusionHandler creates a HTTP handler which loads the HTTP request
+// and calls the "survey" service "get_exclusion" endpoint.
+func NewGetExclusionHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeGetExclusionRequest(mux, decoder)
+		encodeResponse = EncodeGetExclusionResponse(encoder)
+		encodeError    = EncodeGetExclusionError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "get_exclusion")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountDeleteExclusionByIDHandler configures the mux to serve the "survey"
+// service "delete_exclusion_by_id" endpoint.
+func MountDeleteExclusionByIDHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("DELETE", "/surveys/exclusion/{exclusion_id}", f)
+}
+
+// NewDeleteExclusionByIDHandler creates a HTTP handler which loads the HTTP
+// request and calls the "survey" service "delete_exclusion_by_id" endpoint.
+func NewDeleteExclusionByIDHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeDeleteExclusionByIDRequest(mux, decoder)
+		encodeResponse = EncodeDeleteExclusionByIDResponse(encoder)
+		encodeError    = EncodeDeleteExclusionByIDError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "delete_exclusion_by_id")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountValidateEmailHandler configures the mux to serve the "survey" service
+// "validate_email" endpoint.
+func MountValidateEmailHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("POST", "/surveys/validate_email", f)
+}
+
+// NewValidateEmailHandler creates a HTTP handler which loads the HTTP request
+// and calls the "survey" service "validate_email" endpoint.
+func NewValidateEmailHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeValidateEmailRequest(mux, decoder)
+		encodeResponse = EncodeValidateEmailResponse(encoder)
+		encodeError    = EncodeValidateEmailError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "validate_email")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
 		payload, err := decodeRequest(r)
 		if err != nil {

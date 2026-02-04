@@ -58,6 +58,26 @@ type Client struct {
 	// delete_recipient_group endpoint.
 	DeleteRecipientGroupDoer goahttp.Doer
 
+	// CreateExclusion Doer is the HTTP client used to make requests to the
+	// create_exclusion endpoint.
+	CreateExclusionDoer goahttp.Doer
+
+	// DeleteExclusion Doer is the HTTP client used to make requests to the
+	// delete_exclusion endpoint.
+	DeleteExclusionDoer goahttp.Doer
+
+	// GetExclusion Doer is the HTTP client used to make requests to the
+	// get_exclusion endpoint.
+	GetExclusionDoer goahttp.Doer
+
+	// DeleteExclusionByID Doer is the HTTP client used to make requests to the
+	// delete_exclusion_by_id endpoint.
+	DeleteExclusionByIDDoer goahttp.Doer
+
+	// ValidateEmail Doer is the HTTP client used to make requests to the
+	// validate_email endpoint.
+	ValidateEmailDoer goahttp.Doer
+
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
 	RestoreResponseBody bool
@@ -88,6 +108,11 @@ func NewClient(
 		DeleteSurveyResponseDoer:  doer,
 		ResendSurveyResponseDoer:  doer,
 		DeleteRecipientGroupDoer:  doer,
+		CreateExclusionDoer:       doer,
+		DeleteExclusionDoer:       doer,
+		GetExclusionDoer:          doer,
+		DeleteExclusionByIDDoer:   doer,
+		ValidateEmailDoer:         doer,
 		RestoreResponseBody:       restoreBody,
 		scheme:                    scheme,
 		host:                      host,
@@ -331,6 +356,126 @@ func (c *Client) DeleteRecipientGroup() goa.Endpoint {
 		resp, err := c.DeleteRecipientGroupDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("survey", "delete_recipient_group", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// CreateExclusion returns an endpoint that makes HTTP requests to the survey
+// service create_exclusion server.
+func (c *Client) CreateExclusion() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeCreateExclusionRequest(c.encoder)
+		decodeResponse = DecodeCreateExclusionResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildCreateExclusionRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.CreateExclusionDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "create_exclusion", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// DeleteExclusion returns an endpoint that makes HTTP requests to the survey
+// service delete_exclusion server.
+func (c *Client) DeleteExclusion() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeDeleteExclusionRequest(c.encoder)
+		decodeResponse = DecodeDeleteExclusionResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildDeleteExclusionRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.DeleteExclusionDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "delete_exclusion", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// GetExclusion returns an endpoint that makes HTTP requests to the survey
+// service get_exclusion server.
+func (c *Client) GetExclusion() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeGetExclusionRequest(c.encoder)
+		decodeResponse = DecodeGetExclusionResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildGetExclusionRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.GetExclusionDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "get_exclusion", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// DeleteExclusionByID returns an endpoint that makes HTTP requests to the
+// survey service delete_exclusion_by_id server.
+func (c *Client) DeleteExclusionByID() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeDeleteExclusionByIDRequest(c.encoder)
+		decodeResponse = DecodeDeleteExclusionByIDResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildDeleteExclusionByIDRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.DeleteExclusionByIDDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "delete_exclusion_by_id", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// ValidateEmail returns an endpoint that makes HTTP requests to the survey
+// service validate_email server.
+func (c *Client) ValidateEmail() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeValidateEmailRequest(c.encoder)
+		decodeResponse = DecodeValidateEmailResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildValidateEmailRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.ValidateEmailDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "validate_email", err)
 		}
 		return decodeResponse(resp)
 	}

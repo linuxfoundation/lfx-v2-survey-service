@@ -27,6 +27,11 @@ type Endpoints struct {
 	DeleteSurveyResponse  goa.Endpoint
 	ResendSurveyResponse  goa.Endpoint
 	DeleteRecipientGroup  goa.Endpoint
+	CreateExclusion       goa.Endpoint
+	DeleteExclusion       goa.Endpoint
+	GetExclusion          goa.Endpoint
+	DeleteExclusionByID   goa.Endpoint
+	ValidateEmail         goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "survey" service with endpoints.
@@ -44,6 +49,11 @@ func NewEndpoints(s Service) *Endpoints {
 		DeleteSurveyResponse:  NewDeleteSurveyResponseEndpoint(s, a.JWTAuth),
 		ResendSurveyResponse:  NewResendSurveyResponseEndpoint(s, a.JWTAuth),
 		DeleteRecipientGroup:  NewDeleteRecipientGroupEndpoint(s, a.JWTAuth),
+		CreateExclusion:       NewCreateExclusionEndpoint(s, a.JWTAuth),
+		DeleteExclusion:       NewDeleteExclusionEndpoint(s, a.JWTAuth),
+		GetExclusion:          NewGetExclusionEndpoint(s, a.JWTAuth),
+		DeleteExclusionByID:   NewDeleteExclusionByIDEndpoint(s, a.JWTAuth),
+		ValidateEmail:         NewValidateEmailEndpoint(s, a.JWTAuth),
 	}
 }
 
@@ -59,6 +69,11 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.DeleteSurveyResponse = m(e.DeleteSurveyResponse)
 	e.ResendSurveyResponse = m(e.ResendSurveyResponse)
 	e.DeleteRecipientGroup = m(e.DeleteRecipientGroup)
+	e.CreateExclusion = m(e.CreateExclusion)
+	e.DeleteExclusion = m(e.DeleteExclusion)
+	e.GetExclusion = m(e.GetExclusion)
+	e.DeleteExclusionByID = m(e.DeleteExclusionByID)
+	e.ValidateEmail = m(e.ValidateEmail)
 }
 
 // NewScheduleSurveyEndpoint returns an endpoint function that calls the method
@@ -288,5 +303,120 @@ func NewDeleteRecipientGroupEndpoint(s Service, authJWTFn security.AuthJWTFunc) 
 			return nil, err
 		}
 		return nil, s.DeleteRecipientGroup(ctx, p)
+	}
+}
+
+// NewCreateExclusionEndpoint returns an endpoint function that calls the
+// method "create_exclusion" of service "survey".
+func NewCreateExclusionEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*CreateExclusionPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.CreateExclusion(ctx, p)
+	}
+}
+
+// NewDeleteExclusionEndpoint returns an endpoint function that calls the
+// method "delete_exclusion" of service "survey".
+func NewDeleteExclusionEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*DeleteExclusionPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.DeleteExclusion(ctx, p)
+	}
+}
+
+// NewGetExclusionEndpoint returns an endpoint function that calls the method
+// "get_exclusion" of service "survey".
+func NewGetExclusionEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*GetExclusionPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.GetExclusion(ctx, p)
+	}
+}
+
+// NewDeleteExclusionByIDEndpoint returns an endpoint function that calls the
+// method "delete_exclusion_by_id" of service "survey".
+func NewDeleteExclusionByIDEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*DeleteExclusionByIDPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.DeleteExclusionByID(ctx, p)
+	}
+}
+
+// NewValidateEmailEndpoint returns an endpoint function that calls the method
+// "validate_email" of service "survey".
+func NewValidateEmailEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*ValidateEmailPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = *p.Token
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.ValidateEmail(ctx, p)
 	}
 }

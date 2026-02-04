@@ -24,13 +24,13 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"survey (schedule-survey|get-survey|update-survey|delete-survey|bulk-resend-survey|preview-send-survey|send-missing-recipients|delete-survey-response|resend-survey-response|delete-recipient-group)",
+		"survey (schedule-survey|get-survey|update-survey|delete-survey|bulk-resend-survey|preview-send-survey|send-missing-recipients|delete-survey-response|resend-survey-response|delete-recipient-group|create-exclusion|delete-exclusion|get-exclusion|delete-exclusion-by-id|validate-email)",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + " " + "survey schedule-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Consequuntur sapiente et corporis quis numquam autem.\",\n         \"Quia aut.\"\n      ],\n      \"creator_id\": \"Unde consequatur.\",\n      \"creator_name\": \"Illum fuga maiores quis incidunt pariatur.\",\n      \"creator_username\": \"Voluptas possimus iste quasi.\",\n      \"email_body\": \"Voluptatem doloremque qui.\",\n      \"email_body_text\": \"Sit qui ut omnis placeat rerum.\",\n      \"email_subject\": \"Ut sapiente qui numquam eos.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": false,\n      \"stage_filter\": \"Nostrum nostrum repellat aut molestiae officiis nihil.\",\n      \"survey_cutoff_date\": \"Fugit qui.\",\n      \"survey_monkey_id\": \"Sunt accusamus pariatur quia itaque quidem.\",\n      \"survey_reminder_rate_days\": 2463719811884759918,\n      \"survey_send_date\": \"Delectus veniam delectus.\",\n      \"survey_title\": \"Et saepe corrupti quis nostrum.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"" + "\n" +
+	return os.Args[0] + " " + "survey schedule-survey --body '{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Provident sed.\",\n         \"Magnam sit cumque et aliquam quia.\",\n         \"Odit dignissimos ea corrupti sint eum.\"\n      ],\n      \"creator_id\": \"Quia facilis.\",\n      \"creator_name\": \"Quia dolorum cumque veniam neque et.\",\n      \"creator_username\": \"Non omnis amet quia omnis est at.\",\n      \"email_body\": \"Ex mollitia.\",\n      \"email_body_text\": \"Incidunt sequi quibusdam perferendis perferendis expedita molestiae.\",\n      \"email_subject\": \"Et sint quas eveniet eaque dicta.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Ut quam esse saepe.\",\n      \"survey_cutoff_date\": \"Odit quia quia fugiat est quas.\",\n      \"survey_monkey_id\": \"Sint reprehenderit ipsam et.\",\n      \"survey_reminder_rate_days\": 256525687450027157,\n      \"survey_send_date\": \"Minima possimus deleniti occaecati.\",\n      \"survey_title\": \"Vero voluptatem et temporibus eligendi repellendus sunt.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"" + "\n" +
 		""
 }
 
@@ -94,6 +94,26 @@ func ParseEndpoint(
 		surveyDeleteRecipientGroupProjectIDFlag    = surveyDeleteRecipientGroupFlags.String("project-id", "", "")
 		surveyDeleteRecipientGroupFoundationIDFlag = surveyDeleteRecipientGroupFlags.String("foundation-id", "", "")
 		surveyDeleteRecipientGroupTokenFlag        = surveyDeleteRecipientGroupFlags.String("token", "", "")
+
+		surveyCreateExclusionFlags     = flag.NewFlagSet("create-exclusion", flag.ExitOnError)
+		surveyCreateExclusionBodyFlag  = surveyCreateExclusionFlags.String("body", "REQUIRED", "")
+		surveyCreateExclusionTokenFlag = surveyCreateExclusionFlags.String("token", "", "")
+
+		surveyDeleteExclusionFlags     = flag.NewFlagSet("delete-exclusion", flag.ExitOnError)
+		surveyDeleteExclusionBodyFlag  = surveyDeleteExclusionFlags.String("body", "REQUIRED", "")
+		surveyDeleteExclusionTokenFlag = surveyDeleteExclusionFlags.String("token", "", "")
+
+		surveyGetExclusionFlags           = flag.NewFlagSet("get-exclusion", flag.ExitOnError)
+		surveyGetExclusionExclusionIDFlag = surveyGetExclusionFlags.String("exclusion-id", "REQUIRED", "Exclusion identifier")
+		surveyGetExclusionTokenFlag       = surveyGetExclusionFlags.String("token", "", "")
+
+		surveyDeleteExclusionByIDFlags           = flag.NewFlagSet("delete-exclusion-by-id", flag.ExitOnError)
+		surveyDeleteExclusionByIDExclusionIDFlag = surveyDeleteExclusionByIDFlags.String("exclusion-id", "REQUIRED", "Exclusion identifier")
+		surveyDeleteExclusionByIDTokenFlag       = surveyDeleteExclusionByIDFlags.String("token", "", "")
+
+		surveyValidateEmailFlags     = flag.NewFlagSet("validate-email", flag.ExitOnError)
+		surveyValidateEmailBodyFlag  = surveyValidateEmailFlags.String("body", "REQUIRED", "")
+		surveyValidateEmailTokenFlag = surveyValidateEmailFlags.String("token", "", "")
 	)
 	surveyFlags.Usage = surveyUsage
 	surveyScheduleSurveyFlags.Usage = surveyScheduleSurveyUsage
@@ -106,6 +126,11 @@ func ParseEndpoint(
 	surveyDeleteSurveyResponseFlags.Usage = surveyDeleteSurveyResponseUsage
 	surveyResendSurveyResponseFlags.Usage = surveyResendSurveyResponseUsage
 	surveyDeleteRecipientGroupFlags.Usage = surveyDeleteRecipientGroupUsage
+	surveyCreateExclusionFlags.Usage = surveyCreateExclusionUsage
+	surveyDeleteExclusionFlags.Usage = surveyDeleteExclusionUsage
+	surveyGetExclusionFlags.Usage = surveyGetExclusionUsage
+	surveyDeleteExclusionByIDFlags.Usage = surveyDeleteExclusionByIDUsage
+	surveyValidateEmailFlags.Usage = surveyValidateEmailUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -171,6 +196,21 @@ func ParseEndpoint(
 			case "delete-recipient-group":
 				epf = surveyDeleteRecipientGroupFlags
 
+			case "create-exclusion":
+				epf = surveyCreateExclusionFlags
+
+			case "delete-exclusion":
+				epf = surveyDeleteExclusionFlags
+
+			case "get-exclusion":
+				epf = surveyGetExclusionFlags
+
+			case "delete-exclusion-by-id":
+				epf = surveyDeleteExclusionByIDFlags
+
+			case "validate-email":
+				epf = surveyValidateEmailFlags
+
 			}
 
 		}
@@ -226,6 +266,21 @@ func ParseEndpoint(
 			case "delete-recipient-group":
 				endpoint = c.DeleteRecipientGroup()
 				data, err = surveyc.BuildDeleteRecipientGroupPayload(*surveyDeleteRecipientGroupSurveyIDFlag, *surveyDeleteRecipientGroupCommitteeIDFlag, *surveyDeleteRecipientGroupProjectIDFlag, *surveyDeleteRecipientGroupFoundationIDFlag, *surveyDeleteRecipientGroupTokenFlag)
+			case "create-exclusion":
+				endpoint = c.CreateExclusion()
+				data, err = surveyc.BuildCreateExclusionPayload(*surveyCreateExclusionBodyFlag, *surveyCreateExclusionTokenFlag)
+			case "delete-exclusion":
+				endpoint = c.DeleteExclusion()
+				data, err = surveyc.BuildDeleteExclusionPayload(*surveyDeleteExclusionBodyFlag, *surveyDeleteExclusionTokenFlag)
+			case "get-exclusion":
+				endpoint = c.GetExclusion()
+				data, err = surveyc.BuildGetExclusionPayload(*surveyGetExclusionExclusionIDFlag, *surveyGetExclusionTokenFlag)
+			case "delete-exclusion-by-id":
+				endpoint = c.DeleteExclusionByID()
+				data, err = surveyc.BuildDeleteExclusionByIDPayload(*surveyDeleteExclusionByIDExclusionIDFlag, *surveyDeleteExclusionByIDTokenFlag)
+			case "validate-email":
+				endpoint = c.ValidateEmail()
+				data, err = surveyc.BuildValidateEmailPayload(*surveyValidateEmailBodyFlag, *surveyValidateEmailTokenFlag)
 			}
 		}
 	}
@@ -251,6 +306,11 @@ func surveyUsage() {
 	fmt.Fprintln(os.Stderr, `    delete-survey-response: Delete survey response - removes recipient from survey and recalculates statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/responses/{response_id})`)
 	fmt.Fprintln(os.Stderr, `    resend-survey-response: Resend survey email to a specific user (proxies to ITX POST /v2/surveys/{survey_id}/responses/{response_id}/resend)`)
 	fmt.Fprintln(os.Stderr, `    delete-recipient-group: Remove a recipient group (committee, project, or foundation) from survey and recalculate statistics (proxies to ITX DELETE /v2/surveys/{survey_id}/recipient_group)`)
+	fmt.Fprintln(os.Stderr, `    create-exclusion: Create a survey or global exclusion (proxies to ITX POST /v2/surveys/exclusion)`)
+	fmt.Fprintln(os.Stderr, `    delete-exclusion: Delete a survey or global exclusion (proxies to ITX DELETE /v2/surveys/exclusion)`)
+	fmt.Fprintln(os.Stderr, `    get-exclusion: Get exclusion by ID (proxies to ITX GET /v2/surveys/exclusion/{exclusion_id})`)
+	fmt.Fprintln(os.Stderr, `    delete-exclusion-by-id: Delete exclusion by ID (proxies to ITX DELETE /v2/surveys/exclusion/{exclusion_id})`)
+	fmt.Fprintln(os.Stderr, `    validate-email: Validate email template body and subject (proxies to ITX POST /v2/surveys/validate_email)`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s survey COMMAND --help\n", os.Args[0])
@@ -272,7 +332,7 @@ func surveyScheduleSurveyUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey schedule-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Consequuntur sapiente et corporis quis numquam autem.\",\n         \"Quia aut.\"\n      ],\n      \"creator_id\": \"Unde consequatur.\",\n      \"creator_name\": \"Illum fuga maiores quis incidunt pariatur.\",\n      \"creator_username\": \"Voluptas possimus iste quasi.\",\n      \"email_body\": \"Voluptatem doloremque qui.\",\n      \"email_body_text\": \"Sit qui ut omnis placeat rerum.\",\n      \"email_subject\": \"Ut sapiente qui numquam eos.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": false,\n      \"stage_filter\": \"Nostrum nostrum repellat aut molestiae officiis nihil.\",\n      \"survey_cutoff_date\": \"Fugit qui.\",\n      \"survey_monkey_id\": \"Sunt accusamus pariatur quia itaque quidem.\",\n      \"survey_reminder_rate_days\": 2463719811884759918,\n      \"survey_send_date\": \"Delectus veniam delectus.\",\n      \"survey_title\": \"Et saepe corrupti quis nostrum.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey schedule-survey --body '{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Provident sed.\",\n         \"Magnam sit cumque et aliquam quia.\",\n         \"Odit dignissimos ea corrupti sint eum.\"\n      ],\n      \"creator_id\": \"Quia facilis.\",\n      \"creator_name\": \"Quia dolorum cumque veniam neque et.\",\n      \"creator_username\": \"Non omnis amet quia omnis est at.\",\n      \"email_body\": \"Ex mollitia.\",\n      \"email_body_text\": \"Incidunt sequi quibusdam perferendis perferendis expedita molestiae.\",\n      \"email_subject\": \"Et sint quas eveniet eaque dicta.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Ut quam esse saepe.\",\n      \"survey_cutoff_date\": \"Odit quia quia fugiat est quas.\",\n      \"survey_monkey_id\": \"Sint reprehenderit ipsam et.\",\n      \"survey_reminder_rate_days\": 256525687450027157,\n      \"survey_send_date\": \"Minima possimus deleniti occaecati.\",\n      \"survey_title\": \"Vero voluptatem et temporibus eligendi repellendus sunt.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyGetSurveyUsage() {
@@ -314,7 +374,7 @@ func surveyUpdateSurveyUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey update-survey --body '{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Quaerat doloribus.\",\n         \"Et vel et dolorem.\",\n         \"Rerum ut suscipit.\"\n      ],\n      \"creator_id\": \"Et hic consequuntur inventore vel.\",\n      \"email_body\": \"Quaerat voluptas iure nemo.\",\n      \"email_body_text\": \"Dolor voluptatem.\",\n      \"email_subject\": \"Dolorem atque alias possimus eum qui et.\",\n      \"survey_cutoff_date\": \"Maiores dolorem aut odit dolorem repudiandae est.\",\n      \"survey_reminder_rate_days\": 3049090884903950296,\n      \"survey_send_date\": \"Saepe sed temporibus et est.\",\n      \"survey_title\": \"Non inventore quis voluptas dolore qui.\"\n   }' --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey update-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Excepturi et quas autem dolores corporis.\",\n         \"Harum earum autem et.\"\n      ],\n      \"creator_id\": \"Omnis quo.\",\n      \"email_body\": \"Quo qui sint.\",\n      \"email_body_text\": \"Explicabo autem sit id modi corporis.\",\n      \"email_subject\": \"Et sed.\",\n      \"survey_cutoff_date\": \"Sapiente sunt.\",\n      \"survey_reminder_rate_days\": 5570276177094928842,\n      \"survey_send_date\": \"Aliquid similique.\",\n      \"survey_title\": \"Maiores impedit omnis veniam consequuntur sed.\"\n   }' --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyDeleteSurveyUsage() {
@@ -471,4 +531,104 @@ func surveyDeleteRecipientGroupUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-recipient-group --survey-id \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --committee-id \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --project-id \"003170000123XHTAA2\" --foundation-id \"003170000123XHTAA2\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveyCreateExclusionUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey create-exclusion", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Create a survey or global exclusion (proxies to ITX POST /v2/surveys/exclusion)`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey create-exclusion --body '{\n      \"committee_id\": \"Blanditiis harum quis debitis voluptatem laborum.\",\n      \"email\": \"Nihil eos molestiae numquam.\",\n      \"global_exclusion\": \"Laudantium aut consectetur pariatur omnis.\",\n      \"survey_id\": \"Amet deleniti aut.\",\n      \"user_id\": \"Tenetur omnis.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveyDeleteExclusionUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey delete-exclusion", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Delete a survey or global exclusion (proxies to ITX DELETE /v2/surveys/exclusion)`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-exclusion --body '{\n      \"committee_id\": \"Ut iusto eius qui.\",\n      \"email\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"global_exclusion\": \"Recusandae itaque consequatur.\",\n      \"survey_id\": \"Soluta facilis rerum exercitationem.\",\n      \"user_id\": \"Asperiores at dicta iusto adipisci est est.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveyGetExclusionUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey get-exclusion", os.Args[0])
+	fmt.Fprint(os.Stderr, " -exclusion-id STRING")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Get exclusion by ID (proxies to ITX GET /v2/surveys/exclusion/{exclusion_id})`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -exclusion-id STRING: Exclusion identifier`)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey get-exclusion --exclusion-id \"12345\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveyDeleteExclusionByIDUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey delete-exclusion-by-id", os.Args[0])
+	fmt.Fprint(os.Stderr, " -exclusion-id STRING")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Delete exclusion by ID (proxies to ITX DELETE /v2/surveys/exclusion/{exclusion_id})`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -exclusion-id STRING: Exclusion identifier`)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-exclusion-by-id --exclusion-id \"12345\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
+func surveyValidateEmailUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey validate-email", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Validate email template body and subject (proxies to ITX POST /v2/surveys/validate_email)`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey validate-email --body '{\n      \"body\": \"Voluptatem maiores sunt quaerat praesentium reprehenderit eos.\",\n      \"subject\": \"Consequuntur veniam.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }

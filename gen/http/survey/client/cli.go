@@ -24,7 +24,7 @@ func BuildScheduleSurveyPayload(surveyScheduleSurveyBody string, surveyScheduleS
 	{
 		err = json.Unmarshal([]byte(surveyScheduleSurveyBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Consequuntur sapiente et corporis quis numquam autem.\",\n         \"Quia aut.\"\n      ],\n      \"creator_id\": \"Unde consequatur.\",\n      \"creator_name\": \"Illum fuga maiores quis incidunt pariatur.\",\n      \"creator_username\": \"Voluptas possimus iste quasi.\",\n      \"email_body\": \"Voluptatem doloremque qui.\",\n      \"email_body_text\": \"Sit qui ut omnis placeat rerum.\",\n      \"email_subject\": \"Ut sapiente qui numquam eos.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": false,\n      \"stage_filter\": \"Nostrum nostrum repellat aut molestiae officiis nihil.\",\n      \"survey_cutoff_date\": \"Fugit qui.\",\n      \"survey_monkey_id\": \"Sunt accusamus pariatur quia itaque quidem.\",\n      \"survey_reminder_rate_days\": 2463719811884759918,\n      \"survey_send_date\": \"Delectus veniam delectus.\",\n      \"survey_title\": \"Et saepe corrupti quis nostrum.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Provident sed.\",\n         \"Magnam sit cumque et aliquam quia.\",\n         \"Odit dignissimos ea corrupti sint eum.\"\n      ],\n      \"creator_id\": \"Quia facilis.\",\n      \"creator_name\": \"Quia dolorum cumque veniam neque et.\",\n      \"creator_username\": \"Non omnis amet quia omnis est at.\",\n      \"email_body\": \"Ex mollitia.\",\n      \"email_body_text\": \"Incidunt sequi quibusdam perferendis perferendis expedita molestiae.\",\n      \"email_subject\": \"Et sint quas eveniet eaque dicta.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Ut quam esse saepe.\",\n      \"survey_cutoff_date\": \"Odit quia quia fugiat est quas.\",\n      \"survey_monkey_id\": \"Sint reprehenderit ipsam et.\",\n      \"survey_reminder_rate_days\": 256525687450027157,\n      \"survey_send_date\": \"Minima possimus deleniti occaecati.\",\n      \"survey_title\": \"Vero voluptatem et temporibus eligendi repellendus sunt.\"\n   }'")
 		}
 	}
 	var token *string
@@ -89,7 +89,7 @@ func BuildUpdateSurveyPayload(surveyUpdateSurveyBody string, surveyUpdateSurveyS
 	{
 		err = json.Unmarshal([]byte(surveyUpdateSurveyBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Quaerat doloribus.\",\n         \"Et vel et dolorem.\",\n         \"Rerum ut suscipit.\"\n      ],\n      \"creator_id\": \"Et hic consequuntur inventore vel.\",\n      \"email_body\": \"Quaerat voluptas iure nemo.\",\n      \"email_body_text\": \"Dolor voluptatem.\",\n      \"email_subject\": \"Dolorem atque alias possimus eum qui et.\",\n      \"survey_cutoff_date\": \"Maiores dolorem aut odit dolorem repudiandae est.\",\n      \"survey_reminder_rate_days\": 3049090884903950296,\n      \"survey_send_date\": \"Saepe sed temporibus et est.\",\n      \"survey_title\": \"Non inventore quis voluptas dolore qui.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Excepturi et quas autem dolores corporis.\",\n         \"Harum earum autem et.\"\n      ],\n      \"creator_id\": \"Omnis quo.\",\n      \"email_body\": \"Quo qui sint.\",\n      \"email_body_text\": \"Explicabo autem sit id modi corporis.\",\n      \"email_subject\": \"Et sed.\",\n      \"survey_cutoff_date\": \"Sapiente sunt.\",\n      \"survey_reminder_rate_days\": 5570276177094928842,\n      \"survey_send_date\": \"Aliquid similique.\",\n      \"survey_title\": \"Maiores impedit omnis veniam consequuntur sed.\"\n   }'")
 		}
 	}
 	var surveyID string
@@ -327,6 +327,130 @@ func BuildDeleteRecipientGroupPayload(surveyDeleteRecipientGroupSurveyID string,
 	v.CommitteeID = committeeID
 	v.ProjectID = projectID
 	v.FoundationID = foundationID
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildCreateExclusionPayload builds the payload for the survey
+// create_exclusion endpoint from CLI flags.
+func BuildCreateExclusionPayload(surveyCreateExclusionBody string, surveyCreateExclusionToken string) (*survey.CreateExclusionPayload, error) {
+	var err error
+	var body CreateExclusionRequestBody
+	{
+		err = json.Unmarshal([]byte(surveyCreateExclusionBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_id\": \"Blanditiis harum quis debitis voluptatem laborum.\",\n      \"email\": \"Nihil eos molestiae numquam.\",\n      \"global_exclusion\": \"Laudantium aut consectetur pariatur omnis.\",\n      \"survey_id\": \"Amet deleniti aut.\",\n      \"user_id\": \"Tenetur omnis.\"\n   }'")
+		}
+	}
+	var token *string
+	{
+		if surveyCreateExclusionToken != "" {
+			token = &surveyCreateExclusionToken
+		}
+	}
+	v := &survey.CreateExclusionPayload{
+		Email:           body.Email,
+		UserID:          body.UserID,
+		SurveyID:        body.SurveyID,
+		CommitteeID:     body.CommitteeID,
+		GlobalExclusion: body.GlobalExclusion,
+	}
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildDeleteExclusionPayload builds the payload for the survey
+// delete_exclusion endpoint from CLI flags.
+func BuildDeleteExclusionPayload(surveyDeleteExclusionBody string, surveyDeleteExclusionToken string) (*survey.DeleteExclusionPayload, error) {
+	var err error
+	var body DeleteExclusionRequestBody
+	{
+		err = json.Unmarshal([]byte(surveyDeleteExclusionBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_id\": \"Ut iusto eius qui.\",\n      \"email\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"global_exclusion\": \"Recusandae itaque consequatur.\",\n      \"survey_id\": \"Soluta facilis rerum exercitationem.\",\n      \"user_id\": \"Asperiores at dicta iusto adipisci est est.\"\n   }'")
+		}
+	}
+	var token *string
+	{
+		if surveyDeleteExclusionToken != "" {
+			token = &surveyDeleteExclusionToken
+		}
+	}
+	v := &survey.DeleteExclusionPayload{
+		Email:           body.Email,
+		UserID:          body.UserID,
+		SurveyID:        body.SurveyID,
+		CommitteeID:     body.CommitteeID,
+		GlobalExclusion: body.GlobalExclusion,
+	}
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildGetExclusionPayload builds the payload for the survey get_exclusion
+// endpoint from CLI flags.
+func BuildGetExclusionPayload(surveyGetExclusionExclusionID string, surveyGetExclusionToken string) (*survey.GetExclusionPayload, error) {
+	var exclusionID string
+	{
+		exclusionID = surveyGetExclusionExclusionID
+	}
+	var token *string
+	{
+		if surveyGetExclusionToken != "" {
+			token = &surveyGetExclusionToken
+		}
+	}
+	v := &survey.GetExclusionPayload{}
+	v.ExclusionID = exclusionID
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildDeleteExclusionByIDPayload builds the payload for the survey
+// delete_exclusion_by_id endpoint from CLI flags.
+func BuildDeleteExclusionByIDPayload(surveyDeleteExclusionByIDExclusionID string, surveyDeleteExclusionByIDToken string) (*survey.DeleteExclusionByIDPayload, error) {
+	var exclusionID string
+	{
+		exclusionID = surveyDeleteExclusionByIDExclusionID
+	}
+	var token *string
+	{
+		if surveyDeleteExclusionByIDToken != "" {
+			token = &surveyDeleteExclusionByIDToken
+		}
+	}
+	v := &survey.DeleteExclusionByIDPayload{}
+	v.ExclusionID = exclusionID
+	v.Token = token
+
+	return v, nil
+}
+
+// BuildValidateEmailPayload builds the payload for the survey validate_email
+// endpoint from CLI flags.
+func BuildValidateEmailPayload(surveyValidateEmailBody string, surveyValidateEmailToken string) (*survey.ValidateEmailPayload, error) {
+	var err error
+	var body ValidateEmailRequestBody
+	{
+		err = json.Unmarshal([]byte(surveyValidateEmailBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"body\": \"Voluptatem maiores sunt quaerat praesentium reprehenderit eos.\",\n      \"subject\": \"Consequuntur veniam.\"\n   }'")
+		}
+	}
+	var token *string
+	{
+		if surveyValidateEmailToken != "" {
+			token = &surveyValidateEmailToken
+		}
+	}
+	v := &survey.ValidateEmailPayload{
+		Body:    body.Body,
+		Subject: body.Subject,
+	}
 	v.Token = token
 
 	return v, nil

@@ -47,6 +47,20 @@ type Service interface {
 	// recalculate statistics (proxies to ITX DELETE
 	// /v2/surveys/{survey_id}/recipient_group)
 	DeleteRecipientGroup(context.Context, *DeleteRecipientGroupPayload) (err error)
+	// Create a survey or global exclusion (proxies to ITX POST
+	// /v2/surveys/exclusion)
+	CreateExclusion(context.Context, *CreateExclusionPayload) (res *ExclusionResult, err error)
+	// Delete a survey or global exclusion (proxies to ITX DELETE
+	// /v2/surveys/exclusion)
+	DeleteExclusion(context.Context, *DeleteExclusionPayload) (err error)
+	// Get exclusion by ID (proxies to ITX GET /v2/surveys/exclusion/{exclusion_id})
+	GetExclusion(context.Context, *GetExclusionPayload) (res *ExtendedExclusionResult, err error)
+	// Delete exclusion by ID (proxies to ITX DELETE
+	// /v2/surveys/exclusion/{exclusion_id})
+	DeleteExclusionByID(context.Context, *DeleteExclusionByIDPayload) (err error)
+	// Validate email template body and subject (proxies to ITX POST
+	// /v2/surveys/validate_email)
+	ValidateEmail(context.Context, *ValidateEmailPayload) (res *ValidateEmailResult, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -69,7 +83,7 @@ const ServiceName = "survey"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [10]string{"schedule_survey", "get_survey", "update_survey", "delete_survey", "bulk_resend_survey", "preview_send_survey", "send_missing_recipients", "delete_survey_response", "resend_survey_response", "delete_recipient_group"}
+var MethodNames = [15]string{"schedule_survey", "get_survey", "update_survey", "delete_survey", "bulk_resend_survey", "preview_send_survey", "send_missing_recipients", "delete_survey_response", "resend_survey_response", "delete_recipient_group", "create_exclusion", "delete_exclusion", "get_exclusion", "delete_exclusion_by_id", "validate_email"}
 
 // Bad request error response
 type BadRequestError struct {
@@ -96,6 +110,49 @@ type ConflictError struct {
 	Code string
 	// Error message
 	Message string
+}
+
+// CreateExclusionPayload is the payload type of the survey service
+// create_exclusion method.
+type CreateExclusionPayload struct {
+	// JWT token
+	Token *string
+	// Survey responder's email
+	Email *string
+	// Recipient's user ID
+	UserID *string
+	// Survey ID for survey-specific exclusion
+	SurveyID *string
+	// Committee ID for survey-specific exclusion
+	CommitteeID *string
+	// Global exclusion flag
+	GlobalExclusion *string
+}
+
+// DeleteExclusionByIDPayload is the payload type of the survey service
+// delete_exclusion_by_id method.
+type DeleteExclusionByIDPayload struct {
+	// JWT token
+	Token *string
+	// Exclusion identifier
+	ExclusionID string
+}
+
+// DeleteExclusionPayload is the payload type of the survey service
+// delete_exclusion method.
+type DeleteExclusionPayload struct {
+	// JWT token
+	Token *string
+	// Survey responder's email
+	Email *string
+	// Recipient's user ID
+	UserID *string
+	// Survey ID for survey-specific exclusion
+	SurveyID *string
+	// Committee ID for survey-specific exclusion
+	CommitteeID *string
+	// Global exclusion flag
+	GlobalExclusion *string
 }
 
 // DeleteRecipientGroupPayload is the payload type of the survey service
@@ -148,12 +205,67 @@ type ExcludedCommittee struct {
 	CommitteeCategory string
 }
 
+// ExclusionResult is the result type of the survey service create_exclusion
+// method.
+type ExclusionResult struct {
+	// Exclusion ID
+	ID string
+	// Survey responder's email
+	Email *string
+	// Survey ID
+	SurveyID *string
+	// Committee ID
+	CommitteeID *string
+	// Global exclusion flag
+	GlobalExclusion *string
+	// Recipient's user ID
+	UserID *string
+}
+
+// User information for an exclusion
+type ExclusionUser struct {
+	// User ID
+	ID *string
+	// Username
+	Username *string
+	// User emails
+	Emails []*UserEmail
+}
+
+// ExtendedExclusionResult is the result type of the survey service
+// get_exclusion method.
+type ExtendedExclusionResult struct {
+	// Exclusion ID
+	ID string
+	// Survey responder's email
+	Email *string
+	// Survey ID
+	SurveyID *string
+	// Committee ID
+	CommitteeID *string
+	// Global exclusion flag
+	GlobalExclusion *string
+	// Recipient's user ID
+	UserID *string
+	// User information
+	User *ExclusionUser
+}
+
 // Forbidden error response
 type ForbiddenError struct {
 	// HTTP status code
 	Code string
 	// Error message
 	Message string
+}
+
+// GetExclusionPayload is the payload type of the survey service get_exclusion
+// method.
+type GetExclusionPayload struct {
+	// JWT token
+	Token *string
+	// Exclusion identifier
+	ExclusionID string
 }
 
 // GetSurveyPayload is the payload type of the survey service get_survey method.
@@ -435,6 +547,36 @@ type UpdateSurveyPayload struct {
 	Committees []string
 	// Whether committee voting is enabled
 	CommitteeVotingEnabled *bool
+}
+
+// User email information
+type UserEmail struct {
+	// Email ID
+	ID *string
+	// Email address
+	EmailAddress *string
+	// Whether this is the primary email
+	IsPrimary *bool
+}
+
+// ValidateEmailPayload is the payload type of the survey service
+// validate_email method.
+type ValidateEmailPayload struct {
+	// JWT token
+	Token *string
+	// Email body template
+	Body *string
+	// Email subject template
+	Subject *string
+}
+
+// ValidateEmailResult is the result type of the survey service validate_email
+// method.
+type ValidateEmailResult struct {
+	// Validated email body
+	Body string
+	// Validated email subject
+	Subject string
 }
 
 // Error returns an error description.

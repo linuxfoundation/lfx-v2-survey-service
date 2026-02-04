@@ -410,6 +410,209 @@ func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.Dele
 	return nil
 }
 
+// CreateExclusion creates a survey or global exclusion
+func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExclusionPayload) (*survey.ExclusionResult, error) {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return nil, &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "creating exclusion",
+		"principal", principal,
+		"email", p.Email,
+		"user_id", p.UserID,
+	)
+
+	// Build ITX request
+	itxRequest := &itx.ExclusionRequest{
+		Email:           p.Email,
+		UserID:          p.UserID,
+		SurveyID:        p.SurveyID,
+		CommitteeID:     p.CommitteeID,
+		GlobalExclusion: p.GlobalExclusion,
+	}
+
+	// Call ITX API
+	itxResponse, err := s.proxy.CreateExclusion(ctx, itxRequest)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+
+	// Map response back to goa result
+	result := mapExclusionToResult(itxResponse)
+
+	s.logger.InfoContext(ctx, "exclusion created successfully",
+		"exclusion_id", result.ID,
+	)
+
+	return result, nil
+}
+
+// DeleteExclusion deletes a survey or global exclusion
+func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExclusionPayload) error {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "deleting exclusion",
+		"principal", principal,
+		"email", p.Email,
+		"user_id", p.UserID,
+	)
+
+	// Build ITX request
+	itxRequest := &itx.ExclusionRequest{
+		Email:           p.Email,
+		UserID:          p.UserID,
+		SurveyID:        p.SurveyID,
+		CommitteeID:     p.CommitteeID,
+		GlobalExclusion: p.GlobalExclusion,
+	}
+
+	// Call ITX API
+	err = s.proxy.DeleteExclusion(ctx, itxRequest)
+	if err != nil {
+		return mapDomainError(err)
+	}
+
+	s.logger.InfoContext(ctx, "exclusion deleted successfully")
+
+	return nil
+}
+
+// GetExclusion retrieves an exclusion by ID
+func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusionPayload) (*survey.ExtendedExclusionResult, error) {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return nil, &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "getting exclusion",
+		"principal", principal,
+		"exclusion_id", p.ExclusionID,
+	)
+
+	// Call ITX API
+	itxResponse, err := s.proxy.GetExclusion(ctx, p.ExclusionID)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+
+	// Map response back to goa result
+	result := mapExtendedExclusionToResult(itxResponse)
+
+	s.logger.InfoContext(ctx, "exclusion retrieved successfully",
+		"exclusion_id", result.ID,
+	)
+
+	return result, nil
+}
+
+// DeleteExclusionByID deletes an exclusion by its ID
+func (s *SurveyService) DeleteExclusionByID(ctx context.Context, p *survey.DeleteExclusionByIDPayload) error {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "deleting exclusion by ID",
+		"principal", principal,
+		"exclusion_id", p.ExclusionID,
+	)
+
+	// Call ITX API
+	err = s.proxy.DeleteExclusionByID(ctx, p.ExclusionID)
+	if err != nil {
+		return mapDomainError(err)
+	}
+
+	s.logger.InfoContext(ctx, "exclusion deleted successfully",
+		"exclusion_id", p.ExclusionID,
+	)
+
+	return nil
+}
+
+// ValidateEmail validates email template body and subject
+func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEmailPayload) (*survey.ValidateEmailResult, error) {
+	// Parse JWT token to get principal
+	token := ""
+	if p.Token != nil {
+		token = *p.Token
+	}
+	principal, err := s.auth.ParsePrincipal(ctx, token, s.logger)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
+		return nil, &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+
+	s.logger.InfoContext(ctx, "validating email template",
+		"principal", principal,
+	)
+
+	// Build ITX request
+	itxRequest := &itx.ValidateEmailRequest{
+		Body:    p.Body,
+		Subject: p.Subject,
+	}
+
+	// Call ITX API
+	itxResponse, err := s.proxy.ValidateEmail(ctx, itxRequest)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+
+	// Map response back to goa result
+	result := &survey.ValidateEmailResult{
+		Body:    itxResponse.Body,
+		Subject: itxResponse.Subject,
+	}
+
+	s.logger.InfoContext(ctx, "email template validated successfully")
+
+	return result, nil
+}
+
 // Helper functions
 
 // mapITXResponseToResult maps ITX response to Goa result (extracted to avoid duplication)
@@ -527,6 +730,47 @@ func mapITXPreviewRecipientsToResult(recipients []itx.ITXPreviewRecipient) []*su
 			Role:      r.Role,
 		})
 	}
+	return result
+}
+
+func mapExclusionToResult(itxExclusion *itx.Exclusion) *survey.ExclusionResult {
+	return &survey.ExclusionResult{
+		ID:              itxExclusion.ID,
+		Email:           itxExclusion.Email,
+		SurveyID:        itxExclusion.SurveyID,
+		CommitteeID:     itxExclusion.CommitteeID,
+		GlobalExclusion: itxExclusion.GlobalExclusion,
+		UserID:          itxExclusion.UserID,
+	}
+}
+
+func mapExtendedExclusionToResult(itxExclusion *itx.ExtendedExclusion) *survey.ExtendedExclusionResult {
+	result := &survey.ExtendedExclusionResult{
+		ID:              itxExclusion.ID,
+		Email:           itxExclusion.Email,
+		SurveyID:        itxExclusion.SurveyID,
+		CommitteeID:     itxExclusion.CommitteeID,
+		GlobalExclusion: itxExclusion.GlobalExclusion,
+		UserID:          itxExclusion.UserID,
+	}
+
+	if itxExclusion.User != nil {
+		emails := make([]*survey.UserEmail, 0, len(itxExclusion.User.Emails))
+		for _, e := range itxExclusion.User.Emails {
+			emails = append(emails, &survey.UserEmail{
+				ID:           e.ID,
+				EmailAddress: e.EmailAddress,
+				IsPrimary:    e.IsPrimary,
+			})
+		}
+
+		result.User = &survey.ExclusionUser{
+			ID:       itxExclusion.User.ID,
+			Username: itxExclusion.User.Username,
+			Emails:   emails,
+		}
+	}
+
 	return result
 }
 

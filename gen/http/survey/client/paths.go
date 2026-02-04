@@ -14,7 +14,7 @@ import (
 
 // ScheduleSurveySurveyPath returns the URL path to the survey service schedule_survey HTTP endpoint.
 func ScheduleSurveySurveyPath() string {
-	return "/surveys/schedule"
+	return "/surveys"
 }
 
 // GetSurveySurveyPath returns the URL path to the survey service get_survey HTTP endpoint.
@@ -60,4 +60,29 @@ func ResendSurveyResponseSurveyPath(surveyID string, responseID string) string {
 // DeleteRecipientGroupSurveyPath returns the URL path to the survey service delete_recipient_group HTTP endpoint.
 func DeleteRecipientGroupSurveyPath(surveyID string) string {
 	return fmt.Sprintf("/surveys/%v/recipient_group", surveyID)
+}
+
+// CreateExclusionSurveyPath returns the URL path to the survey service create_exclusion HTTP endpoint.
+func CreateExclusionSurveyPath() string {
+	return "/surveys/exclusion"
+}
+
+// DeleteExclusionSurveyPath returns the URL path to the survey service delete_exclusion HTTP endpoint.
+func DeleteExclusionSurveyPath() string {
+	return "/surveys/exclusion"
+}
+
+// GetExclusionSurveyPath returns the URL path to the survey service get_exclusion HTTP endpoint.
+func GetExclusionSurveyPath(exclusionID string) string {
+	return fmt.Sprintf("/surveys/exclusion/%v", exclusionID)
+}
+
+// DeleteExclusionByIDSurveyPath returns the URL path to the survey service delete_exclusion_by_id HTTP endpoint.
+func DeleteExclusionByIDSurveyPath(exclusionID string) string {
+	return fmt.Sprintf("/surveys/exclusion/%v", exclusionID)
+}
+
+// ValidateEmailSurveyPath returns the URL path to the survey service validate_email HTTP endpoint.
+func ValidateEmailSurveyPath() string {
+	return "/surveys/validate_email"
 }
