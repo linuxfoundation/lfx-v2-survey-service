@@ -6,6 +6,15 @@ A proxy service that provides a REST API wrapper around the ITX survey system, b
 
 The LFX V2 Survey Service acts as a secure intermediary between LFX Platform V2 and the ITX survey backend. It handles authentication, authorization, ID mapping between v1 and v2 systems, and provides a clean REST API interface for survey management.
 
+**Proxy Architecture**: This service is a stateless HTTP proxy that translates LFX v2 REST API calls into ITX API calls. All survey data is stored and managed by the ITX service and SurveyMonkey. The proxy handles:
+
+- **Authentication Translation**: JWT (Heimdall) → OAuth2 M2M (Auth0)
+- **Field Mapping**: `project_uid` (v2 UUID) → `project_id` (v1 Salesforce ID)
+- **Authorization**: Fine-grained access control via OpenFGA
+- **Path Translation**: Shorter proxy paths (`/surveys/{id}`) → ITX paths (`/v2/surveys/{id}/schedule`)
+
+See [ITX Proxy Implementation Architecture](docs/itx-proxy-implementation.md) for detailed information.
+
 ## Features
 
 - **Survey Scheduling**: Schedule surveys to be sent to committee members
@@ -34,11 +43,45 @@ The LFX V2 Survey Service acts as a secure intermediary between LFX Platform V2 
 
 ## API Endpoints
 
+The service provides 15 REST API endpoints for survey management:
+
 ### Survey Management
 
-- `POST /surveys/schedule` - Schedule a new survey
+- `POST /surveys` - Create and schedule a new survey
+- `GET /surveys/{survey_id}` - Get survey details
+- `PUT /surveys/{survey_id}` - Update survey (when status is 'disabled')
+- `DELETE /surveys/{survey_id}` - Delete survey (when status is 'disabled')
+- `POST /surveys/{survey_id}/bulk_resend` - Bulk resend survey emails to select recipients
+- `GET /surveys/{survey_id}/preview_send` - Preview recipients affected by a resend
+- `POST /surveys/{survey_id}/send_missing_recipients` - Send survey to committee members who haven't received it
+- `DELETE /surveys/{survey_id}/recipient_group` - Remove a recipient group from survey
+
+### Survey Responses
+
+- `DELETE /surveys/{survey_id}/responses/{response_id}` - Delete survey response
+- `POST /surveys/{survey_id}/responses/{response_id}/resend` - Resend survey email to specific user
+
+### Exclusions Management
+
+- `POST /surveys/exclusion` - Create survey or global exclusion
+- `DELETE /surveys/exclusion` - Delete survey or global exclusion
+- `GET /surveys/exclusion/{exclusion_id}` - Get exclusion by ID
+- `DELETE /surveys/exclusion/{exclusion_id}` - Delete exclusion by ID
+
+### Utilities
+
+- `POST /surveys/validate_email` - Validate email template body and subject
 
 See the OpenAPI spec at `/openapi.yaml` or `/openapi.json` when running locally.
+
+### API Documentation
+
+For detailed API contracts showing request/response schemas and differences between the proxy API and ITX API:
+
+- [Survey Management API Contracts](docs/api-contracts/itx-surveys-api.md)
+- [Survey Responses API Contracts](docs/api-contracts/itx-survey-responses-api.md)
+- [Exclusions API Contracts](docs/api-contracts/itx-exclusions-api.md)
+- [ITX Proxy Implementation Architecture](docs/itx-proxy-implementation.md)
 
 ## Prerequisites
 
@@ -59,6 +102,7 @@ make deps
 ```
 
 This installs:
+
 - `goa` CLI for code generation
 - `golangci-lint` for linting
 
@@ -111,16 +155,19 @@ make fmt
 The service is configured via environment variables:
 
 ### Server Configuration
+
 - `PORT` - HTTP server port (default: 8080)
 - `LOG_LEVEL` - Logging level: debug, info, warn, error (default: info)
 - `LOG_ADD_SOURCE` - Add source file info to logs (default: true)
 
 ### Authentication
+
 - `JWKS_URL` - Heimdall JWKS endpoint for JWT validation
 - `AUDIENCE` - Expected JWT audience (default: lfx-v2-survey-service)
 - `JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL` - Mock principal for local dev (disables JWT validation)
 
 ### ITX Integration
+
 - `ITX_BASE_URL` - ITX API base URL
 - `ITX_AUTH0_DOMAIN` - Auth0 domain for M2M authentication
 - `ITX_CLIENT_ID` - Auth0 client ID
@@ -128,6 +175,7 @@ The service is configured via environment variables:
 - `ITX_AUDIENCE` - Auth0 API audience
 
 ### ID Mapping
+
 - `NATS_URL` - NATS server URL for ID mapping
 - `ID_MAPPING_DISABLED` - Disable ID mapping for local dev (default: false)
 
@@ -201,6 +249,9 @@ kubectl logs -n lfx -l app=lfx-v2-survey-service
 ├── pkg/                      # Public packages
 │   ├── constants/            # Shared constants
 │   └── models/itx/           # ITX API models
+├── docs/                     # Documentation
+│   ├── api-contracts/        # API contract documentation
+│   └── itx-proxy-implementation.md  # Architecture guide
 ├── charts/                   # Helm charts
 │   └── lfx-v2-survey-service/
 ├── Dockerfile                # Container image
@@ -230,6 +281,7 @@ kubectl logs -n lfx -l app=lfx-v2-survey-service
 ### Commit Guidelines
 
 When committing changes, follow the repository's commit conventions and include:
+
 ```
 Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 ```
