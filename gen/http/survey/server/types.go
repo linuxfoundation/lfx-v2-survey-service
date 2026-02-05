@@ -16,6 +16,8 @@ import (
 // ScheduleSurveyRequestBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP request body.
 type ScheduleSurveyRequestBody struct {
+	// Committee UID to send survey to
+	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
 	// Whether the survey is project-level (true) or global-level (false)
 	IsProjectSurvey *bool `form:"is_project_survey,omitempty" json:"is_project_survey,omitempty" xml:"is_project_survey,omitempty"`
 	// Project stage filter for global surveys
@@ -44,8 +46,6 @@ type ScheduleSurveyRequestBody struct {
 	EmailBody *string `form:"email_body,omitempty" json:"email_body,omitempty" xml:"email_body,omitempty"`
 	// Email body plain text content
 	EmailBodyText *string `form:"email_body_text,omitempty" json:"email_body_text,omitempty" xml:"email_body_text,omitempty"`
-	// Array of committee IDs to send survey to
-	Committees []string `form:"committees,omitempty" json:"committees,omitempty" xml:"committees,omitempty"`
 	// Whether committee voting is enabled
 	CommitteeVotingEnabled *bool `form:"committee_voting_enabled,omitempty" json:"committee_voting_enabled,omitempty" xml:"committee_voting_enabled,omitempty"`
 }
@@ -53,6 +53,8 @@ type ScheduleSurveyRequestBody struct {
 // UpdateSurveyRequestBody is the type of the "survey" service "update_survey"
 // endpoint HTTP request body.
 type UpdateSurveyRequestBody struct {
+	// Committee UID to send survey to
+	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
 	// Creator's user ID
 	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
 	// Survey title
@@ -69,8 +71,6 @@ type UpdateSurveyRequestBody struct {
 	EmailBody *string `form:"email_body,omitempty" json:"email_body,omitempty" xml:"email_body,omitempty"`
 	// Email body plain text content
 	EmailBodyText *string `form:"email_body_text,omitempty" json:"email_body_text,omitempty" xml:"email_body_text,omitempty"`
-	// Array of committee IDs to send survey to
-	Committees []string `form:"committees,omitempty" json:"committees,omitempty" xml:"committees,omitempty"`
 	// Whether committee voting is enabled
 	CommitteeVotingEnabled *bool `form:"committee_voting_enabled,omitempty" json:"committee_voting_enabled,omitempty" xml:"committee_voting_enabled,omitempty"`
 }
@@ -2340,6 +2340,7 @@ func NewValidateEmailUnauthorizedResponseBody(res *survey.UnauthorizedError) *Va
 // payload.
 func NewScheduleSurveyPayload(body *ScheduleSurveyRequestBody, token *string) *survey.ScheduleSurveyPayload {
 	v := &survey.ScheduleSurveyPayload{
+		CommitteeUID:           *body.CommitteeUID,
 		IsProjectSurvey:        body.IsProjectSurvey,
 		StageFilter:            body.StageFilter,
 		CreatorUsername:        body.CreatorUsername,
@@ -2355,12 +2356,6 @@ func NewScheduleSurveyPayload(body *ScheduleSurveyRequestBody, token *string) *s
 		EmailBody:              body.EmailBody,
 		EmailBodyText:          body.EmailBodyText,
 		CommitteeVotingEnabled: body.CommitteeVotingEnabled,
-	}
-	if body.Committees != nil {
-		v.Committees = make([]string, len(body.Committees))
-		for i, val := range body.Committees {
-			v.Committees[i] = val
-		}
 	}
 	v.Token = token
 
@@ -2380,6 +2375,7 @@ func NewGetSurveyPayload(surveyUID string, token *string) *survey.GetSurveyPaylo
 // payload.
 func NewUpdateSurveyPayload(body *UpdateSurveyRequestBody, surveyUID string, token *string) *survey.UpdateSurveyPayload {
 	v := &survey.UpdateSurveyPayload{
+		CommitteeUID:           body.CommitteeUID,
 		CreatorID:              body.CreatorID,
 		SurveyTitle:            body.SurveyTitle,
 		SurveySendDate:         body.SurveySendDate,
@@ -2389,12 +2385,6 @@ func NewUpdateSurveyPayload(body *UpdateSurveyRequestBody, surveyUID string, tok
 		EmailBody:              body.EmailBody,
 		EmailBodyText:          body.EmailBodyText,
 		CommitteeVotingEnabled: body.CommitteeVotingEnabled,
-	}
-	if body.Committees != nil {
-		v.Committees = make([]string, len(body.Committees))
-		for i, val := range body.Committees {
-			v.Committees[i] = val
-		}
 	}
 	v.SurveyUID = surveyUID
 	v.Token = token
@@ -2543,6 +2533,15 @@ func NewValidateEmailPayload(body *ValidateEmailRequestBody, token *string) *sur
 	v.Token = token
 
 	return v
+}
+
+// ValidateScheduleSurveyRequestBody runs the validations defined on
+// schedule_survey_request_body
+func ValidateScheduleSurveyRequestBody(body *ScheduleSurveyRequestBody) (err error) {
+	if body.CommitteeUID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("committee_uid", "body"))
+	}
+	return
 }
 
 // ValidateBulkResendSurveyRequestBody runs the validations defined on

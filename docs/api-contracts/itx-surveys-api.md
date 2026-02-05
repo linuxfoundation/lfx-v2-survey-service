@@ -43,7 +43,7 @@ Content-Type: application/json
 
 ```json
 {
-  "project_uid": "7cad5a8d-19d0-41a4-81a6-043453daf9ee",
+  "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
   "creator_id": "005f1000009RbC4AAK",
   "survey_title": "Q1 2024 Committee Member Satisfaction Survey",
   "survey_send_date": "2024-01-15T09:00:00Z",
@@ -52,13 +52,11 @@ Content-Type: application/json
   "email_subject": "Please complete our Q1 2024 survey",
   "email_body": "<p>Dear committee member,<br>Please take a few minutes to complete our quarterly survey.</p>",
   "email_body_text": "Dear committee member,\n\nPlease take a few minutes to complete our quarterly survey.",
-  "committees": [
-    "qa1e8536-a985-4cf5-b981-a170927a1d11",
-    "dc2f7654-b896-5dg6-c092-b281938b2e22"
-  ],
   "committee_voting_enabled": true
 }
 ```
+
+**Note**: The proxy API accepts a single `committee_uid` (required field), which is internally converted to an array when calling the ITX API.
 
 **Response**: `201 Created`
 
@@ -152,8 +150,8 @@ Response body is identical to Proxy API response.
 
 | Proxy API (LFX) | ITX API | Notes |
 |-----------------|---------|-------|
-| `project_uid` | `project_id` | Project identifier - field name differs |
-| All other request fields | Same | Request fields are identical except project identifier |
+| `committee_uid` (single string, required) | `committees` (array) | Proxy accepts single committee UID, converted to array for ITX |
+| All other request fields | Same | Request fields are identical |
 | All response fields | Same | Response fields are identical |
 
 ---
@@ -233,9 +231,12 @@ All fields from Create Survey request are optional. Only include fields to be up
 ```json
 {
   "survey_title": "Q1 2024 Committee Member Satisfaction Survey (Updated)",
-  "survey_cutoff_date": "2024-02-05T23:59:59Z"
+  "survey_cutoff_date": "2024-02-05T23:59:59Z",
+  "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11"
 }
 ```
+
+**Note**: The `committee_uid` field (if provided) is converted to the `committees` array when calling ITX API.
 
 **Response**: `200 OK`
 

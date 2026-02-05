@@ -16,7 +16,7 @@ import (
 
 // Survey service that proxies to ITX survey API
 type Service interface {
-	// Create a scheduled survey for ITX project committees (proxies to ITX POST
+	// Create a scheduled survey for ITX project committee (proxies to ITX POST
 	// /surveys/schedule)
 	ScheduleSurvey(context.Context, *ScheduleSurveyPayload) (res *SurveyScheduleResult, err error)
 	// Get survey details (proxies to ITX GET /v2/surveys/{survey_uid})
@@ -362,6 +362,8 @@ type ResendSurveyResponsePayload struct {
 type ScheduleSurveyPayload struct {
 	// JWT token
 	Token *string
+	// Committee UID to send survey to
+	CommitteeUID string
 	// Whether the survey is project-level (true) or global-level (false)
 	IsProjectSurvey *bool
 	// Project stage filter for global surveys
@@ -390,8 +392,6 @@ type ScheduleSurveyPayload struct {
 	EmailBody *string
 	// Email body plain text content
 	EmailBodyText *string
-	// Array of committee IDs to send survey to
-	Committees []string
 	// Whether committee voting is enabled
 	CommitteeVotingEnabled *bool
 }
@@ -527,6 +527,8 @@ type UpdateSurveyPayload struct {
 	Token *string
 	// Survey identifier
 	SurveyUID string
+	// Committee UID to send survey to
+	CommitteeUID *string
 	// Creator's user ID
 	CreatorID *string
 	// Survey title
@@ -543,8 +545,6 @@ type UpdateSurveyPayload struct {
 	EmailBody *string
 	// Email body plain text content
 	EmailBodyText *string
-	// Array of committee IDs to send survey to
-	Committees []string
 	// Whether committee voting is enabled
 	CommitteeVotingEnabled *bool
 }

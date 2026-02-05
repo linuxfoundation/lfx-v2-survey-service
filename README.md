@@ -47,19 +47,19 @@ The service provides 15 REST API endpoints for survey management:
 
 ### Survey Management
 
-- `POST /surveys` - Create and schedule a new survey
-- `GET /surveys/{survey_id}` - Get survey details
-- `PUT /surveys/{survey_id}` - Update survey (when status is 'disabled')
-- `DELETE /surveys/{survey_id}` - Delete survey (when status is 'disabled')
-- `POST /surveys/{survey_id}/bulk_resend` - Bulk resend survey emails to select recipients
-- `GET /surveys/{survey_id}/preview_send` - Preview recipients affected by a resend
-- `POST /surveys/{survey_id}/send_missing_recipients` - Send survey to committee members who haven't received it
-- `DELETE /surveys/{survey_id}/recipient_group` - Remove a recipient group from survey
+- `POST /surveys` - Create and schedule a new survey for a single committee
+- `GET /surveys/{survey_uid}` - Get survey details
+- `PUT /surveys/{survey_uid}` - Update survey (when status is 'disabled')
+- `DELETE /surveys/{survey_uid}` - Delete survey (when status is 'disabled')
+- `POST /surveys/{survey_uid}/bulk_resend` - Bulk resend survey emails to select recipients
+- `GET /surveys/{survey_uid}/preview_send` - Preview recipients affected by a resend
+- `POST /surveys/{survey_uid}/send_missing_recipients` - Send survey to committee members who haven't received it
+- `DELETE /surveys/{survey_uid}/recipient_group` - Remove a recipient group from survey
 
 ### Survey Responses
 
-- `DELETE /surveys/{survey_id}/responses/{response_id}` - Delete survey response
-- `POST /surveys/{survey_id}/responses/{response_id}/resend` - Resend survey email to specific user
+- `DELETE /surveys/{survey_uid}/responses/{response_id}` - Delete survey response
+- `POST /surveys/{survey_uid}/responses/{response_id}/resend` - Resend survey email to specific user
 
 ### Exclusions Management
 

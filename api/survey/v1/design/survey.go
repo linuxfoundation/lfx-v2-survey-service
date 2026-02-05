@@ -42,7 +42,7 @@ var _ = Service("survey", func() {
 	Error("ServiceUnavailable", ServiceUnavailableError, "Service unavailable")
 
 	Method("schedule_survey", func() {
-		Description("Create a scheduled survey for ITX project committees (proxies to ITX POST /surveys/schedule)")
+		Description("Create a scheduled survey for ITX project committee (proxies to ITX POST /surveys/schedule)")
 
 		Security(JWTAuth, func() {
 			Scope("manage:projects")
@@ -52,6 +52,9 @@ var _ = Service("survey", func() {
 		Payload(func() {
 			BearerTokenAttribute()
 
+			Attribute("committee_uid", String, "Committee UID to send survey to", func() {
+				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
+			})
 			Attribute("is_project_survey", Boolean, "Whether the survey is project-level (true) or global-level (false)")
 			Attribute("stage_filter", String, "Project stage filter for global surveys")
 			Attribute("creator_username", String, "Creator's username")
@@ -66,10 +69,9 @@ var _ = Service("survey", func() {
 			Attribute("email_subject", String, "Email subject line")
 			Attribute("email_body", String, "Email body HTML content")
 			Attribute("email_body_text", String, "Email body plain text content")
-			Attribute("committees", ArrayOf(String), "Array of committee IDs to send survey to")
 			Attribute("committee_voting_enabled", Boolean, "Whether committee voting is enabled")
 
-			// No required fields per the ITX API spec
+			Required("committee_uid")
 		})
 
 		Result(SurveyScheduleResult)
@@ -132,6 +134,9 @@ var _ = Service("survey", func() {
 			Attribute("survey_uid", String, "Survey identifier", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
+			Attribute("committee_uid", String, "Committee UID to send survey to", func() {
+				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
+			})
 			Attribute("creator_id", String, "Creator's user ID")
 			Attribute("survey_title", String, "Survey title")
 			Attribute("survey_send_date", String, "Date to send the survey (RFC3339 format)")
@@ -140,7 +145,6 @@ var _ = Service("survey", func() {
 			Attribute("email_subject", String, "Email subject line")
 			Attribute("email_body", String, "Email body HTML content")
 			Attribute("email_body_text", String, "Email body plain text content")
-			Attribute("committees", ArrayOf(String), "Array of committee IDs to send survey to")
 			Attribute("committee_voting_enabled", Boolean, "Whether committee voting is enabled")
 
 			Required("survey_uid")
