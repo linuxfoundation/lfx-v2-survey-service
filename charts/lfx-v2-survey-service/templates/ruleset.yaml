@@ -12,7 +12,7 @@ metadata:
 spec:
   authClassName: default
   rules:
-    - id: "rule:lfx:lfx-v2-survey-service:surveys:create"
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:schedule"
       match:
         methods:
           - POST
@@ -31,7 +31,7 @@ spec:
           config:
             values:
               relation: writer
-              object: "project:{{ "{{- .Request.Body.project_uid -}}" }}"
+              object: "committee:{{ "{{- .Request.Body.committee_uid -}}" }}"
         {{- else }}
         {{/*
           When OpenFGA is disabled, allow all requests
@@ -44,12 +44,12 @@ spec:
             values:
               aud: {{ .Values.app.audience }}
 
-    - id: "rule:lfx:lfx-v2-survey-service:surveys:survey:get"
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:get"
       match:
         methods:
           - GET
         routes:
-          - path: /surveys/:id
+          - path: /surveys/:survey_uid
       allow_encoded_slashes: "off"
       execute:
         - authenticator: oidc
@@ -62,7 +62,7 @@ spec:
           config:
             values:
               relation: viewer
-              object: "survey:{{ "{{- .Request.URL.Captures.id -}}" }}"
+              object: "survey:{{ "{{- .Request.URL.Captures.survey_uid -}}" }}"
         {{- else }}
         {{/*
           When OpenFGA is disabled, allow all requests
@@ -75,12 +75,12 @@ spec:
             values:
               aud: {{ .Values.app.audience }}
 
-    - id: "rule:lfx:lfx-v2-survey-service:surveys:survey:update"
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:update"
       match:
         methods:
           - PUT
         routes:
-          - path: /surveys/:id
+          - path: /surveys/:survey_uid
       allow_encoded_slashes: "off"
       execute:
         - authenticator: oidc
@@ -93,7 +93,7 @@ spec:
           config:
             values:
               relation: writer
-              object: "survey:{{ "{{- .Request.URL.Captures.id -}}" }}"
+              object: "survey:{{ "{{- .Request.URL.Captures.survey_uid -}}" }}"
         {{- else }}
         {{/*
           When OpenFGA is disabled, allow all requests
@@ -106,12 +106,12 @@ spec:
             values:
               aud: {{ .Values.app.audience }}
 
-    - id: "rule:lfx:lfx-v2-survey-service:surveys:survey:delete"
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:delete"
       match:
         methods:
           - DELETE
         routes:
-          - path: /surveys/:id
+          - path: /surveys/:survey_uid
       allow_encoded_slashes: "off"
       execute:
         - authenticator: oidc
@@ -124,7 +124,7 @@ spec:
           config:
             values:
               relation: writer
-              object: "survey:{{ "{{- .Request.URL.Captures.id -}}" }}"
+              object: "survey:{{ "{{- .Request.URL.Captures.survey_uid -}}" }}"
         {{- else }}
         {{/*
           When OpenFGA is disabled, allow all requests
@@ -137,12 +137,12 @@ spec:
             values:
               aud: {{ .Values.app.audience }}
 
-    - id: "rule:lfx:lfx-v2-survey-service:surveys:survey:extend"
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:bulk_resend"
       match:
         methods:
           - POST
         routes:
-          - path: /surveys/:id/extend
+          - path: /surveys/:survey_uid/bulk_resend
       allow_encoded_slashes: "off"
       execute:
         - authenticator: oidc
@@ -155,7 +155,7 @@ spec:
           config:
             values:
               relation: writer
-              object: "survey:{{ "{{- .Request.URL.Captures.id -}}" }}"
+              object: "survey:{{ "{{- .Request.URL.Captures.survey_uid -}}" }}"
         {{- else }}
         {{/*
           When OpenFGA is disabled, allow all requests
@@ -168,137 +168,12 @@ spec:
             values:
               aud: {{ .Values.app.audience }}
 
-    - id: "rule:lfx:lfx-v2-survey-service:surveys:survey:enable"
-      match:
-        methods:
-          - PUT
-        routes:
-          - path: /surveys/:id/enable
-      allow_encoded_slashes: "off"
-      execute:
-        - authenticator: oidc
-        - authenticator: anonymous_authenticator
-        {{- if .Values.app.use_oidc_contextualizer }}
-        - contextualizer: oidc_contextualizer
-        {{- end }}
-        {{- if .Values.openfga.enabled }}
-        - authorizer: openfga_check
-          config:
-            values:
-              relation: writer
-              object: "survey:{{ "{{- .Request.URL.Captures.id -}}" }}"
-        {{- else }}
-        {{/*
-          When OpenFGA is disabled, allow all requests
-          (Only meant for *local development* because OpenFGA should be enabled when deployed)
-        */}}
-        - authorizer: allow_all
-        {{- end }}
-        - finalizer: create_jwt
-          config:
-            values:
-              aud: {{ .Values.app.audience }}
-
-    - id: "rule:lfx:lfx-v2-survey-service:surveys:survey:bulk_resend"
-      match:
-        methods:
-          - POST
-        routes:
-          - path: /surveys/:id/bulk_resend
-      allow_encoded_slashes: "off"
-      execute:
-        - authenticator: oidc
-        - authenticator: anonymous_authenticator
-        {{- if .Values.app.use_oidc_contextualizer }}
-        - contextualizer: oidc_contextualizer
-        {{- end }}
-        {{- if .Values.openfga.enabled }}
-        - authorizer: openfga_check
-          config:
-            values:
-              relation: writer
-              object: "survey:{{ "{{- .Request.URL.Captures.id -}}" }}"
-        {{- else }}
-        {{/*
-          When OpenFGA is disabled, allow all requests
-          (Only meant for *local development* because OpenFGA should be enabled when deployed)
-        */}}
-        - authorizer: allow_all
-        {{- end }}
-        - finalizer: create_jwt
-          config:
-            values:
-              aud: {{ .Values.app.audience }}
-
-    - id: "rule:lfx:lfx-v2-survey-service:surveys:survey:results"
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:preview_send"
       match:
         methods:
           - GET
         routes:
-          - path: /surveys/:id/results
-      allow_encoded_slashes: "off"
-      execute:
-        - authenticator: oidc
-        - authenticator: anonymous_authenticator
-        {{- if .Values.app.use_oidc_contextualizer }}
-        - contextualizer: oidc_contextualizer
-        {{- end }}
-        {{- if .Values.openfga.enabled }}
-        - authorizer: openfga_check
-          config:
-            values:
-              relation: results_viewer
-              object: "survey:{{ "{{- .Request.URL.Captures.id -}}" }}"
-        {{- else }}
-        {{/*
-          When OpenFGA is disabled, allow all requests
-          (Only meant for *local development* because OpenFGA should be enabled when deployed)
-        */}}
-        - authorizer: allow_all
-        {{- end }}
-        - finalizer: create_jwt
-          config:
-            values:
-              aud: {{ .Values.app.audience }}
-
-    - id: "rule:lfx:lfx-v2-survey-service:survey_response:create"
-      match:
-        methods:
-          - POST
-        routes:
-          - path: /survey_responses
-      allow_encoded_slashes: "off"
-      execute:
-        - authenticator: oidc
-        - authenticator: anonymous_authenticator
-        {{- if .Values.app.use_oidc_contextualizer }}
-        - contextualizer: oidc_contextualizer
-        {{- end }}
-        {{- if .Values.openfga.enabled }}
-        - authorizer: json_content_type
-        - authorizer: openfga_check
-          config:
-            values:
-              relation: participant
-              object: "survey:{{ "{{- .Request.Body.survey_uid -}}" }}"
-        {{- else }}
-        {{/*
-          When OpenFGA is disabled, allow all requests
-          (Only meant for *local development* because OpenFGA should be enabled when deployed)
-        */}}
-        - authorizer: allow_all
-        {{- end }}
-        - finalizer: create_jwt
-          config:
-            values:
-              aud: {{ .Values.app.audience }}
-
-    - id: "rule:lfx:lfx-v2-survey-service:survey_response:get"
-      match:
-        methods:
-          - GET
-        routes:
-          - path: /survey_responses/:id
+          - path: /surveys/:survey_uid/preview_send
       allow_encoded_slashes: "off"
       execute:
         - authenticator: oidc
@@ -311,7 +186,7 @@ spec:
           config:
             values:
               relation: auditor
-              object: "survey_response:{{ "{{- .Request.URL.Captures.id -}}" }}"
+              object: "survey:{{ "{{- .Request.URL.Captures.survey_uid -}}" }}"
         {{- else }}
         {{/*
           When OpenFGA is disabled, allow all requests
@@ -324,43 +199,12 @@ spec:
             values:
               aud: {{ .Values.app.audience }}
 
-    - id: "rule:lfx:lfx-v2-survey-service:survey_response:update"
-      match:
-        methods:
-          - PUT
-        routes:
-          - path: /survey_responses/:id
-      allow_encoded_slashes: "off"
-      execute:
-        - authenticator: oidc
-        - authenticator: anonymous_authenticator
-        {{- if .Values.app.use_oidc_contextualizer }}
-        - contextualizer: oidc_contextualizer
-        {{- end }}
-        {{- if .Values.openfga.enabled }}
-        - authorizer: openfga_check
-          config:
-            values:
-              relation: owner
-              object: "survey_response:{{ "{{- .Request.URL.Captures.id -}}" }}"
-        {{- else }}
-        {{/*
-          When OpenFGA is disabled, allow all requests
-          (Only meant for *local development* because OpenFGA should be enabled when deployed)
-        */}}
-        - authorizer: allow_all
-        {{- end }}
-        - finalizer: create_jwt
-          config:
-            values:
-              aud: {{ .Values.app.audience }}
-
-    - id: "rule:lfx:lfx-v2-survey-service:survey_response:resend"
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:send_missing_recipients"
       match:
         methods:
           - POST
         routes:
-          - path: /survey_responses/:id/resend
+          - path: /surveys/:survey_uid/send_missing_recipients
       allow_encoded_slashes: "off"
       execute:
         - authenticator: oidc
@@ -373,7 +217,255 @@ spec:
           config:
             values:
               relation: writer
-              object: "survey:{{ "{{- .Request.URL.Captures.id -}}" }}"
+              object: "survey:{{ "{{- .Request.URL.Captures.survey_uid -}}" }}"
+        {{- else }}
+        {{/*
+          When OpenFGA is disabled, allow all requests
+          (Only meant for *local development* because OpenFGA should be enabled when deployed)
+        */}}
+        - authorizer: allow_all
+        {{- end }}
+        - finalizer: create_jwt
+          config:
+            values:
+              aud: {{ .Values.app.audience }}
+
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:responses:delete"
+      match:
+        methods:
+          - DELETE
+        routes:
+          - path: /surveys/:survey_uid/responses/:response_id
+      allow_encoded_slashes: "off"
+      execute:
+        - authenticator: oidc
+        - authenticator: anonymous_authenticator
+        {{- if .Values.app.use_oidc_contextualizer }}
+        - contextualizer: oidc_contextualizer
+        {{- end }}
+        {{- if .Values.openfga.enabled }}
+        - authorizer: openfga_check
+          config:
+            values:
+              relation: writer
+              object: "survey:{{ "{{- .Request.URL.Captures.survey_uid -}}" }}"
+        {{- else }}
+        {{/*
+          When OpenFGA is disabled, allow all requests
+          (Only meant for *local development* because OpenFGA should be enabled when deployed)
+        */}}
+        - authorizer: allow_all
+        {{- end }}
+        - finalizer: create_jwt
+          config:
+            values:
+              aud: {{ .Values.app.audience }}
+
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:responses:resend"
+      match:
+        methods:
+          - POST
+        routes:
+          - path: /surveys/:survey_uid/responses/:response_id/resend
+      allow_encoded_slashes: "off"
+      execute:
+        - authenticator: oidc
+        - authenticator: anonymous_authenticator
+        {{- if .Values.app.use_oidc_contextualizer }}
+        - contextualizer: oidc_contextualizer
+        {{- end }}
+        {{- if .Values.openfga.enabled }}
+        - authorizer: openfga_check
+          config:
+            values:
+              relation: writer
+              object: "survey:{{ "{{- .Request.URL.Captures.survey_uid -}}" }}"
+        {{- else }}
+        {{/*
+          When OpenFGA is disabled, allow all requests
+          (Only meant for *local development* because OpenFGA should be enabled when deployed)
+        */}}
+        - authorizer: allow_all
+        {{- end }}
+        - finalizer: create_jwt
+          config:
+            values:
+              aud: {{ .Values.app.audience }}
+
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:recipient_group:delete"
+      match:
+        methods:
+          - DELETE
+        routes:
+          - path: /surveys/:survey_uid/recipient_group
+      allow_encoded_slashes: "off"
+      execute:
+        - authenticator: oidc
+        - authenticator: anonymous_authenticator
+        {{- if .Values.app.use_oidc_contextualizer }}
+        - contextualizer: oidc_contextualizer
+        {{- end }}
+        {{- if .Values.openfga.enabled }}
+        - authorizer: openfga_check
+          config:
+            values:
+              relation: writer
+              object: "survey:{{ "{{- .Request.URL.Captures.survey_uid -}}" }}"
+        {{- else }}
+        {{/*
+          When OpenFGA is disabled, allow all requests
+          (Only meant for *local development* because OpenFGA should be enabled when deployed)
+        */}}
+        - authorizer: allow_all
+        {{- end }}
+        - finalizer: create_jwt
+          config:
+            values:
+              aud: {{ .Values.app.audience }}
+
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:exclusion:create"
+      match:
+        methods:
+          - POST
+        routes:
+          - path: /surveys/exclusion
+      allow_encoded_slashes: "off"
+      execute:
+        - authenticator: oidc
+        - authenticator: anonymous_authenticator
+        {{- if .Values.app.use_oidc_contextualizer }}
+        - contextualizer: oidc_contextualizer
+        {{- end }}
+        {{- if .Values.openfga.enabled }}
+        - authorizer: openfga_check
+          config:
+            values:
+              relation: member
+              object: "team:global_survey_platform_admins"
+        {{- else }}
+        {{/*
+          When OpenFGA is disabled, allow all requests
+          (Only meant for *local development* because OpenFGA should be enabled when deployed)
+        */}}
+        - authorizer: allow_all
+        {{- end }}
+        - finalizer: create_jwt
+          config:
+            values:
+              aud: {{ .Values.app.audience }}
+
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:exclusion:delete"
+      match:
+        methods:
+          - DELETE
+        routes:
+          - path: /surveys/exclusion
+      allow_encoded_slashes: "off"
+      execute:
+        - authenticator: oidc
+        - authenticator: anonymous_authenticator
+        {{- if .Values.app.use_oidc_contextualizer }}
+        - contextualizer: oidc_contextualizer
+        {{- end }}
+        {{- if .Values.openfga.enabled }}
+        - authorizer: openfga_check
+          config:
+            values:
+              relation: member
+              object: "team:global_survey_platform_admins"
+        {{- else }}
+        {{/*
+          When OpenFGA is disabled, allow all requests
+          (Only meant for *local development* because OpenFGA should be enabled when deployed)
+        */}}
+        - authorizer: allow_all
+        {{- end }}
+        - finalizer: create_jwt
+          config:
+            values:
+              aud: {{ .Values.app.audience }}
+
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:exclusion:get"
+      match:
+        methods:
+          - GET
+        routes:
+          - path: /surveys/exclusion/:exclusion_id
+      allow_encoded_slashes: "off"
+      execute:
+        - authenticator: oidc
+        - authenticator: anonymous_authenticator
+        {{- if .Values.app.use_oidc_contextualizer }}
+        - contextualizer: oidc_contextualizer
+        {{- end }}
+        {{- if .Values.openfga.enabled }}
+        - authorizer: openfga_check
+          config:
+            values:
+              relation: member
+              object: "team:global_survey_platform_admins"
+        {{- else }}
+        {{/*
+          When OpenFGA is disabled, allow all requests
+          (Only meant for *local development* because OpenFGA should be enabled when deployed)
+        */}}
+        - authorizer: allow_all
+        {{- end }}
+        - finalizer: create_jwt
+          config:
+            values:
+              aud: {{ .Values.app.audience }}
+
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:exclusion:delete_by_id"
+      match:
+        methods:
+          - DELETE
+        routes:
+          - path: /surveys/exclusion/:exclusion_id
+      allow_encoded_slashes: "off"
+      execute:
+        - authenticator: oidc
+        - authenticator: anonymous_authenticator
+        {{- if .Values.app.use_oidc_contextualizer }}
+        - contextualizer: oidc_contextualizer
+        {{- end }}
+        {{- if .Values.openfga.enabled }}
+        - authorizer: openfga_check
+          config:
+            values:
+              relation: member
+              object: "team:global_survey_platform_admins"
+        {{- else }}
+        {{/*
+          When OpenFGA is disabled, allow all requests
+          (Only meant for *local development* because OpenFGA should be enabled when deployed)
+        */}}
+        - authorizer: allow_all
+        {{- end }}
+        - finalizer: create_jwt
+          config:
+            values:
+              aud: {{ .Values.app.audience }}
+
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:validate_email"
+      match:
+        methods:
+          - POST
+        routes:
+          - path: /surveys/validate_email
+      allow_encoded_slashes: "off"
+      execute:
+        - authenticator: oidc
+        - authenticator: anonymous_authenticator
+        {{- if .Values.app.use_oidc_contextualizer }}
+        - contextualizer: oidc_contextualizer
+        {{- end }}
+        {{- if .Values.openfga.enabled }}
+        - authorizer: openfga_check
+          config:
+            values:
+              relation: member
+              object: "team:global_survey_platform_admins"
         {{- else }}
         {{/*
           When OpenFGA is disabled, allow all requests

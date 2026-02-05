@@ -47,9 +47,12 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 		"survey_title", p.SurveyTitle,
 		"survey_monkey_id", p.SurveyMonkeyID,
 		"send_immediately", p.SendImmediately,
+		"committee_uid", p.CommitteeUID,
 	)
 
-	// Build ITX request - map goa payload directly to ITX structure
+	// Build ITX request - convert single committee_uid to array for ITX
+	committees := []string{p.CommitteeUID}
+
 	itxRequest := &itx.ScheduleSurveyRequest{
 		IsProjectSurvey:        p.IsProjectSurvey,
 		StageFilter:            p.StageFilter,
@@ -65,7 +68,7 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 		EmailSubject:           p.EmailSubject,
 		EmailBody:              p.EmailBody,
 		EmailBodyText:          p.EmailBodyText,
-		Committees:             p.Committees,
+		Committees:             committees,
 		CommitteeVotingEnabled: p.CommitteeVotingEnabled,
 	}
 
@@ -127,9 +130,15 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"survey_title", p.SurveyTitle,
+		"committee_uid", p.CommitteeUID,
 	)
 
-	// Build ITX request
+	// Build ITX request - convert single committee_uid to array for ITX
+	var committees []string
+	if p.CommitteeUID != nil && *p.CommitteeUID != "" {
+		committees = []string{*p.CommitteeUID}
+	}
+
 	itxRequest := &itx.UpdateSurveyRequest{
 		CreatorID:              p.CreatorID,
 		SurveyTitle:            p.SurveyTitle,
@@ -139,7 +148,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 		EmailSubject:           p.EmailSubject,
 		EmailBody:              p.EmailBody,
 		EmailBodyText:          p.EmailBodyText,
-		Committees:             p.Committees,
+		Committees:             committees,
 		CommitteeVotingEnabled: p.CommitteeVotingEnabled,
 	}
 

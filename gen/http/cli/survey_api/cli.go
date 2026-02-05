@@ -30,7 +30,7 @@ func UsageCommands() []string {
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + " " + "survey schedule-survey --body '{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Provident sed.\",\n         \"Magnam sit cumque et aliquam quia.\",\n         \"Odit dignissimos ea corrupti sint eum.\"\n      ],\n      \"creator_id\": \"Quia facilis.\",\n      \"creator_name\": \"Quia dolorum cumque veniam neque et.\",\n      \"creator_username\": \"Non omnis amet quia omnis est at.\",\n      \"email_body\": \"Ex mollitia.\",\n      \"email_body_text\": \"Incidunt sequi quibusdam perferendis perferendis expedita molestiae.\",\n      \"email_subject\": \"Et sint quas eveniet eaque dicta.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Ut quam esse saepe.\",\n      \"survey_cutoff_date\": \"Odit quia quia fugiat est quas.\",\n      \"survey_monkey_id\": \"Sint reprehenderit ipsam et.\",\n      \"survey_reminder_rate_days\": 256525687450027157,\n      \"survey_send_date\": \"Minima possimus deleniti occaecati.\",\n      \"survey_title\": \"Vero voluptatem et temporibus eligendi repellendus sunt.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"" + "\n" +
+	return os.Args[0] + " " + "survey schedule-survey --body '{\n      \"committee_uid\": \"qa1e8536-a985-4cf5-b981-a170927a1d11\",\n      \"committee_voting_enabled\": true,\n      \"creator_id\": \"Quam esse saepe eum non omnis amet.\",\n      \"creator_name\": \"Consequatur quod numquam et provident dolorem voluptatem.\",\n      \"creator_username\": \"Numquam eum suscipit labore odio rerum.\",\n      \"email_body\": \"Repellendus sunt omnis voluptate minima possimus.\",\n      \"email_body_text\": \"Occaecati sunt odit quia quia fugiat est.\",\n      \"email_subject\": \"Quis vero voluptatem et temporibus.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Dolorem quia et in.\",\n      \"survey_cutoff_date\": \"Omnis sint reprehenderit.\",\n      \"survey_monkey_id\": \"Omnis est at omnis.\",\n      \"survey_reminder_rate_days\": 3291766316701683331,\n      \"survey_send_date\": \"Et nulla quia.\",\n      \"survey_title\": \"Dolorum cumque.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"" + "\n" +
 		""
 }
 
@@ -296,7 +296,7 @@ func surveyUsage() {
 	fmt.Fprintln(os.Stderr, `Survey service that proxies to ITX survey API`)
 	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] survey COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
-	fmt.Fprintln(os.Stderr, `    schedule-survey: Create a scheduled survey for ITX project committees (proxies to ITX POST /surveys/schedule)`)
+	fmt.Fprintln(os.Stderr, `    schedule-survey: Create a scheduled survey for ITX project committee (proxies to ITX POST /surveys/schedule)`)
 	fmt.Fprintln(os.Stderr, `    get-survey: Get survey details (proxies to ITX GET /v2/surveys/{survey_uid})`)
 	fmt.Fprintln(os.Stderr, `    update-survey: Update survey (proxies to ITX PUT /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'`)
 	fmt.Fprintln(os.Stderr, `    delete-survey: Delete survey (proxies to ITX DELETE /v2/surveys/{survey_uid}). Only allowed when status is 'disabled'`)
@@ -324,7 +324,7 @@ func surveyScheduleSurveyUsage() {
 
 	// Description
 	fmt.Fprintln(os.Stderr)
-	fmt.Fprintln(os.Stderr, `Create a scheduled survey for ITX project committees (proxies to ITX POST /surveys/schedule)`)
+	fmt.Fprintln(os.Stderr, `Create a scheduled survey for ITX project committee (proxies to ITX POST /surveys/schedule)`)
 
 	// Flags list
 	fmt.Fprintln(os.Stderr, `    -body JSON: `)
@@ -332,7 +332,7 @@ func surveyScheduleSurveyUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey schedule-survey --body '{\n      \"committee_voting_enabled\": false,\n      \"committees\": [\n         \"Provident sed.\",\n         \"Magnam sit cumque et aliquam quia.\",\n         \"Odit dignissimos ea corrupti sint eum.\"\n      ],\n      \"creator_id\": \"Quia facilis.\",\n      \"creator_name\": \"Quia dolorum cumque veniam neque et.\",\n      \"creator_username\": \"Non omnis amet quia omnis est at.\",\n      \"email_body\": \"Ex mollitia.\",\n      \"email_body_text\": \"Incidunt sequi quibusdam perferendis perferendis expedita molestiae.\",\n      \"email_subject\": \"Et sint quas eveniet eaque dicta.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Ut quam esse saepe.\",\n      \"survey_cutoff_date\": \"Odit quia quia fugiat est quas.\",\n      \"survey_monkey_id\": \"Sint reprehenderit ipsam et.\",\n      \"survey_reminder_rate_days\": 256525687450027157,\n      \"survey_send_date\": \"Minima possimus deleniti occaecati.\",\n      \"survey_title\": \"Vero voluptatem et temporibus eligendi repellendus sunt.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey schedule-survey --body '{\n      \"committee_uid\": \"qa1e8536-a985-4cf5-b981-a170927a1d11\",\n      \"committee_voting_enabled\": true,\n      \"creator_id\": \"Quam esse saepe eum non omnis amet.\",\n      \"creator_name\": \"Consequatur quod numquam et provident dolorem voluptatem.\",\n      \"creator_username\": \"Numquam eum suscipit labore odio rerum.\",\n      \"email_body\": \"Repellendus sunt omnis voluptate minima possimus.\",\n      \"email_body_text\": \"Occaecati sunt odit quia quia fugiat est.\",\n      \"email_subject\": \"Quis vero voluptatem et temporibus.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Dolorem quia et in.\",\n      \"survey_cutoff_date\": \"Omnis sint reprehenderit.\",\n      \"survey_monkey_id\": \"Omnis est at omnis.\",\n      \"survey_reminder_rate_days\": 3291766316701683331,\n      \"survey_send_date\": \"Et nulla quia.\",\n      \"survey_title\": \"Dolorum cumque.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyGetSurveyUsage() {
@@ -374,7 +374,7 @@ func surveyUpdateSurveyUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey update-survey --body '{\n      \"committee_voting_enabled\": true,\n      \"committees\": [\n         \"Excepturi et quas autem dolores corporis.\",\n         \"Harum earum autem et.\"\n      ],\n      \"creator_id\": \"Omnis quo.\",\n      \"email_body\": \"Quo qui sint.\",\n      \"email_body_text\": \"Explicabo autem sit id modi corporis.\",\n      \"email_subject\": \"Et sed.\",\n      \"survey_cutoff_date\": \"Sapiente sunt.\",\n      \"survey_reminder_rate_days\": 5570276177094928842,\n      \"survey_send_date\": \"Aliquid similique.\",\n      \"survey_title\": \"Maiores impedit omnis veniam consequuntur sed.\"\n   }' --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey update-survey --body '{\n      \"committee_uid\": \"qa1e8536-a985-4cf5-b981-a170927a1d11\",\n      \"committee_voting_enabled\": true,\n      \"creator_id\": \"Qui distinctio dolorum quia non quaerat nostrum.\",\n      \"email_body\": \"Veniam consequuntur sed praesentium.\",\n      \"email_body_text\": \"Similique et sapiente sunt sit.\",\n      \"email_subject\": \"Quo omnis maiores impedit.\",\n      \"survey_cutoff_date\": \"Consequatur rem et voluptatem et.\",\n      \"survey_reminder_rate_days\": 464515454408226755,\n      \"survey_send_date\": \"Sed in perspiciatis odit nesciunt.\",\n      \"survey_title\": \"Ut dicta eum ut vero animi.\"\n   }' --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyDeleteSurveyUsage() {
@@ -550,7 +550,7 @@ func surveyCreateExclusionUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey create-exclusion --body '{\n      \"committee_uid\": \"Blanditiis harum quis debitis voluptatem laborum.\",\n      \"email\": \"Nihil eos molestiae numquam.\",\n      \"global_exclusion\": \"Laudantium aut consectetur pariatur omnis.\",\n      \"survey_uid\": \"Amet deleniti aut.\",\n      \"user_id\": \"Tenetur omnis.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey create-exclusion --body '{\n      \"committee_uid\": \"Tenetur omnis.\",\n      \"email\": \"Vel ipsam laborum quos provident ad.\",\n      \"global_exclusion\": \"Amet deleniti aut.\",\n      \"survey_uid\": \"Nihil eos molestiae numquam.\",\n      \"user_id\": \"Id minima id.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyDeleteExclusionUsage() {
@@ -570,7 +570,7 @@ func surveyDeleteExclusionUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-exclusion --body '{\n      \"committee_uid\": \"Ut iusto eius qui.\",\n      \"email\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"global_exclusion\": \"Recusandae itaque consequatur.\",\n      \"survey_uid\": \"Soluta facilis rerum exercitationem.\",\n      \"user_id\": \"Asperiores at dicta iusto adipisci est est.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-exclusion --body '{\n      \"committee_uid\": \"Asperiores at dicta iusto adipisci est est.\",\n      \"email\": \"Repellendus modi illo voluptatem ab possimus.\",\n      \"global_exclusion\": \"Soluta facilis rerum exercitationem.\",\n      \"survey_uid\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"user_id\": \"Dolorem voluptatum ab accusantium magni nesciunt deleniti.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyGetExclusionUsage() {
@@ -630,5 +630,5 @@ func surveyValidateEmailUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey validate-email --body '{\n      \"body\": \"Voluptatem maiores sunt quaerat praesentium reprehenderit eos.\",\n      \"subject\": \"Consequuntur veniam.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey validate-email --body '{\n      \"body\": \"Vero in.\",\n      \"subject\": \"Ratione ut consequatur ullam.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }

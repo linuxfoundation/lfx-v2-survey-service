@@ -51,6 +51,10 @@ func DecodeScheduleSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request) 
 			}
 			return nil, goa.DecodePayloadError(err.Error())
 		}
+		err = ValidateScheduleSurveyRequestBody(&body)
+		if err != nil {
+			return nil, err
+		}
 
 		var (
 			token *string

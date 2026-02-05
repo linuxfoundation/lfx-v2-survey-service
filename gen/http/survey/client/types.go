@@ -16,6 +16,8 @@ import (
 // ScheduleSurveyRequestBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP request body.
 type ScheduleSurveyRequestBody struct {
+	// Committee UID to send survey to
+	CommitteeUID string `form:"committee_uid" json:"committee_uid" xml:"committee_uid"`
 	// Whether the survey is project-level (true) or global-level (false)
 	IsProjectSurvey *bool `form:"is_project_survey,omitempty" json:"is_project_survey,omitempty" xml:"is_project_survey,omitempty"`
 	// Project stage filter for global surveys
@@ -44,8 +46,6 @@ type ScheduleSurveyRequestBody struct {
 	EmailBody *string `form:"email_body,omitempty" json:"email_body,omitempty" xml:"email_body,omitempty"`
 	// Email body plain text content
 	EmailBodyText *string `form:"email_body_text,omitempty" json:"email_body_text,omitempty" xml:"email_body_text,omitempty"`
-	// Array of committee IDs to send survey to
-	Committees []string `form:"committees,omitempty" json:"committees,omitempty" xml:"committees,omitempty"`
 	// Whether committee voting is enabled
 	CommitteeVotingEnabled *bool `form:"committee_voting_enabled,omitempty" json:"committee_voting_enabled,omitempty" xml:"committee_voting_enabled,omitempty"`
 }
@@ -53,6 +53,8 @@ type ScheduleSurveyRequestBody struct {
 // UpdateSurveyRequestBody is the type of the "survey" service "update_survey"
 // endpoint HTTP request body.
 type UpdateSurveyRequestBody struct {
+	// Committee UID to send survey to
+	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
 	// Creator's user ID
 	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
 	// Survey title
@@ -69,8 +71,6 @@ type UpdateSurveyRequestBody struct {
 	EmailBody *string `form:"email_body,omitempty" json:"email_body,omitempty" xml:"email_body,omitempty"`
 	// Email body plain text content
 	EmailBodyText *string `form:"email_body_text,omitempty" json:"email_body_text,omitempty" xml:"email_body_text,omitempty"`
-	// Array of committee IDs to send survey to
-	Committees []string `form:"committees,omitempty" json:"committees,omitempty" xml:"committees,omitempty"`
 	// Whether committee voting is enabled
 	CommitteeVotingEnabled *bool `form:"committee_voting_enabled,omitempty" json:"committee_voting_enabled,omitempty" xml:"committee_voting_enabled,omitempty"`
 }
@@ -1264,6 +1264,7 @@ type UserEmailResponseBody struct {
 // of the "schedule_survey" endpoint of the "survey" service.
 func NewScheduleSurveyRequestBody(p *survey.ScheduleSurveyPayload) *ScheduleSurveyRequestBody {
 	body := &ScheduleSurveyRequestBody{
+		CommitteeUID:           p.CommitteeUID,
 		IsProjectSurvey:        p.IsProjectSurvey,
 		StageFilter:            p.StageFilter,
 		CreatorUsername:        p.CreatorUsername,
@@ -1280,12 +1281,6 @@ func NewScheduleSurveyRequestBody(p *survey.ScheduleSurveyPayload) *ScheduleSurv
 		EmailBodyText:          p.EmailBodyText,
 		CommitteeVotingEnabled: p.CommitteeVotingEnabled,
 	}
-	if p.Committees != nil {
-		body.Committees = make([]string, len(p.Committees))
-		for i, val := range p.Committees {
-			body.Committees[i] = val
-		}
-	}
 	return body
 }
 
@@ -1293,6 +1288,7 @@ func NewScheduleSurveyRequestBody(p *survey.ScheduleSurveyPayload) *ScheduleSurv
 // the "update_survey" endpoint of the "survey" service.
 func NewUpdateSurveyRequestBody(p *survey.UpdateSurveyPayload) *UpdateSurveyRequestBody {
 	body := &UpdateSurveyRequestBody{
+		CommitteeUID:           p.CommitteeUID,
 		CreatorID:              p.CreatorID,
 		SurveyTitle:            p.SurveyTitle,
 		SurveySendDate:         p.SurveySendDate,
@@ -1302,12 +1298,6 @@ func NewUpdateSurveyRequestBody(p *survey.UpdateSurveyPayload) *UpdateSurveyRequ
 		EmailBody:              p.EmailBody,
 		EmailBodyText:          p.EmailBodyText,
 		CommitteeVotingEnabled: p.CommitteeVotingEnabled,
-	}
-	if p.Committees != nil {
-		body.Committees = make([]string, len(p.Committees))
-		for i, val := range p.Committees {
-			body.Committees[i] = val
-		}
 	}
 	return body
 }
