@@ -164,21 +164,13 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 	// Map committee UID from V2 to V1 if provided
 	var committees []string
 	if p.CommitteeUID != nil && *p.CommitteeUID != "" {
-		committeeV1, err := s.idMapper.MapCommitteeV2ToV1(ctx, *p.CommitteeUID)
+		committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
 		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map committee UID to V1",
-				"committee_uid", *p.CommitteeUID,
-				"error", err,
-			)
 			return nil, mapDomainError(err)
 		}
-
-		s.logger.DebugContext(ctx, "mapped committee ID",
-			"committee_v2_uid", *p.CommitteeUID,
-			"committee_v1_sfid", committeeV1,
-		)
-
-		committees = []string{committeeV1}
+		if committeeV1 != nil {
+			committees = []string{*committeeV1}
+		}
 	}
 
 	itxRequest := &itx.UpdateSurveyRequest{
@@ -289,23 +281,9 @@ func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.Preview
 	)
 
 	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
-	var committeeV1 *string
-	if p.CommitteeUID != nil && *p.CommitteeUID != "" {
-		mapped, err := s.idMapper.MapCommitteeV2ToV1(ctx, *p.CommitteeUID)
-		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map committee UID to V1",
-				"committee_uid", *p.CommitteeUID,
-				"error", err,
-			)
-			return nil, mapDomainError(err)
-		}
-
-		s.logger.DebugContext(ctx, "mapped committee ID",
-			"committee_v2_uid", *p.CommitteeUID,
-			"committee_v1_sfid", mapped,
-		)
-
-		committeeV1 = &mapped
+	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
+	if err != nil {
+		return nil, mapDomainError(err)
 	}
 
 	// Call ITX API
@@ -346,23 +324,9 @@ func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.Sen
 	)
 
 	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
-	var committeeV1 *string
-	if p.CommitteeUID != nil && *p.CommitteeUID != "" {
-		mapped, err := s.idMapper.MapCommitteeV2ToV1(ctx, *p.CommitteeUID)
-		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map committee UID to V1",
-				"committee_uid", *p.CommitteeUID,
-				"error", err,
-			)
-			return mapDomainError(err)
-		}
-
-		s.logger.DebugContext(ctx, "mapped committee ID",
-			"committee_v2_uid", *p.CommitteeUID,
-			"committee_v1_sfid", mapped,
-		)
-
-		committeeV1 = &mapped
+	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
+	if err != nil {
+		return mapDomainError(err)
 	}
 
 	// Call ITX API
@@ -451,43 +415,15 @@ func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.Dele
 	)
 
 	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
-	var committeeV1 *string
-	if p.CommitteeUID != nil && *p.CommitteeUID != "" {
-		mapped, err := s.idMapper.MapCommitteeV2ToV1(ctx, *p.CommitteeUID)
-		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map committee UID to V1",
-				"committee_uid", *p.CommitteeUID,
-				"error", err,
-			)
-			return mapDomainError(err)
-		}
-
-		s.logger.DebugContext(ctx, "mapped committee ID",
-			"committee_v2_uid", *p.CommitteeUID,
-			"committee_v1_sfid", mapped,
-		)
-
-		committeeV1 = &mapped
+	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
+	if err != nil {
+		return mapDomainError(err)
 	}
 
 	// Map project UID from V2 to V1 if provided (ITX expects V1 SFID)
-	var projectV1 *string
-	if p.ProjectUID != nil && *p.ProjectUID != "" {
-		mapped, err := s.idMapper.MapProjectV2ToV1(ctx, *p.ProjectUID)
-		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map project UID to V1",
-				"project_uid", *p.ProjectUID,
-				"error", err,
-			)
-			return mapDomainError(err)
-		}
-
-		s.logger.DebugContext(ctx, "mapped project ID",
-			"project_v2_uid", *p.ProjectUID,
-			"project_v1_sfid", mapped,
-		)
-
-		projectV1 = &mapped
+	projectV1, err := s.mapOptionalProjectV2ToV1(ctx, p.ProjectUID)
+	if err != nil {
+		return mapDomainError(err)
 	}
 
 	// Call ITX API
@@ -518,23 +454,9 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 	)
 
 	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
-	var committeeV1 *string
-	if p.CommitteeUID != nil && *p.CommitteeUID != "" {
-		mapped, err := s.idMapper.MapCommitteeV2ToV1(ctx, *p.CommitteeUID)
-		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map committee UID to V1",
-				"committee_uid", *p.CommitteeUID,
-				"error", err,
-			)
-			return nil, mapDomainError(err)
-		}
-
-		s.logger.DebugContext(ctx, "mapped committee ID",
-			"committee_v2_uid", *p.CommitteeUID,
-			"committee_v1_sfid", mapped,
-		)
-
-		committeeV1 = &mapped
+	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
+	if err != nil {
+		return nil, mapDomainError(err)
 	}
 
 	// Build ITX request
@@ -583,23 +505,9 @@ func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExc
 	)
 
 	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
-	var committeeV1 *string
-	if p.CommitteeUID != nil && *p.CommitteeUID != "" {
-		mapped, err := s.idMapper.MapCommitteeV2ToV1(ctx, *p.CommitteeUID)
-		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map committee UID to V1",
-				"committee_uid", *p.CommitteeUID,
-				"error", err,
-			)
-			return mapDomainError(err)
-		}
-
-		s.logger.DebugContext(ctx, "mapped committee ID",
-			"committee_v2_uid", *p.CommitteeUID,
-			"committee_v1_sfid", mapped,
-		)
-
-		committeeV1 = &mapped
+	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
+	if err != nil {
+		return mapDomainError(err)
 	}
 
 	// Build ITX request
@@ -735,6 +643,52 @@ func (s *SurveyService) parsePrincipal(ctx context.Context, token *string) (stri
 		}
 	}
 	return principal, nil
+}
+
+// mapOptionalCommitteeV2ToV1 maps an optional committee UID from V2 to V1 with logging
+func (s *SurveyService) mapOptionalCommitteeV2ToV1(ctx context.Context, committeeUID *string) (*string, error) {
+	if committeeUID == nil || *committeeUID == "" {
+		return nil, nil
+	}
+
+	mapped, err := s.idMapper.MapCommitteeV2ToV1(ctx, *committeeUID)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to map committee UID to V1",
+			"committee_uid", *committeeUID,
+			"error", err,
+		)
+		return nil, err
+	}
+
+	s.logger.DebugContext(ctx, "mapped committee ID",
+		"committee_v2_uid", *committeeUID,
+		"committee_v1_sfid", mapped,
+	)
+
+	return &mapped, nil
+}
+
+// mapOptionalProjectV2ToV1 maps an optional project UID from V2 to V1 with logging
+func (s *SurveyService) mapOptionalProjectV2ToV1(ctx context.Context, projectUID *string) (*string, error) {
+	if projectUID == nil || *projectUID == "" {
+		return nil, nil
+	}
+
+	mapped, err := s.idMapper.MapProjectV2ToV1(ctx, *projectUID)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to map project UID to V1",
+			"project_uid", *projectUID,
+			"error", err,
+		)
+		return nil, err
+	}
+
+	s.logger.DebugContext(ctx, "mapped project ID",
+		"project_v2_uid", *projectUID,
+		"project_v1_sfid", mapped,
+	)
+
+	return &mapped, nil
 }
 
 // mapITXResponseToResult maps ITX response to Goa result with V1→V2 ID mapping
