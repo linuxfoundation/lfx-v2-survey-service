@@ -6,6 +6,7 @@ package idmapper
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -98,6 +99,8 @@ func (m *NATSMapper) MapCommitteeV2ToV1(ctx context.Context, v2UID string) (stri
 	if err != nil {
 		return "", err
 	}
+
+	slog.InfoContext(ctx, "MapCommitteeV2ToV1 NATS mapper response", "response", response)
 
 	// Parse the response to extract only the committee SFID
 	// Format: "projectSFID:committeeSFID" -> we want "committeeSFID"
