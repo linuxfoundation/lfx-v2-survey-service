@@ -10,6 +10,7 @@ import (
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
+	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/concurrent"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/models/itx"
 )
 
@@ -745,50 +746,67 @@ func (s *SurveyService) mapSurveyCommitteesToResult(ctx context.Context, committ
 	}
 
 	result := make([]*survey.SurveyCommittee, len(committees))
+
+	// Create worker pool with 5 workers
+	pool := concurrent.NewWorkerPool(5)
+
+	// Build mapping functions for each committee
+	mappingFunctions := make([]func() error, len(committees))
 	for i, c := range committees {
-		// Map committee ID from V1 to V2 if present
-		var committeeV2 *string
-		if c.CommitteeID != nil && *c.CommitteeID != "" {
-			mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, *c.CommitteeID)
-			if err != nil {
-				s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2, using V1 ID",
-					"committee_v1_sfid", *c.CommitteeID,
-					"error", err,
-				)
-				// Fall back to V1 ID if mapping fails
-				committeeV2 = c.CommitteeID
-			} else {
-				committeeV2 = &mapped
+		i, c := i, c // capture loop variables
+		mappingFunctions[i] = func() error {
+			// Map committee ID from V1 to V2 if present
+			var committeeV2 *string
+			if c.CommitteeID != nil && *c.CommitteeID != "" {
+				mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, *c.CommitteeID)
+				if err != nil {
+					s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2, using V1 ID",
+						"committee_v1_sfid", *c.CommitteeID,
+						"error", err,
+					)
+					// Fall back to V1 ID if mapping fails
+					committeeV2 = c.CommitteeID
+				} else {
+					committeeV2 = &mapped
+				}
 			}
-		}
 
-		// Map project ID from V1 to V2 if present
-		var projectV2 *string
-		if c.ProjectID != nil && *c.ProjectID != "" {
-			mapped, err := s.idMapper.MapProjectV1ToV2(ctx, *c.ProjectID)
-			if err != nil {
-				s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
-					"project_v1_sfid", *c.ProjectID,
-					"error", err,
-				)
-				// Fall back to V1 ID if mapping fails
-				projectV2 = c.ProjectID
-			} else {
-				projectV2 = &mapped
+			// Map project ID from V1 to V2 if present
+			var projectV2 *string
+			if c.ProjectID != nil && *c.ProjectID != "" {
+				mapped, err := s.idMapper.MapProjectV1ToV2(ctx, *c.ProjectID)
+				if err != nil {
+					s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
+						"project_v1_sfid", *c.ProjectID,
+						"error", err,
+					)
+					// Fall back to V1 ID if mapping fails
+					projectV2 = c.ProjectID
+				} else {
+					projectV2 = &mapped
+				}
 			}
-		}
 
-		result[i] = &survey.SurveyCommittee{
-			CommitteeName:   c.CommitteeName,
-			CommitteeUID:    committeeV2,
-			ProjectUID:      projectV2,
-			ProjectName:     c.ProjectName,
-			SurveyURL:       c.SurveyURL,
-			TotalRecipients: c.TotalRecipients,
-			TotalResponses:  c.TotalResponses,
-			NpsValue:        c.NPSValue,
+			result[i] = &survey.SurveyCommittee{
+				CommitteeName:   c.CommitteeName,
+				CommitteeUID:    committeeV2,
+				ProjectUID:      projectV2,
+				ProjectName:     c.ProjectName,
+				SurveyURL:       c.SurveyURL,
+				TotalRecipients: c.TotalRecipients,
+				TotalResponses:  c.TotalResponses,
+				NpsValue:        c.NPSValue,
+			}
+
+			return nil
 		}
 	}
+
+	// Execute all mapping functions concurrently
+	if err := pool.Run(ctx, mappingFunctions...); err != nil {
+		return nil, err
+	}
+
 	return result, nil
 }
 
@@ -814,76 +832,118 @@ func (s *SurveyService) mapPreviewSendResponseToResult(ctx context.Context, itxR
 
 func (s *SurveyService) mapLFXProjectsToResult(ctx context.Context, projects []itx.LFXProject) ([]*survey.LFXProject, error) {
 	// Always return an empty slice instead of nil to ensure JSON marshals as []
-	result := make([]*survey.LFXProject, 0, len(projects))
-	for _, p := range projects {
-		// Map project ID from V1 to V2 if present
-		projectV2 := p.ID
-		if p.ID != "" {
-			mapped, err := s.idMapper.MapProjectV1ToV2(ctx, p.ID)
-			if err != nil {
-				s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
-					"project_v1_sfid", p.ID,
-					"error", err,
-				)
-				// Fall back to V1 ID if mapping fails
-			} else {
-				projectV2 = mapped
-			}
-		}
-
-		result = append(result, &survey.LFXProject{
-			ID:      projectV2,
-			Name:    p.Name,
-			Slug:    p.Slug,
-			Status:  p.Status,
-			LogoURL: p.LogoURL,
-		})
+	if len(projects) == 0 {
+		return make([]*survey.LFXProject, 0), nil
 	}
+
+	result := make([]*survey.LFXProject, len(projects))
+
+	// Create worker pool with 5 workers
+	pool := concurrent.NewWorkerPool(5)
+
+	// Build mapping functions for each project
+	mappingFunctions := make([]func() error, len(projects))
+	for i, p := range projects {
+		i, p := i, p // capture loop variables
+		mappingFunctions[i] = func() error {
+			// Map project ID from V1 to V2 if present
+			projectV2 := p.ID
+			if p.ID != "" {
+				mapped, err := s.idMapper.MapProjectV1ToV2(ctx, p.ID)
+				if err != nil {
+					s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
+						"project_v1_sfid", p.ID,
+						"error", err,
+					)
+					// Fall back to V1 ID if mapping fails
+				} else {
+					projectV2 = mapped
+				}
+			}
+
+			result[i] = &survey.LFXProject{
+				ID:      projectV2,
+				Name:    p.Name,
+				Slug:    p.Slug,
+				Status:  p.Status,
+				LogoURL: p.LogoURL,
+			}
+
+			return nil
+		}
+	}
+
+	// Execute all mapping functions concurrently
+	if err := pool.Run(ctx, mappingFunctions...); err != nil {
+		return nil, err
+	}
+
 	return result, nil
 }
 
 func (s *SurveyService) mapExcludedCommitteesToResult(ctx context.Context, committees []itx.ExcludedCommittee) ([]*survey.ExcludedCommittee, error) {
 	// Always return an empty slice instead of nil to ensure JSON marshals as []
-	result := make([]*survey.ExcludedCommittee, 0, len(committees))
-	for _, c := range committees {
-		// Map committee ID from V1 to V2 if present
-		committeeV2 := c.CommitteeID
-		if c.CommitteeID != "" {
-			mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, c.CommitteeID)
-			if err != nil {
-				s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2, using V1 ID",
-					"committee_v1_sfid", c.CommitteeID,
-					"error", err,
-				)
-				// Fall back to V1 ID if mapping fails
-			} else {
-				committeeV2 = mapped
-			}
-		}
-
-		// Map project ID from V1 to V2 if present
-		projectV2 := c.ProjectID
-		if c.ProjectID != "" {
-			mapped, err := s.idMapper.MapProjectV1ToV2(ctx, c.ProjectID)
-			if err != nil {
-				s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
-					"project_v1_sfid", c.ProjectID,
-					"error", err,
-				)
-				// Fall back to V1 ID if mapping fails
-			} else {
-				projectV2 = mapped
-			}
-		}
-
-		result = append(result, &survey.ExcludedCommittee{
-			ProjectUID:        projectV2,
-			ProjectName:       c.ProjectName,
-			CommitteeUID:      committeeV2,
-			CommitteeName:     c.CommitteeName,
-			CommitteeCategory: c.CommitteeCategory,
-		})
+	if len(committees) == 0 {
+		return make([]*survey.ExcludedCommittee, 0), nil
 	}
+
+	result := make([]*survey.ExcludedCommittee, len(committees))
+
+	// Create worker pool with 5 workers
+	pool := concurrent.NewWorkerPool(5)
+
+	// Build mapping functions for each committee
+	mappingFunctions := make([]func() error, len(committees))
+	for i, c := range committees {
+		i, c := i, c // capture loop variables
+		mappingFunctions[i] = func() error {
+			// Map committee ID from V1 to V2 if present
+			committeeV2 := c.CommitteeID
+			if c.CommitteeID != "" {
+				mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, c.CommitteeID)
+				if err != nil {
+					s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2, using V1 ID",
+						"committee_v1_sfid", c.CommitteeID,
+						"error", err,
+					)
+					// Fall back to V1 ID if mapping fails
+				} else {
+					committeeV2 = mapped
+				}
+			}
+
+			// Map project ID from V1 to V2 if present
+			projectV2 := c.ProjectID
+			if c.ProjectID != "" {
+				mapped, err := s.idMapper.MapProjectV1ToV2(ctx, c.ProjectID)
+				if err != nil {
+					s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
+						"project_v1_sfid", c.ProjectID,
+						"error", err,
+					)
+					// Fall back to V1 ID if mapping fails
+				} else {
+					projectV2 = mapped
+				}
+			}
+
+			result[i] = &survey.ExcludedCommittee{
+				ProjectUID:        projectV2,
+				ProjectName:       c.ProjectName,
+				CommitteeUID:      committeeV2,
+				CommitteeName:     c.CommitteeName,
+				CommitteeCategory: c.CommitteeCategory,
+			}
+
+			return nil
+		}
+	}
+
+	// Execute all mapping functions concurrently
+	if err := pool.Run(ctx, mappingFunctions...); err != nil {
+		return nil, err
+	}
+
 	return result, nil
 }
 
