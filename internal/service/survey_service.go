@@ -616,9 +616,9 @@ func mapSurveyCommitteesToResult(committees []itx.SurveyCommittee) []*survey.Sur
 
 func mapPreviewSendResponseToResult(itxResponse *itx.PreviewSendResponse) *survey.PreviewSendResult {
 	return &survey.PreviewSendResult{
-		AffectedProjects:    mapLFXProjectsToResult(itxResponse.AffectedProjects),
-		AffectedCommittees:  mapExcludedCommitteesToResult(itxResponse.AffectedCommittees),
-		AffectedRecipients:  mapITXPreviewRecipientsToResult(itxResponse.AffectedRecipients),
+		AffectedProjects:   mapLFXProjectsToResult(itxResponse.AffectedProjects),
+		AffectedCommittees: mapExcludedCommitteesToResult(itxResponse.AffectedCommittees),
+		AffectedRecipients: mapITXPreviewRecipientsToResult(itxResponse.AffectedRecipients),
 	}
 }
 

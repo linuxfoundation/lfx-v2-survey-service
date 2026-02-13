@@ -9,6 +9,7 @@ require (
 	github.com/auth0/go-auth0 v1.33.0
 	github.com/auth0/go-jwt-middleware/v2 v2.3.1
 	github.com/google/uuid v1.6.0
+	github.com/linuxfoundation/lfx-v2-indexer-service v0.4.14
 	github.com/nats-io/nats.go v1.48.0
 	github.com/remychantenay/slog-otel v1.3.4
 	goa.design/goa/v3 v3.24.1

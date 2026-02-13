@@ -13,10 +13,12 @@ import (
 	"syscall"
 	"time"
 
+	apieventing "github.com/linuxfoundation/lfx-v2-survey-service/cmd/survey-api/eventing"
 	surveysvr "github.com/linuxfoundation/lfx-v2-survey-service/gen/http/survey/server"
 	surveysvc "github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/auth"
+	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/eventing"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/idmapper"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/proxy"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/logging"
@@ -91,6 +93,42 @@ func run() int {
 		idMapper = natsMapper
 	}
 
+	// Initialize event processor (if enabled)
+	var eventProcessor *apieventing.EventProcessor
+	var eventProcessorCtx context.Context
+	var eventProcessorCancel context.CancelFunc
+	if cfg.EventProcessingEnabled {
+		logger.Info("Event processing is ENABLED - initializing event processor")
+		ep, err := apieventing.NewEventProcessor(eventing.Config{
+			NATSURL:       cfg.NATSURL,
+			ConsumerName:  cfg.EventConsumerName,
+			StreamName:    cfg.EventStreamName,
+			FilterSubject: cfg.EventFilterSubject,
+			MaxDeliver:    3,
+			AckWait:       30 * time.Second,
+			MaxAckPending: 1000,
+		}, idMapper, logger)
+		if err != nil {
+			logger.Error("Failed to initialize event processor", "error", err)
+			return 1
+		}
+		eventProcessor = ep
+
+		// Create context for event processor lifecycle
+		eventProcessorCtx, eventProcessorCancel = context.WithCancel(context.Background())
+
+		// Start event processor in goroutine
+		go func() {
+			if err := eventProcessor.Start(eventProcessorCtx); err != nil {
+				logger.Error("Event processor error", "error", err)
+				os.Exit(1)
+			}
+		}()
+		logger.Info("Event processor started in background")
+	} else {
+		logger.Info("Event processing is DISABLED - skipping event processor initialization")
+	}
+
 	// Initialize service layer
 	surveyService := service.NewSurveyService(jwtAuth, proxyClient, idMapper, logger)
 
@@ -157,7 +195,20 @@ func run() int {
 
 	logger.Info("Shutting down server...")
 
-	// Graceful shutdown with timeout
+	// Stop event processor first (if enabled)
+	if eventProcessor != nil {
+		logger.Info("Stopping event processor...")
+		// Cancel the event processor context to stop the Start method
+		if eventProcessorCancel != nil {
+			eventProcessorCancel()
+		}
+		// Then stop the consumer and cleanup resources
+		if err := eventProcessor.Stop(); err != nil {
+			logger.Error("Error stopping event processor", "error", err)
+		}
+	}
+
+	// Graceful shutdown of HTTP server with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -172,45 +223,46 @@ func run() int {
 
 // config holds the application configuration
 type config struct {
-	Port               string
-	JWKSURL            string
-	Audience           string
-	MockLocalPrincipal string
-	ITXBaseURL         string
-	ITXAuth0Domain     string
-	ITXClientID        string
-	ITXPrivateKey      string
-	ITXAudience        string
-	ITXTimeout         time.Duration
-	NATSURL            string
-	NATSTimeout        time.Duration
-	IDMappingDisabled  bool
+	Port                   string
+	JWKSURL                string
+	Audience               string
+	MockLocalPrincipal     string
+	ITXBaseURL             string
+	ITXAuth0Domain         string
+	ITXClientID            string
+	ITXPrivateKey          string
+	ITXAudience            string
+	ITXTimeout             time.Duration
+	NATSURL                string
+	NATSTimeout            time.Duration
+	IDMappingDisabled      bool
+	EventProcessingEnabled bool
+	EventConsumerName      string
+	EventStreamName        string
+	EventFilterSubject     string
 }
 
 // loadConfig loads configuration from environment variables
 func loadConfig() config {
-	cfg := config{
-		Port:               getEnv("PORT", "8080"),
-		JWKSURL:            getEnv("JWKS_URL", "http://heimdall:4457/.well-known/jwks"),
-		Audience:           getEnv("AUDIENCE", "lfx-v2-survey-service"),
-		MockLocalPrincipal: getEnv("JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL", ""),
-		ITXBaseURL:         getEnv("ITX_BASE_URL", "https://api.dev.itx.linuxfoundation.org/"),
-		ITXAuth0Domain:     getEnv("ITX_AUTH0_DOMAIN", "linuxfoundation-dev.auth0.com"),
-		ITXClientID:        getEnv("ITX_CLIENT_ID", ""),
-		ITXPrivateKey:      getEnv("ITX_CLIENT_PRIVATE_KEY", ""),
-		ITXAudience:        getEnv("ITX_AUDIENCE", "https://api.dev.itx.linuxfoundation.org/"),
-		ITXTimeout:         30 * time.Second,
-		NATSURL:            getEnv("NATS_URL", "nats://nats:4222"),
-		NATSTimeout:        5 * time.Second,
-		IDMappingDisabled:  getEnv("ID_MAPPING_DISABLED", "") == "true",
+	return config{
+		Port:                   getEnv("PORT", "8080"),
+		JWKSURL:                getEnv("JWKS_URL", "http://heimdall:4457/.well-known/jwks"),
+		Audience:               getEnv("AUDIENCE", "lfx-v2-survey-service"),
+		MockLocalPrincipal:     getEnv("JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL", ""),
+		ITXBaseURL:             getEnv("ITX_BASE_URL", "https://api.dev.itx.linuxfoundation.org/"),
+		ITXAuth0Domain:         getEnv("ITX_AUTH0_DOMAIN", "linuxfoundation-dev.auth0.com"),
+		ITXClientID:            getEnv("ITX_CLIENT_ID", ""),
+		ITXPrivateKey:          getEnv("ITX_CLIENT_PRIVATE_KEY", ""),
+		ITXAudience:            getEnv("ITX_AUDIENCE", "https://api.dev.itx.linuxfoundation.org/"),
+		ITXTimeout:             30 * time.Second,
+		NATSURL:                getEnv("NATS_URL", "nats://nats:4222"),
+		NATSTimeout:            5 * time.Second,
+		IDMappingDisabled:      getEnv("ID_MAPPING_DISABLED", "") == "true",
+		EventProcessingEnabled: getEnv("EVENT_PROCESSING_ENABLED", "true") == "true",
+		EventConsumerName:      getEnv("EVENT_CONSUMER_NAME", "survey-service-kv-consumer"),
+		EventStreamName:        getEnv("EVENT_STREAM_NAME", "KV_v1-objects"),
+		EventFilterSubject:     getEnv("EVENT_FILTER_SUBJECT", "$KV.v1-objects.>"),
 	}
-
-	if err := cfg.validate(); err != nil {
-		slog.Error("Configuration validation failed", "error", err)
-		os.Exit(1)
-	}
-
-	return cfg
 }
 
 // validate checks that required configuration values are set
