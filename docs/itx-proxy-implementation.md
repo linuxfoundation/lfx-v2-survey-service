@@ -22,8 +22,9 @@ The LFX Survey Service acts as a lightweight proxy to the ITX Survey API service
 
 1. **Authentication Translation** - JWT (Heimdall) → OAuth2 M2M (Auth0)
 2. **Authorization** - OpenFGA fine-grained access control
-3. **Field Mapping** - LFX v2 conventions → ITX conventions
-4. **Stateless Proxy** - No local persistence, all data managed by ITX
+3. **ID Mapping** - V2 UUIDs → V1 Salesforce IDs (via NATS)
+4. **Field Mapping** - LFX v2 conventions → ITX conventions
+5. **Stateless Proxy** - No local persistence, all data managed by ITX
 
 ---
 
@@ -45,7 +46,8 @@ The LFX Survey Service acts as a lightweight proxy to the ITX Survey API service
 │  ┌────────────────────────────────────────────────────────┐     │
 │  │           Service Layer (Proxy Logic)                  │     │
 │  │  - JWT Authentication via Heimdall                     │     │
-│  │  - Field mapping (project_uid ↔ project_id)          │     │
+│  │  - ID mapping (V2 UIDs ↔ V1 SFIDs via NATS)          │     │
+│  │  - Field mapping (committee_uid → committees array)   │     │
 │  │  - Request/response transformation                     │     │
 │  └────────────────────┬───────────────────────────────────┘     │
 │                       │                                         │
@@ -146,15 +148,16 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
         return nil, &survey.UnauthorizedError{...}
     }
 
-    // 2. Map v2 project UID to v1 project ID (if ID mapping enabled)
-    v1ProjectID, err := s.idMapper.MapProjectV2ToV1(ctx, p.ProjectUID)
+    // 2. Map v2 committee UID to v1 committee SFID (via NATS)
+    committeeV1, err := s.idMapper.MapCommitteeV2ToV1(ctx, p.CommitteeUID)
     if err != nil {
         return nil, mapDomainError(err)
     }
 
-    // 3. Build ITX request (field mapping: project_uid → project_id)
-    itxRequest := &itx.SurveyScheduleRequest{
-        ProjectID:              v1ProjectID,
+    // 3. Build ITX request (field mapping: committee_uid → committees array)
+    committees := []string{committeeV1}
+    itxRequest := &itx.ScheduleSurveyRequest{
+        Committees:             committees,
         CreatorID:              p.CreatorID,
         SurveyTitle:            p.SurveyTitle,
         // ... other fields are identical
@@ -166,8 +169,11 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
         return nil, mapDomainError(err)
     }
 
-    // 5. Convert ITX response to Goa result
-    result := mapITXResponseToResult(itxResponse)
+    // 5. Convert ITX response to Goa result (maps V1 IDs back to V2 UIDs)
+    result, err := s.mapITXResponseToResult(ctx, itxResponse)
+    if err != nil {
+        return nil, mapDomainError(err)
+    }
 
     return result, nil
 }
@@ -231,14 +237,14 @@ func (c *Client) ScheduleSurvey(ctx context.Context, req *itx.SurveyScheduleRequ
    POST /surveys
    Authorization: Bearer <jwt_token>
    {
-     "project_uid": "v2-project-uuid",
+     "committee_uid": "v2-committee-uuid",
      "survey_title": "Q1 Survey",
      ...
    }
    ↓
 2. Heimdall Authorization
    - Validates JWT
-   - Checks OpenFGA: user has "writer" permission on project
+   - Checks OpenFGA: user has "writer" permission on committee
    - Adds JWT to context
    ↓
 3. API Handler (api.go)
@@ -247,8 +253,8 @@ func (c *Client) ScheduleSurvey(ctx context.Context, req *itx.SurveyScheduleRequ
 4. Service Layer (survey_service.go)
    ScheduleSurvey()
    ├─→ Parse JWT and extract principal
-   ├─→ Map v2 project UID to v1 project ID (via NATS)
-   ├─→ Build ITX request (field mapping)
+   ├─→ Map v2 committee UID to v1 committee SFID (via NATS)
+   ├─→ Build ITX request (field mapping: committee_uid → committees array)
    └─→ Call proxy client
    ↓
 5. Proxy Client (infrastructure/proxy/itx_client.go)
@@ -262,7 +268,7 @@ func (c *Client) ScheduleSurvey(ctx context.Context, req *itx.SurveyScheduleRequ
    POST /v2/surveys/schedule
    Authorization: Bearer <oauth2_m2m_token>
    {
-     "project_id": "v1-project-id",
+     "committees": ["v1-committee-sfid"],
      "survey_title": "Q1 Survey",
      ...
    }
@@ -274,13 +280,17 @@ func (c *Client) ScheduleSurvey(ctx context.Context, req *itx.SurveyScheduleRequ
    ↓
 9. Service Layer
    - Converts ITX response to Goa result
-   - No field mapping needed (response fields identical)
+   - Maps V1 committee/project SFIDs back to V2 UIDs
    ↓
 10. API Response
     201 Created
     {
       "id": "survey-uuid",
-      "project_uid": "v2-project-uuid",
+      "committees": [{
+        "committee_uid": "v2-committee-uuid",
+        "project_uid": "v2-project-uuid",
+        ...
+      }],
       "survey_title": "Q1 Survey",
       ...
     }
@@ -313,8 +323,17 @@ type AuthenticationService interface {
 
 ```go
 type IDMapper interface {
+    // MapCommitteeV2ToV1 maps LFX v2 committee UID to v1 Salesforce ID
+    MapCommitteeV2ToV1(ctx context.Context, v2UID string) (string, error)
+
+    // MapCommitteeV1ToV2 maps v1 committee SFID to LFX v2 UID
+    MapCommitteeV1ToV2(ctx context.Context, v1SFID string) (string, error)
+
     // MapProjectV2ToV1 maps LFX v2 project UID to v1 Salesforce ID
-    MapProjectV2ToV1(ctx context.Context, v2ID string) (string, error)
+    MapProjectV2ToV1(ctx context.Context, v2UID string) (string, error)
+
+    // MapProjectV1ToV2 maps v1 project SFID to LFX v2 UID
+    MapProjectV1ToV2(ctx context.Context, v1SFID string) (string, error)
 }
 ```
 
@@ -360,11 +379,12 @@ type ITXProxyClient interface {
 
 ### Request Field Mapping (Proxy → ITX)
 
-Only one field differs between Proxy API and ITX API:
+Field differences between Proxy API and ITX API:
 
 | Proxy API (LFX) | ITX API | Notes |
 |-----------------|---------|-------|
-| `project_uid` | `project_id` | V2 UUID → V1 Salesforce ID (mapped via NATS) |
+| `committee_uid` (single string) | `committees` (array of strings) | Proxy accepts single committee UID, converted to array for ITX |
+| Committee/Project values | Mapped values | V2 UUIDs → V1 Salesforce IDs (mapped via NATS) |
 | All other fields | Same | Identical field names |
 
 **Example**:
@@ -372,21 +392,29 @@ Only one field differs between Proxy API and ITX API:
 ```go
 // Proxy API request
 {
-  "project_uid": "7cad5a8d-19d0-41a4-81a6-043453daf9ee",  // V2 UUID
+  "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",  // V2 UUID (single)
   "survey_title": "Q1 Survey"
 }
 
 // After ID mapping and field conversion
 // ITX API request
 {
-  "project_id": "a0A1700000DxYzEEAV",  // V1 Salesforce ID
+  "committees": ["a0C17000000abcDEF"],  // V1 Salesforce ID (array)
   "survey_title": "Q1 Survey"
 }
 ```
 
 ### Response Field Mapping (ITX → Proxy)
 
-No field mapping required for responses - all field names are identical between ITX API and Proxy API.
+Response IDs are mapped from V1 to V2:
+
+| ITX API Response | Proxy API Response | Notes |
+|-----------------|-------------------|-------|
+| `committee_id` | `committee_uid` | V1 Salesforce ID → V2 UUID (mapped via NATS) |
+| `project_id` | `project_uid` | V1 Salesforce ID → V2 UUID (mapped via NATS) |
+| All other fields | Same | Identical field names |
+
+**Fallback Strategy**: If V1→V2 mapping fails, the service falls back to returning V1 IDs with warning logs rather than failing the request.
 
 ### Path Mapping
 
