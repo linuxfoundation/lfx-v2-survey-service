@@ -21,6 +21,7 @@ See [ITX Proxy Implementation Architecture](docs/itx-proxy-implementation.md) fo
 - **JWT Authentication**: Secure authentication via Heimdall JWT tokens
 - **OAuth2 M2M**: Machine-to-machine authentication with ITX using Auth0
 - **ID Mapping**: Automatic v1/v2 ID translation via NATS
+- **Event Processing**: Real-time sync of v1 survey data to v2 indexer and FGA (see [Event Processing](docs/event-processing.md))
 - **OpenFGA Authorization**: Fine-grained access control
 - **OpenAPI Spec**: Auto-generated from Goa design
 - **Kubernetes Ready**: Includes Helm charts with health checks and probes
@@ -179,6 +180,15 @@ The service is configured via environment variables:
 - `NATS_URL` - NATS server URL for ID mapping
 - `ID_MAPPING_DISABLED` - Disable ID mapping for local dev (default: false)
 
+### Event Processing
+
+- `EVENT_PROCESSING_ENABLED` - Enable/disable event processing (default: true)
+- `EVENT_CONSUMER_NAME` - JetStream consumer name (default: survey-service-kv-consumer)
+- `EVENT_STREAM_NAME` - JetStream stream name (default: KV_v1-objects)
+- `EVENT_FILTER_SUBJECT` - NATS subject filter (default: $KV.v1-objects.>)
+
+See [Event Processing Documentation](docs/event-processing.md) for details.
+
 ## Docker
 
 ### Build Image
@@ -237,10 +247,14 @@ kubectl logs -n lfx -l app=lfx-v2-survey-service
 ├── cmd/                      # Application entry points
 │   └── survey-api/           # Main service binary
 ├── gen/                      # Generated code (from Goa)
+├── cmd/                      # Application entry points
+│   └── survey-api/           # Main service binary
+│       └── eventing/         # Event processing handlers
 ├── internal/                 # Private application code
 │   ├── domain/               # Domain interfaces and types
 │   ├── infrastructure/       # Infrastructure implementations
 │   │   ├── auth/             # JWT authentication
+│   │   ├── eventing/         # Event processing infrastructure
 │   │   ├── idmapper/         # ID mapping (NATS)
 │   │   └── proxy/            # ITX proxy client
 │   ├── logging/              # Structured logging
@@ -251,6 +265,7 @@ kubectl logs -n lfx -l app=lfx-v2-survey-service
 │   └── models/itx/           # ITX API models
 ├── docs/                     # Documentation
 │   ├── api-contracts/        # API contract documentation
+│   ├── event-processing.md   # Event processing guide
 │   └── itx-proxy-implementation.md  # Architecture guide
 ├── charts/                   # Helm charts
 │   └── lfx-v2-survey-service/
