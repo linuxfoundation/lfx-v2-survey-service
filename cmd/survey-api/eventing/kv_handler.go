@@ -199,7 +199,6 @@ func handleKVDelete(
 	case "itx-survey-responses":
 		return handleSurveyResponseDelete(ctx, uid, publisher, mappingsKV, logger)
 	default:
-		logger.With("key", key, "prefix", prefix).Debug("skipping delete - unsupported type")
 		return false // ACK unsupported types
 	}
 }
