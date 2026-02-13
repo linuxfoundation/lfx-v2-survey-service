@@ -7,6 +7,20 @@
 
 set -e
 
+# Check for required dependencies
+if ! command -v jq &> /dev/null; then
+    echo "Error: jq is not installed. Please install jq to run this script."
+    echo "  - macOS: brew install jq"
+    echo "  - Ubuntu/Debian: apt-get install jq"
+    echo "  - RHEL/CentOS: yum install jq"
+    exit 1
+fi
+
+if ! command -v curl &> /dev/null; then
+    echo "Error: curl is not installed. Please install curl to run this script."
+    exit 1
+fi
+
 # Configuration
 OPENSEARCH_URL="${OPENSEARCH_URL:-http://opensearch-cluster-master.lfx.svc.cluster.local:9200}"
 INDEX_NAME="${INDEX_NAME:-resources}"
@@ -30,7 +44,7 @@ fi
 
 echo ""
 echo "Step 1: Counting survey documents..."
-SURVEY_COUNT=$(curl -s -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
+SURVEY_RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
     -H 'Content-Type: application/json' \
     -d '{
         "query": {
@@ -38,13 +52,29 @@ SURVEY_COUNT=$(curl -s -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
                 "object_type": "survey"
             }
         }
-    }' | jq -r '.count')
+    }')
+
+HTTP_CODE=$(echo "$SURVEY_RESPONSE" | tail -n1)
+SURVEY_BODY=$(echo "$SURVEY_RESPONSE" | sed '$d')
+
+if [ "$HTTP_CODE" != "200" ]; then
+    echo "Error: Failed to query OpenSearch (HTTP $HTTP_CODE)"
+    echo "Response: $SURVEY_BODY"
+    exit 1
+fi
+
+SURVEY_COUNT=$(echo "$SURVEY_BODY" | jq -r '.count')
+if [ "$SURVEY_COUNT" = "null" ] || [ -z "$SURVEY_COUNT" ]; then
+    echo "Error: Invalid response from OpenSearch"
+    echo "Response: $SURVEY_BODY"
+    exit 1
+fi
 
 echo "Found $SURVEY_COUNT survey documents"
 
 echo ""
 echo "Step 2: Counting survey_response documents..."
-RESPONSE_COUNT=$(curl -s -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
+RESPONSE_RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
     -H 'Content-Type: application/json' \
     -d '{
         "query": {
@@ -52,7 +82,23 @@ RESPONSE_COUNT=$(curl -s -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
                 "object_type": "survey_response"
             }
         }
-    }' | jq -r '.count')
+    }')
+
+HTTP_CODE=$(echo "$RESPONSE_RESPONSE" | tail -n1)
+RESPONSE_BODY=$(echo "$RESPONSE_RESPONSE" | sed '$d')
+
+if [ "$HTTP_CODE" != "200" ]; then
+    echo "Error: Failed to query OpenSearch (HTTP $HTTP_CODE)"
+    echo "Response: $RESPONSE_BODY"
+    exit 1
+fi
+
+RESPONSE_COUNT=$(echo "$RESPONSE_BODY" | jq -r '.count')
+if [ "$RESPONSE_COUNT" = "null" ] || [ -z "$RESPONSE_COUNT" ]; then
+    echo "Error: Invalid response from OpenSearch"
+    echo "Response: $RESPONSE_BODY"
+    exit 1
+fi
 
 echo "Found $RESPONSE_COUNT survey_response documents"
 
@@ -76,7 +122,7 @@ fi
 # Delete OpenSearch documents for surveys
 echo ""
 echo "Step 3: Deleting OpenSearch survey documents..."
-SURVEY_RESULT=$(curl -s -X POST "${OPENSEARCH_URL}/${INDEX_NAME}/_delete_by_query?conflicts=proceed" \
+SURVEY_DELETE_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${OPENSEARCH_URL}/${INDEX_NAME}/_delete_by_query?conflicts=proceed" \
     -H 'Content-Type: application/json' \
     -d '{
         "query": {
@@ -86,13 +132,26 @@ SURVEY_RESULT=$(curl -s -X POST "${OPENSEARCH_URL}/${INDEX_NAME}/_delete_by_quer
         }
     }')
 
+HTTP_CODE=$(echo "$SURVEY_DELETE_RESPONSE" | tail -n1)
+SURVEY_RESULT=$(echo "$SURVEY_DELETE_RESPONSE" | sed '$d')
+
+if [ "$HTTP_CODE" != "200" ]; then
+    echo "Error: Failed to delete survey documents (HTTP $HTTP_CODE)"
+    echo "Response: $SURVEY_RESULT"
+    exit 1
+fi
+
 SURVEY_DELETED=$(echo "$SURVEY_RESULT" | jq -r '.deleted')
+if [ "$SURVEY_DELETED" = "null" ]; then
+    SURVEY_DELETED=0
+fi
+
 echo "Deleted $SURVEY_DELETED survey documents from OpenSearch"
 
 # Delete OpenSearch documents for survey responses
 echo ""
 echo "Step 4: Deleting OpenSearch survey_response documents..."
-RESPONSE_RESULT=$(curl -s -X POST "${OPENSEARCH_URL}/${INDEX_NAME}/_delete_by_query?conflicts=proceed" \
+RESPONSE_DELETE_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${OPENSEARCH_URL}/${INDEX_NAME}/_delete_by_query?conflicts=proceed" \
     -H 'Content-Type: application/json' \
     -d '{
         "query": {
@@ -102,7 +161,20 @@ RESPONSE_RESULT=$(curl -s -X POST "${OPENSEARCH_URL}/${INDEX_NAME}/_delete_by_qu
         }
     }')
 
+HTTP_CODE=$(echo "$RESPONSE_DELETE_RESPONSE" | tail -n1)
+RESPONSE_RESULT=$(echo "$RESPONSE_DELETE_RESPONSE" | sed '$d')
+
+if [ "$HTTP_CODE" != "200" ]; then
+    echo "Error: Failed to delete survey_response documents (HTTP $HTTP_CODE)"
+    echo "Response: $RESPONSE_RESULT"
+    exit 1
+fi
+
 RESPONSE_DELETED=$(echo "$RESPONSE_RESULT" | jq -r '.deleted')
+if [ "$RESPONSE_DELETED" = "null" ]; then
+    RESPONSE_DELETED=0
+fi
+
 echo "Deleted $RESPONSE_DELETED survey_response documents from OpenSearch"
 
 TOTAL_DELETED=$((SURVEY_DELETED + RESPONSE_DELETED))
@@ -120,7 +192,7 @@ sleep 5
 echo ""
 echo "Step 5: Verifying OpenSearch cleanup..."
 
-REMAINING_SURVEY=$(curl -s -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
+VERIFY_SURVEY_RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
     -H 'Content-Type: application/json' \
     -d '{
         "query": {
@@ -128,9 +200,22 @@ REMAINING_SURVEY=$(curl -s -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
                 "object_type": "survey"
             }
         }
-    }' | jq -r '.count')
+    }')
 
-REMAINING_RESPONSE=$(curl -s -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
+HTTP_CODE=$(echo "$VERIFY_SURVEY_RESPONSE" | tail -n1)
+VERIFY_SURVEY_BODY=$(echo "$VERIFY_SURVEY_RESPONSE" | sed '$d')
+
+if [ "$HTTP_CODE" = "200" ]; then
+    REMAINING_SURVEY=$(echo "$VERIFY_SURVEY_BODY" | jq -r '.count')
+    if [ "$REMAINING_SURVEY" = "null" ]; then
+        REMAINING_SURVEY=0
+    fi
+else
+    echo "Warning: Failed to verify survey document count (HTTP $HTTP_CODE)"
+    REMAINING_SURVEY="unknown"
+fi
+
+VERIFY_RESPONSE_RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
     -H 'Content-Type: application/json' \
     -d '{
         "query": {
@@ -138,17 +223,36 @@ REMAINING_RESPONSE=$(curl -s -X GET "${OPENSEARCH_URL}/${INDEX_NAME}/_count" \
                 "object_type": "survey_response"
             }
         }
-    }' | jq -r '.count')
+    }')
 
-TOTAL_REMAINING=$((REMAINING_SURVEY + REMAINING_RESPONSE))
+HTTP_CODE=$(echo "$VERIFY_RESPONSE_RESPONSE" | tail -n1)
+VERIFY_RESPONSE_BODY=$(echo "$VERIFY_RESPONSE_RESPONSE" | sed '$d')
+
+if [ "$HTTP_CODE" = "200" ]; then
+    REMAINING_RESPONSE=$(echo "$VERIFY_RESPONSE_BODY" | jq -r '.count')
+    if [ "$REMAINING_RESPONSE" = "null" ]; then
+        REMAINING_RESPONSE=0
+    fi
+else
+    echo "Warning: Failed to verify survey_response document count (HTTP $HTTP_CODE)"
+    REMAINING_RESPONSE="unknown"
+fi
 
 echo "Remaining survey documents: $REMAINING_SURVEY"
 echo "Remaining survey_response documents: $REMAINING_RESPONSE"
-echo "Total remaining: $TOTAL_REMAINING"
 
-echo ""
-if [ "$TOTAL_REMAINING" -eq 0 ]; then
-    echo "✓ All OpenSearch documents successfully removed!"
+if [ "$REMAINING_SURVEY" = "unknown" ] || [ "$REMAINING_RESPONSE" = "unknown" ]; then
+    echo "Total remaining: unknown (verification failed)"
+    echo ""
+    echo "⚠ Warning: Could not verify cleanup completion"
 else
-    echo "⚠ Warning: $TOTAL_REMAINING documents still remain."
+    TOTAL_REMAINING=$((REMAINING_SURVEY + REMAINING_RESPONSE))
+    echo "Total remaining: $TOTAL_REMAINING"
+
+    echo ""
+    if [ "$TOTAL_REMAINING" -eq 0 ]; then
+        echo "✓ All OpenSearch documents successfully removed!"
+    else
+        echo "⚠ Warning: $TOTAL_REMAINING documents still remain."
+    fi
 fi

@@ -246,10 +246,8 @@ kubectl logs -n lfx -l app=lfx-v2-survey-service
 │   └── survey/v1/design/     # API design (DSL)
 ├── cmd/                      # Application entry points
 │   └── survey-api/           # Main service binary
-├── gen/                      # Generated code (from Goa)
-├── cmd/                      # Application entry points
-│   └── survey-api/           # Main service binary
 │       └── eventing/         # Event processing handlers
+├── gen/                      # Generated code (from Goa)
 ├── internal/                 # Private application code
 │   ├── domain/               # Domain interfaces and types
 │   ├── infrastructure/       # Infrastructure implementations

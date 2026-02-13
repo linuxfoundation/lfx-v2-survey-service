@@ -42,6 +42,12 @@ func run() int {
 	// Load configuration from environment
 	cfg := loadConfig()
 
+	// Validate configuration
+	if err := cfg.validate(); err != nil {
+		fmt.Fprintf(os.Stderr, "Configuration error: %v\n", err)
+		return 1
+	}
+
 	// Initialize structured logging
 	logging.InitStructureLogConfig()
 	logger := slog.Default()
@@ -93,6 +99,9 @@ func run() int {
 		idMapper = natsMapper
 	}
 
+	// Create shutdown channel for coordinating graceful shutdown
+	shutdown := make(chan struct{}, 1)
+
 	// Initialize event processor (if enabled)
 	var eventProcessor *apieventing.EventProcessor
 	var eventProcessorCtx context.Context
@@ -121,7 +130,11 @@ func run() int {
 		go func() {
 			if err := eventProcessor.Start(eventProcessorCtx); err != nil {
 				logger.Error("Event processor error", "error", err)
-				os.Exit(1)
+				// Signal shutdown instead of calling os.Exit
+				select {
+				case shutdown <- struct{}{}:
+				default:
+				}
 			}
 		}()
 		logger.Info("Event processor started in background")
@@ -184,14 +197,24 @@ func run() int {
 		logger.Info("HTTP server listening", "addr", srv.Addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Error("HTTP server error", "error", err)
-			os.Exit(1)
+			// Signal shutdown instead of calling os.Exit
+			select {
+			case shutdown <- struct{}{}:
+			default:
+			}
 		}
 	}()
 
-	// Wait for interrupt signal
+	// Wait for interrupt signal or shutdown event
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
+
+	select {
+	case <-quit:
+		logger.Info("Received interrupt signal")
+	case <-shutdown:
+		logger.Info("Received shutdown signal from background goroutine")
+	}
 
 	logger.Info("Shutting down server...")
 
