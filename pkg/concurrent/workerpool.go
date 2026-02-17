@@ -29,7 +29,6 @@ func (wp *WorkerPool) Run(ctx context.Context, functions ...func() error) error 
 
 	// Submit all functions to the errgroup
 	for _, fn := range functions {
-		fn := fn // capture loop variable
 		g.Go(func() error {
 			// Check if context was cancelled before starting
 			select {
