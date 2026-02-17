@@ -90,17 +90,20 @@ The survey service implements NATS KV bucket event processing to automatically s
 ### Survey Data
 
 **v1 Format (DynamoDB/KV)**:
+
 - All numeric fields stored as strings (e.g., `"nps_value": "8"`)
 - v1 SFIDs for committees and projects
 - Committee array with per-committee statistics
 
 **v2 Format (Transformed)**:
+
 - Proper types (integers, booleans)
 - v2 UUIDs for committees and projects
 - Mapped via IDMapper service
 - Preserved committee array structure
 
 **Example Transformation**:
+
 ```json
 // v1 Input
 {
@@ -132,6 +135,7 @@ The survey service implements NATS KV bucket event processing to automatically s
 **v1 Format**: Similar string-based fields, v1 references
 
 **v2 Format**:
+
 - Proper types
 - Mapped project/committee/survey UIDs
 - Preserved SurveyMonkey question answers (no transformation)
@@ -139,7 +143,9 @@ The survey service implements NATS KV bucket event processing to automatically s
 ## Error Handling
 
 ### Transient Errors (Retry)
+
 These errors trigger NAK (negative acknowledgment) for automatic retry:
+
 - NATS connection timeouts
 - IDMapper service unavailable
 - Network failures
@@ -148,7 +154,9 @@ These errors trigger NAK (negative acknowledgment) for automatic retry:
 **Action**: Message redelivered up to `MaxDeliver` times (3 attempts)
 
 ### Permanent Errors (Skip)
+
 These errors trigger ACK to skip and move on:
+
 - Invalid JSON structure
 - Missing required fields (e.g., empty `id`)
 - No parent references (survey/response orphaned)
@@ -157,7 +165,9 @@ These errors trigger ACK to skip and move on:
 **Action**: Log warning and continue processing other messages
 
 ### ID Mapping Failures
+
 When v1→v2 ID mapping fails:
+
 - Log warning with v1 ID
 - Skip setting v2 UID for that reference
 - Continue processing with remaining valid data
@@ -183,6 +193,7 @@ EVENT_PROCESSING_ENABLED=false ./survey-api
 ### Monitoring
 
 **Log Messages**:
+
 ```
 INFO  Event processing is ENABLED - initializing event processor
 INFO  Event processor started in background
@@ -191,6 +202,7 @@ INFO  successfully sent survey indexer and access messages survey_id=survey-123
 ```
 
 **Consumer Status**:
+
 ```bash
 # Check consumer status
 nats consumer info KV_v1-objects survey-service-kv-consumer
@@ -209,20 +221,24 @@ nats consumer info KV_v1-objects survey-service-kv-consumer
 ### Troubleshooting
 
 **No events processing**:
+
 - Check `EVENT_PROCESSING_ENABLED=true`
 - Verify NATS connection: `NATS_URL`
 - Check consumer exists: `nats consumer ls KV_v1-objects`
 
 **Events failing repeatedly**:
+
 - Check logs for permanent errors
 - Verify IDMapper service is running
 - Confirm indexer and FGA-sync services are available
 
 **Duplicate processing**:
+
 - Check `v1-mappings` KV bucket for tracking entries
 - Verify consumer name is unique per instance
 
 **ID mapping failures**:
+
 - Ensure IDMapper service has v1↔v2 mappings populated
 - Check project/committee references exist in v1 system
 
@@ -231,17 +247,20 @@ nats consumer info KV_v1-objects survey-service-kv-consumer
 The service uses the `v1-mappings` KV bucket to track processed events:
 
 **Key Pattern**:
+
 - Surveys: `survey:{uid}`
 - Responses: `survey_response:{uid}`
 
 **Value**: Timestamp of last processing
 
 **Logic**:
+
 - If mapping exists → **UPDATE** operation
 - If mapping missing → **CREATE** operation
 - After processing → Store/update mapping entry
 
 This ensures:
+
 - First event creates the resource
 - Subsequent events update the resource
 - No duplicate resources in downstream services
@@ -249,19 +268,23 @@ This ensures:
 ## Performance Considerations
 
 **Concurrency**:
+
 - Single consumer per service instance
 - Messages processed sequentially per consumer
 - Multiple service instances = parallel processing
 
 **Throughput**:
+
 - `MaxAckPending=1000` allows up to 1000 in-flight messages
 - Adjust based on processing speed and resource availability
 
 **Backpressure**:
+
 - Consumer automatically pauses when `MaxAckPending` reached
 - Resumes when pending count drops
 
 **Resource Usage**:
+
 - Event processor runs in background goroutine (low overhead)
 - NATS connection shared with IDMapper
 - Memory footprint minimal (streaming model)
@@ -269,16 +292,19 @@ This ensures:
 ## Related Services
 
 ### IDMapper Service
+
 - Maps v1 SFIDs ↔ v2 UUIDs
 - Required for event processing
 - Queries via NATS request-reply pattern
 
 ### Indexer Service
+
 - Receives transformed survey/response data
 - Indexes in OpenSearch for search functionality
 - Handles `ActionCreated`, `ActionUpdated`, `ActionDeleted`
 
 ### FGA-Sync Service
+
 - Receives access control updates
 - Manages OpenFGA authorization tuples
 - Links resources to parent entities (committees, projects)
@@ -288,22 +314,26 @@ This ensures:
 ### Testing Event Processing
 
 1. **Disable in local development**:
+
    ```bash
    export EVENT_PROCESSING_ENABLED=false
    ```
 
 2. **Watch consumer activity**:
+
    ```bash
    nats consumer next KV_v1-objects survey-service-kv-consumer --count 10
    ```
 
 3. **Trigger test event**:
+
    ```bash
    # Put test survey in v1-objects KV
    nats kv put v1-objects itx-surveys:test-123 '{"id":"test-123",...}'
    ```
 
 4. **Check processing logs**:
+
    ```bash
    # Look for processing messages
    grep "processing survey update" logs/survey-api.log
