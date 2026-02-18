@@ -208,6 +208,8 @@ make helm-install
 make helm-install-local
 ```
 
+**Chart Versioning**: The chart version in `Chart.yaml` is set to `0.0.1` and should not be manually incremented. During the release process, the chart version is dynamically set to match the Git tag version (e.g., tag `v0.1.6` results in chart version `0.1.6`).
+
 ### Configure Secrets
 
 The service requires Auth0 credentials stored in AWS Secrets Manager:
