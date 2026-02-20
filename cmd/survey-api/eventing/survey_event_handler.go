@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"log/slog"
 	"strconv"
+	"strings"
 
 	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
-	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/utils"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -514,8 +514,8 @@ func isTransientError(err error) bool {
 
 	errStr := err.Error()
 	// NATS publish errors, timeouts, connection issues
-	if utils.Contains(errStr, "timeout") || utils.Contains(errStr, "connection") ||
-		utils.Contains(errStr, "unavailable") || utils.Contains(errStr, "deadline") {
+	if strings.Contains(errStr, "timeout") || strings.Contains(errStr, "connection") ||
+		strings.Contains(errStr, "unavailable") || strings.Contains(errStr, "deadline") {
 		return true
 	}
 

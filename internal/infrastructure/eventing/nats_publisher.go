@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"slices"
 
 	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
 	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
@@ -99,6 +100,14 @@ func (p *NATSPublisher) Close() error {
 	return nil
 }
 
+// appendIfNotExists adds a value to a slice only if it doesn't already exist
+func appendIfNotExists(slice []string, value string) []string {
+	if !slices.Contains(slice, value) {
+		return append(slice, value)
+	}
+	return slice
+}
+
 // sendSurveyIndexerMessage routes to the appropriate indexer message handler based on action
 func (p *NATSPublisher) sendSurveyIndexerMessage(ctx context.Context, subject string, action indexerConstants.MessageAction, data *domain.SurveyData) error {
 	// Build IndexingConfig (needed for both create/update and delete)
@@ -115,18 +124,8 @@ func (p *NATSPublisher) sendSurveyIndexerMessage(ctx context.Context, subject st
 			parentRefs = append(parentRefs, fmt.Sprintf("committee:%s", committee.CommitteeUID))
 		}
 		if committee.ProjectUID != "" {
-			// Check if we've already added this project UID
 			projectRef := fmt.Sprintf("project:%s", committee.ProjectUID)
-			found := false
-			for _, ref := range parentRefs {
-				if ref == projectRef {
-					found = true
-					break
-				}
-			}
-			if !found {
-				parentRefs = append(parentRefs, projectRef)
-			}
+			parentRefs = appendIfNotExists(parentRefs, projectRef)
 		}
 	}
 
@@ -160,17 +159,7 @@ func (p *NATSPublisher) sendSurveyAccessMessage(survey *domain.SurveyData) error
 			committeeRefs = append(committeeRefs, committee.CommitteeUID)
 		}
 		if committee.ProjectUID != "" {
-			// Check if we've already added this project UID
-			found := false
-			for _, ref := range projectRefs {
-				if ref == committee.ProjectUID {
-					found = true
-					break
-				}
-			}
-			if !found {
-				projectRefs = append(projectRefs, committee.ProjectUID)
-			}
+			projectRefs = appendIfNotExists(projectRefs, committee.ProjectUID)
 		}
 	}
 
