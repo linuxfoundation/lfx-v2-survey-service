@@ -753,7 +753,6 @@ func (s *SurveyService) mapSurveyCommitteesToResult(ctx context.Context, committ
 	// Build mapping functions for each committee
 	mappingFunctions := make([]func() error, len(committees))
 	for i, c := range committees {
-		i, c := i, c // capture loop variables
 		mappingFunctions[i] = func() error {
 			// Map committee ID from V1 to V2 if present
 			var committeeV2 *string
@@ -844,7 +843,6 @@ func (s *SurveyService) mapLFXProjectsToResult(ctx context.Context, projects []i
 	// Build mapping functions for each project
 	mappingFunctions := make([]func() error, len(projects))
 	for i, p := range projects {
-		i, p := i, p // capture loop variables
 		mappingFunctions[i] = func() error {
 			// Map project ID from V1 to V2 if present
 			projectV2 := p.ID
@@ -895,7 +893,6 @@ func (s *SurveyService) mapExcludedCommitteesToResult(ctx context.Context, commi
 	// Build mapping functions for each committee
 	mappingFunctions := make([]func() error, len(committees))
 	for i, c := range committees {
-		i, c := i, c // capture loop variables
 		mappingFunctions[i] = func() error {
 			// Map committee ID from V1 to V2 if present
 			committeeV2 := c.CommitteeID
