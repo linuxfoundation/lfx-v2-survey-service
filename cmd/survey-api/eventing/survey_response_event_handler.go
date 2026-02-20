@@ -204,6 +204,18 @@ func handleSurveyResponseUpdate(
 	}
 	funcLogger = funcLogger.With("survey_response_id", responseData.UID)
 
+	// Check if parent survey exists in mappings before proceeding
+	if responseData.SurveyID == "" {
+		funcLogger.ErrorContext(ctx, "survey response missing required parent survey ID")
+		return false // Permanent error, ACK and skip
+	}
+	funcLogger = funcLogger.With("survey_id", responseData.SurveyID)
+	surveyMappingKey := fmt.Sprintf("survey.%s", responseData.SurveyID)
+	if _, err := mappingsKV.Get(ctx, surveyMappingKey); err != nil {
+		funcLogger.With(errKey, err).InfoContext(ctx, "parent survey not found in mappings, will retry survey response sync")
+		return true // NAK for retry - survey may not be processed yet
+	}
+
 	// Check if parent project exists in mappings
 	if responseData.Project.ProjectUID == "" {
 		funcLogger.With("project_id", responseData.Project.ID).InfoContext(ctx, "skipping survey response sync - parent project not found in mappings")
