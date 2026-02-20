@@ -27,7 +27,7 @@ type SurveyResponseDBRaw struct {
 	CreatedAt                     string                               `json:"created_at"`
 	ResponseDatetime              string                               `json:"response_datetime"`
 	LastReceivedTime              string                               `json:"last_received_time"`
-	NumAutomatedRemindersReceived string                               `json:"num_automated_reminders_received"` // String in DynamoDB
+	NumAutomatedRemindersReceived int                                  `json:"num_automated_reminders_received"`
 	Username                      string                               `json:"username"`
 	VotingStatus                  string                               `json:"voting_status"`
 	Role                          string                               `json:"role"`
@@ -38,7 +38,7 @@ type SurveyResponseDBRaw struct {
 	CommitteeID                   string                               `json:"committee_id"` // v1 SFID
 	CommitteeVotingEnabled        bool                                 `json:"committee_voting_enabled"`
 	SurveyLink                    string                               `json:"survey_link"`
-	NPSValue                      string                               `json:"nps_value"` // String in DynamoDB
+	NPSValue                      int                                  `json:"nps_value"`
 	SurveyMonkeyQuestionAnswers   []domain.SurveyMonkeyQuestionAnswers `json:"survey_monkey_question_answers"`
 	SESMessageID                  string                               `json:"ses_message_id"`
 	SESBounceType                 string                               `json:"ses_bounce_type"`
@@ -53,6 +53,120 @@ type SurveyResponseDBRaw struct {
 	LinkClickedFirstTime          string                               `json:"link_clicked_first_time"`
 	LinkClickedLastTime           string                               `json:"link_clicked_last_time"`
 	Excluded                      bool                                 `json:"excluded"`
+}
+
+// UnmarshalJSON implements custom unmarshaling to handle both string and int inputs for numeric fields.
+func (r *SurveyResponseDBRaw) UnmarshalJSON(data []byte) error {
+	// Use a temporary struct with interface{} types for numeric fields
+	tmp := struct {
+		ID                            string                               `json:"id"`
+		SurveyID                      string                               `json:"survey_id"`
+		SurveyMonkeyRespondent        string                               `json:"survey_monkey_respondent_id"`
+		Email                         string                               `json:"email"`
+		CommitteeMemberID             string                               `json:"committee_member_id,omitempty"`
+		FirstName                     string                               `json:"first_name"`
+		LastName                      string                               `json:"last_name"`
+		CreatedAt                     string                               `json:"created_at"`
+		ResponseDatetime              string                               `json:"response_datetime"`
+		LastReceivedTime              string                               `json:"last_received_time"`
+		NumAutomatedRemindersReceived interface{}                          `json:"num_automated_reminders_received"`
+		Username                      string                               `json:"username"`
+		VotingStatus                  string                               `json:"voting_status"`
+		Role                          string                               `json:"role"`
+		JobTitle                      string                               `json:"job_title"`
+		MembershipTier                string                               `json:"membership_tier"`
+		Organization                  domain.SurveyResponseOrgData         `json:"organization"`
+		Project                       SurveyResponseProjectDBRaw           `json:"project"`
+		CommitteeID                   string                               `json:"committee_id"`
+		CommitteeVotingEnabled        bool                                 `json:"committee_voting_enabled"`
+		SurveyLink                    string                               `json:"survey_link"`
+		NPSValue                      interface{}                          `json:"nps_value"`
+		SurveyMonkeyQuestionAnswers   []domain.SurveyMonkeyQuestionAnswers `json:"survey_monkey_question_answers"`
+		SESMessageID                  string                               `json:"ses_message_id"`
+		SESBounceType                 string                               `json:"ses_bounce_type"`
+		SESBounceSubtype              string                               `json:"ses_bounce_subtype"`
+		SESBounceDiagnosticCode       string                               `json:"ses_bounce_diagnostic_code"`
+		SESComplaintExists            bool                                 `json:"ses_complaint_exists"`
+		SESComplaintType              string                               `json:"ses_complaint_type"`
+		SESComplaintDate              string                               `json:"ses_complaint_date"`
+		SESDeliverySuccessful         bool                                 `json:"ses_delivery_successful"`
+		EmailOpenedFirstTime          string                               `json:"email_opened_first_time"`
+		EmailOpenedLastTime           string                               `json:"email_opened_last_time"`
+		LinkClickedFirstTime          string                               `json:"link_clicked_first_time"`
+		LinkClickedLastTime           string                               `json:"link_clicked_last_time"`
+		Excluded                      bool                                 `json:"excluded"`
+	}{}
+
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+
+	// Helper function to convert interface{} to int
+	convertToInt := func(v interface{}) (int, error) {
+		if v == nil {
+			return 0, nil
+		}
+		switch val := v.(type) {
+		case string:
+			if val == "" {
+				return 0, nil
+			}
+			return strconv.Atoi(val)
+		case float64:
+			return int(val), nil
+		case int:
+			return val, nil
+		default:
+			return 0, fmt.Errorf("invalid type for numeric field: %T", v)
+		}
+	}
+
+	// Assign all fields
+	r.ID = tmp.ID
+	r.SurveyID = tmp.SurveyID
+	r.SurveyMonkeyRespondent = tmp.SurveyMonkeyRespondent
+	r.Email = tmp.Email
+	r.CommitteeMemberID = tmp.CommitteeMemberID
+	r.FirstName = tmp.FirstName
+	r.LastName = tmp.LastName
+	r.CreatedAt = tmp.CreatedAt
+	r.ResponseDatetime = tmp.ResponseDatetime
+	r.LastReceivedTime = tmp.LastReceivedTime
+	r.Username = tmp.Username
+	r.VotingStatus = tmp.VotingStatus
+	r.Role = tmp.Role
+	r.JobTitle = tmp.JobTitle
+	r.MembershipTier = tmp.MembershipTier
+	r.Organization = tmp.Organization
+	r.Project = tmp.Project
+	r.CommitteeID = tmp.CommitteeID
+	r.CommitteeVotingEnabled = tmp.CommitteeVotingEnabled
+	r.SurveyLink = tmp.SurveyLink
+	r.SurveyMonkeyQuestionAnswers = tmp.SurveyMonkeyQuestionAnswers
+	r.SESMessageID = tmp.SESMessageID
+	r.SESBounceType = tmp.SESBounceType
+	r.SESBounceSubtype = tmp.SESBounceSubtype
+	r.SESBounceDiagnosticCode = tmp.SESBounceDiagnosticCode
+	r.SESComplaintExists = tmp.SESComplaintExists
+	r.SESComplaintType = tmp.SESComplaintType
+	r.SESComplaintDate = tmp.SESComplaintDate
+	r.SESDeliverySuccessful = tmp.SESDeliverySuccessful
+	r.EmailOpenedFirstTime = tmp.EmailOpenedFirstTime
+	r.EmailOpenedLastTime = tmp.EmailOpenedLastTime
+	r.LinkClickedFirstTime = tmp.LinkClickedFirstTime
+	r.LinkClickedLastTime = tmp.LinkClickedLastTime
+	r.Excluded = tmp.Excluded
+
+	// Convert numeric fields
+	var err error
+	if r.NumAutomatedRemindersReceived, err = convertToInt(tmp.NumAutomatedRemindersReceived); err != nil {
+		return fmt.Errorf("failed to convert num_automated_reminders_received: %w", err)
+	}
+	if r.NPSValue, err = convertToInt(tmp.NPSValue); err != nil {
+		return fmt.Errorf("failed to convert nps_value: %w", err)
+	}
+
+	return nil
 }
 
 // SurveyResponseProjectDBRaw represents raw project data from v1
@@ -141,62 +255,45 @@ func convertMapToSurveyResponseData(
 		return nil, fmt.Errorf("failed to unmarshal JSON into SurveyResponseDBRaw: %w", err)
 	}
 
-	// Build v2 survey response data struct
+	// Build v2 survey response data struct - numeric fields are now properly typed after UnmarshalJSON
 	responseData := &domain.SurveyResponseData{
-		UID:                         responseDB.ID,
-		ID:                          responseDB.ID,
-		SurveyID:                    responseDB.SurveyID,
-		SurveyUID:                   responseDB.SurveyID, // survey_id becomes survey_uid in v2
-		SurveyMonkeyRespondent:      responseDB.SurveyMonkeyRespondent,
-		Email:                       responseDB.Email,
-		CommitteeMemberID:           responseDB.CommitteeMemberID,
-		FirstName:                   responseDB.FirstName,
-		LastName:                    responseDB.LastName,
-		CreatedAt:                   responseDB.CreatedAt,
-		ResponseDatetime:            responseDB.ResponseDatetime,
-		LastReceivedTime:            responseDB.LastReceivedTime,
-		Username:                    responseDB.Username,
-		VotingStatus:                responseDB.VotingStatus,
-		Role:                        responseDB.Role,
-		JobTitle:                    responseDB.JobTitle,
-		MembershipTier:              responseDB.MembershipTier,
-		Organization:                responseDB.Organization,
-		CommitteeID:                 responseDB.CommitteeID,
-		CommitteeVotingEnabled:      responseDB.CommitteeVotingEnabled,
-		SurveyLink:                  responseDB.SurveyLink,
-		SurveyMonkeyQuestionAnswers: responseDB.SurveyMonkeyQuestionAnswers,
-		SESMessageID:                responseDB.SESMessageID,
-		SESBounceType:               responseDB.SESBounceType,
-		SESBounceSubtype:            responseDB.SESBounceSubtype,
-		SESBounceDiagnosticCode:     responseDB.SESBounceDiagnosticCode,
-		SESComplaintExists:          responseDB.SESComplaintExists,
-		SESComplaintType:            responseDB.SESComplaintType,
-		SESComplaintDate:            responseDB.SESComplaintDate,
-		SESDeliverySuccessful:       responseDB.SESDeliverySuccessful,
-		EmailOpenedFirstTime:        responseDB.EmailOpenedFirstTime,
-		EmailOpenedLastTime:         responseDB.EmailOpenedLastTime,
-		LinkClickedFirstTime:        responseDB.LinkClickedFirstTime,
-		LinkClickedLastTime:         responseDB.LinkClickedLastTime,
-		Excluded:                    responseDB.Excluded,
-	}
-
-	// Convert string integers to actual ints
-	if responseDB.NumAutomatedRemindersReceived != "" {
-		if val, err := strconv.Atoi(responseDB.NumAutomatedRemindersReceived); err == nil {
-			responseData.NumAutomatedRemindersReceived = val
-		} else {
-			logger.With(errKey, err, "field", "num_automated_reminders_received", "value", responseDB.NumAutomatedRemindersReceived).
-				WarnContext(ctx, "failed to convert string to int")
-		}
-	}
-
-	if responseDB.NPSValue != "" {
-		if val, err := strconv.Atoi(responseDB.NPSValue); err == nil {
-			responseData.NPSValue = val
-		} else {
-			logger.With(errKey, err, "field", "nps_value", "value", responseDB.NPSValue).
-				WarnContext(ctx, "failed to convert string to int")
-		}
+		UID:                           responseDB.ID,
+		ID:                            responseDB.ID,
+		SurveyID:                      responseDB.SurveyID,
+		SurveyUID:                     responseDB.SurveyID, // survey_id becomes survey_uid in v2
+		SurveyMonkeyRespondent:        responseDB.SurveyMonkeyRespondent,
+		Email:                         responseDB.Email,
+		CommitteeMemberID:             responseDB.CommitteeMemberID,
+		FirstName:                     responseDB.FirstName,
+		LastName:                      responseDB.LastName,
+		CreatedAt:                     responseDB.CreatedAt,
+		ResponseDatetime:              responseDB.ResponseDatetime,
+		LastReceivedTime:              responseDB.LastReceivedTime,
+		NumAutomatedRemindersReceived: responseDB.NumAutomatedRemindersReceived,
+		Username:                      responseDB.Username,
+		VotingStatus:                  responseDB.VotingStatus,
+		Role:                          responseDB.Role,
+		JobTitle:                      responseDB.JobTitle,
+		MembershipTier:                responseDB.MembershipTier,
+		Organization:                  responseDB.Organization,
+		CommitteeID:                   responseDB.CommitteeID,
+		CommitteeVotingEnabled:        responseDB.CommitteeVotingEnabled,
+		SurveyLink:                    responseDB.SurveyLink,
+		NPSValue:                      responseDB.NPSValue,
+		SurveyMonkeyQuestionAnswers:   responseDB.SurveyMonkeyQuestionAnswers,
+		SESMessageID:                  responseDB.SESMessageID,
+		SESBounceType:                 responseDB.SESBounceType,
+		SESBounceSubtype:              responseDB.SESBounceSubtype,
+		SESBounceDiagnosticCode:       responseDB.SESBounceDiagnosticCode,
+		SESComplaintExists:            responseDB.SESComplaintExists,
+		SESComplaintType:              responseDB.SESComplaintType,
+		SESComplaintDate:              responseDB.SESComplaintDate,
+		SESDeliverySuccessful:         responseDB.SESDeliverySuccessful,
+		EmailOpenedFirstTime:          responseDB.EmailOpenedFirstTime,
+		EmailOpenedLastTime:           responseDB.EmailOpenedLastTime,
+		LinkClickedFirstTime:          responseDB.LinkClickedFirstTime,
+		LinkClickedLastTime:           responseDB.LinkClickedLastTime,
+		Excluded:                      responseDB.Excluded,
 	}
 
 	// Process project with ID mapping
