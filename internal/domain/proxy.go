@@ -15,7 +15,7 @@ type SurveyClient interface {
 	ScheduleSurvey(ctx context.Context, req *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error)
 
 	// GetSurvey retrieves survey details from ITX
-	GetSurvey(ctx context.Context, surveyID string) (*itx.SurveyScheduleResponse, error)
+	GetSurvey(ctx context.Context, surveyID string, queryParams *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error)
 
 	// UpdateSurvey updates a survey in ITX (only when status is "disabled")
 	UpdateSurvey(ctx context.Context, surveyID string, req *itx.UpdateSurveyRequest) (*itx.SurveyScheduleResponse, error)

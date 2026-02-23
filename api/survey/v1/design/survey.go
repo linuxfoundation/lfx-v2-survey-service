@@ -103,6 +103,14 @@ var _ = Service("survey", func() {
 				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
 			})
 
+			Attribute("project_uid", String, "Optional LFX Project UID (V2) to filter survey data", func() {
+				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
+			})
+
+			Attribute("project_uids", String, "Optional comma-delimited list of LFX Project UIDs (V2). Should not be combined with project_uid", func() {
+				Example("qa1e8536-a985-4cf5-b981-a170927a1d11,qa1e8536-a985-4cf5-b981-a170927a1d12")
+			})
+
 			Required("survey_uid")
 		})
 
@@ -110,6 +118,8 @@ var _ = Service("survey", func() {
 
 		HTTP(func() {
 			GET("/surveys/{survey_uid}")
+			Param("project_uid")
+			Param("project_uids")
 			Response(StatusOK)
 			Response("BadRequest", StatusBadRequest)
 			Response("Unauthorized", StatusUnauthorized)

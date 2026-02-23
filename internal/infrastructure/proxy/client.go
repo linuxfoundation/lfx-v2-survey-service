@@ -168,10 +168,28 @@ func (c *Client) ScheduleSurvey(ctx context.Context, req *itx.ScheduleSurveyRequ
 }
 
 // GetSurvey retrieves survey details from ITX
-func (c *Client) GetSurvey(ctx context.Context, surveyID string) (*itx.SurveyScheduleResponse, error) {
+func (c *Client) GetSurvey(ctx context.Context, surveyID string, queryParams *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error) {
+	// Build URL with query parameters
+	baseURL := fmt.Sprintf("%sv2/surveys/%s/schedule", c.config.BaseURL, surveyID)
+	parsedURL, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, domain.NewInternalError("failed to parse URL", err)
+	}
+
+	// Add query parameters if provided
+	if queryParams != nil {
+		query := parsedURL.Query()
+		if queryParams.ProjectID != nil && *queryParams.ProjectID != "" {
+			query.Add("project_id", *queryParams.ProjectID)
+		}
+		if queryParams.ProjectIDs != nil && *queryParams.ProjectIDs != "" {
+			query.Add("project_ids", *queryParams.ProjectIDs)
+		}
+		parsedURL.RawQuery = query.Encode()
+	}
+
 	// Create HTTP request
-	url := fmt.Sprintf("%sv2/surveys/%s/schedule", c.config.BaseURL, surveyID)
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, parsedURL.String(), nil)
 	if err != nil {
 		return nil, domain.NewInternalError("failed to create request", err)
 	}

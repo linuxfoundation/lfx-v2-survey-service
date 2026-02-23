@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"strings"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
@@ -122,10 +123,52 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 	s.logger.InfoContext(ctx, "getting survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
+		"project_uid", p.ProjectUID,
+		"project_uids", p.ProjectUids,
 	)
 
+	// Build query parameters with V2 to V1 ID mapping
+	var queryParams *itx.GetSurveyParams
+	if p.ProjectUID != nil || p.ProjectUids != nil {
+		queryParams = &itx.GetSurveyParams{}
+
+		// Map single project_uid from V2 to V1
+		if p.ProjectUID != nil && *p.ProjectUID != "" {
+			projectV1, err := s.idMapper.MapProjectV2ToV1(ctx, *p.ProjectUID)
+			if err != nil {
+				s.logger.ErrorContext(ctx, "failed to map project_uid to V1",
+					"project_uid", *p.ProjectUID,
+					"error", err,
+				)
+				return nil, mapDomainError(err)
+			}
+			queryParams.ProjectID = &projectV1
+			s.logger.DebugContext(ctx, "mapped project_uid",
+				"project_v2_uid", *p.ProjectUID,
+				"project_v1_sfid", projectV1,
+			)
+		}
+
+		// Map project_uids from V2 to V1 (comma-delimited list)
+		if p.ProjectUids != nil && *p.ProjectUids != "" {
+			projectV1IDs, err := s.mapProjectUIDsV2ToV1(ctx, *p.ProjectUids)
+			if err != nil {
+				s.logger.ErrorContext(ctx, "failed to map project_uids to V1",
+					"project_uids", *p.ProjectUids,
+					"error", err,
+				)
+				return nil, mapDomainError(err)
+			}
+			queryParams.ProjectIDs = &projectV1IDs
+			s.logger.DebugContext(ctx, "mapped project_uids",
+				"project_v2_uids", *p.ProjectUids,
+				"project_v1_sfids", projectV1IDs,
+			)
+		}
+	}
+
 	// Call ITX API
-	itxResponse, err := s.proxy.GetSurvey(ctx, p.SurveyUID)
+	itxResponse, err := s.proxy.GetSurvey(ctx, p.SurveyUID, queryParams)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -690,6 +733,37 @@ func (s *SurveyService) mapOptionalProjectV2ToV1(ctx context.Context, projectUID
 	)
 
 	return &mapped, nil
+}
+
+// mapProjectUIDsV2ToV1 maps a comma-delimited list of project UIDs from V2 to V1
+func (s *SurveyService) mapProjectUIDsV2ToV1(ctx context.Context, projectUIDs string) (string, error) {
+	if projectUIDs == "" {
+		return "", nil
+	}
+
+	// Split comma-delimited list and trim whitespace
+	v2UIDs := strings.Split(projectUIDs, ",")
+	v1IDs := make([]string, 0, len(v2UIDs))
+
+	// Map each UID from V2 to V1
+	for _, v2UID := range v2UIDs {
+		trimmed := strings.TrimSpace(v2UID)
+		if trimmed == "" {
+			continue
+		}
+		v1ID, err := s.idMapper.MapProjectV2ToV1(ctx, trimmed)
+		if err != nil {
+			s.logger.ErrorContext(ctx, "failed to map project UID to V1",
+				"project_v2_uid", trimmed,
+				"error", err,
+			)
+			return "", err
+		}
+		v1IDs = append(v1IDs, v1ID)
+	}
+
+	// Join back into comma-delimited string
+	return strings.Join(v1IDs, ","), nil
 }
 
 // mapITXResponseToResult maps ITX response to Goa result with V1→V2 ID mapping

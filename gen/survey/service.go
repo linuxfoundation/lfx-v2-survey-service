@@ -274,6 +274,11 @@ type GetSurveyPayload struct {
 	Token *string
 	// Survey identifier
 	SurveyUID string
+	// Optional LFX Project UID (V2) to filter survey data
+	ProjectUID *string
+	// Optional comma-delimited list of LFX Project UIDs (V2). Should not be
+	// combined with project_uid
+	ProjectUids *string
 }
 
 // Recipient information for preview send
