@@ -2363,9 +2363,11 @@ func NewScheduleSurveyPayload(body *ScheduleSurveyRequestBody, token *string) *s
 }
 
 // NewGetSurveyPayload builds a survey service get_survey endpoint payload.
-func NewGetSurveyPayload(surveyUID string, token *string) *survey.GetSurveyPayload {
+func NewGetSurveyPayload(surveyUID string, projectUID *string, projectUids *string, token *string) *survey.GetSurveyPayload {
 	v := &survey.GetSurveyPayload{}
 	v.SurveyUID = surveyUID
+	v.ProjectUID = projectUID
+	v.ProjectUids = projectUids
 	v.Token = token
 
 	return v

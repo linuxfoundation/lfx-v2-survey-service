@@ -174,6 +174,11 @@ Authorization: Bearer <jwt_token>
 
 - `survey_id` (string, required) - Survey identifier
 
+**Query Parameters**:
+
+- `project_uid` (string, optional) - LFX Project UID (V2 format) to filter survey data
+- `project_uids` (string, optional) - Comma-delimited list of LFX Project UIDs (V2 format). Should not be combined with `project_uid`
+
 **Response**: `200 OK`
 
 Response body is identical to Create Survey response.
@@ -192,6 +197,11 @@ Authorization: Bearer <oauth2_m2m_token>
 
 - `survey_id` (string, required) - Survey identifier
 
+**Query Parameters**:
+
+- `project_id` (string, optional) - LFX Project ID (V1 SFID format) to filter survey data
+- `project_ids` (string, optional) - Comma-delimited list of LFX Project IDs (V1 SFID format)
+
 **Response**: `200 OK`
 
 Response body is identical to ITX Create Survey response.
@@ -201,6 +211,8 @@ Response body is identical to ITX Create Survey response.
 | Proxy API (LFX) | ITX API | Notes |
 |-----------------|---------|-------|
 | `/surveys/{survey_id}` | `/v2/surveys/{survey_id}/schedule` | Path differs - proxy has shorter path |
+| `project_uid` query param | `project_id` query param | Proxy accepts V2 UID, maps to V1 SFID for ITX |
+| `project_uids` query param | `project_ids` query param | Proxy accepts comma-delimited V2 UIDs, maps to V1 SFIDs for ITX |
 | All response fields | Same | Response fields are identical |
 
 ---

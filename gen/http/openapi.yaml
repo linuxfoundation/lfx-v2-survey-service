@@ -98,6 +98,16 @@ paths:
                   * `manage:surveys`
             operationId: survey#get_survey
             parameters:
+                - name: project_uid
+                  in: query
+                  description: Optional LFX Project UID (V2) to filter survey data
+                  required: false
+                  type: string
+                - name: project_uids
+                  in: query
+                  description: Optional comma-delimited list of LFX Project UIDs (V2). Should not be combined with project_uid
+                  required: false
+                  type: string
                 - name: survey_uid
                   in: path
                   description: Survey identifier
