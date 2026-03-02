@@ -217,6 +217,14 @@ func EncodeGetSurveyRequest(encoder func(*http.Request) goahttp.Encoder) func(*h
 				req.Header.Set("Authorization", head)
 			}
 		}
+		values := req.URL.Query()
+		if p.ProjectUID != nil {
+			values.Add("project_uid", *p.ProjectUID)
+		}
+		if p.ProjectUids != nil {
+			values.Add("project_uids", *p.ProjectUids)
+		}
+		req.URL.RawQuery = values.Encode()
 		return nil
 	}
 }

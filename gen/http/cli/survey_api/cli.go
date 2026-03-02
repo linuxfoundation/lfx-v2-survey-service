@@ -50,9 +50,11 @@ func ParseEndpoint(
 		surveyScheduleSurveyBodyFlag  = surveyScheduleSurveyFlags.String("body", "REQUIRED", "")
 		surveyScheduleSurveyTokenFlag = surveyScheduleSurveyFlags.String("token", "", "")
 
-		surveyGetSurveyFlags         = flag.NewFlagSet("get-survey", flag.ExitOnError)
-		surveyGetSurveySurveyUIDFlag = surveyGetSurveyFlags.String("survey-uid", "REQUIRED", "Survey identifier")
-		surveyGetSurveyTokenFlag     = surveyGetSurveyFlags.String("token", "", "")
+		surveyGetSurveyFlags           = flag.NewFlagSet("get-survey", flag.ExitOnError)
+		surveyGetSurveySurveyUIDFlag   = surveyGetSurveyFlags.String("survey-uid", "REQUIRED", "Survey identifier")
+		surveyGetSurveyProjectUIDFlag  = surveyGetSurveyFlags.String("project-uid", "", "")
+		surveyGetSurveyProjectUidsFlag = surveyGetSurveyFlags.String("project-uids", "", "")
+		surveyGetSurveyTokenFlag       = surveyGetSurveyFlags.String("token", "", "")
 
 		surveyUpdateSurveyFlags         = flag.NewFlagSet("update-survey", flag.ExitOnError)
 		surveyUpdateSurveyBodyFlag      = surveyUpdateSurveyFlags.String("body", "REQUIRED", "")
@@ -241,7 +243,7 @@ func ParseEndpoint(
 				data, err = surveyc.BuildScheduleSurveyPayload(*surveyScheduleSurveyBodyFlag, *surveyScheduleSurveyTokenFlag)
 			case "get-survey":
 				endpoint = c.GetSurvey()
-				data, err = surveyc.BuildGetSurveyPayload(*surveyGetSurveySurveyUIDFlag, *surveyGetSurveyTokenFlag)
+				data, err = surveyc.BuildGetSurveyPayload(*surveyGetSurveySurveyUIDFlag, *surveyGetSurveyProjectUIDFlag, *surveyGetSurveyProjectUidsFlag, *surveyGetSurveyTokenFlag)
 			case "update-survey":
 				endpoint = c.UpdateSurvey()
 				data, err = surveyc.BuildUpdateSurveyPayload(*surveyUpdateSurveyBodyFlag, *surveyUpdateSurveySurveyUIDFlag, *surveyUpdateSurveyTokenFlag)
@@ -339,6 +341,8 @@ func surveyGetSurveyUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey get-survey", os.Args[0])
 	fmt.Fprint(os.Stderr, " -survey-uid STRING")
+	fmt.Fprint(os.Stderr, " -project-uid STRING")
+	fmt.Fprint(os.Stderr, " -project-uids STRING")
 	fmt.Fprint(os.Stderr, " -token STRING")
 	fmt.Fprintln(os.Stderr)
 
@@ -348,11 +352,13 @@ func surveyGetSurveyUsage() {
 
 	// Flags list
 	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -project-uid STRING: `)
+	fmt.Fprintln(os.Stderr, `    -project-uids STRING: `)
 	fmt.Fprintln(os.Stderr, `    -token STRING: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey get-survey --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey get-survey --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --project-uid \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --project-uids \"qa1e8536-a985-4cf5-b981-a170927a1d11,qa1e8536-a985-4cf5-b981-a170927a1d12\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyUpdateSurveyUsage() {

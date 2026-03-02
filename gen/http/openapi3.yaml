@@ -238,6 +238,24 @@ paths:
             description: Get survey details (proxies to ITX GET /v2/surveys/{survey_uid})
             operationId: survey#get_survey
             parameters:
+                - name: project_uid
+                  in: query
+                  description: Optional LFX Project UID (V2) to filter survey data
+                  allowEmptyValue: true
+                  schema:
+                    type: string
+                    description: Optional LFX Project UID (V2) to filter survey data
+                    example: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  example: qa1e8536-a985-4cf5-b981-a170927a1d11
+                - name: project_uids
+                  in: query
+                  description: Optional comma-delimited list of LFX Project UIDs (V2). Should not be combined with project_uid
+                  allowEmptyValue: true
+                  schema:
+                    type: string
+                    description: Optional comma-delimited list of LFX Project UIDs (V2). Should not be combined with project_uid
+                    example: qa1e8536-a985-4cf5-b981-a170927a1d11,qa1e8536-a985-4cf5-b981-a170927a1d12
+                  example: qa1e8536-a985-4cf5-b981-a170927a1d11,qa1e8536-a985-4cf5-b981-a170927a1d12
                 - name: survey_uid
                   in: path
                   description: Survey identifier
