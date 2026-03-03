@@ -5,6 +5,12 @@ package itx
 
 import "time"
 
+// GetSurveyParams holds optional query parameters for GetSurvey endpoint
+type GetSurveyParams struct {
+	ProjectID  *string // Optional project ID (V1 SFID) to filter survey data
+	ProjectIDs *string // Optional comma-delimited list of project IDs (V1 SFIDs)
+}
+
 // ScheduleSurveyRequest represents the request to schedule a survey in ITX
 type ScheduleSurveyRequest struct {
 	IsProjectSurvey        *bool    `json:"is_project_survey,omitempty"`

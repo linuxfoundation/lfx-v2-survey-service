@@ -58,10 +58,22 @@ func BuildScheduleSurveyPayload(surveyScheduleSurveyBody string, surveyScheduleS
 
 // BuildGetSurveyPayload builds the payload for the survey get_survey endpoint
 // from CLI flags.
-func BuildGetSurveyPayload(surveyGetSurveySurveyUID string, surveyGetSurveyToken string) (*survey.GetSurveyPayload, error) {
+func BuildGetSurveyPayload(surveyGetSurveySurveyUID string, surveyGetSurveyProjectUID string, surveyGetSurveyProjectUids string, surveyGetSurveyToken string) (*survey.GetSurveyPayload, error) {
 	var surveyUID string
 	{
 		surveyUID = surveyGetSurveySurveyUID
+	}
+	var projectUID *string
+	{
+		if surveyGetSurveyProjectUID != "" {
+			projectUID = &surveyGetSurveyProjectUID
+		}
+	}
+	var projectUids *string
+	{
+		if surveyGetSurveyProjectUids != "" {
+			projectUids = &surveyGetSurveyProjectUids
+		}
 	}
 	var token *string
 	{
@@ -71,6 +83,8 @@ func BuildGetSurveyPayload(surveyGetSurveySurveyUID string, surveyGetSurveyToken
 	}
 	v := &survey.GetSurveyPayload{}
 	v.SurveyUID = surveyUID
+	v.ProjectUID = projectUID
+	v.ProjectUids = projectUids
 	v.Token = token
 
 	return v, nil

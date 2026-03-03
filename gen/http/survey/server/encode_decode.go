@@ -174,17 +174,28 @@ func EncodeGetSurveyResponse(encoder func(context.Context, http.ResponseWriter) 
 func DecodeGetSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.GetSurveyPayload, error) {
 	return func(r *http.Request) (*survey.GetSurveyPayload, error) {
 		var (
-			surveyUID string
-			token     *string
+			surveyUID   string
+			projectUID  *string
+			projectUids *string
+			token       *string
 
 			params = mux.Vars(r)
 		)
 		surveyUID = params["survey_uid"]
+		qp := r.URL.Query()
+		projectUIDRaw := qp.Get("project_uid")
+		if projectUIDRaw != "" {
+			projectUID = &projectUIDRaw
+		}
+		projectUidsRaw := qp.Get("project_uids")
+		if projectUidsRaw != "" {
+			projectUids = &projectUidsRaw
+		}
 		tokenRaw := r.Header.Get("Authorization")
 		if tokenRaw != "" {
 			token = &tokenRaw
 		}
-		payload := NewGetSurveyPayload(surveyUID, token)
+		payload := NewGetSurveyPayload(surveyUID, projectUID, projectUids, token)
 		if payload.Token != nil {
 			if strings.Contains(*payload.Token, " ") {
 				// Remove authorization scheme prefix (e.g. "Bearer")
