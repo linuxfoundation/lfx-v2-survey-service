@@ -210,8 +210,9 @@ func handleSurveyResponseUpdate(
 		return false // Permanent error, ACK and skip
 	}
 	funcLogger = funcLogger.With("survey_id", responseData.SurveyID)
+	// Treat a tombstoned survey mapping as not-found so responses are not synced after parent deletion.
 	surveyMappingKey := fmt.Sprintf("survey.%s", responseData.SurveyID)
-	if _, err := mappingsKV.Get(ctx, surveyMappingKey); err != nil {
+	if entry, err := mappingsKV.Get(ctx, surveyMappingKey); err != nil || isTombstonedMapping(entry.Value()) {
 		funcLogger.With(errKey, err).InfoContext(ctx, "parent survey not found in mappings, will retry survey response sync")
 		return true // NAK for retry - survey may not be processed yet
 	}

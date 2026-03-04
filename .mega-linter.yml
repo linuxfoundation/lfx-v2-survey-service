@@ -38,5 +38,5 @@ API_SPECTRAL_FILTER_REGEX_EXCLUDE: "gen/"
 # Ignore YAML files with templating macros; these typically fail linting and/or
 # schema checking.
 FILTER_REGEX_EXCLUDE: '(templates/.*\.yml|templates/.*\.yaml)'
-KUBERNETES_DIRECTORY: charts/lfx-v2-voting-service
-KUBERNETES_HELM_ARGUMENTS: charts/lfx-v2-voting-service
+KUBERNETES_DIRECTORY: charts/lfx-v2-survey-service
+KUBERNETES_HELM_ARGUMENTS: charts/lfx-v2-survey-service

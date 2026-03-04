@@ -104,8 +104,8 @@ func run() int {
 
 	// Initialize event processor (if enabled)
 	var eventProcessor *apieventing.EventProcessor
-	var eventProcessorCtx context.Context
-	var eventProcessorCancel context.CancelFunc
+	eventProcessorCtx, eventProcessorCancel := context.WithCancel(context.Background())
+	defer eventProcessorCancel()
 	if cfg.EventProcessingEnabled {
 		logger.Info("Event processing is ENABLED - initializing event processor")
 		ep, err := apieventing.NewEventProcessor(eventing.Config{
@@ -126,7 +126,7 @@ func run() int {
 		}
 		eventProcessor = ep
 
-		// Create context for event processor lifecycle
+		// Create context for event processor lifecycle (replaces the no-op context)
 		eventProcessorCtx, eventProcessorCancel = context.WithCancel(context.Background())
 
 		// Start event processor in goroutine
@@ -225,9 +225,7 @@ func run() int {
 	if eventProcessor != nil {
 		logger.Info("Stopping event processor...")
 		// Cancel the event processor context to stop the Start method
-		if eventProcessorCancel != nil {
-			eventProcessorCancel()
-		}
+		eventProcessorCancel()
 		// Then stop the consumer and cleanup resources
 		if err := eventProcessor.Stop(); err != nil {
 			logger.Error("Error stopping event processor", "error", err)
@@ -240,9 +238,6 @@ func run() int {
 
 	if err := srv.Shutdown(ctx); err != nil {
 		logger.Error("Server forced to shutdown", "error", err)
-		if eventProcessorCancel != nil {
-			eventProcessorCancel()
-		}
 		return 1
 	}
 

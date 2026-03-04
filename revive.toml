@@ -1,7 +1,7 @@
 # Copyright The Linux Foundation and each contributor to LFX.
 # SPDX-License-Identifier: MIT
 
-# When set to false, ignores files with "GENERATED" header, similar to golint
+# When set to true, ignores files with "GENERATED" header; when set to false, lints them (similar to golint behavior)
 ignoreGeneratedHeader = true
 
 # Disabled rules
