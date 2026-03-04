@@ -126,9 +126,6 @@ func run() int {
 		}
 		eventProcessor = ep
 
-		// Create context for event processor lifecycle (replaces the no-op context)
-		eventProcessorCtx, eventProcessorCancel = context.WithCancel(context.Background())
-
 		// Start event processor in goroutine
 		go func() {
 			if err := eventProcessor.Start(eventProcessorCtx); err != nil {
