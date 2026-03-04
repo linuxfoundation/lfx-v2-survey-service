@@ -187,6 +187,7 @@ func handleKVPut(
 		return handleSurveyResponseUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, logger)
 	default:
 		// Not a survey-related key, ACK and skip
+		logger.With("key", key, "prefix", prefix).Debug("skipping update - unsupported type")
 		return false
 	}
 }
