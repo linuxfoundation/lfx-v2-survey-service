@@ -12,8 +12,11 @@ require (
 	github.com/linuxfoundation/lfx-v2-indexer-service v0.4.14
 	github.com/nats-io/nats.go v1.48.0
 	github.com/remychantenay/slog-otel v1.3.4
+	github.com/stretchr/testify v1.11.1
+	github.com/vmihailenco/msgpack/v5 v5.4.1
 	goa.design/goa/v3 v3.24.1
 	golang.org/x/oauth2 v0.34.0
+	golang.org/x/sync v0.19.0
 )
 
 require (
@@ -37,13 +40,12 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
-	github.com/stretchr/testify v1.11.1 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.devnw.com/structs v1.0.0 // indirect
 	go.opentelemetry.io/otel v1.36.0 // indirect
 	go.opentelemetry.io/otel/trace v1.36.0 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/mod v0.32.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/tools v0.41.0 // indirect
