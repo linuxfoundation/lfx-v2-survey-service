@@ -128,7 +128,6 @@ func run() int {
 
 		// Create context for event processor lifecycle
 		eventProcessorCtx, eventProcessorCancel = context.WithCancel(context.Background())
-		defer eventProcessorCancel()
 
 		// Start event processor in goroutine
 		go func() {
@@ -285,8 +284,8 @@ func loadConfig() config {
 		NATSTimeout:            5 * time.Second,
 		IDMappingDisabled:      getEnv("ID_MAPPING_DISABLED", "") == "true",
 		EventProcessingEnabled: getEnv("EVENT_PROCESSING_ENABLED", "true") == "true",
-		EventConsumerName: getEnv("EVENT_CONSUMER_NAME", "survey-service-kv-consumer"),
-		EventStreamName:   getEnv("EVENT_STREAM_NAME", "KV_v1-objects"),
+		EventConsumerName:      getEnv("EVENT_CONSUMER_NAME", "survey-service-kv-consumer"),
+		EventStreamName:        getEnv("EVENT_STREAM_NAME", "KV_v1-objects"),
 	}
 }
 
