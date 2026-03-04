@@ -109,10 +109,13 @@ func run() int {
 	if cfg.EventProcessingEnabled {
 		logger.Info("Event processing is ENABLED - initializing event processor")
 		ep, err := apieventing.NewEventProcessor(eventing.Config{
-			NATSURL:       cfg.NATSURL,
-			ConsumerName:  cfg.EventConsumerName,
-			StreamName:    cfg.EventStreamName,
-			FilterSubject: cfg.EventFilterSubject,
+			NATSURL:      cfg.NATSURL,
+			ConsumerName: cfg.EventConsumerName,
+			StreamName:   cfg.EventStreamName,
+			FilterSubjects: []string{
+				"$KV.v1-objects.itx-surveys.>",
+				"$KV.v1-objects.itx-survey-responses.>",
+			},
 			MaxDeliver:    3,
 			AckWait:       30 * time.Second,
 			MaxAckPending: 1000,
@@ -262,7 +265,6 @@ type config struct {
 	EventProcessingEnabled bool
 	EventConsumerName      string
 	EventStreamName        string
-	EventFilterSubject     string
 }
 
 // loadConfig loads configuration from environment variables
@@ -282,9 +284,8 @@ func loadConfig() config {
 		NATSTimeout:            5 * time.Second,
 		IDMappingDisabled:      getEnv("ID_MAPPING_DISABLED", "") == "true",
 		EventProcessingEnabled: getEnv("EVENT_PROCESSING_ENABLED", "true") == "true",
-		EventConsumerName:      getEnv("EVENT_CONSUMER_NAME", "survey-service-kv-consumer"),
-		EventStreamName:        getEnv("EVENT_STREAM_NAME", "KV_v1-objects"),
-		EventFilterSubject:     getEnv("EVENT_FILTER_SUBJECT", "$KV.v1-objects.>"),
+		EventConsumerName: getEnv("EVENT_CONSUMER_NAME", "survey-service-kv-consumer"),
+		EventStreamName:   getEnv("EVENT_STREAM_NAME", "KV_v1-objects"),
 	}
 }
 
