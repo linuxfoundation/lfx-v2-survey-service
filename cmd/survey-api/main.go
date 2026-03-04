@@ -240,6 +240,9 @@ func run() int {
 
 	if err := srv.Shutdown(ctx); err != nil {
 		logger.Error("Server forced to shutdown", "error", err)
+		if eventProcessorCancel != nil {
+			eventProcessorCancel()
+		}
 		return 1
 	}
 
