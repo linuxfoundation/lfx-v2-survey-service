@@ -128,6 +128,7 @@ func run() int {
 
 		// Create context for event processor lifecycle
 		eventProcessorCtx, eventProcessorCancel = context.WithCancel(context.Background())
+		defer eventProcessorCancel()
 
 		// Start event processor in goroutine
 		go func() {
