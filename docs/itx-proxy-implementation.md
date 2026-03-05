@@ -530,8 +530,8 @@ func mapDomainError(err error) error {
 
 ```bash
 PORT=8080
-LOG_LEVEL=info
-LOG_ADD_SOURCE=true
+LOG_LEVEL=info        # debug, info, warn, error (default: info)
+LOG_ADD_SOURCE=true   # Include source file/line in log output (default: false)
 ```
 
 **Authentication**:
@@ -669,7 +669,7 @@ func TestScheduleSurvey(t *testing.T) {
     mockIDMapper := &MockIDMapper{}
     mockAuth := &MockAuth{}
 
-    service := NewSurveyService(mockProxy, mockIDMapper, mockAuth, logger)
+    service := NewSurveyService(mockAuth, mockProxy, mockIDMapper, logger)
 
     // Mock ID mapping: v2 UUID → v1 Salesforce ID
     mockIDMapper.On("MapProjectV2ToV1", mock.Anything, "v2-uuid").
@@ -715,7 +715,7 @@ func TestScheduleSurvey(t *testing.T) {
 | **Field Mapping** | Minimal (only project_uid ↔ project_id) |
 | **ID Mapping** | V2 UUID ↔ V1 Salesforce ID (via NATS) |
 | **Business Logic** | Thin proxy layer |
-| **Code Size** | ~2000 LOC |
+| **Code Size** | ~4000 LOC (including event processing) |
 
 ### Key Design Decisions
 

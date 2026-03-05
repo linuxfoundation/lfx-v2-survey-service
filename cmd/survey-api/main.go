@@ -104,8 +104,8 @@ func run() int {
 
 	// Initialize event processor (if enabled)
 	var eventProcessor *apieventing.EventProcessor
-	var eventProcessorCtx context.Context
-	var eventProcessorCancel context.CancelFunc
+	eventProcessorCtx, eventProcessorCancel := context.WithCancel(context.Background())
+	defer eventProcessorCancel()
 	if cfg.EventProcessingEnabled {
 		logger.Info("Event processing is ENABLED - initializing event processor")
 		ep, err := apieventing.NewEventProcessor(eventing.Config{
@@ -125,9 +125,6 @@ func run() int {
 			return 1
 		}
 		eventProcessor = ep
-
-		// Create context for event processor lifecycle
-		eventProcessorCtx, eventProcessorCancel = context.WithCancel(context.Background())
 
 		// Start event processor in goroutine
 		go func() {
@@ -225,9 +222,7 @@ func run() int {
 	if eventProcessor != nil {
 		logger.Info("Stopping event processor...")
 		// Cancel the event processor context to stop the Start method
-		if eventProcessorCancel != nil {
-			eventProcessorCancel()
-		}
+		eventProcessorCancel()
 		// Then stop the consumer and cleanup resources
 		if err := eventProcessor.Stop(); err != nil {
 			logger.Error("Error stopping event processor", "error", err)
@@ -284,8 +279,8 @@ func loadConfig() config {
 		NATSTimeout:            5 * time.Second,
 		IDMappingDisabled:      getEnv("ID_MAPPING_DISABLED", "") == "true",
 		EventProcessingEnabled: getEnv("EVENT_PROCESSING_ENABLED", "true") == "true",
-		EventConsumerName: getEnv("EVENT_CONSUMER_NAME", "survey-service-kv-consumer"),
-		EventStreamName:   getEnv("EVENT_STREAM_NAME", "KV_v1-objects"),
+		EventConsumerName:      getEnv("EVENT_CONSUMER_NAME", "survey-service-kv-consumer"),
+		EventStreamName:        getEnv("EVENT_STREAM_NAME", "KV_v1-objects"),
 	}
 }
 

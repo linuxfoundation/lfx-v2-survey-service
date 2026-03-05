@@ -210,8 +210,9 @@ func handleSurveyResponseUpdate(
 		return false // Permanent error, ACK and skip
 	}
 	funcLogger = funcLogger.With("survey_id", responseData.SurveyID)
+	// Treat a tombstoned survey mapping as not-found so responses are not synced after parent deletion.
 	surveyMappingKey := fmt.Sprintf("survey.%s", responseData.SurveyID)
-	if _, err := mappingsKV.Get(ctx, surveyMappingKey); err != nil {
+	if entry, err := mappingsKV.Get(ctx, surveyMappingKey); err != nil || isTombstonedMapping(entry.Value()) {
 		funcLogger.With(errKey, err).InfoContext(ctx, "parent survey not found in mappings, will retry survey response sync")
 		return true // NAK for retry - survey may not be processed yet
 	}
@@ -353,6 +354,13 @@ func handleSurveyResponseDelete(
 
 	funcLogger.DebugContext(ctx, "processing survey response delete")
 
+	// Skip if already tombstoned — prevents duplicate delete events on redelivery
+	mappingKey := fmt.Sprintf("survey_response.%s", uid)
+	if entry, err := mappingsKV.Get(ctx, mappingKey); err == nil && isTombstonedMapping(entry.Value()) {
+		funcLogger.DebugContext(ctx, "survey response delete already processed, skipping")
+		return false
+	}
+
 	// Create minimal survey response data for delete event
 	responseData := &domain.SurveyResponseData{
 		UID: uid,
@@ -369,11 +377,10 @@ func handleSurveyResponseDelete(
 		return false // Permanent error, ACK and skip
 	}
 
-	// Remove mapping from v1-mappings KV
-	mappingKey := fmt.Sprintf("survey_response.%s", uid)
-	if err := mappingsKV.Delete(ctx, mappingKey); err != nil {
-		funcLogger.With(errKey, err).WarnContext(ctx, "failed to delete survey response mapping")
-		// Don't retry on mapping deletion failures
+	// Tombstone mapping instead of hard-deleting, so redelivery is safely skipped
+	if _, err := mappingsKV.Put(ctx, mappingKey, []byte(tombstoneMarker)); err != nil {
+		funcLogger.With(errKey, err).WarnContext(ctx, "failed to tombstone survey response mapping")
+		// Don't retry on mapping failures
 	}
 
 	funcLogger.InfoContext(ctx, "successfully sent survey response delete indexer and access messages")

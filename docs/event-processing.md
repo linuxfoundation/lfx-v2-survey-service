@@ -235,7 +235,7 @@ nats consumer info KV_v1-objects survey-service-kv-consumer
 
 **Duplicate processing**:
 
-- Check `v1-mappings` KV bucket for tracking entries
+- Check `v1-mappings` KV bucket for tracking entries (live = `1`, deleted = `!del`)
 - Verify consumer name is unique per instance
 
 **ID mapping failures**:
@@ -249,22 +249,32 @@ The service uses the `v1-mappings` KV bucket to track processed events:
 
 **Key Pattern**:
 
-- Surveys: `survey:{uid}`
-- Responses: `survey_response:{uid}`
+- Surveys: `survey.<uid>`
+- Responses: `survey_response.<uid>`
 
-**Value**: Timestamp of last processing
+**Value**:
+
+- `1` — resource has been synced at least once (live mapping)
+- `!del` — resource was deleted (tombstone marker)
 
 **Logic**:
 
-- If mapping exists → **UPDATE** operation
-- If mapping missing → **CREATE** operation
-- After processing → Store/update mapping entry
+- If mapping missing or tombstoned → **CREATE** operation
+- If mapping exists (live) → **UPDATE** operation
+- After successful sync → store/update mapping with value `1`
+- After successful delete → overwrite mapping with `!del` (tombstone)
 
-This ensures:
+**Tombstone deduplication**:
 
-- First event creates the resource
-- Subsequent events update the resource
-- No duplicate resources in downstream services
+When a delete event is processed, the mapping key is set to `!del` rather than being removed. On any redelivery of the same delete message, the tombstone is detected and the event is safely skipped without re-publishing a delete to downstream services.
+
+**Soft delete support**:
+
+KV PUT operations that include a non-empty `_sdc_deleted_at` field are treated as soft deletes and follow the same delete path as hard KV DEL/PURGE operations.
+
+**Orphan prevention**:
+
+When processing a survey response, the handler checks that the parent survey mapping exists and is not tombstoned. If the parent mapping is missing or tombstoned (i.e., the survey was deleted), the response event is NAKed for retry rather than being synced to downstream services.
 
 ## Performance Considerations
 
