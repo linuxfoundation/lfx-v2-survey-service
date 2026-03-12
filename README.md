@@ -210,11 +210,43 @@ docker run -p 8080:8080 \
 
 ### Install with Helm
 
-```bash
-# Install with default values
-make helm-install
+#### Create Kubernetes Secret
 
-# Install with local values file
+Before installing the chart, you must create a Kubernetes secret with the required credentials. Get the values from the **LFX Platform Chart Values Secrets - Local Development** note in the **LFX V2** vault in 1Password.
+
+```bash
+kubectl create secret generic lfx-v2-survey-service -n lfx \
+  --from-literal=ITX_CLIENT_ID="<from-1password>" \
+  --from-file=ITX_CLIENT_PRIVATE_KEY=/path/to/private.key
+```
+
+#### Install from GHCR (no local code changes)
+
+To install the latest published image directly from GHCR without any local modifications:
+
+```bash
+make helm-install
+```
+
+#### Install with Local Code Changes
+
+When making code changes locally:
+
+1. Copy the local values example file:
+
+```bash
+cp charts/lfx-v2-survey-service/values.local.example.yaml charts/lfx-v2-survey-service/values.local.yaml
+```
+
+1. After making code changes, build the Docker image:
+
+```bash
+make docker-build
+```
+
+1. Install the chart using your local image:
+
+```bash
 make helm-install-local
 ```
 
