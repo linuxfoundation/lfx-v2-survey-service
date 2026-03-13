@@ -13,6 +13,8 @@ The LFX V2 Survey Service acts as a secure intermediary between LFX Platform V2 
 - **Authorization**: Fine-grained access control via OpenFGA
 - **Path Translation**: Shorter proxy paths (`/surveys/{id}`) → ITX paths (`/v2/surveys/{id}/schedule`)
 
+The service also processes real-time NATS events to sync v1 survey data to the v2 indexer and FGA. See [Event Processing Documentation](docs/event-processing.md) for details.
+
 See [ITX Proxy Implementation Architecture](docs/itx-proxy-implementation.md) for detailed information.
 
 ## Features
@@ -123,17 +125,18 @@ make build
 
 Binary is output to `bin/survey-api`.
 
-### Run Locally
+### Run
+
+Copy `.env.example` to `.env`, fill in the required values (see the `REQUIRED` comments, credentials from 1Password), then source it and run:
 
 ```bash
-# Set required environment variables
-export ITX_CLIENT_ID="your-client-id"
-export ITX_CLIENT_PRIVATE_KEY="$(cat path/to/private-key.pem)"
-export JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL="test-user"  # For local dev only
-export ID_MAPPING_DISABLED="true"  # For local dev without NATS
+cp .env.example .env
+# edit .env and set ITX_CLIENT_ID and ITX_CLIENT_PRIVATE_KEY
+source .env
 
-# Run the service
 make run
+# or for debug logging
+make debug
 ```
 
 The service will start on port 8080 by default.
@@ -149,61 +152,6 @@ make test
 ```bash
 make lint
 make fmt
-```
-
-## Configuration
-
-The service is configured via environment variables:
-
-### Server Configuration
-
-- `PORT` - HTTP server port (default: 8080)
-- `LOG_LEVEL` - Logging level: debug, info, warn, error (default: info)
-- `LOG_ADD_SOURCE` - Add source file info to logs (default: true)
-
-### Authentication
-
-- `JWKS_URL` - Heimdall JWKS endpoint for JWT validation
-- `AUDIENCE` - Expected JWT audience (default: lfx-v2-survey-service)
-- `JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL` - Mock principal for local dev (disables JWT validation)
-
-### ITX Integration
-
-- `ITX_BASE_URL` - ITX API base URL
-- `ITX_AUTH0_DOMAIN` - Auth0 domain for M2M authentication
-- `ITX_CLIENT_ID` - Auth0 client ID
-- `ITX_CLIENT_PRIVATE_KEY` - RSA private key in PEM format (not base64-encoded)
-- `ITX_AUDIENCE` - Auth0 API audience
-
-### ID Mapping
-
-- `NATS_URL` - NATS server URL for ID mapping
-- `ID_MAPPING_DISABLED` - Disable ID mapping for local dev (default: false)
-
-### Event Processing
-
-- `EVENT_PROCESSING_ENABLED` - Enable/disable event processing (default: true)
-- `EVENT_CONSUMER_NAME` - JetStream consumer name (default: survey-service-kv-consumer)
-- `EVENT_STREAM_NAME` - JetStream stream name (default: KV_v1-objects)
-- `EVENT_FILTER_SUBJECT` - NATS subject filter (default: $KV.v1-objects.>)
-
-See [Event Processing Documentation](docs/event-processing.md) for details.
-
-## Docker
-
-### Build Image
-
-```bash
-make docker-build
-```
-
-### Run Container
-
-```bash
-docker run -p 8080:8080 \
-  -e ITX_CLIENT_ID="your-client-id" \
-  -e ITX_CLIENT_PRIVATE_KEY="$(cat private-key.pem)" \
-  linuxfoundation/lfx-v2-survey-service:latest
 ```
 
 ## Kubernetes Deployment
@@ -230,21 +178,19 @@ make helm-install
 
 #### Install with Local Code Changes
 
-When making code changes locally:
-
-1. Copy the local values example file:
+Copy the local values example file:
 
 ```bash
 cp charts/lfx-v2-survey-service/values.local.example.yaml charts/lfx-v2-survey-service/values.local.yaml
 ```
 
-1. After making code changes, build the Docker image:
+After making code changes, build the Docker image:
 
 ```bash
 make docker-build
 ```
 
-1. Install the chart using your local image:
+Install the chart using your local image:
 
 ```bash
 make helm-install-local
@@ -305,16 +251,6 @@ kubectl logs -n lfx -l app=lfx-v2-survey-service
 ├── Makefile                  # Build automation
 └── go.mod                    # Go module definition
 ```
-
-## Development Workflow
-
-1. **Design API**: Modify `api/survey/v1/design/*.go`
-2. **Generate Code**: Run `make apigen`
-3. **Implement Logic**: Add/update files in `internal/service/`
-4. **Test**: Run `make test`
-5. **Format & Lint**: Run `make fmt lint`
-6. **Build**: Run `make build`
-7. **Verify**: Run `make verify` to ensure generated code is up to date
 
 ## Contributing
 
