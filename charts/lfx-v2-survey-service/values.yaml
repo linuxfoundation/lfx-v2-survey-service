@@ -49,7 +49,7 @@ app:
       value: https://api.dev.itx.linuxfoundation.org/
     # Auth0 domain used for M2M token requests to ITX
     ITX_AUTH0_DOMAIN:
-      value: linuxfoundation.auth0.com
+      value: linuxfoundation-dev.auth0.com
     # Auth0 client ID — loaded from Kubernetes secret (see externalSecretsOperator below)
     ITX_CLIENT_ID:
       valueFrom:
@@ -83,9 +83,6 @@ app:
     # JetStream stream to consume from
     EVENT_STREAM_NAME:
       value: KV_v1-objects
-    # NATS subject filter for survey-related events
-    EVENT_FILTER_SUBJECT:
-      value: "$KV.v1-objects.>"
 
     # OpenTelemetry configuration (optional)
     # OTEL_SERVICE_NAME:

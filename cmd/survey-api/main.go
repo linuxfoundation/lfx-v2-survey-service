@@ -286,14 +286,11 @@ func loadConfig() config {
 
 // validate checks that required configuration values are set
 func (c config) validate() error {
-	// Only validate ITX credentials if JWT auth is not disabled (not in local dev mode)
-	if c.MockLocalPrincipal == "" {
-		if c.ITXClientID == "" {
-			return fmt.Errorf("ITX_CLIENT_ID is required")
-		}
-		if c.ITXPrivateKey == "" {
-			return fmt.Errorf("ITX_CLIENT_PRIVATE_KEY is required")
-		}
+	if c.ITXClientID == "" {
+		return fmt.Errorf("ITX_CLIENT_ID is required")
+	}
+	if c.ITXPrivateKey == "" {
+		return fmt.Errorf("ITX_CLIENT_PRIVATE_KEY is required")
 	}
 	return nil
 }
