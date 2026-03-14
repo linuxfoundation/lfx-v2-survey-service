@@ -547,7 +547,7 @@ JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL=test-user
 
 ```bash
 ITX_BASE_URL=https://api.dev.itx.linuxfoundation.org
-ITX_AUTH0_DOMAIN=linuxfoundation-dev.us.auth0.com
+ITX_AUTH0_DOMAIN=linuxfoundation-dev.auth0.com
 ITX_CLIENT_ID=<client-id>
 ITX_CLIENT_PRIVATE_KEY=<rsa-private-key-pem>
 ITX_AUDIENCE=https://api.dev.itx.linuxfoundation.org/
@@ -575,7 +575,7 @@ app:
     ITX_BASE_URL:
       value: https://api.dev.itx.linuxfoundation.org
     ITX_AUTH0_DOMAIN:
-      value: linuxfoundation-dev.us.auth0.com
+      value: linuxfoundation-dev.auth0.com
     ITX_AUDIENCE:
       value: https://api.dev.itx.linuxfoundation.org/
     NATS_URL:
