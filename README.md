@@ -75,9 +75,20 @@ The service provides 15 REST API endpoints for survey management:
 
 - `POST /surveys/validate_email` - Validate email template body and subject
 
-See the OpenAPI spec at `/openapi.yaml` or `/openapi.json` when running locally.
-
 ### API Documentation
+
+**Survey Service OpenAPI Spec**:
+
+- [Dev](https://lfx-api.dev.v2.cluster.linuxfound.info/_survey/openapi3.yaml)
+- [Production](https://lfx-api.v2.cluster.lfx.dev/_survey/openapi3.yaml)
+
+Or import `gen/http/openapi.yaml` into [Swagger Editor](https://editor.swagger.io/) when running locally.
+
+**ITX API Docs** (upstream):
+
+- [Dev](https://api.dev.itx.linuxfoundation.org/explore/?urls.primaryName=v2)
+- [Staging](https://api.stg.itx.linuxfoundation.org/explore/?urls.primaryName=v2)
+- [Production](https://api.prod.itx.linuxfoundation.org/explore/?urls.primaryName=v2)
 
 For detailed API contracts showing request/response schemas and differences between the proxy API and ITX API:
 
