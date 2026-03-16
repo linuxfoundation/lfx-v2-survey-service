@@ -14,6 +14,7 @@ import (
 	"time"
 
 	apieventing "github.com/linuxfoundation/lfx-v2-survey-service/cmd/survey-api/eventing"
+	openapisvr "github.com/linuxfoundation/lfx-v2-survey-service/gen/http/openapi/server"
 	surveysvr "github.com/linuxfoundation/lfx-v2-survey-service/gen/http/survey/server"
 	surveysvc "github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
@@ -154,9 +155,20 @@ func run() int {
 	// Create HTTP muxer
 	mux := goahttp.NewMuxer()
 
+	// Resolve kodata path for serving OpenAPI spec files
+	koDataPath := os.Getenv("KO_DATA_PATH")
+	if koDataPath == "" {
+		koDataPath = "../../gen/http"
+	}
+	koDataDir := http.Dir(koDataPath)
+
 	// Mount HTTP handlers
 	surveyServer := surveysvr.New(surveyEndpoints, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil)
 	surveysvr.Mount(mux, surveyServer)
+
+	// Mount OpenAPI spec file handlers
+	openapiServer := openapisvr.New(nil, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil, koDataDir, koDataDir, koDataDir, koDataDir)
+	openapisvr.Mount(mux, openapiServer)
 
 	// Add health check endpoints
 	mux.Handle("GET", "/health", func(w http.ResponseWriter, r *http.Request) {

@@ -2684,5 +2684,6 @@ components:
             description: Heimdall JWT authorization
             scheme: bearer
 tags:
+    - name: openapi
     - name: survey
       description: Survey service that proxies to ITX survey API

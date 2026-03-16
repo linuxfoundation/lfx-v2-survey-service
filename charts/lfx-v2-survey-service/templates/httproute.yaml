@@ -23,6 +23,9 @@ spec:
     - path:
         type: PathPrefix
         value: /surveys/
+    - path:
+        type: PathPrefix
+        value: /_survey/
     {{- if .Values.heimdall.enabled }}
     filters:
     - type: ExtensionRef
