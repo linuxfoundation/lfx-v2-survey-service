@@ -265,20 +265,7 @@ kubectl logs -n lfx -l app=lfx-v2-survey-service
 
 ## Contributing
 
-### Code Style
-
-- Follow standard Go conventions
-- Use `gofmt` and `golangci-lint`
-- Write tests for business logic
-- Update API design in DSL (don't manually edit generated code)
-
-### Commit Guidelines
-
-When committing changes, follow the repository's commit conventions and include:
-
-```
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on development setup, code style, how to add new endpoints, commit conventions, and the pull request process.
 
 ## License
 
@@ -286,6 +273,3 @@ Copyright The Linux Foundation and each contributor to LFX.
 
 Licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-## Support
-
-For issues, questions, or contributions, please open an issue in the GitHub repository.
