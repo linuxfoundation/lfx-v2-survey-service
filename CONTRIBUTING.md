@@ -133,14 +133,14 @@ package yourpackage
 
 ### Automated Checks
 
-- **CI Pipeline**: GitHub Actions verifies all files have proper headers on every pull request (excludes `gen/*`)
+- **CI Pipeline**: GitHub Actions verifies all files have proper headers on every pull request (excludes `gen/*` and `cmd/survey-api/kodata/*`)
 
 ## Code Style
 
 ### General Guidelines
 
 - Follow [Effective Go](https://golang.org/doc/effective_go.html)
-- Use `gofmt` / `goimports` for formatting — run `make fmt` before committing
+- Use `gofmt` for formatting — run `make fmt` before committing
 - All exported functions and types must have doc comments
 - Domain errors use the `DomainError` pattern (see `internal/domain/errors.go`)
 - Use structured logging (`slog`) — never `fmt.Println` or `log.Printf`
@@ -157,7 +157,7 @@ make lint
 make check
 ```
 
-The linter config is in [revive.toml](revive.toml).
+[revive.toml](revive.toml) configures the standalone `revive` linter used by MegaLinter in CI. `make lint` runs `golangci-lint` with its built-in defaults (no `.golangci.yml` in this repo).
 
 ## Architecture Guidelines
 
