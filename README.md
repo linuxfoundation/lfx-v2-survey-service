@@ -13,6 +13,8 @@ The LFX V2 Survey Service acts as a secure intermediary between LFX Platform V2 
 - **Authorization**: Fine-grained access control via OpenFGA
 - **Path Translation**: Shorter proxy paths (`/surveys/{id}`) → ITX paths (`/v2/surveys/{id}/schedule`)
 
+The service also processes real-time NATS events to sync v1 survey data to the v2 indexer and FGA. See [Event Processing Documentation](docs/event-processing.md) for details.
+
 See [ITX Proxy Implementation Architecture](docs/itx-proxy-implementation.md) for detailed information.
 
 ## Features
@@ -73,9 +75,20 @@ The service provides 15 REST API endpoints for survey management:
 
 - `POST /surveys/validate_email` - Validate email template body and subject
 
-See the OpenAPI spec at `/openapi.yaml` or `/openapi.json` when running locally.
-
 ### API Documentation
+
+**Survey Service OpenAPI Spec**:
+
+- [Dev](https://lfx-api.dev.v2.cluster.linuxfound.info/_survey/openapi3.yaml)
+- [Production](https://lfx-api.v2.cluster.lfx.dev/_survey/openapi3.yaml)
+
+Or import `gen/http/openapi.yaml` into [Swagger Editor](https://editor.swagger.io/) when running locally.
+
+**ITX API Docs** (upstream):
+
+- [Dev](https://api.dev.itx.linuxfoundation.org/explore/?urls.primaryName=v2)
+- [Staging](https://api.stg.itx.linuxfoundation.org/explore/?urls.primaryName=v2)
+- [Production](https://api.prod.itx.linuxfoundation.org/explore/?urls.primaryName=v2)
 
 For detailed API contracts showing request/response schemas and differences between the proxy API and ITX API:
 
@@ -123,17 +136,18 @@ make build
 
 Binary is output to `bin/survey-api`.
 
-### Run Locally
+### Run
+
+Copy `.env.example` to `.env`, fill in the required values (see the `REQUIRED` comments, credentials from 1Password), then source it and run:
 
 ```bash
-# Set required environment variables
-export ITX_CLIENT_ID="your-client-id"
-export ITX_CLIENT_PRIVATE_KEY="$(cat path/to/private-key.pem)"
-export JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL="test-user"  # For local dev only
-export ID_MAPPING_DISABLED="true"  # For local dev without NATS
+cp .env.example .env
+# edit .env and set ITX_CLIENT_ID and ITX_CLIENT_PRIVATE_KEY
+source .env
 
-# Run the service
 make run
+# or for debug logging
+make debug
 ```
 
 The service will start on port 8080 by default.
@@ -151,70 +165,45 @@ make lint
 make fmt
 ```
 
-## Configuration
+## Kubernetes Deployment
 
-The service is configured via environment variables:
+### Install with Helm
 
-### Server Configuration
+#### Create Kubernetes Secret
 
-- `PORT` - HTTP server port (default: 8080)
-- `LOG_LEVEL` - Logging level: debug, info, warn, error (default: info)
-- `LOG_ADD_SOURCE` - Add source file info to logs (default: true)
+Before installing the chart, you must create a Kubernetes secret with the required credentials. Get the values from the **LFX Platform Chart Values Secrets - Local Development** note in the **LFX V2** vault in 1Password.
 
-### Authentication
+```bash
+kubectl create secret generic lfx-v2-survey-service -n lfx \
+  --from-literal=ITX_CLIENT_ID="<from-1password>" \
+  --from-file=ITX_CLIENT_PRIVATE_KEY=/path/to/private.key
+```
 
-- `JWKS_URL` - Heimdall JWKS endpoint for JWT validation
-- `AUDIENCE` - Expected JWT audience (default: lfx-v2-survey-service)
-- `JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL` - Mock principal for local dev (disables JWT validation)
+#### Install from GHCR (no local code changes)
 
-### ITX Integration
+To install the latest published image directly from GHCR without any local modifications:
 
-- `ITX_BASE_URL` - ITX API base URL
-- `ITX_AUTH0_DOMAIN` - Auth0 domain for M2M authentication
-- `ITX_CLIENT_ID` - Auth0 client ID
-- `ITX_CLIENT_PRIVATE_KEY` - RSA private key in PEM format (not base64-encoded)
-- `ITX_AUDIENCE` - Auth0 API audience
+```bash
+make helm-install
+```
 
-### ID Mapping
+#### Install with Local Code Changes
 
-- `NATS_URL` - NATS server URL for ID mapping
-- `ID_MAPPING_DISABLED` - Disable ID mapping for local dev (default: false)
+Copy the local values example file:
 
-### Event Processing
+```bash
+cp charts/lfx-v2-survey-service/values.local.example.yaml charts/lfx-v2-survey-service/values.local.yaml
+```
 
-- `EVENT_PROCESSING_ENABLED` - Enable/disable event processing (default: true)
-- `EVENT_CONSUMER_NAME` - JetStream consumer name (default: survey-service-kv-consumer)
-- `EVENT_STREAM_NAME` - JetStream stream name (default: KV_v1-objects)
-- `EVENT_FILTER_SUBJECT` - NATS subject filter (default: $KV.v1-objects.>)
-
-See [Event Processing Documentation](docs/event-processing.md) for details.
-
-## Docker
-
-### Build Image
+After making code changes, build the Docker image:
 
 ```bash
 make docker-build
 ```
 
-### Run Container
+Install the chart using your local image:
 
 ```bash
-docker run -p 8080:8080 \
-  -e ITX_CLIENT_ID="your-client-id" \
-  -e ITX_CLIENT_PRIVATE_KEY="$(cat private-key.pem)" \
-  linuxfoundation/lfx-v2-survey-service:latest
-```
-
-## Kubernetes Deployment
-
-### Install with Helm
-
-```bash
-# Install with default values
-make helm-install
-
-# Install with local values file
 make helm-install-local
 ```
 
@@ -274,32 +263,9 @@ kubectl logs -n lfx -l app=lfx-v2-survey-service
 └── go.mod                    # Go module definition
 ```
 
-## Development Workflow
-
-1. **Design API**: Modify `api/survey/v1/design/*.go`
-2. **Generate Code**: Run `make apigen`
-3. **Implement Logic**: Add/update files in `internal/service/`
-4. **Test**: Run `make test`
-5. **Format & Lint**: Run `make fmt lint`
-6. **Build**: Run `make build`
-7. **Verify**: Run `make verify` to ensure generated code is up to date
-
 ## Contributing
 
-### Code Style
-
-- Follow standard Go conventions
-- Use `gofmt` and `golangci-lint`
-- Write tests for business logic
-- Update API design in DSL (don't manually edit generated code)
-
-### Commit Guidelines
-
-When committing changes, follow the repository's commit conventions and include:
-
-```
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on development setup, code style, how to add new endpoints, commit conventions, and the pull request process.
 
 ## License
 
@@ -307,6 +273,3 @@ Copyright The Linux Foundation and each contributor to LFX.
 
 Licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-## Support
-
-For issues, questions, or contributions, please open an issue in the GitHub repository.

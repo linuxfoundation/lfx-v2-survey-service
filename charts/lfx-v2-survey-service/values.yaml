@@ -7,7 +7,7 @@ image:
   tag: ""  # Overrides appVersion from Chart.yaml
   pullPolicy: IfNotPresent
 
-replicaCount: 3
+replicaCount: 1
 
 # podDisruptionBudget configures a PodDisruptionBudget for the deployment.
 # Only one of minAvailable or maxUnavailable may be set (not both).
@@ -34,42 +34,62 @@ app:
     # Server configuration
     PORT:
       value: "8080"
+    # Logging level: debug, info, warn, error
     LOG_LEVEL:
       value: info
+    # Add source file and line number to log output
     LOG_ADD_SOURCE:
       value: "true"
 
     # JWT authentication (Heimdall)
     JWKS_URL:
       value: http://lfx-platform-heimdall.lfx.svc.cluster.local:4457/.well-known/jwks
+    # Must match the audience claim in incoming JWTs
     AUDIENCE:
       value: lfx-v2-survey-service
+    # Set to a non-empty string to skip JWT validation (local dev only — never set in production)
     JWT_AUTH_DISABLED_MOCK_LOCAL_PRINCIPAL:
       value: ''
 
     # ITX service configuration
     ITX_BASE_URL:
       value: https://api.dev.itx.linuxfoundation.org/
+    # Auth0 domain used for M2M token requests to ITX
     ITX_AUTH0_DOMAIN:
-      value: linuxfoundation.auth0.com
+      value: linuxfoundation-dev.auth0.com
+    # Auth0 client ID — loaded from Kubernetes secret (see externalSecretsOperator below)
     ITX_CLIENT_ID:
       valueFrom:
         secretKeyRef:
           name: lfx-v2-survey-service
           key: ITX_CLIENT_ID
+    # RSA private key in raw PEM format (not base64-encoded) — loaded from Kubernetes secret
     ITX_CLIENT_PRIVATE_KEY:
       valueFrom:
         secretKeyRef:
           name: lfx-v2-survey-service
           key: ITX_CLIENT_PRIVATE_KEY
+    # Auth0 API audience for ITX M2M token requests
     ITX_AUDIENCE:
       value: https://api.dev.itx.linuxfoundation.org/
 
     # NATS configuration
     NATS_URL:
       value: nats://lfx-platform-nats.lfx.svc.cluster.local:4222
+    # Set to true to disable NATS ID mapping (local dev without NATS)
     ID_MAPPING_DISABLED:
       value: false
+
+    # Event processing — consumes JetStream events to sync v1 survey data to v2 indexer and FGA
+    # See docs/event-processing.md for details
+    EVENT_PROCESSING_ENABLED:
+      value: true
+    # JetStream consumer name — must be unique per service instance
+    EVENT_CONSUMER_NAME:
+      value: survey-service-kv-consumer
+    # JetStream stream to consume from
+    EVENT_STREAM_NAME:
+      value: KV_v1-objects
 
     # OpenTelemetry configuration (optional)
     # OTEL_SERVICE_NAME:
@@ -130,7 +150,7 @@ heimdall:
 # External Secrets Operator
 externalSecretsOperator:
   # Enable/disable External Secrets Operator integration
-  enabled: true
+  enabled: false
 
   # ExternalSecret configuration
   externalSecret:
