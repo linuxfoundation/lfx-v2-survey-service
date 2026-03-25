@@ -148,7 +148,7 @@ func (p *NATSPublisher) sendSurveyIndexerMessage(ctx context.Context, subject st
 		return p.sendIndexerDeleteMessage(ctx, subject, action, data.UID, indexingConfig)
 	}
 
-	return p.sendIndexerCreateUpdateMessage(ctx, subject, action, data, indexingConfig, tags)
+	return p.sendIndexerCreateUpdateMessage(ctx, subject, action, data, indexingConfig)
 }
 
 // sendSurveyAccessMessage sends the message to the NATS server for the survey access control
@@ -242,7 +242,7 @@ func (p *NATSPublisher) sendSurveyResponseIndexerMessage(ctx context.Context, su
 		return p.sendIndexerDeleteMessage(ctx, subject, action, data.UID, indexingConfig)
 	}
 
-	return p.sendIndexerCreateUpdateMessage(ctx, subject, action, data, indexingConfig, tags)
+	return p.sendIndexerCreateUpdateMessage(ctx, subject, action, data, indexingConfig)
 }
 
 // sendSurveyResponseAccessMessage sends the message to the NATS server for the survey response access control
@@ -341,7 +341,7 @@ func (p *NATSPublisher) sendIndexerDeleteMessage(ctx context.Context, subject st
 }
 
 // sendIndexerCreateUpdateMessage sends a generic create/update message to the indexer with full object and IndexingConfig
-func (p *NATSPublisher) sendIndexerCreateUpdateMessage(ctx context.Context, subject string, action indexerConstants.MessageAction, data interface{}, indexingConfig *indexerTypes.IndexingConfig, tags []string) error {
+func (p *NATSPublisher) sendIndexerCreateUpdateMessage(ctx context.Context, subject string, action indexerConstants.MessageAction, data interface{}, indexingConfig *indexerTypes.IndexingConfig) error {
 	headers := p.buildHeaders(ctx)
 
 	public := false
@@ -352,7 +352,6 @@ func (p *NATSPublisher) sendIndexerCreateUpdateMessage(ctx context.Context, subj
 		Action:         action,
 		Headers:        headers,
 		Data:           data,
-		Tags:           tags,
 		IndexingConfig: indexingConfig,
 	}
 
