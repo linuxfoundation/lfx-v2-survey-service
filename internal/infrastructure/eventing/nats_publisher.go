@@ -113,6 +113,7 @@ func (p *NATSPublisher) sendSurveyIndexerMessage(ctx context.Context, subject st
 	// Build IndexingConfig (needed for both create/update and delete)
 	nameAndAliases := []string{}
 	parentRefs := []string{}
+	tags := []string{}
 
 	if data.SurveyTitle != "" {
 		nameAndAliases = append(nameAndAliases, data.SurveyTitle)
@@ -122,10 +123,11 @@ func (p *NATSPublisher) sendSurveyIndexerMessage(ctx context.Context, subject st
 	for _, committee := range data.Committees {
 		if committee.CommitteeUID != "" {
 			parentRefs = append(parentRefs, fmt.Sprintf("committee:%s", committee.CommitteeUID))
+			tags = append(tags, fmt.Sprintf("committee_uid:%s", committee.CommitteeUID))
 		}
 		if committee.ProjectUID != "" {
-			projectRef := fmt.Sprintf("project:%s", committee.ProjectUID)
-			parentRefs = appendIfNotExists(parentRefs, projectRef)
+			parentRefs = appendIfNotExists(parentRefs, fmt.Sprintf("project:%s", committee.ProjectUID))
+			tags = appendIfNotExists(tags, fmt.Sprintf("project_uid:%s", committee.ProjectUID))
 		}
 	}
 
@@ -138,6 +140,7 @@ func (p *NATSPublisher) sendSurveyIndexerMessage(ctx context.Context, subject st
 		SortName:             data.SurveyTitle,
 		NameAndAliases:       nameAndAliases,
 		ParentRefs:           parentRefs,
+		Tags:                 tags,
 		Fulltext:             data.SurveyTitle,
 	}
 
@@ -204,15 +207,22 @@ func (p *NATSPublisher) sendSurveyResponseIndexerMessage(ctx context.Context, su
 	// Build IndexingConfig (needed for both create/update and delete)
 	nameAndAliases := []string{}
 	parentRefs := []string{}
+	tags := []string{}
 
 	if data.Email != "" {
 		nameAndAliases = append(nameAndAliases, data.Email)
 	}
 	if data.Project.ProjectUID != "" {
 		parentRefs = append(parentRefs, fmt.Sprintf("project:%s", data.Project.ProjectUID))
+		tags = append(tags, fmt.Sprintf("project_uid:%s", data.Project.ProjectUID))
+	}
+	if data.CommitteeUID != "" {
+		parentRefs = append(parentRefs, fmt.Sprintf("committee:%s", data.CommitteeUID))
+		tags = append(tags, fmt.Sprintf("committee_uid:%s", data.CommitteeUID))
 	}
 	if data.SurveyUID != "" {
 		parentRefs = append(parentRefs, fmt.Sprintf("survey:%s", data.SurveyUID))
+		tags = append(tags, fmt.Sprintf("survey_uid:%s", data.SurveyUID))
 	}
 
 	indexingConfig := &indexerTypes.IndexingConfig{
@@ -224,6 +234,7 @@ func (p *NATSPublisher) sendSurveyResponseIndexerMessage(ctx context.Context, su
 		SortName:             data.Email,
 		NameAndAliases:       nameAndAliases,
 		ParentRefs:           parentRefs,
+		Tags:                 tags,
 		Fulltext:             fmt.Sprintf("%s %s %s", data.Email, data.FirstName, data.LastName),
 	}
 

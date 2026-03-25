@@ -58,6 +58,7 @@ The survey service implements NATS KV bucket event processing to automatically s
    - **Indexer Service** (`lfx.index.survey`, `lfx.index.survey_response`)
      - Enables search functionality
      - Includes parent references (committee, project)
+     - Includes searchable tags (`committee_uid:<uid>`, `project_uid:<uid>` for surveys; additionally `survey_uid:<uid>` for responses)
      - Provides access control metadata
 
    - **FGA-Sync Service** (`lfx.fga-sync.update_access`, `lfx.fga-sync.delete_access`)
