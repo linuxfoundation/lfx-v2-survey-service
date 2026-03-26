@@ -4,5 +4,5 @@
 # Image configuration
 image:
   repository: linuxfoundation/lfx-v2-survey-service
-  tag: ""  # Overrides appVersion from Chart.yaml
-  pullPolicy: IfNotPresent
+  tag: "latest"  # Overrides appVersion from Chart.yaml
+  pullPolicy: Never
