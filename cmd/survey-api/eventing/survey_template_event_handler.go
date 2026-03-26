@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"strconv"
 
 	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
@@ -33,6 +34,78 @@ type SurveyTemplateDBRaw struct {
 	Category        string            `json:"category"`
 	IsOwner         bool              `json:"is_owner"`
 	CustomVariables map[string]string `json:"custom_variables"`
+}
+
+// UnmarshalJSON implements custom unmarshaling to handle both string and int inputs for numeric fields.
+func (s *SurveyTemplateDBRaw) UnmarshalJSON(data []byte) error {
+	tmp := struct {
+		ID              string            `json:"id"`
+		Title           string            `json:"title"`
+		Href            string            `json:"href"`
+		Nickname        string            `json:"nickname"`
+		QuestionCount   interface{}       `json:"question_count"`
+		AnalyzeUrl      string            `json:"analyze_url"`
+		EditUrl         string            `json:"edit_url"`
+		CollectUrl      string            `json:"collect_url"`
+		Preview         string            `json:"preview"`
+		DateCreated     string            `json:"date_created"`
+		DateModified    string            `json:"date_modified"`
+		Language        string            `json:"language"`
+		FolderID        string            `json:"folder_id"`
+		PageCount       interface{}       `json:"page_count"`
+		Category        string            `json:"category"`
+		IsOwner         bool              `json:"is_owner"`
+		CustomVariables map[string]string `json:"custom_variables"`
+	}{}
+
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+
+	convertToInt := func(v interface{}) (int, error) {
+		if v == nil {
+			return 0, nil
+		}
+		switch val := v.(type) {
+		case string:
+			if val == "" {
+				return 0, nil
+			}
+			return strconv.Atoi(val)
+		case float64:
+			return int(val), nil
+		case int:
+			return val, nil
+		default:
+			return 0, fmt.Errorf("invalid type for numeric field: %T", v)
+		}
+	}
+
+	s.ID = tmp.ID
+	s.Title = tmp.Title
+	s.Href = tmp.Href
+	s.Nickname = tmp.Nickname
+	s.AnalyzeUrl = tmp.AnalyzeUrl
+	s.EditUrl = tmp.EditUrl
+	s.CollectUrl = tmp.CollectUrl
+	s.Preview = tmp.Preview
+	s.DateCreated = tmp.DateCreated
+	s.DateModified = tmp.DateModified
+	s.Language = tmp.Language
+	s.FolderID = tmp.FolderID
+	s.Category = tmp.Category
+	s.IsOwner = tmp.IsOwner
+	s.CustomVariables = tmp.CustomVariables
+
+	var err error
+	if s.QuestionCount, err = convertToInt(tmp.QuestionCount); err != nil {
+		return fmt.Errorf("failed to convert question_count: %w", err)
+	}
+	if s.PageCount, err = convertToInt(tmp.PageCount); err != nil {
+		return fmt.Errorf("failed to convert page_count: %w", err)
+	}
+
+	return nil
 }
 
 // handleSurveyTemplateUpdate processes a survey template update from surveymonkey-surveys records
