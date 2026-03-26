@@ -206,6 +206,8 @@ func handleKVPut(
 		return handleSurveyUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, logger)
 	case "itx-survey-responses":
 		return handleSurveyResponseUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, logger)
+	case "surveymonkey-surveys":
+		return handleSurveyTemplateUpdate(ctx, key, v1Data, publisher, mappingsKV, logger)
 	default:
 		// Not a survey-related key, ACK and skip
 		logger.With("key", key, "prefix", prefix).Debug("skipping update - unsupported type")
@@ -268,6 +270,8 @@ func handleResourceDelete(ctx context.Context,
 		return handleSurveyDelete(ctx, uid, publisher, mappingsKV, logger)
 	case "itx-survey-responses":
 		return handleSurveyResponseDelete(ctx, uid, publisher, mappingsKV, logger)
+	case "surveymonkey-surveys":
+		return handleSurveyTemplateDelete(ctx, uid, publisher, mappingsKV, logger)
 	default:
 		return false // ACK unsupported types
 	}

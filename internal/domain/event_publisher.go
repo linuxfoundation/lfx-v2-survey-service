@@ -16,6 +16,10 @@ type EventPublisher interface {
 	// action should be "created", "updated", or "deleted"
 	PublishSurveyResponseEvent(ctx context.Context, action string, response *SurveyResponseData) error
 
+	// PublishSurveyTemplateEvent publishes a survey template event to the indexer
+	// action should be "created", "updated", or "deleted"
+	PublishSurveyTemplateEvent(ctx context.Context, action string, template *SurveyTemplateData) error
+
 	// Close closes the publisher connection
 	Close() error
 }
