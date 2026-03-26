@@ -24,6 +24,9 @@ const (
 	// IndexSurveyResponseSubject is the subject for survey response indexing
 	IndexSurveyResponseSubject = "lfx.index.survey_response"
 
+	// IndexSurveyTemplateSubject is the subject for survey template indexing
+	IndexSurveyTemplateSubject = "lfx.index.survey_template"
+
 	// UpdateAccessSubject is the subject for FGA access control updates
 	UpdateAccessSubject = "lfx.fga-sync.update_access"
 
@@ -91,6 +94,14 @@ func (p *NATSPublisher) PublishSurveyResponseEvent(ctx context.Context, action s
 		}
 	}
 
+	return nil
+}
+
+// PublishSurveyTemplateEvent publishes a survey template event to the indexer
+func (p *NATSPublisher) PublishSurveyTemplateEvent(ctx context.Context, action string, template *domain.SurveyTemplateData) error {
+	if err := p.sendSurveyTemplateIndexerMessage(ctx, IndexSurveyTemplateSubject, indexerConstants.MessageAction(action), template); err != nil {
+		return fmt.Errorf("failed to send survey template indexer message: %w", err)
+	}
 	return nil
 }
 
@@ -240,6 +251,34 @@ func (p *NATSPublisher) sendSurveyResponseIndexerMessage(ctx context.Context, su
 
 	if action == indexerConstants.ActionDeleted {
 		return p.sendIndexerDeleteMessage(ctx, subject, action, data.UID, indexingConfig)
+	}
+
+	return p.sendIndexerCreateUpdateMessage(ctx, subject, action, data, indexingConfig)
+}
+
+// sendSurveyTemplateIndexerMessage routes to the appropriate indexer message handler based on action
+func (p *NATSPublisher) sendSurveyTemplateIndexerMessage(ctx context.Context, subject string, action indexerConstants.MessageAction, data *domain.SurveyTemplateData) error {
+	nameAndAliases := []string{}
+	if data.Title != "" {
+		nameAndAliases = append(nameAndAliases, data.Title)
+	}
+	if data.Nickname != "" {
+		nameAndAliases = appendIfNotExists(nameAndAliases, data.Nickname)
+	}
+
+	indexingConfig := &indexerTypes.IndexingConfig{
+		ObjectID:             data.ID,
+		AccessCheckObject:    "team:global_survey_platform_admins",
+		AccessCheckRelation:  "member",
+		HistoryCheckObject:   "team:global_survey_platform_admins",
+		HistoryCheckRelation: "member",
+		SortName:             data.Title,
+		NameAndAliases:       nameAndAliases,
+		Fulltext:             fmt.Sprintf("%s %s", data.Title, data.Nickname),
+	}
+
+	if action == indexerConstants.ActionDeleted {
+		return p.sendIndexerDeleteMessage(ctx, subject, action, data.ID, indexingConfig)
 	}
 
 	return p.sendIndexerCreateUpdateMessage(ctx, subject, action, data, indexingConfig)

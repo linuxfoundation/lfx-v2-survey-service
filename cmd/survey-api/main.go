@@ -116,6 +116,7 @@ func run() int {
 			FilterSubjects: []string{
 				"$KV.v1-objects.itx-surveys.>",
 				"$KV.v1-objects.itx-survey-responses.>",
+				"$KV.v1-objects.surveymonkey-surveys.>",
 			},
 			MaxDeliver:    3,
 			AckWait:       30 * time.Second,
