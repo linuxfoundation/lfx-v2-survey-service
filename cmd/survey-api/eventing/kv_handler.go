@@ -202,10 +202,10 @@ func handleKVPut(
 
 	// Route to specific handlers based on prefix
 	switch prefix {
-	// case "itx-surveys":
-	// 	return handleSurveyUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, logger)
-	// case "itx-survey-responses":
-	// 	return handleSurveyResponseUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, logger)
+	case "itx-surveys":
+		return handleSurveyUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, logger)
+	case "itx-survey-responses":
+		return handleSurveyResponseUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, logger)
 	case "surveymonkey-surveys":
 		return handleSurveyTemplateUpdate(ctx, key, v1Data, publisher, mappingsKV, logger)
 	default:
