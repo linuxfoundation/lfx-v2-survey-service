@@ -132,3 +132,24 @@ type SurveyResponseOrgData struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
+
+// SurveyTemplateData represents a SurveyMonkey survey template from the surveymonkey-surveys table
+type SurveyTemplateData struct {
+	ID              string            `json:"id"`
+	Title           string            `json:"title"`
+	Href            string            `json:"href"`
+	Nickname        string            `json:"nickname"`
+	QuestionCount   int               `json:"question_count"`
+	AnalyzeUrl      string            `json:"analyze_url"`
+	EditUrl         string            `json:"edit_url"`
+	CollectUrl      string            `json:"collect_url"`
+	Preview         string            `json:"preview"`
+	DateCreated     string            `json:"date_created"`
+	DateModified    string            `json:"date_modified"`
+	Language        string            `json:"language"`
+	FolderID        string            `json:"folder_id"`
+	PageCount       int               `json:"page_count"`
+	Category        string            `json:"category"`
+	IsOwner         bool              `json:"is_owner"`
+	CustomVariables map[string]string `json:"custom_variables"`
+}
