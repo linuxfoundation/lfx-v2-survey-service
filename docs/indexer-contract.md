@@ -46,7 +46,7 @@ These fields are indexed and queryable via `filters` or `cel_filter` in the quer
 | `email_body` | string | Email body HTML |
 | `email_body_text` | string | Email body plain text |
 | `committee_category` | string | Category of committees this survey targets |
-| `committees` | []object | Array of associated committees (see [SurveyCommitteeData](#surveycommunitteedata)) |
+| `committees` | []object | Array of associated committees (see [SurveyCommitteeData](#surveycommitteedata)) |
 | `committee_voting_enabled` | bool | Whether committee voting is enabled for this survey |
 | `survey_status` | string | Current survey status |
 | `nps_value` | int | Net Promoter Score value |
@@ -249,7 +249,7 @@ On create/update, a message is published to `lfx.fga-sync.update_access`:
 }
 ```
 
-> `relations` is only included when `username` is non-empty. Each of `project` and `survey` in `references` is only included when the respective UID is non-empty. The access message is skipped entirely if both `relations` and `references` are empty. On delete, a `lfx.fga-sync.delete_access` message is sent with only `uid`.
+> When an access message is published, the `relations` and `references` keys may be present even if they are empty maps. A non-empty `username` populates `relations.writer` and `relations.viewer`. Non-empty project and survey UIDs populate `references.project` and `references.survey`, respectively. The access message is skipped entirely if both `relations` and `references` are empty. On delete, a `lfx.fga-sync.delete_access` message is sent with only `uid`.
 
 ### Search Behavior
 
@@ -352,6 +352,6 @@ All three resource types support the following actions:
 
 | Action | Trigger |
 |---|---|
-| `created` | Key not yet present (or tombstoned) in the `v1-mappings` KV bucket |
-| `updated` | Key already exists with value `1` in the `v1-mappings` KV bucket |
+| `created` | Key not yet present in the `v1-mappings` KV bucket |
+| `updated` | Key already exists in the `v1-mappings` KV bucket, including tombstoned `!del` entries |
 | `deleted` | Key deleted, purged, or `_sdc_deleted_at` present in the payload |
