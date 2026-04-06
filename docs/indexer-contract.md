@@ -103,27 +103,6 @@ Each entry in the `committees` array has the following fields:
 | `history_check_object` | `survey:{uid}` |
 | `history_check_relation` | `auditor` |
 
-### FGA-Sync Access Message
-
-On create/update, a message is published to `lfx.fga-sync.update_access`:
-
-```json
-{
-  "object_type": "survey",
-  "operation": "update_access",
-  "data": {
-    "uid": "<survey_uid>",
-    "public": false,
-    "references": {
-      "committee": ["<committee_uid>", ...],
-      "project": ["<project_uid>", ...]
-    }
-  }
-}
-```
-
-> The access message is only sent when at least one valid committee or project reference exists. On delete, a `lfx.fga-sync.delete_access` message is sent with only `uid`.
-
 ### Search Behavior
 
 | Field | Value |
@@ -226,31 +205,6 @@ Each entry in `survey_monkey_question_answers` has:
 | `history_check_object` | `survey_response:{uid}` |
 | `history_check_relation` | `auditor` |
 
-### FGA-Sync Access Message
-
-On create/update, a message is published to `lfx.fga-sync.update_access`:
-
-```json
-{
-  "object_type": "survey_response",
-  "operation": "update_access",
-  "data": {
-    "uid": "<response_uid>",
-    "public": false,
-    "relations": {
-      "writer": ["<username>"],
-      "viewer": ["<username>"]
-    },
-    "references": {
-      "project": ["<project_uid>"],
-      "survey": ["<survey_uid>"]
-    }
-  }
-}
-```
-
-> When an access message is published, the `relations` and `references` keys may be present even if they are empty maps. A non-empty `username` populates `relations.writer` and `relations.viewer`. Non-empty project and survey UIDs populate `references.project` and `references.survey`, respectively. The access message is skipped entirely if both `relations` and `references` are empty. On delete, a `lfx.fga-sync.delete_access` message is sent with only `uid`.
-
 ### Search Behavior
 
 | Field | Value |
@@ -311,7 +265,7 @@ _(none)_
 | `history_check_object` | `team:global_survey_platform_admins` |
 | `history_check_relation` | `member` |
 
-> Survey templates are restricted to members of the `global_survey_platform_admins` team. No FGA-sync access message is sent for templates.
+> Survey templates are restricted to members of the `global_survey_platform_admins` team.
 
 ### Search Behavior
 
@@ -326,32 +280,3 @@ _(none)_
 
 _(none)_
 
----
-
-## NATS Subjects
-
-| Purpose | Subject |
-|---|---|
-| Index a survey | `lfx.index.survey` |
-| Index a survey response | `lfx.index.survey_response` |
-| Index a survey template | `lfx.index.survey_template` |
-| Update FGA access tuples | `lfx.fga-sync.update_access` |
-| Delete FGA access tuples | `lfx.fga-sync.delete_access` |
-
-## KV Buckets Watched
-
-| Bucket | Filter Subject | Resource Type |
-|---|---|---|
-| `v1-objects` | `$KV.v1-objects.itx-surveys.>` | Survey |
-| `v1-objects` | `$KV.v1-objects.itx-survey-responses.>` | Survey Response |
-| `v1-objects` | `$KV.v1-objects.surveymonkey-surveys.>` | Survey Template |
-
-## Actions
-
-All three resource types support the following actions:
-
-| Action | Trigger |
-|---|---|
-| `created` | Key not yet present in the `v1-mappings` KV bucket |
-| `updated` | Key already exists in the `v1-mappings` KV bucket, including tombstoned `!del` entries |
-| `deleted` | Key deleted, purged, or `_sdc_deleted_at` present in the payload |
