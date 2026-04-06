@@ -15,6 +15,8 @@ The LFX V2 Survey Service acts as a secure intermediary between LFX Platform V2 
 
 The service also processes real-time NATS events to sync v1 survey data to the v2 indexer and FGA. See [Event Processing Documentation](docs/event-processing.md) for details.
 
+For a complete reference of all data types, tags, access control config, and parent references sent to the indexer, see [Indexer Contract](docs/indexer-contract.md).
+
 See [ITX Proxy Implementation Architecture](docs/itx-proxy-implementation.md) for detailed information.
 
 ## Features
@@ -255,6 +257,7 @@ kubectl logs -n lfx -l app=lfx-v2-survey-service
 ├── docs/                     # Documentation
 │   ├── api-contracts/        # API contract documentation
 │   ├── event-processing.md   # Event processing guide
+│   ├── indexer-contract.md   # Indexer data types & access control reference
 │   └── itx-proxy-implementation.md  # Architecture guide
 ├── charts/                   # Helm charts
 │   └── lfx-v2-survey-service/
