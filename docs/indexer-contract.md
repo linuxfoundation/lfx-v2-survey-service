@@ -16,6 +16,10 @@ This document is the authoritative reference for all data the survey service sen
 
 ## Survey
 
+**Object type:** `survey`
+
+**NATS subject:** `lfx.index.survey`
+
 **Source struct:** `internal/domain/event_models.go` — `SurveyData`
 
 **Indexed on:** create, update, delete of a survey (sourced from the `itx-surveys` KV bucket).
@@ -123,6 +127,10 @@ Each entry in the `committees` array has the following fields:
 
 ## Survey Response
 
+**Object type:** `survey_response`
+
+**NATS subject:** `lfx.index.survey_response`
+
 **Source struct:** `internal/domain/event_models.go` — `SurveyResponseData`
 
 **Indexed on:** create, update, delete of a survey response (sourced from the `itx-survey-responses` KV bucket).
@@ -225,6 +233,10 @@ Each entry in `survey_monkey_question_answers` has:
 ---
 
 ## Survey Template
+
+**Object type:** `survey_template`
+
+**NATS subject:** `lfx.index.survey_template`
 
 **Source struct:** `internal/domain/event_models.go` — `SurveyTemplateData`
 
