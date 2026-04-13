@@ -41,7 +41,7 @@ require (
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/jwx/v2 v2.1.6 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
-	github.com/linuxfoundation/lfx-v2-fga-sync v0.2.17-0.20260413213503-19b4156d3291 // indirect
+	github.com/linuxfoundation/lfx-v2-fga-sync v0.2.17-0.20260413222802-7f3a6be4424e // indirect
 	github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d // indirect
 	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
