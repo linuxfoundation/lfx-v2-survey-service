@@ -14,10 +14,12 @@ spec:
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
+      app.kubernetes.io/name: {{ .Chart.Name }}
   template:
     metadata:
       labels:
         app: {{ .Chart.Name }}
+        app.kubernetes.io/name: {{ .Chart.Name }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | default .Chart.Name }}
       securityContext:
