@@ -10,10 +10,10 @@ import (
 	"log/slog"
 	"slices"
 
-	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
-	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
 	fgaconstants "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/constants"
 	fgatypes "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/types"
+	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
+	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/nats-io/nats.go"
 )
@@ -28,7 +28,6 @@ const (
 
 	// IndexSurveyTemplateSubject is the subject for survey template indexing
 	IndexSurveyTemplateSubject = "lfx.index.survey_template"
-
 )
 
 // NATSPublisher implements the EventPublisher interface
