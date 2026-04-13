@@ -12,6 +12,7 @@ import (
 
 	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
 	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
+	fgatypes "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/nats-io/nats.go"
 )
@@ -33,13 +34,6 @@ const (
 	// DeleteAccessSubject is the subject for FGA access control deletions
 	DeleteAccessSubject = "lfx.fga-sync.delete_access"
 )
-
-// GenericFGAMessage represents a generic FGA message
-type GenericFGAMessage struct {
-	ObjectType string                 `json:"object_type"`
-	Operation  string                 `json:"operation"`
-	Data       map[string]interface{} `json:"data"`
-}
 
 // NATSPublisher implements the EventPublisher interface
 type NATSPublisher struct {
@@ -190,13 +184,13 @@ func (p *NATSPublisher) sendSurveyAccessMessage(survey *domain.SurveyData) error
 		return nil
 	}
 
-	accessMsg := GenericFGAMessage{
+	accessMsg := fgatypes.GenericFGAMessage{
 		ObjectType: "survey",
 		Operation:  "update_access",
-		Data: map[string]interface{}{
-			"uid":        survey.UID,
-			"public":     false,
-			"references": references,
+		Data: fgatypes.GenericAccessData{
+			UID:        survey.UID,
+			Public:     false,
+			References: references,
 		},
 	}
 
@@ -305,14 +299,14 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(data *domain.SurveyRespo
 		return nil
 	}
 
-	accessMsg := GenericFGAMessage{
+	accessMsg := fgatypes.GenericFGAMessage{
 		ObjectType: "survey_response",
 		Operation:  "update_access",
-		Data: map[string]interface{}{
-			"uid":        data.UID,
-			"public":     false,
-			"relations":  relations,
-			"references": references,
+		Data: fgatypes.GenericAccessData{
+			UID:        data.UID,
+			Public:     false,
+			Relations:  relations,
+			References: references,
 		},
 	}
 
@@ -332,12 +326,10 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(data *domain.SurveyRespo
 // sendDeleteAccessMessage sends a delete access message to FGA-sync
 func (p *NATSPublisher) sendDeleteAccessMessage(objectType string, uid string) error {
 	// Construct delete access message
-	deleteMsg := GenericFGAMessage{
+	deleteMsg := fgatypes.GenericFGAMessage{
 		ObjectType: objectType,
 		Operation:  "delete_access",
-		Data: map[string]interface{}{
-			"uid": uid,
-		},
+		Data:       fgatypes.GenericDeleteData{UID: uid},
 	}
 
 	deleteMsgBytes, err := json.Marshal(deleteMsg)
