@@ -8,6 +8,7 @@ metadata:
   namespace: {{ .Values.lfx.namespace }}
   labels:
     app: {{ .Chart.Name }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -17,6 +18,7 @@ spec:
     metadata:
       labels:
         app: {{ .Chart.Name }}
+        app.kubernetes.io/name: {{ .Chart.Name }}
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name | default .Chart.Name }}
       securityContext:
