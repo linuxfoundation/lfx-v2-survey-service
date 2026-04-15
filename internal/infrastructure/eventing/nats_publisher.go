@@ -277,14 +277,10 @@ func (p *NATSPublisher) sendSurveyTemplateIndexerMessage(ctx context.Context, su
 func (p *NATSPublisher) sendSurveyResponseAccessMessage(data *domain.SurveyResponseData) error {
 	relations := map[string][]string{}
 	if data.Username != "" {
-		relations["writer"] = []string{data.Username}
-		relations["viewer"] = []string{data.Username}
+		relations["owner"] = []string{data.Username}
 	}
 
 	references := map[string][]string{}
-	if data.Project.ProjectUID != "" {
-		references["project"] = []string{data.Project.ProjectUID}
-	}
 	if data.SurveyUID != "" {
 		references["survey"] = []string{data.SurveyUID}
 	}
