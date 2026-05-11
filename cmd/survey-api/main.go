@@ -25,6 +25,8 @@ import (
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/logging"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/middleware"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/service"
+	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	goahttp "goa.design/goa/v3/http"
 )
 
@@ -195,6 +197,11 @@ func run() int {
 	handler = middleware.RequestLoggerMiddleware()(handler)
 	handler = middleware.RequestIDMiddleware()(handler)
 	handler = middleware.AuthorizationMiddleware()(handler)
+	handler = otelhttp.NewHandler(handler, "survey-service",
+		otelhttp.WithFilter(func(r *http.Request) bool {
+			return !constants.IsHealthPath(r.URL.Path)
+		}),
+	)
 
 	// Create HTTP server
 	srv := &http.Server{
