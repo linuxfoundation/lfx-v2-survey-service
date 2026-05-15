@@ -227,8 +227,8 @@ func (p *NATSPublisher) sendSurveyResponseIndexerMessage(ctx context.Context, su
 
 	indexingConfig := &indexerTypes.IndexingConfig{
 		ObjectID:             data.UID,
-		AccessCheckObject:    fmt.Sprintf("survey:%s", data.SurveyUID),
-		AccessCheckRelation:  "viewer",
+		AccessCheckObject:    fmt.Sprintf("survey_response:%s", data.UID),
+		AccessCheckRelation:  "auditor",
 		HistoryCheckObject:   fmt.Sprintf("survey_response:%s", data.UID),
 		HistoryCheckRelation: "auditor",
 		SortName:             data.Email,

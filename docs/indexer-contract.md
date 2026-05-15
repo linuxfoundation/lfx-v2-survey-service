@@ -229,8 +229,8 @@ Each entry in `survey_monkey_question_answers` has:
 
 | Field | Value |
 |---|---|
-| `access_check_object` | `survey:{survey_uid}` (access is checked on the **parent survey**, not the response itself) |
-| `access_check_relation` | `viewer` |
+| `access_check_object` | `survey_response:{uid}` |
+| `access_check_relation` | `auditor` |
 | `history_check_object` | `survey_response:{uid}` |
 | `history_check_relation` | `auditor` |
 
