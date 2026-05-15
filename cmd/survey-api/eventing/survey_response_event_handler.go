@@ -184,6 +184,7 @@ func handleSurveyResponseUpdate(
 	publisher domain.EventPublisher,
 	idMapper domain.IDMapper,
 	mappingsKV jetstream.KeyValue,
+	v1ObjectsKV jetstream.KeyValue,
 	logger *slog.Logger,
 ) bool {
 	funcLogger := logger.With("key", key, "handler", "survey_response")
@@ -221,6 +222,26 @@ func handleSurveyResponseUpdate(
 	if responseData.Project.ProjectUID == "" {
 		funcLogger.With("project_id", responseData.Project.ID).InfoContext(ctx, "skipping survey response sync - parent project not found in mappings")
 		return false // Permanent issue, ACK and skip
+	}
+
+	// Fetch parent survey from v1-objects and denormalize its display fields onto the
+	// response payload. Survey takers do not hold survey:{uid}:viewer so they cannot
+	// resolve these fields through the query service — without denormalization the
+	// "My Surveys" list renders empty stub rows for every respondent.
+	surveyKey := fmt.Sprintf("itx-surveys.%s", responseData.SurveyID)
+	surveyEntry, err := v1ObjectsKV.Get(ctx, surveyKey)
+	if err != nil {
+		if isTransientError(err) {
+			funcLogger.With(errKey, err).WarnContext(ctx, "transient error fetching parent survey for denormalization, will retry")
+			return true // NAK for retry
+		}
+		funcLogger.With(errKey, err).WarnContext(ctx, "failed to fetch parent survey for denormalization; denormalized fields will be empty/zero in the index")
+	} else if parentV1Data, decodeErr := decodeKVValue(surveyEntry.Value()); decodeErr != nil {
+		funcLogger.With(errKey, decodeErr).WarnContext(ctx, "failed to decode parent survey as JSON or msgpack; denormalized fields will be empty/zero in the index")
+	} else if parentSurvey, convErr := extractSurveyDenormFields(parentV1Data); convErr != nil {
+		funcLogger.With(errKey, convErr).WarnContext(ctx, "failed to extract parent survey fields; denormalized fields will be empty/zero in the index")
+	} else {
+		applyParentSurveyDenormalization(responseData, parentSurvey)
 	}
 
 	// Determine action (created vs updated) by checking if mapping exists
@@ -339,6 +360,69 @@ func convertMapToSurveyResponseData(
 	}
 
 	return responseData, nil
+}
+
+// extractSurveyDenormFields unmarshals only the display fields needed for denormalization
+// from a raw v1 survey data map. Unlike convertMapToSurveyData it skips committee and
+// project ID-mapping RPCs entirely — the only committee data we need is the name, which
+// is already present in the raw record.
+func extractSurveyDenormFields(v1Data map[string]interface{}) (*domain.SurveyData, error) {
+	jsonBytes, err := json.Marshal(v1Data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal survey data: %w", err)
+	}
+	var surveyDB SurveyDBRaw
+	if err := json.Unmarshal(jsonBytes, &surveyDB); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal into SurveyDBRaw: %w", err)
+	}
+	data := &domain.SurveyData{
+		SurveyTitle:       surveyDB.SurveyTitle,
+		SurveyStatus:      surveyDB.SurveyStatus,
+		SurveyCutoffDate:  surveyDB.SurveyCutoffDate,
+		IsNPSSurvey:       surveyDB.IsNPSSurvey,
+		IsProjectSurvey:   surveyDB.IsProjectSurvey,
+		CommitteeCategory: surveyDB.CommitteeCategory,
+		CreatorName:       surveyDB.CreatorName,
+		CreatedAt:         surveyDB.CreatedAt,
+		LastModifiedAt:    surveyDB.LastModifiedAt,
+		TotalResponses:    surveyDB.TotalResponses,
+		TotalRecipients:   surveyDB.TotalRecipients,
+	}
+	for _, c := range surveyDB.Committees {
+		data.Committees = append(data.Committees, domain.SurveyCommitteeData{
+			CommitteeID:   c.CommitteeID,
+			CommitteeName: c.CommitteeName,
+		})
+	}
+	return data, nil
+}
+
+// applyParentSurveyDenormalization copies survey-level display fields onto the response
+// indexer payload so consumers can render the "My Surveys" list without a secondary
+// access-controlled fetch of the survey resource.
+func applyParentSurveyDenormalization(r *domain.SurveyResponseData, s *domain.SurveyData) {
+	r.SurveyTitle = s.SurveyTitle
+	r.SurveyStatus = s.SurveyStatus
+	r.SurveyCutoffDate = s.SurveyCutoffDate
+	r.IsNPSSurvey = s.IsNPSSurvey
+	r.IsProjectSurvey = s.IsProjectSurvey
+	r.CommitteeCategory = s.CommitteeCategory
+	r.CreatorName = s.CreatorName
+	r.SurveyCreatedAt = s.CreatedAt
+	r.SurveyLastModifiedAt = s.LastModifiedAt
+	r.TotalResponses = s.TotalResponses
+	r.TotalRecipients = s.TotalRecipients
+
+	// Match by v1 committee ID; fall back to first committee when no exact match.
+	for _, c := range s.Committees {
+		if r.CommitteeID != "" && c.CommitteeID == r.CommitteeID {
+			r.CommitteeName = c.CommitteeName
+			return
+		}
+	}
+	if len(s.Committees) > 0 {
+		r.CommitteeName = s.Committees[0].CommitteeName
+	}
 }
 
 // handleSurveyResponseDelete processes a survey response delete from itx-survey-responses records

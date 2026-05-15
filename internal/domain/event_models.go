@@ -103,6 +103,23 @@ type SurveyResponseData struct {
 	LinkClickedFirstTime          string                        `json:"link_clicked_first_time"`
 	LinkClickedLastTime           string                        `json:"link_clicked_last_time"`
 	Excluded                      bool                          `json:"excluded"`
+
+	// Denormalized from parent survey so consumers can render the "My Surveys" list
+	// without a secondary access-controlled fetch of the survey resource. Survey
+	// takers do not hold the survey:{uid}:viewer relation and cannot resolve these
+	// fields through the query service on their own.
+	SurveyTitle          string `json:"survey_title"`
+	SurveyStatus         string `json:"survey_status"`
+	SurveyCutoffDate     string `json:"survey_cutoff_date"`
+	IsNPSSurvey          bool   `json:"is_nps_survey"`
+	IsProjectSurvey      bool   `json:"is_project_survey"`
+	CommitteeName        string `json:"committee_name"`
+	CommitteeCategory    string `json:"committee_category"`
+	CreatorName          string `json:"creator_name"`
+	SurveyCreatedAt      string `json:"survey_created_at"`
+	SurveyLastModifiedAt string `json:"survey_last_modified_at"`
+	TotalResponses       int    `json:"total_responses"`
+	TotalRecipients      int    `json:"total_recipients"`
 }
 
 // SurveyMonkeyQuestionAnswers contains a SurveyMonkey response
