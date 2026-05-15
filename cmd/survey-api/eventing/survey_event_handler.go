@@ -6,6 +6,7 @@ package eventing
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 
 	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -518,8 +520,19 @@ func isTransientError(err error) bool {
 		return false
 	}
 
+	// Check known NATS sentinel errors that indicate infrastructure unavailability.
+	// ErrNoResponders fires when JetStream has no active responders (e.g., during a
+	// rolling restart or brief outage) and should always retry rather than silently
+	// index incomplete data.
+	if errors.Is(err, nats.ErrNoResponders) ||
+		errors.Is(err, nats.ErrTimeout) ||
+		errors.Is(err, nats.ErrConnectionClosed) ||
+		errors.Is(err, nats.ErrConnectionDraining) {
+		return true
+	}
+
 	errStr := err.Error()
-	// NATS publish errors, timeouts, connection issues
+	// Catch any remaining transient patterns not covered by sentinel checks above.
 	if strings.Contains(errStr, "timeout") || strings.Contains(errStr, "connection") ||
 		strings.Contains(errStr, "unavailable") || strings.Contains(errStr, "deadline") {
 		return true

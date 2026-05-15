@@ -182,6 +182,27 @@ Each entry in the `committees` array has the following fields:
 | `link_clicked_last_time` | string | Last time the survey link was clicked (RFC3339) |
 | `excluded` | bool | Whether this response is excluded from results |
 
+The following fields are denormalized from the parent survey at index time so that consumer services can render the "My Surveys" list without a secondary `GET /surveys/{uid}` fetch. Survey takers do not hold the `survey:{uid}:viewer` relation, so the survey resource itself is inaccessible to them via both the REST endpoint and the `type=survey` query index.
+
+| Field | Type | Description |
+|---|---|---|
+| `survey_title` | string | Parent survey title (denormalized from survey) |
+| `survey_status` | string | Parent survey status (denormalized from survey) |
+| `survey_cutoff_date` | string | Parent survey response cutoff date (RFC3339, denormalized from survey) |
+| `is_nps_survey` | bool | Whether the parent survey is an NPS survey (denormalized from survey) |
+| `is_project_survey` | bool | Whether the parent survey is a project-level survey (denormalized from survey) |
+| `committee_name` | string | Name of the committee this response is associated with (denormalized from survey) |
+| `committee_category` | string | Category of committees the parent survey targets (denormalized from survey) |
+| `creator_name` | string | Display name of the survey creator (denormalized from survey) |
+| `survey_created_at` | string | Parent survey creation time (RFC3339, denormalized from survey; distinct from response `created_at`) |
+| `survey_last_modified_at` | string | Parent survey last modification time (RFC3339, denormalized from survey) |
+| `total_responses` | int | Total responses received for the parent survey (denormalized aggregate) |
+| `total_recipients` | int | Total intended recipients for the parent survey (denormalized aggregate) |
+
+> **Fallback behavior:** If fetching the parent survey from the KV store fails with a transient error, the message is NAKed and retried with exponential backoff — the response is not indexed until the fetch succeeds or the delivery limit is exhausted. If the fetch succeeds but the payload cannot be decoded or converted (e.g., unrecognised encoding, corrupt data), the response is still indexed with these denormalized fields set to their zero values (`""` for strings, `false` for bools, `0` for ints). Consumers should treat an empty `survey_title` as a signal that denormalization did not occur. The service logs a `WARN`-level message with `survey_id` in both cases. A re-index triggered by LFXV2-1843 (survey update fan-out) will backfill the correct values.
+>
+> **`committee_name` matching:** populated by matching the response's `committee_id` against the parent survey's committee list. If no exact match is found (e.g., the committee was removed from the survey after the response was recorded), the first committee's name is used as a best-effort fallback. Consumers should treat `committee_name` as informational rather than a strict mapping when `committee_id` is set but the survey has since changed.
+
 #### SurveyMonkeyQuestionAnswers
 
 Each entry in `survey_monkey_question_answers` has:
