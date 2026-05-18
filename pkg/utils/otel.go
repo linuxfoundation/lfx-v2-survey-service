@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"math"
 	"os"
 	"strconv"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/contrib/propagators/autoprop"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/metric"
@@ -30,7 +32,7 @@ type OTelConfig struct {
 	// Env: OTEL_SERVICE_NAME (default: "lfx-v2-survey-service")
 	ServiceName string
 	// ServiceVersion is the version of the service.
-	// Env: OTEL_SERVICE_VERSION (default: build-time version from ldflags)
+	// Env: OTEL_SERVICE_VERSION (default: empty; set by caller or ldflags)
 	ServiceVersion string
 }
 
@@ -119,6 +121,10 @@ func SetupOTelSDKWithConfig(ctx context.Context, cfg OTelConfig) (shutdown func(
 	otel.SetMeterProvider(metricsProvider)
 
 	// Set up logger provider.
+	// NOTE: This registers the OTel log pipeline but does not bridge slog records
+	// to the OTel log exporter. Slog output continues to go to its own handler.
+	// To route slog through OTel, add a go.opentelemetry.io/contrib/bridges/otelslog
+	// bridge in the caller.
 	loggerProvider, err := newLoggerProvider(ctx, res)
 	if err != nil {
 		handleErr(err)
@@ -131,20 +137,25 @@ func SetupOTelSDKWithConfig(ctx context.Context, cfg OTelConfig) (shutdown func(
 }
 
 // newResource creates an OpenTelemetry resource with service name and version attributes.
+// Attributes are only set when non-empty to avoid overwriting resource.Default() fallbacks.
 func newResource(cfg OTelConfig) (*resource.Resource, error) {
+	var attrs []attribute.KeyValue
+	if cfg.ServiceName != "" {
+		attrs = append(attrs, semconv.ServiceName(cfg.ServiceName))
+	}
+	if cfg.ServiceVersion != "" {
+		attrs = append(attrs, semconv.ServiceVersion(cfg.ServiceVersion))
+	}
 	return resource.Merge(
 		resource.Default(),
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceName(cfg.ServiceName),
-			semconv.ServiceVersion(cfg.ServiceVersion),
-		),
+		resource.NewWithAttributes(semconv.SchemaURL, attrs...),
 	)
 }
 
 // newSampler creates a trace.Sampler from standard OTEL_TRACES_SAMPLER env vars.
-// Supported values: "always_on" (default), "always_off", "traceidratio",
+// Supported values: "always_on", "always_off", "traceidratio",
 // "parentbased_always_on", "parentbased_always_off", "parentbased_traceidratio".
+// The default (unset or unrecognized) is "parentbased_always_on" per OTel spec.
 // The ratio for traceidratio samplers is read from OTEL_TRACES_SAMPLER_ARG.
 func newSampler() trace.Sampler {
 	sampler := os.Getenv("OTEL_TRACES_SAMPLER")
@@ -155,7 +166,7 @@ func newSampler() trace.Sampler {
 			return 1.0
 		}
 		r, err := strconv.ParseFloat(arg, 64)
-		if err != nil || r < 0.0 || r > 1.0 {
+		if err != nil || math.IsNaN(r) || math.IsInf(r, 0) || r < 0.0 || r > 1.0 {
 			slog.Warn("invalid OTEL_TRACES_SAMPLER_ARG, using 1.0", "value", arg)
 			return 1.0
 		}
@@ -163,6 +174,8 @@ func newSampler() trace.Sampler {
 	}
 
 	switch sampler {
+	case "always_on":
+		return trace.AlwaysSample()
 	case "always_off":
 		return trace.NeverSample()
 	case "traceidratio":
@@ -173,8 +186,8 @@ func newSampler() trace.Sampler {
 		return trace.ParentBased(trace.NeverSample())
 	case "parentbased_traceidratio":
 		return trace.ParentBased(trace.TraceIDRatioBased(parseRatio()))
-	default: // "always_on" and any other value
-		return trace.AlwaysSample()
+	default: // unset or unrecognized: OTel spec default is parentbased_always_on
+		return trace.ParentBased(trace.AlwaysSample())
 	}
 }
 
