@@ -94,8 +94,8 @@ app:
     # OpenTelemetry configuration
     OTEL_SERVICE_NAME:
       value: lfx-v2-survey-service
-    # Exporters default to "none" so local/staging deployments do not attempt
-    # OTLP connections. Production values are overridden via ArgoCD.
+    # Exporters default to "none" so deployments without a collector configured
+    # do not attempt OTLP connections. Override per-environment as needed.
     OTEL_TRACES_EXPORTER:
       value: none
     OTEL_METRICS_EXPORTER:
@@ -103,7 +103,7 @@ app:
     OTEL_LOGS_EXPORTER:
       value: none
     # OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_PROTOCOL, and sampler
-    # settings are set via ArgoCD production overrides.
+    # settings should be overridden per environment as needed.
 
 # Traefik Gateway API routing
 traefik:
