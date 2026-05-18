@@ -21,15 +21,16 @@ const (
 
 // EventProcessor handles NATS KV bucket event processing
 type EventProcessor struct {
-	natsConn   *nats.Conn
-	jsInstance jetstream.JetStream
-	consumer   jetstream.Consumer
-	consumeCtx jetstream.ConsumeContext
-	publisher  domain.EventPublisher
-	idMapper   domain.IDMapper
-	mappingsKV jetstream.KeyValue
-	logger     *slog.Logger
-	config     eventing.Config
+	natsConn    *nats.Conn
+	jsInstance  jetstream.JetStream
+	consumer    jetstream.Consumer
+	consumeCtx  jetstream.ConsumeContext
+	publisher   domain.EventPublisher
+	idMapper    domain.IDMapper
+	mappingsKV  jetstream.KeyValue
+	v1ObjectsKV jetstream.KeyValue
+	logger      *slog.Logger
+	config      eventing.Config
 }
 
 // NewEventProcessor creates a new event processor
@@ -73,14 +74,23 @@ func NewEventProcessor(
 		return nil, fmt.Errorf("failed to access %s KV bucket: %w", V1MappingsBucket, err)
 	}
 
+	// Access the V1 objects KV bucket (read-only; used to fetch parent survey data
+	// for denormalization onto survey_response indexer payloads)
+	v1ObjectsKV, err := jsContext.KeyValue(context.Background(), V1ObjectsBucket)
+	if err != nil {
+		conn.Close()
+		return nil, fmt.Errorf("failed to access %s KV bucket: %w", V1ObjectsBucket, err)
+	}
+
 	return &EventProcessor{
-		natsConn:   conn,
-		jsInstance: jsContext,
-		publisher:  publisher,
-		idMapper:   idMapper,
-		mappingsKV: mappingsKV,
-		logger:     logger,
-		config:     cfg,
+		natsConn:    conn,
+		jsInstance:  jsContext,
+		publisher:   publisher,
+		idMapper:    idMapper,
+		mappingsKV:  mappingsKV,
+		v1ObjectsKV: v1ObjectsKV,
+		logger:      logger,
+		config:      cfg,
 	}, nil
 }
 
@@ -107,7 +117,7 @@ func (ep *EventProcessor) Start(ctx context.Context) error {
 
 	// Start consuming messages
 	consumeCtx, err := consumer.Consume(func(msg jetstream.Msg) {
-		kvMessageHandler(ctx, msg, ep.publisher, ep.idMapper, ep.mappingsKV, ep.logger)
+		kvMessageHandler(ctx, msg, ep.publisher, ep.idMapper, ep.mappingsKV, ep.v1ObjectsKV, ep.logger)
 	}, jetstream.ConsumeErrHandler(func(_ jetstream.ConsumeContext, err error) {
 		ep.logger.With("error", err).Error("KV consumer error encountered")
 	}))

@@ -71,6 +71,7 @@ func kvMessageHandler(
 	publisher domain.EventPublisher,
 	idMapper domain.IDMapper,
 	mappingsKV jetstream.KeyValue,
+	v1ObjectsKV jetstream.KeyValue,
 	logger *slog.Logger,
 ) {
 	// Parse the message as a KV entry
@@ -102,7 +103,7 @@ func kvMessageHandler(
 	}
 
 	// Process the KV entry and check if retry is needed
-	shouldRetry := kvHandler(ctx, entry, publisher, idMapper, mappingsKV, logger)
+	shouldRetry := kvHandler(ctx, entry, publisher, idMapper, mappingsKV, v1ObjectsKV, logger)
 
 	// Handle message acknowledgment based on retry decision
 	if shouldRetry {
@@ -149,17 +150,32 @@ func kvHandler(
 	publisher domain.EventPublisher,
 	idMapper domain.IDMapper,
 	mappingsKV jetstream.KeyValue,
+	v1ObjectsKV jetstream.KeyValue,
 	logger *slog.Logger,
 ) bool {
 	switch entry.Operation() {
 	case jetstream.KeyValuePut:
-		return handleKVPut(ctx, entry, publisher, idMapper, mappingsKV, logger)
+		return handleKVPut(ctx, entry, publisher, idMapper, mappingsKV, v1ObjectsKV, logger)
 	case jetstream.KeyValueDelete, jetstream.KeyValuePurge:
 		return handleKVDelete(ctx, entry, publisher, mappingsKV, logger)
 	default:
 		logger.With("key", entry.Key(), "operation", entry.Operation()).Debug("ignoring unknown KV operation")
 		return false // ACK unknown operations
 	}
+}
+
+// decodeKVValue decodes a KV entry value from JSON or msgpack into a map.
+// Tries JSON first; on failure resets the map and retries with msgpack.
+// Returns an error only if both formats fail.
+func decodeKVValue(value []byte) (map[string]any, error) {
+	var data map[string]any
+	if err := json.Unmarshal(value, &data); err != nil {
+		data = make(map[string]any)
+		if msgErr := msgpack.Unmarshal(value, &data); msgErr != nil {
+			return nil, fmt.Errorf("json: %w; msgpack: %w", err, msgErr)
+		}
+	}
+	return data, nil
 }
 
 // handleKVPut processes PUT operations by routing to specific handlers based on key prefix
@@ -169,23 +185,16 @@ func handleKVPut(
 	publisher domain.EventPublisher,
 	idMapper domain.IDMapper,
 	mappingsKV jetstream.KeyValue,
+	v1ObjectsKV jetstream.KeyValue,
 	logger *slog.Logger,
 ) bool {
 	key := entry.Key()
 
 	// Parse the data (try JSON first, then msgpack)
-	value := entry.Value()
-	var v1Data map[string]any
-	if err := json.Unmarshal(value, &v1Data); err != nil {
-		// JSON failed, try msgpack with a fresh map to avoid stale keys from partial JSON decode
-		v1Data = make(map[string]any)
-		if msgErr := msgpack.Unmarshal(value, &v1Data); msgErr != nil {
-			logger.With(errKey, err, "msgpack_error", msgErr, "key", key).ErrorContext(ctx, "failed to unmarshal KV entry data as JSON or msgpack")
-			return false
-		}
-		logger.With("key", key).DebugContext(ctx, "successfully unmarshalled msgpack data")
-	} else {
-		logger.With("key", key).DebugContext(ctx, "successfully unmarshalled JSON data")
+	v1Data, err := decodeKVValue(entry.Value())
+	if err != nil {
+		logger.With(errKey, err, "key", key).ErrorContext(ctx, "failed to unmarshal KV entry data as JSON or msgpack")
+		return false
 	}
 
 	// Check if this is a soft delete (record has _sdc_deleted_at field).
@@ -205,7 +214,7 @@ func handleKVPut(
 	case "itx-surveys":
 		return handleSurveyUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, logger)
 	case "itx-survey-responses":
-		return handleSurveyResponseUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, logger)
+		return handleSurveyResponseUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, v1ObjectsKV, logger)
 	case "surveymonkey-surveys":
 		return handleSurveyTemplateUpdate(ctx, key, v1Data, publisher, mappingsKV, logger)
 	default:
