@@ -183,6 +183,8 @@ func TestNewSampler(t *testing.T) {
 		{"traceidratio", "", "TraceIDRatioBased{1}"},
 		{"parentbased_always_on", "", "ParentBased{root:AlwaysOnSampler"},
 		{"parentbased_always_off", "", "ParentBased{root:AlwaysOffSampler"},
+		{"parentbased_traceidratio", "0.5", "ParentBased{root:TraceIDRatioBased{0.5}"},
+		{"parentbased_traceidratio", "", "ParentBased{root:TraceIDRatioBased{1}"},
 		{"unknown_value", "", "ParentBased{root:AlwaysOnSampler"}, // default: parentbased_always_on
 		{"", "", "ParentBased{root:AlwaysOnSampler"},              // default: parentbased_always_on
 	}
@@ -210,20 +212,25 @@ func TestNewSampler(t *testing.T) {
 	}
 }
 
-// TestNewSampler_InvalidArg verifies that an invalid OTEL_TRACES_SAMPLER_ARG
-// falls back to 1.0 (always sample).
+// TestNewSampler_InvalidArg verifies that invalid OTEL_TRACES_SAMPLER_ARG values
+// (non-parseable, NaN, Inf, negative, > 1.0) all fall back to ratio 1.0.
 func TestNewSampler_InvalidArg(t *testing.T) {
-	t.Setenv("OTEL_TRACES_SAMPLER", "traceidratio")
-	t.Setenv("OTEL_TRACES_SAMPLER_ARG", "invalid")
+	cases := []string{"invalid", "NaN", "+Inf", "-Inf", "-0.1", "1.1"}
+	for _, arg := range cases {
+		t.Run(arg, func(t *testing.T) {
+			t.Setenv("OTEL_TRACES_SAMPLER", "traceidratio")
+			t.Setenv("OTEL_TRACES_SAMPLER_ARG", arg)
 
-	s := newSampler()
-	if s == nil {
-		t.Fatal("expected non-nil sampler")
-	}
-	// With invalid arg, falls back to 1.0 (always sample).
-	// TraceIDRatioBased(1.0) describes as "TraceIDRatioBased{1}"
-	if s.Description() != "TraceIDRatioBased{1}" {
-		t.Errorf("expected TraceIDRatioBased{1}, got %q", s.Description())
+			s := newSampler()
+			if s == nil {
+				t.Fatal("expected non-nil sampler")
+			}
+			// All invalid args fall back to ratio 1.0.
+			// TraceIDRatioBased(1.0) describes as "TraceIDRatioBased{1}"
+			if s.Description() != "TraceIDRatioBased{1}" {
+				t.Errorf("arg %q: expected TraceIDRatioBased{1}, got %q", arg, s.Description())
+			}
+		})
 	}
 }
 
