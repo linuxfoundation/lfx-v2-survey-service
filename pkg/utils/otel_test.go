@@ -175,14 +175,8 @@ func TestNewSampler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.sampler+"_"+tt.arg, func(t *testing.T) {
-			t.Setenv("OTEL_TRACES_SAMPLER", "")
-			t.Setenv("OTEL_TRACES_SAMPLER_ARG", "")
-			if tt.sampler != "" {
-				t.Setenv("OTEL_TRACES_SAMPLER", tt.sampler)
-			}
-			if tt.arg != "" {
-				t.Setenv("OTEL_TRACES_SAMPLER_ARG", tt.arg)
-			}
+			t.Setenv("OTEL_TRACES_SAMPLER", tt.sampler)
+			t.Setenv("OTEL_TRACES_SAMPLER_ARG", tt.arg)
 
 			s := newSampler()
 			if s == nil {
