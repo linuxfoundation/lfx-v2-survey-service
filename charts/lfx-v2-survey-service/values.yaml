@@ -91,13 +91,19 @@ app:
     EVENT_STREAM_NAME:
       value: KV_v1-objects
 
-    # OpenTelemetry configuration (optional)
-    # OTEL_SERVICE_NAME:
-    #   value: lfx-v2-survey-service
-    # OTEL_EXPORTER_OTLP_ENDPOINT:
-    #   value: http://otel-collector.observability.svc.cluster.local:4317
-    # OTEL_EXPORTER_OTLP_PROTOCOL:
-    #   value: grpc
+    # OpenTelemetry configuration
+    OTEL_SERVICE_NAME:
+      value: lfx-v2-survey-service
+    # Exporters default to "none" so deployments without a collector configured
+    # do not attempt OTLP connections. Override per-environment as needed.
+    OTEL_TRACES_EXPORTER:
+      value: none
+    OTEL_METRICS_EXPORTER:
+      value: none
+    OTEL_LOGS_EXPORTER:
+      value: none
+    # OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_PROTOCOL, and sampler
+    # settings should be overridden per environment as needed.
 
 # Traefik Gateway API routing
 traefik:
