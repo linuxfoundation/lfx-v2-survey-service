@@ -10,7 +10,7 @@ import (
 	"math"
 	"os"
 	"strconv"
-	"time"
+	"sync"
 
 	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/contrib/propagators/autoprop"
@@ -73,18 +73,23 @@ func SetupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 //   - OTEL_TRACES_SAMPLER ("always_on", "always_off", "traceidratio", "parentbased_*")
 //   - OTEL_TRACES_SAMPLER_ARG (ratio for traceidratio, e.g. "0.5")
 func SetupOTelSDKWithConfig(ctx context.Context, cfg OTelConfig) (shutdown func(context.Context) error, err error) {
-	var shutdownFuncs []func(context.Context) error
+	var (
+		shutdownFuncs []func(context.Context) error
+		shutdownOnce  sync.Once
+		shutdownErr   error
+	)
 
 	// shutdown calls cleanup functions registered via shutdownFuncs.
-	// The errors from the calls are joined.
-	// Each registered cleanup will be invoked once.
+	// The errors from the calls are joined. Safe to call from multiple
+	// goroutines; only the first call runs cleanup, subsequent calls are no-ops.
 	shutdown = func(ctx context.Context) error {
-		var err error
-		for _, fn := range shutdownFuncs {
-			err = errors.Join(err, fn(ctx))
-		}
-		shutdownFuncs = nil
-		return err
+		shutdownOnce.Do(func() {
+			for _, fn := range shutdownFuncs {
+				shutdownErr = errors.Join(shutdownErr, fn(ctx))
+			}
+			shutdownFuncs = nil
+		})
+		return shutdownErr
 	}
 
 	// handleErr calls shutdown for cleanup and makes sure that all errors are returned.
@@ -202,9 +207,7 @@ func newTraceProvider(ctx context.Context, res *resource.Resource) (*trace.Trace
 	return trace.NewTracerProvider(
 		trace.WithResource(res),
 		trace.WithSampler(newSampler()),
-		trace.WithBatcher(exporter,
-			trace.WithBatchTimeout(time.Second),
-		),
+		trace.WithBatcher(exporter),
 	), nil
 }
 
