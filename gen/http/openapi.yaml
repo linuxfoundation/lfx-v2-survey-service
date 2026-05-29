@@ -2204,7 +2204,7 @@ definitions:
             page_token:
                 type: string
                 description: Opaque token for the next page; empty string on the last page
-                example: eyJwYWdlIjogMn0=
+                example: page-2-token
             per_page:
                 type: integer
                 description: Number of results per page
@@ -2222,7 +2222,7 @@ definitions:
                 format: int64
         description: Pagination metadata for survey responses
         example:
-            page_token: eyJwYWdlIjogMn0=
+            page_token: page-2-token
             per_page: 25
             total_pages: 5
             total_results: 120
@@ -2257,7 +2257,7 @@ definitions:
         example:
             data: []
             meta:
-                page_token: eyJwYWdlIjogMn0=
+                page_token: page-2-token
                 per_page: 25
                 total_pages: 5
                 total_results: 120

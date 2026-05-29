@@ -556,7 +556,7 @@ var _ = Service("survey", func() {
 			})
 
 			Attribute("page_token", String, "Opaque pagination token for the next page (omit for first page)", func() {
-				Example("eyJwYWdlIjogMn0=")
+				Example("page-2-token")
 			})
 
 			Attribute("per_page", String, "Maximum number of responses to return per page", func() {

@@ -453,7 +453,7 @@ var SurveyResponsePageMeta = Type("SurveyResponsePageMeta", func() {
 	Description("Pagination metadata for survey responses")
 
 	Attribute("page_token", String, "Opaque token for the next page; empty string on the last page", func() {
-		Example("eyJwYWdlIjogMn0=")
+		Example("page-2-token")
 	})
 
 	Attribute("total_pages", Int, "Total number of pages", func() {

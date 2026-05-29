@@ -898,8 +898,8 @@ paths:
                   schema:
                     type: string
                     description: Opaque pagination token for the next page (omit for first page)
-                    example: eyJwYWdlIjogMn0=
-                  example: eyJwYWdlIjogMn0=
+                    example: page-2-token
+                  example: page-2-token
                 - name: per_page
                   in: query
                   description: Maximum number of responses to return per page
@@ -946,7 +946,7 @@ paths:
                             example:
                                 data: []
                                 meta:
-                                    page_token: eyJwYWdlIjogMn0=
+                                    page_token: page-2-token
                                     per_page: 25
                                     total_pages: 5
                                     total_results: 120
@@ -2681,7 +2681,7 @@ components:
                 page_token:
                     type: string
                     description: Opaque token for the next page; empty string on the last page
-                    example: eyJwYWdlIjogMn0=
+                    example: page-2-token
                 per_page:
                     type: integer
                     description: Number of results per page
@@ -2699,7 +2699,7 @@ components:
                     format: int64
             description: Pagination metadata for survey responses
             example:
-                page_token: eyJwYWdlIjogMn0=
+                page_token: page-2-token
                 per_page: 25
                 total_pages: 5
                 total_results: 120
@@ -2733,7 +2733,7 @@ components:
             example:
                 data: []
                 meta:
-                    page_token: eyJwYWdlIjogMn0=
+                    page_token: page-2-token
                     per_page: 25
                     total_pages: 5
                     total_results: 120

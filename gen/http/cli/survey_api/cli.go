@@ -660,7 +660,7 @@ func surveyListSurveyResponsesUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey list-survey-responses --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --page-token \"eyJwYWdlIjogMn0=\" --per-page \"25\" --project-uid \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --project-uids \"qa1e8536-a985-4cf5-b981-a170927a1d11,qa1e8536-a985-4cf5-b981-a170927a1d12\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey list-survey-responses --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --page-token \"page-2-token\" --per-page \"25\" --project-uid \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --project-uids \"qa1e8536-a985-4cf5-b981-a170927a1d11,qa1e8536-a985-4cf5-b981-a170927a1d12\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyValidateEmailUsage() {
