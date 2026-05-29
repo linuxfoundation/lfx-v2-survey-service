@@ -2737,6 +2737,9 @@ components:
                     per_page: 25
                     total_pages: 5
                     total_results: 120
+            required:
+                - data
+                - meta
         SurveySchedulePayload:
             type: object
             properties:

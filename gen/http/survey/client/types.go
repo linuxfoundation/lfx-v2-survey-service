@@ -2622,19 +2622,15 @@ func NewDeleteExclusionByIDUnauthorized(body *DeleteExclusionByIDUnauthorizedRes
 // "list_survey_responses" endpoint result from a HTTP "OK" response.
 func NewListSurveyResponsesSurveyResponsesPageOK(body *ListSurveyResponsesResponseBody) *survey.SurveyResponsesPage {
 	v := &survey.SurveyResponsesPage{}
-	if body.Data != nil {
-		v.Data = make([]*survey.SurveyResponseItem, len(body.Data))
-		for i, val := range body.Data {
-			if val == nil {
-				v.Data[i] = nil
-				continue
-			}
-			v.Data[i] = unmarshalSurveyResponseItemResponseBodyToSurveySurveyResponseItem(val)
+	v.Data = make([]*survey.SurveyResponseItem, len(body.Data))
+	for i, val := range body.Data {
+		if val == nil {
+			v.Data[i] = nil
+			continue
 		}
+		v.Data[i] = unmarshalSurveyResponseItemResponseBodyToSurveySurveyResponseItem(val)
 	}
-	if body.Meta != nil {
-		v.Meta = unmarshalSurveyResponsePageMetaResponseBodyToSurveySurveyResponsePageMeta(body.Meta)
-	}
+	v.Meta = unmarshalSurveyResponsePageMetaResponseBodyToSurveySurveyResponsePageMeta(body.Meta)
 
 	return v
 }
@@ -2928,6 +2924,12 @@ func ValidateGetExclusionResponseBody(body *GetExclusionResponseBody) (err error
 // ValidateListSurveyResponsesResponseBody runs the validations defined on
 // list_survey_responses_response_body
 func ValidateListSurveyResponsesResponseBody(body *ListSurveyResponsesResponseBody) (err error) {
+	if body.Data == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("data", "body"))
+	}
+	if body.Meta == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("meta", "body"))
+	}
 	for _, e := range body.Data {
 		if e != nil {
 			if err2 := ValidateSurveyResponseItemResponseBody(e); err2 != nil {

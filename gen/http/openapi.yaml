@@ -617,6 +617,9 @@ paths:
                     description: OK response.
                     schema:
                         $ref: '#/definitions/SurveyResponsesPage'
+                        required:
+                            - data
+                            - meta
                 "400":
                     description: Bad Request response.
                     schema:
@@ -2261,6 +2264,9 @@ definitions:
                 per_page: 25
                 total_pages: 5
                 total_results: 120
+        required:
+            - data
+            - meta
     SurveyScheduleResult:
         title: SurveyScheduleResult
         type: object

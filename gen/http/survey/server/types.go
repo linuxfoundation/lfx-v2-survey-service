@@ -403,9 +403,9 @@ type GetExclusionResponseBody struct {
 // "list_survey_responses" endpoint HTTP response body.
 type ListSurveyResponsesResponseBody struct {
 	// List of individual per-recipient responses
-	Data []*SurveyResponseItemResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
+	Data []*SurveyResponseItemResponseBody `form:"data" json:"data" xml:"data"`
 	// Pagination metadata
-	Meta *SurveyResponsePageMetaResponseBody `form:"meta,omitempty" json:"meta,omitempty" xml:"meta,omitempty"`
+	Meta *SurveyResponsePageMetaResponseBody `form:"meta" json:"meta" xml:"meta"`
 }
 
 // ValidateEmailResponseBody is the type of the "survey" service
@@ -1696,6 +1696,8 @@ func NewListSurveyResponsesResponseBody(res *survey.SurveyResponsesPage) *ListSu
 			}
 			body.Data[i] = marshalSurveySurveyResponseItemToSurveyResponseItemResponseBody(val)
 		}
+	} else {
+		body.Data = []*SurveyResponseItemResponseBody{}
 	}
 	if res.Meta != nil {
 		body.Meta = marshalSurveySurveyResponsePageMetaToSurveyResponsePageMetaResponseBody(res.Meta)

@@ -1185,16 +1185,27 @@ func (s *SurveyService) mapExtendedExclusionToResult(ctx context.Context, itxExc
 	return result, nil
 }
 
-// mapITXResponsesToPage maps ITX paginated responses to a Goa result with V1→V2 ID mapping
+// mapITXResponsesToPage maps ITX paginated responses to a Goa result with V1→V2 ID mapping.
+// Uses a worker pool to run per-item NATS ID-mapper lookups concurrently, matching the
+// pattern used by mapSurveyCommitteesToResult and mapLFXProjectsToResult.
 func (s *SurveyService) mapITXResponsesToPage(ctx context.Context, itxResponse *itx.PaginatedSurveyResponses) (*survey.SurveyResponsesPage, error) {
-	data := make([]*survey.SurveyResponseItem, 0, len(itxResponse.Data))
+	data := make([]*survey.SurveyResponseItem, len(itxResponse.Data))
 
-	for _, r := range itxResponse.Data {
-		item, err := s.mapITXRecipientResponseToItem(ctx, r)
-		if err != nil {
-			return nil, err
+	pool := concurrent.NewWorkerPool(5)
+	mappingFunctions := make([]func() error, len(itxResponse.Data))
+	for i, r := range itxResponse.Data {
+		mappingFunctions[i] = func() error {
+			item, err := s.mapITXRecipientResponseToItem(ctx, r)
+			if err != nil {
+				return err
+			}
+			data[i] = item
+			return nil
 		}
-		data = append(data, item)
+	}
+
+	if err := pool.Run(ctx, mappingFunctions...); err != nil {
+		return nil, err
 	}
 
 	return &survey.SurveyResponsesPage{

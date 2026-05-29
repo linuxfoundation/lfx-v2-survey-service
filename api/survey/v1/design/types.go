@@ -446,6 +446,8 @@ var SurveyResponsesPage = Type("SurveyResponsesPage", func() {
 	})
 
 	Attribute("meta", SurveyResponsePageMeta, "Pagination metadata")
+
+	Required("data", "meta")
 })
 
 // SurveyResponsePageMeta holds pagination metadata for a responses page

@@ -127,10 +127,6 @@ All fields are identical between Proxy and ITX API.
 
 ---
 
-## Error Responses
-
----
-
 ## List Survey Responses
 
 Returns a paginated list of individual per-recipient responses for a survey. Each response includes the
@@ -251,6 +247,8 @@ Authorization: Bearer <oauth2_m2m_token>
 | All other fields | identical | passthrough |
 
 ---
+
+## Error Responses
 
 Both APIs return similar error structures:
 

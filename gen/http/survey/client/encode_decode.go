@@ -2754,9 +2754,6 @@ func unmarshalUserEmailResponseBodyToSurveyUserEmail(v *UserEmailResponseBody) *
 // value of type *survey.SurveyResponseItem from a value of type
 // *SurveyResponseItemResponseBody.
 func unmarshalSurveyResponseItemResponseBodyToSurveySurveyResponseItem(v *SurveyResponseItemResponseBody) *survey.SurveyResponseItem {
-	if v == nil {
-		return nil
-	}
 	res := &survey.SurveyResponseItem{
 		ID:                            *v.ID,
 		SurveyUID:                     *v.SurveyUID,
@@ -2886,9 +2883,6 @@ func unmarshalSurveyAnswerChoiceResponseBodyToSurveySurveyAnswerChoice(v *Survey
 // builds a value of type *survey.SurveyResponsePageMeta from a value of type
 // *SurveyResponsePageMetaResponseBody.
 func unmarshalSurveyResponsePageMetaResponseBodyToSurveySurveyResponsePageMeta(v *SurveyResponsePageMetaResponseBody) *survey.SurveyResponsePageMeta {
-	if v == nil {
-		return nil
-	}
 	res := &survey.SurveyResponsePageMeta{
 		PageToken:    v.PageToken,
 		TotalPages:   v.TotalPages,
