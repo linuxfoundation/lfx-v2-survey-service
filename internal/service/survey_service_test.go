@@ -31,6 +31,8 @@ func (m *mockAuth) ParsePrincipal(_ context.Context, _ string, _ *slog.Logger) (
 type mockProxy struct {
 	listResponsesResult *itx.PaginatedSurveyResponses
 	listResponsesErr    error
+	capturedSurveyID    string
+	capturedParams      *itx.ListResponsesParams
 }
 
 func (m *mockProxy) ScheduleSurvey(_ context.Context, _ *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
@@ -96,7 +98,9 @@ func (m *mockProxy) DeleteResponse(_ context.Context, _ string, _ string) error 
 func (m *mockProxy) ResendResponse(_ context.Context, _ string, _ string) error {
 	panic("unexpected call to ResendResponse")
 }
-func (m *mockProxy) ListResponses(_ context.Context, _ string, _ *itx.ListResponsesParams) (*itx.PaginatedSurveyResponses, error) {
+func (m *mockProxy) ListResponses(_ context.Context, surveyID string, params *itx.ListResponsesParams) (*itx.PaginatedSurveyResponses, error) {
+	m.capturedSurveyID = surveyID
+	m.capturedParams = params
 	return m.listResponsesResult, m.listResponsesErr
 }
 
@@ -202,6 +206,41 @@ func TestListSurveyResponses_Success(t *testing.T) {
 	}
 }
 
+func TestListSurveyResponses_ProjectWithNoID_OmitsUID(t *testing.T) {
+	// When a response has a project object but no id, UID must be nil (not a pointer to "").
+	proxy := &mockProxy{
+		listResponsesResult: &itx.PaginatedSurveyResponses{
+			Data: []itx.SurveyRecipientResponse{
+				{
+					ID:       "resp-002",
+					SurveyID: "survey-uid-abc",
+					Project:  &itx.SurveyResponseProject{ID: nil, Name: strPtr("Unnamed Project")},
+				},
+			},
+			Meta: itx.PageMetadata{},
+		},
+	}
+
+	svc := newTestService(proxy)
+	token := "test-token"
+
+	result, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
+		Token:     &token,
+		SurveyUID: "survey-uid-abc",
+	})
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	item := result.Data[0]
+	if item.Project == nil {
+		t.Fatal("expected project to be present")
+	}
+	if item.Project.UID != nil {
+		t.Errorf("expected project UID to be nil when no id provided, got %q", *item.Project.UID)
+	}
+}
+
 func TestListSurveyResponses_EmptyData(t *testing.T) {
 	proxy := &mockProxy{
 		listResponsesResult: &itx.PaginatedSurveyResponses{
@@ -250,8 +289,9 @@ func TestListSurveyResponses_ITX404_MapsToNotFound(t *testing.T) {
 	}
 }
 
-func TestListSurveyResponses_ProjectUID_MappedToV1(t *testing.T) {
-	// Verify that providing project_uid doesn't error (noop mapper returns it unchanged, proxy succeeds)
+func TestListSurveyResponses_ProjectUID_ForwardedToProxy(t *testing.T) {
+	// Verify project_uid is V2→V1 mapped and forwarded as ProjectID in ListResponses params.
+	// NoOpMapper returns the ID unchanged, so we can assert the value directly.
 	proxy := &mockProxy{
 		listResponsesResult: &itx.PaginatedSurveyResponses{
 			Data: []itx.SurveyRecipientResponse{},
@@ -262,14 +302,35 @@ func TestListSurveyResponses_ProjectUID_MappedToV1(t *testing.T) {
 	svc := newTestService(proxy)
 	token := "test-token"
 	projectUID := "v2-project-uid"
+	pageToken := "tok-abc"
+	perPage := "10"
 
 	_, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
 		Token:      &token,
 		SurveyUID:  "survey-uid-abc",
 		ProjectUID: &projectUID,
+		PageToken:  &pageToken,
+		PerPage:    &perPage,
 	})
 
 	if err != nil {
-		t.Fatalf("unexpected error when project_uid provided: %v", err)
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if proxy.capturedSurveyID != "survey-uid-abc" {
+		t.Errorf("expected survey_uid survey-uid-abc forwarded, got %q", proxy.capturedSurveyID)
+	}
+	if proxy.capturedParams == nil {
+		t.Fatal("expected params to be forwarded, got nil")
+	}
+	// NoOpMapper returns V2 UID unchanged — assert it was set as ProjectID
+	if proxy.capturedParams.ProjectID == nil || *proxy.capturedParams.ProjectID != "v2-project-uid" {
+		t.Errorf("expected ProjectID v2-project-uid forwarded, got %v", proxy.capturedParams.ProjectID)
+	}
+	// Pagination params passed through unchanged
+	if proxy.capturedParams.PageToken == nil || *proxy.capturedParams.PageToken != "tok-abc" {
+		t.Errorf("expected PageToken tok-abc forwarded, got %v", proxy.capturedParams.PageToken)
+	}
+	if proxy.capturedParams.PerPage == nil || *proxy.capturedParams.PerPage != "10" {
+		t.Errorf("expected PerPage 10 forwarded, got %v", proxy.capturedParams.PerPage)
 	}
 }

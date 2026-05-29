@@ -1213,7 +1213,7 @@ func (s *SurveyService) mapITXRecipientResponseToItem(ctx context.Context, r itx
 	// Map project V1 ID → V2 UID if present; fall back to original on failure
 	var projectResult *survey.SurveyResponseProj
 	if r.Project != nil {
-		uid := ""
+		var uid *string
 		name := r.Project.Name
 		if r.Project.ID != nil && *r.Project.ID != "" {
 			mapped, err := s.idMapper.MapProjectV1ToV2(ctx, *r.Project.ID)
@@ -1222,13 +1222,13 @@ func (s *SurveyService) mapITXRecipientResponseToItem(ctx context.Context, r itx
 					"project_v1_sfid", *r.Project.ID,
 					"error", err,
 				)
-				uid = *r.Project.ID
+				uid = r.Project.ID
 			} else {
-				uid = mapped
+				uid = &mapped
 			}
 		}
 		projectResult = &survey.SurveyResponseProj{
-			UID:  &uid,
+			UID:  uid,
 			Name: name,
 		}
 	}
