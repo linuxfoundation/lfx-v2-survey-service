@@ -93,6 +93,11 @@ func (api *SurveyAPI) DeleteExclusionByID(ctx context.Context, p *survey.DeleteE
 	return api.surveyService.DeleteExclusionByID(ctx, p)
 }
 
+// ListSurveyResponses implements survey.Service.ListSurveyResponses
+func (api *SurveyAPI) ListSurveyResponses(ctx context.Context, p *survey.ListSurveyResponsesPayload) (*survey.SurveyResponsesPage, error) {
+	return api.surveyService.ListSurveyResponses(ctx, p)
+}
+
 // ValidateEmail implements survey.Service.ValidateEmail
 func (api *SurveyAPI) ValidateEmail(ctx context.Context, p *survey.ValidateEmailPayload) (*survey.ValidateEmailResult, error) {
 	return api.surveyService.ValidateEmail(ctx, p)

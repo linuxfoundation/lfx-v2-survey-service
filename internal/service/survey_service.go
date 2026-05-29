@@ -670,6 +670,83 @@ func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEma
 	return result, nil
 }
 
+// ListSurveyResponses returns a paginated list of individual per-recipient responses for a survey
+func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListSurveyResponsesPayload) (*survey.SurveyResponsesPage, error) {
+	// Parse JWT token to get principal
+	principal, err := s.parsePrincipal(ctx, p.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	s.logger.InfoContext(ctx, "listing survey responses",
+		"principal", principal,
+		"survey_uid", p.SurveyUID,
+		"project_uid", p.ProjectUID,
+		"project_uids", p.ProjectUids,
+		"per_page", p.PerPage,
+	)
+
+	// Build ITX params with optional V2→V1 ID mapping for project filters
+	params := &itx.ListResponsesParams{
+		PageToken: p.PageToken,
+		PerPage:   p.PerPage,
+	}
+
+	if p.ProjectUID != nil && *p.ProjectUID != "" {
+		projectV1, err := s.idMapper.MapProjectV2ToV1(ctx, *p.ProjectUID)
+		if err != nil {
+			s.logger.ErrorContext(ctx, "failed to map project_uid to V1",
+				"project_uid", *p.ProjectUID,
+				"error", err,
+			)
+			return nil, mapDomainError(err)
+		}
+		params.ProjectID = &projectV1
+		s.logger.DebugContext(ctx, "mapped project_uid for responses filter",
+			"project_v2_uid", *p.ProjectUID,
+			"project_v1_sfid", projectV1,
+		)
+	}
+
+	if p.ProjectUids != nil && *p.ProjectUids != "" {
+		projectV1IDs, err := s.mapProjectUIDsV2ToV1(ctx, *p.ProjectUids)
+		if err != nil {
+			s.logger.ErrorContext(ctx, "failed to map project_uids to V1",
+				"project_uids", *p.ProjectUids,
+				"error", err,
+			)
+			return nil, mapDomainError(err)
+		}
+		params.ProjectIDs = &projectV1IDs
+		s.logger.DebugContext(ctx, "mapped project_uids for responses filter",
+			"project_v2_uids", *p.ProjectUids,
+			"project_v1_sfids", projectV1IDs,
+		)
+	}
+
+	// Call ITX API
+	itxResponse, err := s.proxy.ListResponses(ctx, p.SurveyUID, params)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+
+	// Map response back to Goa result (V1→V2 ID mapping per response)
+	result, err := s.mapITXResponsesToPage(ctx, itxResponse)
+	if err != nil {
+		s.logger.ErrorContext(ctx, "failed to map ITX responses",
+			"error", err,
+		)
+		return nil, mapDomainError(err)
+	}
+
+	s.logger.InfoContext(ctx, "survey responses listed successfully",
+		"survey_uid", p.SurveyUID,
+		"count", len(result.Data),
+	)
+
+	return result, nil
+}
+
 // Helper functions
 
 // parsePrincipal extracts and validates the JWT token, returning the principal
@@ -1106,6 +1183,136 @@ func (s *SurveyService) mapExtendedExclusionToResult(ctx context.Context, itxExc
 	}
 
 	return result, nil
+}
+
+// mapITXResponsesToPage maps ITX paginated responses to a Goa result with V1→V2 ID mapping
+func (s *SurveyService) mapITXResponsesToPage(ctx context.Context, itxResponse *itx.PaginatedSurveyResponses) (*survey.SurveyResponsesPage, error) {
+	data := make([]*survey.SurveyResponseItem, 0, len(itxResponse.Data))
+
+	for _, r := range itxResponse.Data {
+		item, err := s.mapITXRecipientResponseToItem(ctx, r)
+		if err != nil {
+			return nil, err
+		}
+		data = append(data, item)
+	}
+
+	return &survey.SurveyResponsesPage{
+		Data: data,
+		Meta: &survey.SurveyResponsePageMeta{
+			PageToken:    &itxResponse.Meta.PageToken,
+			TotalPages:   &itxResponse.Meta.TotalPages,
+			TotalResults: &itxResponse.Meta.TotalResults,
+			PerPage:      &itxResponse.Meta.PerPage,
+		},
+	}, nil
+}
+
+// mapITXRecipientResponseToItem maps a single ITX SurveyRecipientResponse to a Goa SurveyResponseItem
+func (s *SurveyService) mapITXRecipientResponseToItem(ctx context.Context, r itx.SurveyRecipientResponse) (*survey.SurveyResponseItem, error) {
+	// Map project V1 ID → V2 UID if present; fall back to original on failure
+	var projectResult *survey.SurveyResponseProj
+	if r.Project != nil {
+		uid := ""
+		name := r.Project.Name
+		if r.Project.ID != nil && *r.Project.ID != "" {
+			mapped, err := s.idMapper.MapProjectV1ToV2(ctx, *r.Project.ID)
+			if err != nil {
+				s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2 for response, using V1 ID",
+					"project_v1_sfid", *r.Project.ID,
+					"error", err,
+				)
+				uid = *r.Project.ID
+			} else {
+				uid = mapped
+			}
+		}
+		projectResult = &survey.SurveyResponseProj{
+			UID:  &uid,
+			Name: name,
+		}
+	}
+
+	// Map committee V1 ID → V2 UID if present; fall back to original on failure
+	var committeeUID *string
+	if r.CommitteeID != nil && *r.CommitteeID != "" {
+		mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, *r.CommitteeID)
+		if err != nil {
+			s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2 for response, using V1 ID",
+				"committee_v1_sfid", *r.CommitteeID,
+				"error", err,
+			)
+			committeeUID = r.CommitteeID
+		} else {
+			committeeUID = &mapped
+		}
+	}
+
+	// Map organization (no ID mapping needed — org IDs are not V1 SFIDs)
+	var orgResult *survey.SurveyResponseOrg
+	if r.Organization != nil {
+		orgResult = &survey.SurveyResponseOrg{
+			ID:   r.Organization.ID,
+			Name: r.Organization.Name,
+		}
+	}
+
+	// Map SurveyMonkey question answers
+	var answers []*survey.SurveyQuestionAnswer
+	for _, qa := range r.SurveyMonkeyQuestionAnswers {
+		choices := make([]*survey.SurveyAnswerChoice, 0, len(qa.Answers))
+		for _, a := range qa.Answers {
+			choices = append(choices, &survey.SurveyAnswerChoice{
+				ChoiceID: a.ChoiceID,
+				Text:     a.Text,
+			})
+		}
+		answers = append(answers, &survey.SurveyQuestionAnswer{
+			QuestionID:      qa.QuestionID,
+			QuestionText:    qa.QuestionText,
+			QuestionFamily:  qa.QuestionFamily,
+			QuestionSubtype: qa.QuestionSubtype,
+			Answers:         choices,
+		})
+	}
+
+	return &survey.SurveyResponseItem{
+		ID:                            r.ID,
+		SurveyUID:                     r.SurveyID,
+		SurveyLink:                    r.SurveyLink,
+		CommitteeUID:                  committeeUID,
+		Email:                         r.Email,
+		FirstName:                     r.FirstName,
+		LastName:                      r.LastName,
+		Username:                      r.Username,
+		Role:                          r.Role,
+		JobTitle:                      r.JobTitle,
+		MembershipTier:                r.MembershipTier,
+		VotingStatus:                  r.VotingStatus,
+		Organization:                  orgResult,
+		Project:                       projectResult,
+		ResponseStatus:                r.ResponseStatus,
+		CreatedAt:                     r.CreatedAt,
+		ResponseDatetime:              r.ResponseDatetime,
+		LastReceivedTime:              r.LastReceivedTime,
+		NumAutomatedRemindersReceived: r.NumAutomatedRemindersReceived,
+		NpsValue:                      r.NPSValue,
+		SurveyMonkeyRespondentID:      r.SurveyMonkeyRespondentID,
+		SurveyMonkeyQuestionAnswers:   answers,
+		// SES tracking
+		SesMessageID:            r.SESMessageID,
+		SesDeliverySuccessful:   r.SESDeliverySuccessful,
+		SesBounceType:           r.SESBounceType,
+		SesBounceSubtype:        r.SESBounceSubtype,
+		SesBounceDiagnosticCode: r.SESBounceDiagnosticCode,
+		SesComplaintExists:      r.SESComplaintExists,
+		SesComplaintType:        r.SESComplaintType,
+		SesComplaintDate:        r.SESComplaintDate,
+		SesEmailOpened:          r.SESEmailOpened,
+		SesEmailOpenedLastTime:  r.SESEmailOpenedLastTime,
+		SesLinkClicked:          r.SESLinkClicked,
+		SesLinkClickedLastTime:  r.SESLinkClickedLastTime,
+	}, nil
 }
 
 func mapDomainError(err error) error {

@@ -58,6 +58,9 @@ type Service interface {
 	// Delete exclusion by ID (proxies to ITX DELETE
 	// /v2/surveys/exclusion/{exclusion_id})
 	DeleteExclusionByID(context.Context, *DeleteExclusionByIDPayload) (err error)
+	// List individual per-recipient responses for a survey (proxies to ITX GET
+	// /v2/surveys/{survey_uid}/responses)
+	ListSurveyResponses(context.Context, *ListSurveyResponsesPayload) (res *SurveyResponsesPage, err error)
 	// Validate email template body and subject (proxies to ITX POST
 	// /v2/surveys/validate_email)
 	ValidateEmail(context.Context, *ValidateEmailPayload) (res *ValidateEmailResult, err error)
@@ -83,7 +86,7 @@ const ServiceName = "survey"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [15]string{"schedule_survey", "get_survey", "update_survey", "delete_survey", "bulk_resend_survey", "preview_send_survey", "send_missing_recipients", "delete_survey_response", "resend_survey_response", "delete_recipient_group", "create_exclusion", "delete_exclusion", "get_exclusion", "delete_exclusion_by_id", "validate_email"}
+var MethodNames = [16]string{"schedule_survey", "get_survey", "update_survey", "delete_survey", "bulk_resend_survey", "preview_send_survey", "send_missing_recipients", "delete_survey_response", "resend_survey_response", "delete_recipient_group", "create_exclusion", "delete_exclusion", "get_exclusion", "delete_exclusion_by_id", "list_survey_responses", "validate_email"}
 
 // Bad request error response
 type BadRequestError struct {
@@ -321,6 +324,23 @@ type LFXProject struct {
 	LogoURL *string
 }
 
+// ListSurveyResponsesPayload is the payload type of the survey service
+// list_survey_responses method.
+type ListSurveyResponsesPayload struct {
+	// JWT token
+	Token *string
+	// Survey identifier
+	SurveyUID string
+	// Opaque pagination token for the next page (omit for first page)
+	PageToken *string
+	// Maximum number of responses to return per page
+	PerPage *string
+	// Optional LFX Project UID (V2) to filter responses to a single project
+	ProjectUID *string
+	// Optional comma-delimited list of LFX Project UIDs (V2) to filter responses
+	ProjectUids *string
+}
+
 // Not found error response
 type NotFoundError struct {
 	// HTTP status code
@@ -420,6 +440,14 @@ type ServiceUnavailableError struct {
 	Message string
 }
 
+// A single answer choice or text entry for a survey question
+type SurveyAnswerChoice struct {
+	// Choice identifier (for multiple-choice questions)
+	ChoiceID *string
+	// Answer text (for open-ended questions or choice label)
+	Text *string
+}
+
 // Survey committee details
 type SurveyCommittee struct {
 	// Committee name
@@ -438,6 +466,129 @@ type SurveyCommittee struct {
 	TotalResponses *int
 	// NPS value for this committee
 	NpsValue *float64
+}
+
+// A survey question and the answers submitted by the recipient
+type SurveyQuestionAnswer struct {
+	// Question identifier
+	QuestionID string
+	// Question text as shown to the recipient
+	QuestionText *string
+	// Question type family (e.g. rating, open_ended, single_choice)
+	QuestionFamily *string
+	// Question subtype within the family
+	QuestionSubtype *string
+	// Answers selected or entered by the recipient
+	Answers []*SurveyAnswerChoice
+}
+
+// Individual survey response submitted by a recipient
+type SurveyResponseItem struct {
+	// Response identifier
+	ID string
+	// Survey identifier
+	SurveyUID string
+	// Personal survey link for this recipient
+	SurveyLink *string
+	// Committee UID (V2)
+	CommitteeUID *string
+	// Recipient email address
+	Email *string
+	// Recipient first name
+	FirstName *string
+	// Recipient last name
+	LastName *string
+	// Linux Foundation username
+	Username *string
+	// Recipient's role in the committee
+	Role *string
+	// Recipient's job title
+	JobTitle *string
+	// Recipient's membership tier
+	MembershipTier *string
+	// Recipient's voting status
+	VotingStatus *string
+	// Recipient's organization
+	Organization *SurveyResponseOrg
+	// Project this response belongs to
+	Project *SurveyResponseProj
+	// Response delivery/completion status
+	ResponseStatus *string
+	// When the response record was created (RFC3339)
+	CreatedAt *string
+	// When the recipient submitted their response (RFC3339)
+	ResponseDatetime *string
+	// Last time a survey email was received (RFC3339)
+	LastReceivedTime *string
+	// Number of automated reminder emails received
+	NumAutomatedRemindersReceived *int
+	// NPS score given by the recipient (0-10)
+	NpsValue *float64
+	// SurveyMonkey respondent identifier
+	SurveyMonkeyRespondentID *string
+	// Per-question answers submitted by the recipient
+	SurveyMonkeyQuestionAnswers []*SurveyQuestionAnswer
+	// SES message identifier
+	SesMessageID *string
+	// Whether SES delivery succeeded
+	SesDeliverySuccessful *bool
+	// SES bounce type (Undetermined, Permanent, Transient)
+	SesBounceType *string
+	// SES bounce subtype
+	SesBounceSubtype *string
+	// SES bounce diagnostic code
+	SesBounceDiagnosticCode *string
+	// Whether a spam complaint was filed
+	SesComplaintExists *bool
+	// SES complaint type
+	SesComplaintType *string
+	// When the SES complaint was filed (RFC3339)
+	SesComplaintDate *string
+	// Whether the recipient opened the survey email
+	SesEmailOpened *bool
+	// Last time the email was opened (RFC3339)
+	SesEmailOpenedLastTime *string
+	// Whether the recipient clicked the survey link
+	SesLinkClicked *bool
+	// Last time the survey link was clicked (RFC3339)
+	SesLinkClickedLastTime *string
+}
+
+// Organization information for a survey response
+type SurveyResponseOrg struct {
+	// Organization ID
+	ID *string
+	// Organization name
+	Name *string
+}
+
+// Pagination metadata for survey responses
+type SurveyResponsePageMeta struct {
+	// Opaque token for the next page; empty string on the last page
+	PageToken *string
+	// Total number of pages
+	TotalPages *int
+	// Total number of responses across all pages
+	TotalResults *int
+	// Number of results per page
+	PerPage *int
+}
+
+// Project information for a survey response
+type SurveyResponseProj struct {
+	// Project UID (V2)
+	UID *string
+	// Project name
+	Name *string
+}
+
+// SurveyResponsesPage is the result type of the survey service
+// list_survey_responses method.
+type SurveyResponsesPage struct {
+	// List of individual per-recipient responses
+	Data []*SurveyResponseItem
+	// Pagination metadata
+	Meta *SurveyResponsePageMeta
 }
 
 // SurveyScheduleResult is the result type of the survey service

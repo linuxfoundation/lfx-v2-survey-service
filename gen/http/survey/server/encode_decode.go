@@ -1885,6 +1885,161 @@ func EncodeDeleteExclusionByIDError(encoder func(context.Context, http.ResponseW
 	}
 }
 
+// EncodeListSurveyResponsesResponse returns an encoder for responses returned
+// by the survey list_survey_responses endpoint.
+func EncodeListSurveyResponsesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res, _ := v.(*survey.SurveyResponsesPage)
+		enc := encoder(ctx, w)
+		body := NewListSurveyResponsesResponseBody(res)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeListSurveyResponsesRequest returns a decoder for requests sent to the
+// survey list_survey_responses endpoint.
+func DecodeListSurveyResponsesRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.ListSurveyResponsesPayload, error) {
+	return func(r *http.Request) (*survey.ListSurveyResponsesPayload, error) {
+		var (
+			surveyUID   string
+			pageToken   *string
+			perPage     *string
+			projectUID  *string
+			projectUids *string
+			token       *string
+
+			params = mux.Vars(r)
+		)
+		surveyUID = params["survey_uid"]
+		qp := r.URL.Query()
+		pageTokenRaw := qp.Get("page_token")
+		if pageTokenRaw != "" {
+			pageToken = &pageTokenRaw
+		}
+		perPageRaw := qp.Get("per_page")
+		if perPageRaw != "" {
+			perPage = &perPageRaw
+		}
+		projectUIDRaw := qp.Get("project_uid")
+		if projectUIDRaw != "" {
+			projectUID = &projectUIDRaw
+		}
+		projectUidsRaw := qp.Get("project_uids")
+		if projectUidsRaw != "" {
+			projectUids = &projectUidsRaw
+		}
+		tokenRaw := r.Header.Get("Authorization")
+		if tokenRaw != "" {
+			token = &tokenRaw
+		}
+		payload := NewListSurveyResponsesPayload(surveyUID, pageToken, perPage, projectUID, projectUids, token)
+		if payload.Token != nil {
+			if strings.Contains(*payload.Token, " ") {
+				// Remove authorization scheme prefix (e.g. "Bearer")
+				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				payload.Token = &cred
+			}
+		}
+
+		return payload, nil
+	}
+}
+
+// EncodeListSurveyResponsesError returns an encoder for errors returned by the
+// list_survey_responses survey endpoint.
+func EncodeListSurveyResponsesError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "BadRequest":
+			var res *survey.BadRequestError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyResponsesBadRequestResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Forbidden":
+			var res *survey.ForbiddenError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyResponsesForbiddenResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusForbidden)
+			return enc.Encode(body)
+		case "InternalServerError":
+			var res *survey.InternalServerError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyResponsesInternalServerErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		case "NotFound":
+			var res *survey.NotFoundError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyResponsesNotFoundResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusNotFound)
+			return enc.Encode(body)
+		case "ServiceUnavailable":
+			var res *survey.ServiceUnavailableError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyResponsesServiceUnavailableResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return enc.Encode(body)
+		case "Unauthorized":
+			var res *survey.UnauthorizedError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyResponsesUnauthorizedResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
 // EncodeValidateEmailResponse returns an encoder for responses returned by the
 // survey validate_email endpoint.
 func EncodeValidateEmailResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
@@ -2115,6 +2270,155 @@ func marshalSurveyUserEmailToUserEmailResponseBody(v *survey.UserEmail) *UserEma
 		ID:           v.ID,
 		EmailAddress: v.EmailAddress,
 		IsPrimary:    v.IsPrimary,
+	}
+
+	return res
+}
+
+// marshalSurveySurveyResponseItemToSurveyResponseItemResponseBody builds a
+// value of type *SurveyResponseItemResponseBody from a value of type
+// *survey.SurveyResponseItem.
+func marshalSurveySurveyResponseItemToSurveyResponseItemResponseBody(v *survey.SurveyResponseItem) *SurveyResponseItemResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &SurveyResponseItemResponseBody{
+		ID:                            v.ID,
+		SurveyUID:                     v.SurveyUID,
+		SurveyLink:                    v.SurveyLink,
+		CommitteeUID:                  v.CommitteeUID,
+		Email:                         v.Email,
+		FirstName:                     v.FirstName,
+		LastName:                      v.LastName,
+		Username:                      v.Username,
+		Role:                          v.Role,
+		JobTitle:                      v.JobTitle,
+		MembershipTier:                v.MembershipTier,
+		VotingStatus:                  v.VotingStatus,
+		ResponseStatus:                v.ResponseStatus,
+		CreatedAt:                     v.CreatedAt,
+		ResponseDatetime:              v.ResponseDatetime,
+		LastReceivedTime:              v.LastReceivedTime,
+		NumAutomatedRemindersReceived: v.NumAutomatedRemindersReceived,
+		NpsValue:                      v.NpsValue,
+		SurveyMonkeyRespondentID:      v.SurveyMonkeyRespondentID,
+		SesMessageID:                  v.SesMessageID,
+		SesDeliverySuccessful:         v.SesDeliverySuccessful,
+		SesBounceType:                 v.SesBounceType,
+		SesBounceSubtype:              v.SesBounceSubtype,
+		SesBounceDiagnosticCode:       v.SesBounceDiagnosticCode,
+		SesComplaintExists:            v.SesComplaintExists,
+		SesComplaintType:              v.SesComplaintType,
+		SesComplaintDate:              v.SesComplaintDate,
+		SesEmailOpened:                v.SesEmailOpened,
+		SesEmailOpenedLastTime:        v.SesEmailOpenedLastTime,
+		SesLinkClicked:                v.SesLinkClicked,
+		SesLinkClickedLastTime:        v.SesLinkClickedLastTime,
+	}
+	if v.Organization != nil {
+		res.Organization = marshalSurveySurveyResponseOrgToSurveyResponseOrgResponseBody(v.Organization)
+	}
+	if v.Project != nil {
+		res.Project = marshalSurveySurveyResponseProjToSurveyResponseProjResponseBody(v.Project)
+	}
+	if v.SurveyMonkeyQuestionAnswers != nil {
+		res.SurveyMonkeyQuestionAnswers = make([]*SurveyQuestionAnswerResponseBody, len(v.SurveyMonkeyQuestionAnswers))
+		for i, val := range v.SurveyMonkeyQuestionAnswers {
+			if val == nil {
+				res.SurveyMonkeyQuestionAnswers[i] = nil
+				continue
+			}
+			res.SurveyMonkeyQuestionAnswers[i] = marshalSurveySurveyQuestionAnswerToSurveyQuestionAnswerResponseBody(val)
+		}
+	}
+
+	return res
+}
+
+// marshalSurveySurveyResponseOrgToSurveyResponseOrgResponseBody builds a value
+// of type *SurveyResponseOrgResponseBody from a value of type
+// *survey.SurveyResponseOrg.
+func marshalSurveySurveyResponseOrgToSurveyResponseOrgResponseBody(v *survey.SurveyResponseOrg) *SurveyResponseOrgResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &SurveyResponseOrgResponseBody{
+		ID:   v.ID,
+		Name: v.Name,
+	}
+
+	return res
+}
+
+// marshalSurveySurveyResponseProjToSurveyResponseProjResponseBody builds a
+// value of type *SurveyResponseProjResponseBody from a value of type
+// *survey.SurveyResponseProj.
+func marshalSurveySurveyResponseProjToSurveyResponseProjResponseBody(v *survey.SurveyResponseProj) *SurveyResponseProjResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &SurveyResponseProjResponseBody{
+		UID:  v.UID,
+		Name: v.Name,
+	}
+
+	return res
+}
+
+// marshalSurveySurveyQuestionAnswerToSurveyQuestionAnswerResponseBody builds a
+// value of type *SurveyQuestionAnswerResponseBody from a value of type
+// *survey.SurveyQuestionAnswer.
+func marshalSurveySurveyQuestionAnswerToSurveyQuestionAnswerResponseBody(v *survey.SurveyQuestionAnswer) *SurveyQuestionAnswerResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &SurveyQuestionAnswerResponseBody{
+		QuestionID:      v.QuestionID,
+		QuestionText:    v.QuestionText,
+		QuestionFamily:  v.QuestionFamily,
+		QuestionSubtype: v.QuestionSubtype,
+	}
+	if v.Answers != nil {
+		res.Answers = make([]*SurveyAnswerChoiceResponseBody, len(v.Answers))
+		for i, val := range v.Answers {
+			if val == nil {
+				res.Answers[i] = nil
+				continue
+			}
+			res.Answers[i] = marshalSurveySurveyAnswerChoiceToSurveyAnswerChoiceResponseBody(val)
+		}
+	}
+
+	return res
+}
+
+// marshalSurveySurveyAnswerChoiceToSurveyAnswerChoiceResponseBody builds a
+// value of type *SurveyAnswerChoiceResponseBody from a value of type
+// *survey.SurveyAnswerChoice.
+func marshalSurveySurveyAnswerChoiceToSurveyAnswerChoiceResponseBody(v *survey.SurveyAnswerChoice) *SurveyAnswerChoiceResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &SurveyAnswerChoiceResponseBody{
+		ChoiceID: v.ChoiceID,
+		Text:     v.Text,
+	}
+
+	return res
+}
+
+// marshalSurveySurveyResponsePageMetaToSurveyResponsePageMetaResponseBody
+// builds a value of type *SurveyResponsePageMetaResponseBody from a value of
+// type *survey.SurveyResponsePageMeta.
+func marshalSurveySurveyResponsePageMetaToSurveyResponsePageMetaResponseBody(v *survey.SurveyResponsePageMeta) *SurveyResponsePageMetaResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &SurveyResponsePageMetaResponseBody{
+		PageToken:    v.PageToken,
+		TotalPages:   v.TotalPages,
+		TotalResults: v.TotalResults,
+		PerPage:      v.PerPage,
 	}
 
 	return res

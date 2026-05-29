@@ -24,7 +24,7 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"survey (schedule-survey|get-survey|update-survey|delete-survey|bulk-resend-survey|preview-send-survey|send-missing-recipients|delete-survey-response|resend-survey-response|delete-recipient-group|create-exclusion|delete-exclusion|get-exclusion|delete-exclusion-by-id|validate-email)",
+		"survey (schedule-survey|get-survey|update-survey|delete-survey|bulk-resend-survey|preview-send-survey|send-missing-recipients|delete-survey-response|resend-survey-response|delete-recipient-group|create-exclusion|delete-exclusion|get-exclusion|delete-exclusion-by-id|list-survey-responses|validate-email)",
 	}
 }
 
@@ -113,6 +113,14 @@ func ParseEndpoint(
 		surveyDeleteExclusionByIDExclusionIDFlag = surveyDeleteExclusionByIDFlags.String("exclusion-id", "REQUIRED", "Exclusion identifier")
 		surveyDeleteExclusionByIDTokenFlag       = surveyDeleteExclusionByIDFlags.String("token", "", "")
 
+		surveyListSurveyResponsesFlags           = flag.NewFlagSet("list-survey-responses", flag.ExitOnError)
+		surveyListSurveyResponsesSurveyUIDFlag   = surveyListSurveyResponsesFlags.String("survey-uid", "REQUIRED", "Survey identifier")
+		surveyListSurveyResponsesPageTokenFlag   = surveyListSurveyResponsesFlags.String("page-token", "", "")
+		surveyListSurveyResponsesPerPageFlag     = surveyListSurveyResponsesFlags.String("per-page", "", "")
+		surveyListSurveyResponsesProjectUIDFlag  = surveyListSurveyResponsesFlags.String("project-uid", "", "")
+		surveyListSurveyResponsesProjectUidsFlag = surveyListSurveyResponsesFlags.String("project-uids", "", "")
+		surveyListSurveyResponsesTokenFlag       = surveyListSurveyResponsesFlags.String("token", "", "")
+
 		surveyValidateEmailFlags     = flag.NewFlagSet("validate-email", flag.ExitOnError)
 		surveyValidateEmailBodyFlag  = surveyValidateEmailFlags.String("body", "REQUIRED", "")
 		surveyValidateEmailTokenFlag = surveyValidateEmailFlags.String("token", "", "")
@@ -132,6 +140,7 @@ func ParseEndpoint(
 	surveyDeleteExclusionFlags.Usage = surveyDeleteExclusionUsage
 	surveyGetExclusionFlags.Usage = surveyGetExclusionUsage
 	surveyDeleteExclusionByIDFlags.Usage = surveyDeleteExclusionByIDUsage
+	surveyListSurveyResponsesFlags.Usage = surveyListSurveyResponsesUsage
 	surveyValidateEmailFlags.Usage = surveyValidateEmailUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
@@ -210,6 +219,9 @@ func ParseEndpoint(
 			case "delete-exclusion-by-id":
 				epf = surveyDeleteExclusionByIDFlags
 
+			case "list-survey-responses":
+				epf = surveyListSurveyResponsesFlags
+
 			case "validate-email":
 				epf = surveyValidateEmailFlags
 
@@ -280,6 +292,9 @@ func ParseEndpoint(
 			case "delete-exclusion-by-id":
 				endpoint = c.DeleteExclusionByID()
 				data, err = surveyc.BuildDeleteExclusionByIDPayload(*surveyDeleteExclusionByIDExclusionIDFlag, *surveyDeleteExclusionByIDTokenFlag)
+			case "list-survey-responses":
+				endpoint = c.ListSurveyResponses()
+				data, err = surveyc.BuildListSurveyResponsesPayload(*surveyListSurveyResponsesSurveyUIDFlag, *surveyListSurveyResponsesPageTokenFlag, *surveyListSurveyResponsesPerPageFlag, *surveyListSurveyResponsesProjectUIDFlag, *surveyListSurveyResponsesProjectUidsFlag, *surveyListSurveyResponsesTokenFlag)
 			case "validate-email":
 				endpoint = c.ValidateEmail()
 				data, err = surveyc.BuildValidateEmailPayload(*surveyValidateEmailBodyFlag, *surveyValidateEmailTokenFlag)
@@ -312,6 +327,7 @@ func surveyUsage() {
 	fmt.Fprintln(os.Stderr, `    delete-exclusion: Delete a survey or global exclusion (proxies to ITX DELETE /v2/surveys/exclusion)`)
 	fmt.Fprintln(os.Stderr, `    get-exclusion: Get exclusion by ID (proxies to ITX GET /v2/surveys/exclusion/{exclusion_id})`)
 	fmt.Fprintln(os.Stderr, `    delete-exclusion-by-id: Delete exclusion by ID (proxies to ITX DELETE /v2/surveys/exclusion/{exclusion_id})`)
+	fmt.Fprintln(os.Stderr, `    list-survey-responses: List individual per-recipient responses for a survey (proxies to ITX GET /v2/surveys/{survey_uid}/responses)`)
 	fmt.Fprintln(os.Stderr, `    validate-email: Validate email template body and subject (proxies to ITX POST /v2/surveys/validate_email)`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
@@ -619,6 +635,34 @@ func surveyDeleteExclusionByIDUsage() {
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-exclusion-by-id --exclusion-id \"12345\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
+func surveyListSurveyResponsesUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] survey list-survey-responses", os.Args[0])
+	fmt.Fprint(os.Stderr, " -survey-uid STRING")
+	fmt.Fprint(os.Stderr, " -page-token STRING")
+	fmt.Fprint(os.Stderr, " -per-page STRING")
+	fmt.Fprint(os.Stderr, " -project-uid STRING")
+	fmt.Fprint(os.Stderr, " -project-uids STRING")
+	fmt.Fprint(os.Stderr, " -token STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `List individual per-recipient responses for a survey (proxies to ITX GET /v2/surveys/{survey_uid}/responses)`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -survey-uid STRING: Survey identifier`)
+	fmt.Fprintln(os.Stderr, `    -page-token STRING: `)
+	fmt.Fprintln(os.Stderr, `    -per-page STRING: `)
+	fmt.Fprintln(os.Stderr, `    -project-uid STRING: `)
+	fmt.Fprintln(os.Stderr, `    -project-uids STRING: `)
+	fmt.Fprintln(os.Stderr, `    -token STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey list-survey-responses --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --page-token \"eyJwYWdlIjogMn0=\" --per-page \"25\" --project-uid \"qa1e8536-a985-4cf5-b981-a170927a1d11\" --project-uids \"qa1e8536-a985-4cf5-b981-a170927a1d11,qa1e8536-a985-4cf5-b981-a170927a1d12\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+}
+
 func surveyValidateEmailUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] survey validate-email", os.Args[0])
@@ -636,5 +680,5 @@ func surveyValidateEmailUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey validate-email --body '{\n      \"body\": \"Vero in.\",\n      \"subject\": \"Ratione ut consequatur ullam.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey validate-email --body '{\n      \"body\": \"Quia rerum esse adipisci quia.\",\n      \"subject\": \"Qui est sint.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }

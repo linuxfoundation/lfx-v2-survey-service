@@ -437,6 +437,219 @@ var ExtendedExclusionResult = Type("ExtendedExclusionResult", func() {
 	Required("uid")
 })
 
+// SurveyResponsesPage represents a paginated list of individual per-recipient survey responses
+var SurveyResponsesPage = Type("SurveyResponsesPage", func() {
+	Description("Paginated list of individual survey responses per recipient")
+
+	Attribute("data", ArrayOf(SurveyResponseItem), "List of individual per-recipient responses", func() {
+		Example([]interface{}{})
+	})
+
+	Attribute("meta", SurveyResponsePageMeta, "Pagination metadata")
+})
+
+// SurveyResponsePageMeta holds pagination metadata for a responses page
+var SurveyResponsePageMeta = Type("SurveyResponsePageMeta", func() {
+	Description("Pagination metadata for survey responses")
+
+	Attribute("page_token", String, "Opaque token for the next page; empty string on the last page", func() {
+		Example("eyJwYWdlIjogMn0=")
+	})
+
+	Attribute("total_pages", Int, "Total number of pages", func() {
+		Example(5)
+	})
+
+	Attribute("total_results", Int, "Total number of responses across all pages", func() {
+		Example(120)
+	})
+
+	Attribute("per_page", Int, "Number of results per page", func() {
+		Example(25)
+	})
+})
+
+// SurveyResponseItem represents an individual per-recipient survey response
+var SurveyResponseItem = Type("SurveyResponseItem", func() {
+	Description("Individual survey response submitted by a recipient")
+
+	Attribute("id", String, "Response identifier", func() {
+		Example("cba14f40-1636-11ec-9621-0242ac130002")
+	})
+
+	Attribute("survey_uid", String, "Survey identifier", func() {
+		Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
+	})
+
+	Attribute("survey_link", String, "Personal survey link for this recipient", func() {
+		Example("https://surveymonkey.com/r/abc123")
+	})
+
+	Attribute("committee_uid", String, "Committee UID (V2)", func() {
+		Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
+	})
+
+	// Recipient identity
+	Attribute("email", String, "Recipient email address", func() {
+		Format(FormatEmail)
+		Example("john.doe@example.com")
+	})
+
+	Attribute("first_name", String, "Recipient first name", func() {
+		Example("John")
+	})
+
+	Attribute("last_name", String, "Recipient last name", func() {
+		Example("Doe")
+	})
+
+	Attribute("username", String, "Linux Foundation username", func() {
+		Example("jdoe")
+	})
+
+	Attribute("role", String, "Recipient's role in the committee", func() {
+		Example("Voting Rep")
+	})
+
+	Attribute("job_title", String, "Recipient's job title", func() {
+		Example("Principal Engineer")
+	})
+
+	Attribute("membership_tier", String, "Recipient's membership tier", func() {
+		Example("Platinum")
+	})
+
+	Attribute("voting_status", String, "Recipient's voting status", func() {
+		Example("Eligible")
+	})
+
+	Attribute("organization", SurveyResponseOrg, "Recipient's organization")
+	Attribute("project", SurveyResponseProj, "Project this response belongs to")
+
+	// Status and timestamps
+	Attribute("response_status", String, "Response delivery/completion status", func() {
+		Enum("Responded", "Clicked", "Opened", "Delivered", "Failed", "Pending")
+		Example("Responded")
+	})
+
+	Attribute("created_at", String, "When the response record was created (RFC3339)", func() {
+		Format(FormatDateTime)
+	})
+
+	Attribute("response_datetime", String, "When the recipient submitted their response (RFC3339)", func() {
+		Format(FormatDateTime)
+	})
+
+	Attribute("last_received_time", String, "Last time a survey email was received (RFC3339)", func() {
+		Format(FormatDateTime)
+	})
+
+	Attribute("num_automated_reminders_received", Int, "Number of automated reminder emails received", func() {
+		Example(2)
+	})
+
+	// NPS and answers
+	Attribute("nps_value", Float64, "NPS score given by the recipient (0-10)", func() {
+		Example(9.0)
+	})
+
+	Attribute("survey_monkey_respondent_id", String, "SurveyMonkey respondent identifier", func() {
+		Example("12345678")
+	})
+
+	Attribute("survey_monkey_question_answers", ArrayOf(SurveyQuestionAnswer), "Per-question answers submitted by the recipient")
+
+	// SES delivery tracking
+	Attribute("ses_message_id", String, "SES message identifier")
+	Attribute("ses_delivery_successful", Boolean, "Whether SES delivery succeeded")
+	Attribute("ses_bounce_type", String, "SES bounce type (Undetermined, Permanent, Transient)", func() {
+		Example("Permanent")
+	})
+	Attribute("ses_bounce_subtype", String, "SES bounce subtype", func() {
+		Example("NoEmail")
+	})
+	Attribute("ses_bounce_diagnostic_code", String, "SES bounce diagnostic code")
+	Attribute("ses_complaint_exists", Boolean, "Whether a spam complaint was filed")
+	Attribute("ses_complaint_type", String, "SES complaint type")
+	Attribute("ses_complaint_date", String, "When the SES complaint was filed (RFC3339)", func() {
+		Format(FormatDateTime)
+	})
+	Attribute("ses_email_opened", Boolean, "Whether the recipient opened the survey email")
+	Attribute("ses_email_opened_last_time", String, "Last time the email was opened (RFC3339)", func() {
+		Format(FormatDateTime)
+	})
+	Attribute("ses_link_clicked", Boolean, "Whether the recipient clicked the survey link")
+	Attribute("ses_link_clicked_last_time", String, "Last time the survey link was clicked (RFC3339)", func() {
+		Format(FormatDateTime)
+	})
+
+	Required("id", "survey_uid")
+})
+
+// SurveyResponseOrg represents an organization embedded in a survey response
+var SurveyResponseOrg = Type("SurveyResponseOrg", func() {
+	Description("Organization information for a survey response")
+
+	Attribute("id", String, "Organization ID", func() {
+		Example("003170000123XHTAA2")
+	})
+
+	Attribute("name", String, "Organization name", func() {
+		Example("Acme Corp")
+	})
+})
+
+// SurveyResponseProj represents a project embedded in a survey response
+var SurveyResponseProj = Type("SurveyResponseProj", func() {
+	Description("Project information for a survey response")
+
+	Attribute("uid", String, "Project UID (V2)", func() {
+		Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
+	})
+
+	Attribute("name", String, "Project name", func() {
+		Example("Kubernetes")
+	})
+})
+
+// SurveyQuestionAnswer represents a single question with its answers in a survey response
+var SurveyQuestionAnswer = Type("SurveyQuestionAnswer", func() {
+	Description("A survey question and the answers submitted by the recipient")
+
+	Attribute("question_id", String, "Question identifier", func() {
+		Example("q-001")
+	})
+
+	Attribute("question_text", String, "Question text as shown to the recipient", func() {
+		Example("How satisfied are you with the project governance?")
+	})
+
+	Attribute("question_family", String, "Question type family (e.g. rating, open_ended, single_choice)", func() {
+		Example("rating")
+	})
+
+	Attribute("question_subtype", String, "Question subtype within the family", func() {
+		Example("ranking")
+	})
+
+	Attribute("answers", ArrayOf(SurveyAnswerChoice), "Answers selected or entered by the recipient")
+
+	Required("question_id")
+})
+
+// SurveyAnswerChoice represents a single answer within a question answer
+var SurveyAnswerChoice = Type("SurveyAnswerChoice", func() {
+	Description("A single answer choice or text entry for a survey question")
+
+	Attribute("choice_id", String, "Choice identifier (for multiple-choice questions)", func() {
+		Example("c-001")
+	})
+
+	Attribute("text", String, "Answer text (for open-ended questions or choice label)", func() {
+		Example("Strongly agree")
+	})
+})
+
 // ValidateEmailResult represents the validated email template response
 var ValidateEmailResult = Type("ValidateEmailResult", func() {
 	Description("Validated email template body and subject")

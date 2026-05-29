@@ -30,11 +30,12 @@ type Client struct {
 	DeleteExclusionEndpoint       goa.Endpoint
 	GetExclusionEndpoint          goa.Endpoint
 	DeleteExclusionByIDEndpoint   goa.Endpoint
+	ListSurveyResponsesEndpoint   goa.Endpoint
 	ValidateEmailEndpoint         goa.Endpoint
 }
 
 // NewClient initializes a "survey" service client given the endpoints.
-func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResendSurvey, previewSendSurvey, sendMissingRecipients, deleteSurveyResponse, resendSurveyResponse, deleteRecipientGroup, createExclusion, deleteExclusion, getExclusion, deleteExclusionByID, validateEmail goa.Endpoint) *Client {
+func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResendSurvey, previewSendSurvey, sendMissingRecipients, deleteSurveyResponse, resendSurveyResponse, deleteRecipientGroup, createExclusion, deleteExclusion, getExclusion, deleteExclusionByID, listSurveyResponses, validateEmail goa.Endpoint) *Client {
 	return &Client{
 		ScheduleSurveyEndpoint:        scheduleSurvey,
 		GetSurveyEndpoint:             getSurvey,
@@ -50,6 +51,7 @@ func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResend
 		DeleteExclusionEndpoint:       deleteExclusion,
 		GetExclusionEndpoint:          getExclusion,
 		DeleteExclusionByIDEndpoint:   deleteExclusionByID,
+		ListSurveyResponsesEndpoint:   listSurveyResponses,
 		ValidateEmailEndpoint:         validateEmail,
 	}
 }
@@ -295,6 +297,26 @@ func (c *Client) GetExclusion(ctx context.Context, p *GetExclusionPayload) (res 
 func (c *Client) DeleteExclusionByID(ctx context.Context, p *DeleteExclusionByIDPayload) (err error) {
 	_, err = c.DeleteExclusionByIDEndpoint(ctx, p)
 	return
+}
+
+// ListSurveyResponses calls the "list_survey_responses" endpoint of the
+// "survey" service.
+// ListSurveyResponses may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) ListSurveyResponses(ctx context.Context, p *ListSurveyResponsesPayload) (res *SurveyResponsesPage, err error) {
+	var ires any
+	ires, err = c.ListSurveyResponsesEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*SurveyResponsesPage), nil
 }
 
 // ValidateEmail calls the "validate_email" endpoint of the "survey" service.
