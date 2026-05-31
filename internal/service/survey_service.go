@@ -1268,8 +1268,8 @@ func (s *SurveyService) mapITXRecipientResponseToItem(ctx context.Context, r itx
 		}
 	}
 
-	// Map SurveyMonkey question answers
-	var answers []*survey.SurveyQuestionAnswer
+	// Map SurveyMonkey question answers — always an empty slice, never nil
+	answers := make([]*survey.SurveyQuestionAnswer, 0, len(r.SurveyMonkeyQuestionAnswers))
 	for _, qa := range r.SurveyMonkeyQuestionAnswers {
 		choices := make([]*survey.SurveyAnswerChoice, 0, len(qa.Answers))
 		for _, a := range qa.Answers {

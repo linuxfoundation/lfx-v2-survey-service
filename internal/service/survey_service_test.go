@@ -289,6 +289,42 @@ func TestListSurveyResponses_ITX404_MapsToNotFound(t *testing.T) {
 	}
 }
 
+func TestListSurveyResponses_ProjectUIDs_ForwardedToProxy(t *testing.T) {
+	// Verify that comma-delimited project_uids is V2→V1 mapped and forwarded as ProjectIDs.
+	// NoOpMapper returns each ID unchanged, so the joined string should equal the input.
+	proxy := &mockProxy{
+		listResponsesResult: &itx.PaginatedSurveyResponses{
+			Data: []itx.SurveyRecipientResponse{},
+			Meta: itx.PageMetadata{},
+		},
+	}
+
+	svc := newTestService(proxy)
+	token := "test-token"
+	projectUIDs := "uid-one,uid-two,uid-three"
+
+	_, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
+		Token:       &token,
+		SurveyUID:   "survey-uid-abc",
+		ProjectUids: &projectUIDs,
+	})
+
+	if err != nil {
+		t.Fatalf("unexpected error when project_uids provided: %v", err)
+	}
+	if proxy.capturedParams == nil {
+		t.Fatal("expected params to be forwarded, got nil")
+	}
+	// NoOpMapper returns each V2 UID unchanged — joined result should equal input
+	if proxy.capturedParams.ProjectIDs == nil || *proxy.capturedParams.ProjectIDs != "uid-one,uid-two,uid-three" {
+		t.Errorf("expected ProjectIDs uid-one,uid-two,uid-three, got %v", proxy.capturedParams.ProjectIDs)
+	}
+	// ProjectID should be nil when only project_uids was provided
+	if proxy.capturedParams.ProjectID != nil {
+		t.Errorf("expected ProjectID nil when only project_uids provided, got %v", proxy.capturedParams.ProjectID)
+	}
+}
+
 func TestListSurveyResponses_ProjectUID_ForwardedToProxy(t *testing.T) {
 	// Verify project_uid is V2→V1 mapped and forwarded as ProjectID in ListResponses params.
 	// NoOpMapper returns the ID unchanged, so we can assert the value directly.

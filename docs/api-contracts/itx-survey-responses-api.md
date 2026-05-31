@@ -136,7 +136,9 @@ recipient's identity, their submitted answers, NPS score, and SES delivery track
 
 **Method**: `GET /surveys/{survey_uid}/responses`
 
-**Authorization**: Requires JWT with `manage:projects` + `manage:surveys` scopes
+**Authorization**: Two layers enforced in sequence:
+1. **JWT scopes** — token must carry `manage:projects` + `manage:surveys`
+2. **OpenFGA** — caller must hold the `viewer` relation on `survey:{survey_uid}` (enforced by the Heimdall ruleset; same object used by `GET /surveys/{survey_uid}`)
 
 **Request Headers**:
 
