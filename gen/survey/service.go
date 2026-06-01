@@ -337,7 +337,8 @@ type ListSurveyResponsesPayload struct {
 	PerPage *string
 	// Optional LFX Project UID (V2) to filter responses to a single project
 	ProjectUID *string
-	// Optional comma-delimited list of LFX Project UIDs (V2) to filter responses
+	// Optional comma-delimited list of LFX Project UIDs (V2) to filter responses.
+	// Should not be combined with project_uid
 	ProjectUids *string
 }
 

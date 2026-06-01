@@ -599,7 +599,7 @@ paths:
                   type: string
                 - name: project_uids
                   in: query
-                  description: Optional comma-delimited list of LFX Project UIDs (V2) to filter responses
+                  description: Optional comma-delimited list of LFX Project UIDs (V2) to filter responses. Should not be combined with project_uid
                   required: false
                   type: string
                 - name: survey_uid

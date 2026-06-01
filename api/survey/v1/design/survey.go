@@ -567,7 +567,7 @@ var _ = Service("survey", func() {
 				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
 			})
 
-			Attribute("project_uids", String, "Optional comma-delimited list of LFX Project UIDs (V2) to filter responses", func() {
+			Attribute("project_uids", String, "Optional comma-delimited list of LFX Project UIDs (V2) to filter responses. Should not be combined with project_uid", func() {
 				Example("qa1e8536-a985-4cf5-b981-a170927a1d11,qa1e8536-a985-4cf5-b981-a170927a1d12")
 			})
 
