@@ -76,6 +76,9 @@ type SurveyResponseClient interface {
 
 	// ResendResponse resends the survey email to a specific user in ITX
 	ResendResponse(ctx context.Context, surveyID string, responseID string) error
+
+	// ListResponses retrieves a paginated list of individual per-recipient responses for a survey from ITX
+	ListResponses(ctx context.Context, surveyID string, params *itx.ListResponsesParams) (*itx.PaginatedSurveyResponses, error)
 }
 
 // ITXProxyClient combines both survey and survey response operations
