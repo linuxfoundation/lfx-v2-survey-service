@@ -1227,6 +1227,7 @@ func (s *SurveyService) mapITXResponsesToPage(ctx context.Context, itxResponse *
 	pool := concurrent.NewWorkerPool(5)
 	mappingFunctions := make([]func() error, len(itxResponse.Data))
 	for i, r := range itxResponse.Data {
+		i, r := i, r
 		mappingFunctions[i] = func() error {
 			item, err := s.mapITXRecipientResponseToItem(ctx, r)
 			if err != nil {
