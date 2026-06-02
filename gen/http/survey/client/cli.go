@@ -434,6 +434,54 @@ func BuildDeleteExclusionByIDPayload(surveyDeleteExclusionByIDExclusionID string
 	return v, nil
 }
 
+// BuildListSurveyResponsesPayload builds the payload for the survey
+// list_survey_responses endpoint from CLI flags.
+func BuildListSurveyResponsesPayload(surveyListSurveyResponsesSurveyUID string, surveyListSurveyResponsesPageToken string, surveyListSurveyResponsesPerPage string, surveyListSurveyResponsesProjectUID string, surveyListSurveyResponsesProjectUids string, surveyListSurveyResponsesToken string) (*survey.ListSurveyResponsesPayload, error) {
+	var surveyUID string
+	{
+		surveyUID = surveyListSurveyResponsesSurveyUID
+	}
+	var pageToken *string
+	{
+		if surveyListSurveyResponsesPageToken != "" {
+			pageToken = &surveyListSurveyResponsesPageToken
+		}
+	}
+	var perPage *string
+	{
+		if surveyListSurveyResponsesPerPage != "" {
+			perPage = &surveyListSurveyResponsesPerPage
+		}
+	}
+	var projectUID *string
+	{
+		if surveyListSurveyResponsesProjectUID != "" {
+			projectUID = &surveyListSurveyResponsesProjectUID
+		}
+	}
+	var projectUids *string
+	{
+		if surveyListSurveyResponsesProjectUids != "" {
+			projectUids = &surveyListSurveyResponsesProjectUids
+		}
+	}
+	var token *string
+	{
+		if surveyListSurveyResponsesToken != "" {
+			token = &surveyListSurveyResponsesToken
+		}
+	}
+	v := &survey.ListSurveyResponsesPayload{}
+	v.SurveyUID = surveyUID
+	v.PageToken = pageToken
+	v.PerPage = perPage
+	v.ProjectUID = projectUID
+	v.ProjectUids = projectUids
+	v.Token = token
+
+	return v, nil
+}
+
 // BuildValidateEmailPayload builds the payload for the survey validate_email
 // endpoint from CLI flags.
 func BuildValidateEmailPayload(surveyValidateEmailBody string, surveyValidateEmailToken string) (*survey.ValidateEmailPayload, error) {
@@ -442,7 +490,7 @@ func BuildValidateEmailPayload(surveyValidateEmailBody string, surveyValidateEma
 	{
 		err = json.Unmarshal([]byte(surveyValidateEmailBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"body\": \"Vero in.\",\n      \"subject\": \"Ratione ut consequatur ullam.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"body\": \"Quia rerum esse adipisci quia.\",\n      \"subject\": \"Qui est sint.\"\n   }'")
 		}
 	}
 	var token *string

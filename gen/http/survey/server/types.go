@@ -399,6 +399,15 @@ type GetExclusionResponseBody struct {
 	User *ExclusionUserResponseBody `form:"user,omitempty" json:"user,omitempty" xml:"user,omitempty"`
 }
 
+// ListSurveyResponsesResponseBody is the type of the "survey" service
+// "list_survey_responses" endpoint HTTP response body.
+type ListSurveyResponsesResponseBody struct {
+	// List of individual per-recipient responses
+	Data []*SurveyResponseItemResponseBody `form:"data" json:"data" xml:"data"`
+	// Pagination metadata
+	Meta *SurveyResponsePageMetaResponseBody `form:"meta" json:"meta" xml:"meta"`
+}
+
 // ValidateEmailResponseBody is the type of the "survey" service
 // "validate_email" endpoint HTTP response body.
 type ValidateEmailResponseBody struct {
@@ -1135,6 +1144,65 @@ type DeleteExclusionByIDUnauthorizedResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// ListSurveyResponsesBadRequestResponseBody is the type of the "survey"
+// service "list_survey_responses" endpoint HTTP response body for the
+// "BadRequest" error.
+type ListSurveyResponsesBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyResponsesForbiddenResponseBody is the type of the "survey" service
+// "list_survey_responses" endpoint HTTP response body for the "Forbidden"
+// error.
+type ListSurveyResponsesForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyResponsesInternalServerErrorResponseBody is the type of the
+// "survey" service "list_survey_responses" endpoint HTTP response body for the
+// "InternalServerError" error.
+type ListSurveyResponsesInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyResponsesNotFoundResponseBody is the type of the "survey" service
+// "list_survey_responses" endpoint HTTP response body for the "NotFound" error.
+type ListSurveyResponsesNotFoundResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyResponsesServiceUnavailableResponseBody is the type of the
+// "survey" service "list_survey_responses" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type ListSurveyResponsesServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyResponsesUnauthorizedResponseBody is the type of the "survey"
+// service "list_survey_responses" endpoint HTTP response body for the
+// "Unauthorized" error.
+type ListSurveyResponsesUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // ValidateEmailBadRequestResponseBody is the type of the "survey" service
 // "validate_email" endpoint HTTP response body for the "BadRequest" error.
 type ValidateEmailBadRequestResponseBody struct {
@@ -1258,6 +1326,134 @@ type UserEmailResponseBody struct {
 	EmailAddress *string `form:"email_address,omitempty" json:"email_address,omitempty" xml:"email_address,omitempty"`
 	// Whether this is the primary email
 	IsPrimary *bool `form:"is_primary,omitempty" json:"is_primary,omitempty" xml:"is_primary,omitempty"`
+}
+
+// SurveyResponseItemResponseBody is used to define fields on response body
+// types.
+type SurveyResponseItemResponseBody struct {
+	// Response identifier
+	ID string `form:"id" json:"id" xml:"id"`
+	// Survey identifier
+	SurveyUID string `form:"survey_uid" json:"survey_uid" xml:"survey_uid"`
+	// Personal survey link for this recipient
+	SurveyLink *string `form:"survey_link,omitempty" json:"survey_link,omitempty" xml:"survey_link,omitempty"`
+	// Committee UID (V2)
+	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
+	// Recipient email address
+	Email *string `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
+	// Recipient first name
+	FirstName *string `form:"first_name,omitempty" json:"first_name,omitempty" xml:"first_name,omitempty"`
+	// Recipient last name
+	LastName *string `form:"last_name,omitempty" json:"last_name,omitempty" xml:"last_name,omitempty"`
+	// Linux Foundation username
+	Username *string `form:"username,omitempty" json:"username,omitempty" xml:"username,omitempty"`
+	// Recipient's role in the committee
+	Role *string `form:"role,omitempty" json:"role,omitempty" xml:"role,omitempty"`
+	// Recipient's job title
+	JobTitle *string `form:"job_title,omitempty" json:"job_title,omitempty" xml:"job_title,omitempty"`
+	// Recipient's membership tier
+	MembershipTier *string `form:"membership_tier,omitempty" json:"membership_tier,omitempty" xml:"membership_tier,omitempty"`
+	// Recipient's voting status
+	VotingStatus *string `form:"voting_status,omitempty" json:"voting_status,omitempty" xml:"voting_status,omitempty"`
+	// Recipient's organization
+	Organization *SurveyResponseOrgResponseBody `form:"organization,omitempty" json:"organization,omitempty" xml:"organization,omitempty"`
+	// Project this response belongs to
+	Project *SurveyResponseProjResponseBody `form:"project,omitempty" json:"project,omitempty" xml:"project,omitempty"`
+	// Response delivery/completion status
+	ResponseStatus *string `form:"response_status,omitempty" json:"response_status,omitempty" xml:"response_status,omitempty"`
+	// When the response record was created (RFC3339)
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// When the recipient submitted their response (RFC3339)
+	ResponseDatetime *string `form:"response_datetime,omitempty" json:"response_datetime,omitempty" xml:"response_datetime,omitempty"`
+	// Last time a survey email was received (RFC3339)
+	LastReceivedTime *string `form:"last_received_time,omitempty" json:"last_received_time,omitempty" xml:"last_received_time,omitempty"`
+	// Number of automated reminder emails received
+	NumAutomatedRemindersReceived *int `form:"num_automated_reminders_received,omitempty" json:"num_automated_reminders_received,omitempty" xml:"num_automated_reminders_received,omitempty"`
+	// NPS score given by the recipient (0-10)
+	NpsValue *float64 `form:"nps_value,omitempty" json:"nps_value,omitempty" xml:"nps_value,omitempty"`
+	// SurveyMonkey respondent identifier
+	SurveyMonkeyRespondentID *string `form:"survey_monkey_respondent_id,omitempty" json:"survey_monkey_respondent_id,omitempty" xml:"survey_monkey_respondent_id,omitempty"`
+	// Per-question answers submitted by the recipient
+	SurveyMonkeyQuestionAnswers []*SurveyQuestionAnswerResponseBody `form:"survey_monkey_question_answers,omitempty" json:"survey_monkey_question_answers,omitempty" xml:"survey_monkey_question_answers,omitempty"`
+	// SES message identifier
+	SesMessageID *string `form:"ses_message_id,omitempty" json:"ses_message_id,omitempty" xml:"ses_message_id,omitempty"`
+	// Whether SES delivery succeeded
+	SesDeliverySuccessful *bool `form:"ses_delivery_successful,omitempty" json:"ses_delivery_successful,omitempty" xml:"ses_delivery_successful,omitempty"`
+	// SES bounce type (Undetermined, Permanent, Transient)
+	SesBounceType *string `form:"ses_bounce_type,omitempty" json:"ses_bounce_type,omitempty" xml:"ses_bounce_type,omitempty"`
+	// SES bounce subtype
+	SesBounceSubtype *string `form:"ses_bounce_subtype,omitempty" json:"ses_bounce_subtype,omitempty" xml:"ses_bounce_subtype,omitempty"`
+	// SES bounce diagnostic code
+	SesBounceDiagnosticCode *string `form:"ses_bounce_diagnostic_code,omitempty" json:"ses_bounce_diagnostic_code,omitempty" xml:"ses_bounce_diagnostic_code,omitempty"`
+	// Whether a spam complaint was filed
+	SesComplaintExists *bool `form:"ses_complaint_exists,omitempty" json:"ses_complaint_exists,omitempty" xml:"ses_complaint_exists,omitempty"`
+	// SES complaint type
+	SesComplaintType *string `form:"ses_complaint_type,omitempty" json:"ses_complaint_type,omitempty" xml:"ses_complaint_type,omitempty"`
+	// When the SES complaint was filed (RFC3339)
+	SesComplaintDate *string `form:"ses_complaint_date,omitempty" json:"ses_complaint_date,omitempty" xml:"ses_complaint_date,omitempty"`
+	// Whether the recipient opened the survey email
+	SesEmailOpened *bool `form:"ses_email_opened,omitempty" json:"ses_email_opened,omitempty" xml:"ses_email_opened,omitempty"`
+	// Last time the email was opened (RFC3339)
+	SesEmailOpenedLastTime *string `form:"ses_email_opened_last_time,omitempty" json:"ses_email_opened_last_time,omitempty" xml:"ses_email_opened_last_time,omitempty"`
+	// Whether the recipient clicked the survey link
+	SesLinkClicked *bool `form:"ses_link_clicked,omitempty" json:"ses_link_clicked,omitempty" xml:"ses_link_clicked,omitempty"`
+	// Last time the survey link was clicked (RFC3339)
+	SesLinkClickedLastTime *string `form:"ses_link_clicked_last_time,omitempty" json:"ses_link_clicked_last_time,omitempty" xml:"ses_link_clicked_last_time,omitempty"`
+}
+
+// SurveyResponseOrgResponseBody is used to define fields on response body
+// types.
+type SurveyResponseOrgResponseBody struct {
+	// Organization ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Organization name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+}
+
+// SurveyResponseProjResponseBody is used to define fields on response body
+// types.
+type SurveyResponseProjResponseBody struct {
+	// Project UID (V2)
+	UID *string `form:"uid,omitempty" json:"uid,omitempty" xml:"uid,omitempty"`
+	// Project name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+}
+
+// SurveyQuestionAnswerResponseBody is used to define fields on response body
+// types.
+type SurveyQuestionAnswerResponseBody struct {
+	// Question identifier
+	QuestionID string `form:"question_id" json:"question_id" xml:"question_id"`
+	// Question text as shown to the recipient
+	QuestionText *string `form:"question_text,omitempty" json:"question_text,omitempty" xml:"question_text,omitempty"`
+	// Question type family (e.g. rating, open_ended, single_choice)
+	QuestionFamily *string `form:"question_family,omitempty" json:"question_family,omitempty" xml:"question_family,omitempty"`
+	// Question subtype within the family
+	QuestionSubtype *string `form:"question_subtype,omitempty" json:"question_subtype,omitempty" xml:"question_subtype,omitempty"`
+	// Answers selected or entered by the recipient
+	Answers []*SurveyAnswerChoiceResponseBody `form:"answers,omitempty" json:"answers,omitempty" xml:"answers,omitempty"`
+}
+
+// SurveyAnswerChoiceResponseBody is used to define fields on response body
+// types.
+type SurveyAnswerChoiceResponseBody struct {
+	// Choice identifier (for multiple-choice questions)
+	ChoiceID *string `form:"choice_id,omitempty" json:"choice_id,omitempty" xml:"choice_id,omitempty"`
+	// Answer text (for open-ended questions or choice label)
+	Text *string `form:"text,omitempty" json:"text,omitempty" xml:"text,omitempty"`
+}
+
+// SurveyResponsePageMetaResponseBody is used to define fields on response body
+// types.
+type SurveyResponsePageMetaResponseBody struct {
+	// Opaque token for the next page; empty string on the last page
+	PageToken *string `form:"page_token,omitempty" json:"page_token,omitempty" xml:"page_token,omitempty"`
+	// Total number of pages
+	TotalPages *int `form:"total_pages,omitempty" json:"total_pages,omitempty" xml:"total_pages,omitempty"`
+	// Total number of responses across all pages
+	TotalResults *int `form:"total_results,omitempty" json:"total_results,omitempty" xml:"total_results,omitempty"`
+	// Number of results per page
+	PerPage *int `form:"per_page,omitempty" json:"per_page,omitempty" xml:"per_page,omitempty"`
 }
 
 // NewScheduleSurveyResponseBody builds the HTTP response body from the result
@@ -1483,6 +1679,28 @@ func NewGetExclusionResponseBody(res *survey.ExtendedExclusionResult) *GetExclus
 	}
 	if res.User != nil {
 		body.User = marshalSurveyExclusionUserToExclusionUserResponseBody(res.User)
+	}
+	return body
+}
+
+// NewListSurveyResponsesResponseBody builds the HTTP response body from the
+// result of the "list_survey_responses" endpoint of the "survey" service.
+func NewListSurveyResponsesResponseBody(res *survey.SurveyResponsesPage) *ListSurveyResponsesResponseBody {
+	body := &ListSurveyResponsesResponseBody{}
+	if res.Data != nil {
+		body.Data = make([]*SurveyResponseItemResponseBody, len(res.Data))
+		for i, val := range res.Data {
+			if val == nil {
+				body.Data[i] = nil
+				continue
+			}
+			body.Data[i] = marshalSurveySurveyResponseItemToSurveyResponseItemResponseBody(val)
+		}
+	} else {
+		body.Data = []*SurveyResponseItemResponseBody{}
+	}
+	if res.Meta != nil {
+		body.Meta = marshalSurveySurveyResponsePageMetaToSurveyResponsePageMetaResponseBody(res.Meta)
 	}
 	return body
 }
@@ -2295,6 +2513,72 @@ func NewDeleteExclusionByIDUnauthorizedResponseBody(res *survey.UnauthorizedErro
 	return body
 }
 
+// NewListSurveyResponsesBadRequestResponseBody builds the HTTP response body
+// from the result of the "list_survey_responses" endpoint of the "survey"
+// service.
+func NewListSurveyResponsesBadRequestResponseBody(res *survey.BadRequestError) *ListSurveyResponsesBadRequestResponseBody {
+	body := &ListSurveyResponsesBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyResponsesForbiddenResponseBody builds the HTTP response body
+// from the result of the "list_survey_responses" endpoint of the "survey"
+// service.
+func NewListSurveyResponsesForbiddenResponseBody(res *survey.ForbiddenError) *ListSurveyResponsesForbiddenResponseBody {
+	body := &ListSurveyResponsesForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyResponsesInternalServerErrorResponseBody builds the HTTP
+// response body from the result of the "list_survey_responses" endpoint of the
+// "survey" service.
+func NewListSurveyResponsesInternalServerErrorResponseBody(res *survey.InternalServerError) *ListSurveyResponsesInternalServerErrorResponseBody {
+	body := &ListSurveyResponsesInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyResponsesNotFoundResponseBody builds the HTTP response body
+// from the result of the "list_survey_responses" endpoint of the "survey"
+// service.
+func NewListSurveyResponsesNotFoundResponseBody(res *survey.NotFoundError) *ListSurveyResponsesNotFoundResponseBody {
+	body := &ListSurveyResponsesNotFoundResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyResponsesServiceUnavailableResponseBody builds the HTTP
+// response body from the result of the "list_survey_responses" endpoint of the
+// "survey" service.
+func NewListSurveyResponsesServiceUnavailableResponseBody(res *survey.ServiceUnavailableError) *ListSurveyResponsesServiceUnavailableResponseBody {
+	body := &ListSurveyResponsesServiceUnavailableResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyResponsesUnauthorizedResponseBody builds the HTTP response body
+// from the result of the "list_survey_responses" endpoint of the "survey"
+// service.
+func NewListSurveyResponsesUnauthorizedResponseBody(res *survey.UnauthorizedError) *ListSurveyResponsesUnauthorizedResponseBody {
+	body := &ListSurveyResponsesUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewValidateEmailBadRequestResponseBody builds the HTTP response body from
 // the result of the "validate_email" endpoint of the "survey" service.
 func NewValidateEmailBadRequestResponseBody(res *survey.BadRequestError) *ValidateEmailBadRequestResponseBody {
@@ -2520,6 +2804,20 @@ func NewGetExclusionPayload(exclusionID string, token *string) *survey.GetExclus
 func NewDeleteExclusionByIDPayload(exclusionID string, token *string) *survey.DeleteExclusionByIDPayload {
 	v := &survey.DeleteExclusionByIDPayload{}
 	v.ExclusionID = exclusionID
+	v.Token = token
+
+	return v
+}
+
+// NewListSurveyResponsesPayload builds a survey service list_survey_responses
+// endpoint payload.
+func NewListSurveyResponsesPayload(surveyUID string, pageToken *string, perPage *string, projectUID *string, projectUids *string, token *string) *survey.ListSurveyResponsesPayload {
+	v := &survey.ListSurveyResponsesPayload{}
+	v.SurveyUID = surveyUID
+	v.PageToken = pageToken
+	v.PerPage = perPage
+	v.ProjectUID = projectUID
+	v.ProjectUids = projectUids
 	v.Token = token
 
 	return v

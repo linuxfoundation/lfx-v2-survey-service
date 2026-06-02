@@ -322,6 +322,72 @@ func (c *Client) GetResponse(ctx context.Context, responseID string) (*itx.Surve
 	return &result, nil
 }
 
+// ListResponses retrieves a paginated list of individual survey responses from ITX
+func (c *Client) ListResponses(ctx context.Context, surveyID string, params *itx.ListResponsesParams) (*itx.PaginatedSurveyResponses, error) {
+	// Build URL with query parameters
+	baseURL := fmt.Sprintf("%sv2/surveys/%s/responses", c.config.BaseURL, surveyID)
+	parsedURL, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, domain.NewInternalError("failed to parse URL", err)
+	}
+
+	// Add optional query parameters
+	if params != nil {
+		query := parsedURL.Query()
+		if params.PageToken != nil && *params.PageToken != "" {
+			query.Add("page_token", *params.PageToken)
+		}
+		if params.PerPage != nil && *params.PerPage != "" {
+			query.Add("per_page", *params.PerPage)
+		}
+		if params.ProjectID != nil && *params.ProjectID != "" {
+			query.Add("project_id", *params.ProjectID)
+		}
+		if params.ProjectIDs != nil && *params.ProjectIDs != "" {
+			query.Add("project_ids", *params.ProjectIDs)
+		}
+		parsedURL.RawQuery = query.Encode()
+	}
+
+	// Create HTTP request
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, parsedURL.String(), nil)
+	if err != nil {
+		return nil, domain.NewInternalError("failed to create request", err)
+	}
+
+	// Set headers (Authorization header is automatically set by OAuth2 transport)
+	httpReq.Header.Set("Accept", "application/json")
+	httpReq.Header.Set("x-scope", "manage:surveys")
+
+	// Execute request
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, domain.NewUnavailableError("ITX service request failed", err)
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	// Read response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, domain.NewInternalError("failed to read response", err)
+	}
+
+	// Handle non-2xx status codes
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, c.mapHTTPError(resp.StatusCode, respBody)
+	}
+
+	// Parse response
+	var result itx.PaginatedSurveyResponses
+	if err := json.Unmarshal(respBody, &result); err != nil {
+		return nil, domain.NewInternalError("failed to parse response", err)
+	}
+
+	return &result, nil
+}
+
 // UpdateSurvey updates a survey in ITX (only when status is "disabled")
 func (c *Client) UpdateSurvey(ctx context.Context, surveyID string, req *itx.UpdateSurveyRequest) (*itx.SurveyScheduleResponse, error) {
 	// Marshal request
