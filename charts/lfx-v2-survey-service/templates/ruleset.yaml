@@ -301,6 +301,12 @@ spec:
         - authorizer: openfga_check
           config:
             values:
+              {{/*
+                `viewer` is the intended relation for individual responses — same as aggregate results
+                (GetSurveyResults). Survey viewers are explicitly permitted to see per-recipient PII
+                (email, first_name, last_name, NPS scores, job titles). If that ever needs restricting,
+                introduce a more specific relation (e.g. responses_reader) here and in the FGA model.
+              */}}
               relation: viewer
               object: "survey:{{ "{{- .Request.URL.Captures.survey_uid -}}" }}"
         {{- else }}

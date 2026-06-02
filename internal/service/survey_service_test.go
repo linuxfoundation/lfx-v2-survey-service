@@ -370,3 +370,41 @@ func TestListSurveyResponses_ProjectUID_ForwardedToProxy(t *testing.T) {
 		t.Errorf("expected PerPage 10 forwarded, got %v", proxy.capturedParams.PerPage)
 	}
 }
+
+func TestListSurveyResponses_BothProjectFilters_ReturnsValidationError(t *testing.T) {
+	// project_uid and project_uids are mutually exclusive. Providing both must be rejected
+	// with a 400 Bad Request before any proxy or ID-mapping calls are made.
+	proxy := &mockProxy{}
+	svc := newTestService(proxy)
+	token := "test-token"
+	projectUID := "v2-project-uid"
+	projectUIDs := "v2-uid-one,v2-uid-two"
+
+	_, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
+		Token:       &token,
+		SurveyUID:   "survey-uid-abc",
+		ProjectUID:  &projectUID,
+		ProjectUids: &projectUIDs,
+	})
+
+	if err == nil {
+		t.Fatal("expected a validation error when both project_uid and project_uids are set, got nil")
+	}
+	var badReq *survey.BadRequestError
+	if !func() bool {
+		e, ok := err.(*survey.BadRequestError)
+		if ok {
+			badReq = e
+		}
+		return ok
+	}() {
+		t.Fatalf("expected *survey.BadRequestError, got %T: %v", err, err)
+	}
+	if badReq.Code != "400" {
+		t.Errorf("expected code 400, got %q", badReq.Code)
+	}
+	// Proxy must not have been called — the guard fires before any I/O.
+	if proxy.capturedParams != nil {
+		t.Error("expected proxy not to be called when validation fails, but capturedParams is set")
+	}
+}

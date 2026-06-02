@@ -127,6 +127,13 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 		"project_uids", p.ProjectUids,
 	)
 
+	// project_uid and project_uids are mutually exclusive — reject early.
+	if p.ProjectUID != nil && *p.ProjectUID != "" &&
+		p.ProjectUids != nil && *p.ProjectUids != "" {
+		return nil, mapDomainError(domain.NewValidationError(
+			"project_uid and project_uids are mutually exclusive"))
+	}
+
 	// Build query parameters with V2 to V1 ID mapping
 	var queryParams *itx.GetSurveyParams
 	if p.ProjectUID != nil || p.ProjectUids != nil {
@@ -686,6 +693,13 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 		"per_page", p.PerPage,
 	)
 
+	// project_uid and project_uids are mutually exclusive — reject early.
+	if p.ProjectUID != nil && *p.ProjectUID != "" &&
+		p.ProjectUids != nil && *p.ProjectUids != "" {
+		return nil, mapDomainError(domain.NewValidationError(
+			"project_uid and project_uids are mutually exclusive"))
+	}
+
 	// Build ITX params with optional V2→V1 ID mapping for project filters
 	params := &itx.ListResponsesParams{
 		PageToken: p.PageToken,
@@ -812,31 +826,50 @@ func (s *SurveyService) mapOptionalProjectV2ToV1(ctx context.Context, projectUID
 	return &mapped, nil
 }
 
-// mapProjectUIDsV2ToV1 maps a comma-delimited list of project UIDs from V2 to V1
+// mapProjectUIDsV2ToV1 maps a comma-delimited list of project UIDs from V2 to V1.
+// Mapping calls are fanned out concurrently using the shared WorkerPool — each goroutine
+// writes to a pre-allocated, index-disjoint slot in v1IDs (the same pattern used by
+// mapSurveyCommitteesToResult and mapITXResponsesToPage).
 func (s *SurveyService) mapProjectUIDsV2ToV1(ctx context.Context, projectUIDs string) (string, error) {
 	if projectUIDs == "" {
 		return "", nil
 	}
 
-	// Split comma-delimited list and trim whitespace
-	v2UIDs := strings.Split(projectUIDs, ",")
-	v1IDs := make([]string, 0, len(v2UIDs))
+	// Split comma-delimited list and trim whitespace, discarding empty tokens.
+	raw := strings.Split(projectUIDs, ",")
+	validUIDs := make([]string, 0, len(raw))
+	for _, u := range raw {
+		if t := strings.TrimSpace(u); t != "" {
+			validUIDs = append(validUIDs, t)
+		}
+	}
+	if len(validUIDs) == 0 {
+		return "", nil
+	}
 
-	// Map each UID from V2 to V1
-	for _, v2UID := range v2UIDs {
-		trimmed := strings.TrimSpace(v2UID)
-		if trimmed == "" {
-			continue
+	// Pre-allocate result slice; goroutines write to index-disjoint slots.
+	v1IDs := make([]string, len(validUIDs))
+	pool := concurrent.NewWorkerPool(5)
+	mappingFunctions := make([]func() error, len(validUIDs))
+	for i, uid := range validUIDs {
+		i, uid := i, uid
+		mappingFunctions[i] = func() error {
+			mapped, err := s.idMapper.MapProjectV2ToV1(ctx, uid)
+			if err != nil {
+				s.logger.ErrorContext(ctx, "failed to map project UID to V1",
+					"project_v2_uid", uid,
+					"error", err,
+				)
+				return err
+			}
+			v1IDs[i] = mapped
+			return nil
 		}
-		v1ID, err := s.idMapper.MapProjectV2ToV1(ctx, trimmed)
-		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map project UID to V1",
-				"project_v2_uid", trimmed,
-				"error", err,
-			)
-			return "", err
-		}
-		v1IDs = append(v1IDs, v1ID)
+	}
+
+	// pool.Run blocks until all functions complete; v1IDs[i] writes are index-disjoint and safe.
+	if err := pool.Run(ctx, mappingFunctions...); err != nil {
+		return "", err
 	}
 
 	// Join back into comma-delimited string
@@ -1204,6 +1237,7 @@ func (s *SurveyService) mapITXResponsesToPage(ctx context.Context, itxResponse *
 		}
 	}
 
+	// pool.Run blocks until all functions complete; data[i] writes are index-disjoint and safe.
 	if err := pool.Run(ctx, mappingFunctions...); err != nil {
 		return nil, err
 	}
