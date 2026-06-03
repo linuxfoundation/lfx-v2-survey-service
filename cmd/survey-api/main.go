@@ -13,6 +13,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
+	"go.opentelemetry.io/otel/trace"
+	goahttp "goa.design/goa/v3/http"
+
 	apieventing "github.com/linuxfoundation/lfx-v2-survey-service/cmd/survey-api/eventing"
 	openapisvr "github.com/linuxfoundation/lfx-v2-survey-service/gen/http/openapi/server"
 	surveysvr "github.com/linuxfoundation/lfx-v2-survey-service/gen/http/survey/server"
@@ -24,12 +30,6 @@ import (
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/proxy"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/logging"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/middleware"
-	"github.com/go-chi/chi/v5"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
-	"go.opentelemetry.io/otel/trace"
-	goahttp "goa.design/goa/v3/http"
-
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/service"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/utils"
