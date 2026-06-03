@@ -540,6 +540,58 @@ var _ = Service("survey", func() {
 		})
 	})
 
+	Method("list_survey_responses", func() {
+		Description("List individual per-recipient responses for a survey (proxies to ITX GET /v2/surveys/{survey_uid}/responses)")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("survey_uid", String, "Survey identifier", func() {
+				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
+			})
+
+			Attribute("page_token", String, "Opaque pagination token for the next page (omit for first page)", func() {
+				Example("page-2-token")
+			})
+
+			Attribute("per_page", String, "Maximum number of responses to return per page", func() {
+				Example("25")
+			})
+
+			Attribute("project_uid", String, "Optional LFX Project UID (V2) to filter responses to a single project", func() {
+				Example("qa1e8536-a985-4cf5-b981-a170927a1d11")
+			})
+
+			Attribute("project_uids", String, "Optional comma-delimited list of LFX Project UIDs (V2) to filter responses. Should not be combined with project_uid", func() {
+				Example("qa1e8536-a985-4cf5-b981-a170927a1d11,qa1e8536-a985-4cf5-b981-a170927a1d12")
+			})
+
+			Required("survey_uid")
+		})
+
+		Result(SurveyResponsesPage)
+
+		HTTP(func() {
+			GET("/surveys/{survey_uid}/responses")
+			Param("page_token")
+			Param("per_page")
+			Param("project_uid")
+			Param("project_uids")
+			Response(StatusOK)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("NotFound", StatusNotFound)
+			Response("InternalServerError", StatusInternalServerError)
+			Response("ServiceUnavailable", StatusServiceUnavailable)
+		})
+	})
+
 	Method("validate_email", func() {
 		Description("Validate email template body and subject (proxies to ITX POST /v2/surveys/validate_email)")
 

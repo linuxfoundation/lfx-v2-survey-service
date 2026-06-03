@@ -82,6 +82,11 @@ func DeleteExclusionByIDSurveyPath(exclusionID string) string {
 	return fmt.Sprintf("/surveys/exclusion/%v", exclusionID)
 }
 
+// ListSurveyResponsesSurveyPath returns the URL path to the survey service list_survey_responses HTTP endpoint.
+func ListSurveyResponsesSurveyPath(surveyUID string) string {
+	return fmt.Sprintf("/surveys/%v/responses", surveyUID)
+}
+
 // ValidateEmailSurveyPath returns the URL path to the survey service validate_email HTTP endpoint.
 func ValidateEmailSurveyPath() string {
 	return "/surveys/validate_email"

@@ -11,6 +11,94 @@ type GetSurveyParams struct {
 	ProjectIDs *string // Optional comma-delimited list of project IDs (V1 SFIDs)
 }
 
+// ListResponsesParams holds optional query parameters for ListResponses endpoint
+type ListResponsesParams struct {
+	PageToken  *string // Opaque pagination token for the next page
+	PerPage    *string // Max items per page
+	ProjectID  *string // Optional project ID (V1 SFID) to filter by project
+	ProjectIDs *string // Optional comma-delimited list of project IDs (V1 SFIDs)
+}
+
+// PaginatedSurveyResponses represents a paginated list of individual survey responses
+type PaginatedSurveyResponses struct {
+	Data []SurveyRecipientResponse `json:"data"`
+	Meta PageMetadata              `json:"meta"`
+}
+
+// PageMetadata holds pagination metadata returned by ITX
+type PageMetadata struct {
+	PageToken    string `json:"page_token"`
+	TotalPages   int    `json:"total_pages"`
+	TotalResults int    `json:"total_results"`
+	PerPage      int    `json:"per_page"`
+}
+
+// SurveyRecipientResponse represents an individual per-recipient survey response from ITX
+type SurveyRecipientResponse struct {
+	ID                            string                       `json:"id"`
+	SurveyID                      string                       `json:"survey_id"`
+	SurveyLink                    *string                      `json:"survey_link,omitempty"`
+	CommitteeID                   *string                      `json:"committee_id,omitempty"`
+	Email                         *string                      `json:"email,omitempty"`
+	FirstName                     *string                      `json:"first_name,omitempty"`
+	LastName                      *string                      `json:"last_name,omitempty"`
+	Username                      *string                      `json:"username,omitempty"`
+	Role                          *string                      `json:"role,omitempty"`
+	JobTitle                      *string                      `json:"job_title,omitempty"`
+	MembershipTier                *string                      `json:"membership_tier,omitempty"`
+	VotingStatus                  *string                      `json:"voting_status,omitempty"`
+	Organization                  *SurveyResponseOrganization  `json:"organization,omitempty"`
+	Project                       *SurveyResponseProject       `json:"project,omitempty"`
+	ResponseStatus                *string                      `json:"response_status,omitempty"` // Responded, Clicked, Opened, Delivered, Failed, Pending
+	CreatedAt                     *string                      `json:"created_at,omitempty"`
+	ResponseDatetime              *string                      `json:"response_datetime,omitempty"`
+	LastReceivedTime              *string                      `json:"last_received_time,omitempty"`
+	NumAutomatedRemindersReceived *int                         `json:"num_automated_reminders_received,omitempty"`
+	NPSValue                      *float64                     `json:"nps_value,omitempty"`
+	SurveyMonkeyRespondentID      *string                      `json:"survey_monkey_respondent_id,omitempty"`
+	SurveyMonkeyQuestionAnswers   []SurveyMonkeyQuestionAnswer `json:"survey_monkey_question_answers,omitempty"`
+	// SES delivery tracking
+	SESMessageID            *string `json:"ses_message_id,omitempty"`
+	SESDeliverySuccessful   *bool   `json:"ses_delivery_successful,omitempty"`
+	SESBounceType           *string `json:"ses_bounce_type,omitempty"`
+	SESBounceSubtype        *string `json:"ses_bounce_subtype,omitempty"`
+	SESBounceDiagnosticCode *string `json:"ses_bounce_diagnostic_code,omitempty"`
+	SESComplaintExists      *bool   `json:"ses_complaint_exists,omitempty"`
+	SESComplaintType        *string `json:"ses_complaint_type,omitempty"`
+	SESComplaintDate        *string `json:"ses_complaint_date,omitempty"`
+	SESEmailOpened          *bool   `json:"ses_email_opened,omitempty"`
+	SESEmailOpenedLastTime  *string `json:"ses_email_opened_last_time,omitempty"`
+	SESLinkClicked          *bool   `json:"ses_link_clicked,omitempty"`
+	SESLinkClickedLastTime  *string `json:"ses_link_clicked_last_time,omitempty"`
+}
+
+// SurveyResponseOrganization represents an organization embedded in a survey response
+type SurveyResponseOrganization struct {
+	ID   *string `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
+// SurveyResponseProject represents a project embedded in a survey response
+type SurveyResponseProject struct {
+	ID   *string `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
+// SurveyMonkeyQuestionAnswer represents a single question with its answers in a survey response
+type SurveyMonkeyQuestionAnswer struct {
+	QuestionID      string               `json:"question_id"`
+	QuestionText    *string              `json:"question_text,omitempty"`
+	QuestionFamily  *string              `json:"question_family,omitempty"`
+	QuestionSubtype *string              `json:"question_subtype,omitempty"`
+	Answers         []SurveyMonkeyAnswer `json:"answers,omitempty"`
+}
+
+// SurveyMonkeyAnswer represents a single answer choice within a question answer
+type SurveyMonkeyAnswer struct {
+	ChoiceID *string `json:"choice_id,omitempty"`
+	Text     *string `json:"text,omitempty"`
+}
+
 // ScheduleSurveyRequest represents the request to schedule a survey in ITX
 type ScheduleSurveyRequest struct {
 	IsProjectSurvey        *bool    `json:"is_project_survey,omitempty"`

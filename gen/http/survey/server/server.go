@@ -34,6 +34,7 @@ type Server struct {
 	DeleteExclusion       http.Handler
 	GetExclusion          http.Handler
 	DeleteExclusionByID   http.Handler
+	ListSurveyResponses   http.Handler
 	ValidateEmail         http.Handler
 }
 
@@ -78,6 +79,7 @@ func New(
 			{"DeleteExclusion", "DELETE", "/surveys/exclusion"},
 			{"GetExclusion", "GET", "/surveys/exclusion/{exclusion_id}"},
 			{"DeleteExclusionByID", "DELETE", "/surveys/exclusion/{exclusion_id}"},
+			{"ListSurveyResponses", "GET", "/surveys/{survey_uid}/responses"},
 			{"ValidateEmail", "POST", "/surveys/validate_email"},
 		},
 		ScheduleSurvey:        NewScheduleSurveyHandler(e.ScheduleSurvey, mux, decoder, encoder, errhandler, formatter),
@@ -94,6 +96,7 @@ func New(
 		DeleteExclusion:       NewDeleteExclusionHandler(e.DeleteExclusion, mux, decoder, encoder, errhandler, formatter),
 		GetExclusion:          NewGetExclusionHandler(e.GetExclusion, mux, decoder, encoder, errhandler, formatter),
 		DeleteExclusionByID:   NewDeleteExclusionByIDHandler(e.DeleteExclusionByID, mux, decoder, encoder, errhandler, formatter),
+		ListSurveyResponses:   NewListSurveyResponsesHandler(e.ListSurveyResponses, mux, decoder, encoder, errhandler, formatter),
 		ValidateEmail:         NewValidateEmailHandler(e.ValidateEmail, mux, decoder, encoder, errhandler, formatter),
 	}
 }
@@ -117,6 +120,7 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.DeleteExclusion = m(s.DeleteExclusion)
 	s.GetExclusion = m(s.GetExclusion)
 	s.DeleteExclusionByID = m(s.DeleteExclusionByID)
+	s.ListSurveyResponses = m(s.ListSurveyResponses)
 	s.ValidateEmail = m(s.ValidateEmail)
 }
 
@@ -139,6 +143,7 @@ func Mount(mux goahttp.Muxer, h *Server) {
 	MountDeleteExclusionHandler(mux, h.DeleteExclusion)
 	MountGetExclusionHandler(mux, h.GetExclusion)
 	MountDeleteExclusionByIDHandler(mux, h.DeleteExclusionByID)
+	MountListSurveyResponsesHandler(mux, h.ListSurveyResponses)
 	MountValidateEmailHandler(mux, h.ValidateEmail)
 }
 
@@ -866,6 +871,59 @@ func NewDeleteExclusionByIDHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "delete_exclusion_by_id")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountListSurveyResponsesHandler configures the mux to serve the "survey"
+// service "list_survey_responses" endpoint.
+func MountListSurveyResponsesHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/surveys/{survey_uid}/responses", f)
+}
+
+// NewListSurveyResponsesHandler creates a HTTP handler which loads the HTTP
+// request and calls the "survey" service "list_survey_responses" endpoint.
+func NewListSurveyResponsesHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeListSurveyResponsesRequest(mux, decoder)
+		encodeResponse = EncodeListSurveyResponsesResponse(encoder)
+		encodeError    = EncodeListSurveyResponsesError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "list_survey_responses")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "survey")
 		payload, err := decodeRequest(r)
 		if err != nil {
