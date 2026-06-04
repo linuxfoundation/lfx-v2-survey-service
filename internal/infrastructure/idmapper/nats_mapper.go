@@ -11,6 +11,10 @@ import (
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/nats-io/nats.go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -132,14 +136,30 @@ func (m *NATSMapper) MapCommitteeV1ToV2(ctx context.Context, v1SFID string) (str
 
 // lookup performs the NATS request/reply lookup
 func (m *NATSMapper) lookup(ctx context.Context, key string) (string, error) {
-	// Send request with timeout
-	msg, err := m.conn.RequestWithContext(ctx, lookupSubject, []byte(key))
+	ctx, span := tracer.Start(ctx, "nats.request",
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(
+			attribute.String("messaging.system", "nats"),
+			attribute.String("messaging.destination.name", lookupSubject),
+			attribute.Int("messaging.message.body.size", len(key)),
+		),
+	)
+	defer span.End()
+
+	natsMsg := nats.NewMsg(lookupSubject)
+	natsMsg.Data = []byte(key)
+	otel.GetTextMapPropagator().Inject(ctx, natsHeaderCarrier(natsMsg.Header))
+
+	msg, err := m.conn.RequestMsgWithContext(ctx, natsMsg)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		if err == context.DeadlineExceeded || err == nats.ErrTimeout {
 			return "", domain.NewUnavailableError("v1-sync-helper lookup timed out", err)
 		}
 		return "", domain.NewUnavailableError("failed to lookup ID mapping", err)
 	}
+	span.SetStatus(codes.Ok, "")
 
 	// Parse response
 	response := string(msg.Data)
