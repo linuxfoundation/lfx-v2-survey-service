@@ -16,9 +16,9 @@ import (
 	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/nats-io/nats.go"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -106,6 +106,7 @@ func (p *NATSPublisher) publishWithSpan(ctx context.Context, subject string, dat
 		trace.WithAttributes(
 			attribute.String("messaging.system", "nats"),
 			attribute.String("messaging.destination.name", subject),
+			attribute.String("messaging.operation.type", "publish"),
 			attribute.Int("messaging.message.body.size", len(data)),
 		),
 	)
@@ -113,14 +114,15 @@ func (p *NATSPublisher) publishWithSpan(ctx context.Context, subject string, dat
 
 	msg := nats.NewMsg(subject)
 	msg.Data = data
-	otel.GetTextMapPropagator().Inject(ctx, natsHeaderCarrier(msg.Header))
+	propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+	).Inject(ctx, natsHeaderCarrier(msg.Header))
 
 	if err := p.conn.PublishMsg(msg); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return fmt.Errorf("failed to publish to subject %s: %w", subject, err)
 	}
-	span.SetStatus(codes.Ok, "")
 	return nil
 }
 
@@ -417,6 +419,7 @@ func lookupUsernameToAuthSub(ctx context.Context, nc *nats.Conn, username string
 		trace.WithAttributes(
 			attribute.String("messaging.system", "nats"),
 			attribute.String("messaging.destination.name", subject),
+			attribute.String("messaging.operation.type", "publish"),
 			attribute.Int("messaging.message.body.size", len(username)),
 		),
 	)
@@ -424,7 +427,9 @@ func lookupUsernameToAuthSub(ctx context.Context, nc *nats.Conn, username string
 
 	natsMsg := nats.NewMsg(subject)
 	natsMsg.Data = []byte(username)
-	otel.GetTextMapPropagator().Inject(ctx, natsHeaderCarrier(natsMsg.Header))
+	propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+	).Inject(ctx, natsHeaderCarrier(natsMsg.Header))
 
 	msg, err := nc.RequestMsgWithContext(ctx, natsMsg)
 	if err != nil {
@@ -432,7 +437,6 @@ func lookupUsernameToAuthSub(ctx context.Context, nc *nats.Conn, username string
 		span.SetStatus(codes.Error, err.Error())
 		return "", fmt.Errorf("auth service username lookup failed: %w", err)
 	}
-	span.SetStatus(codes.Ok, "")
 	sub := string(msg.Data)
 	if sub == "" {
 		return "", fmt.Errorf("auth service returned empty sub for username %q", username)
