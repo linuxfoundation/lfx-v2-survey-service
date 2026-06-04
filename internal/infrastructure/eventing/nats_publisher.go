@@ -113,6 +113,7 @@ func (p *NATSPublisher) publishWithSpan(ctx context.Context, subject string, dat
 	defer span.End()
 
 	msg := nats.NewMsg(subject)
+	msg.Header = make(nats.Header)
 	msg.Data = data
 	propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{},
@@ -426,6 +427,7 @@ func lookupUsernameToAuthSub(ctx context.Context, nc *nats.Conn, username string
 	defer span.End()
 
 	natsMsg := nats.NewMsg(subject)
+	natsMsg.Header = make(nats.Header)
 	natsMsg.Data = []byte(username)
 	propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{},

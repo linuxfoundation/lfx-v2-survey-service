@@ -147,6 +147,7 @@ func (m *NATSMapper) lookup(ctx context.Context, key string) (string, error) {
 	defer span.End()
 
 	natsMsg := nats.NewMsg(lookupSubject)
+	natsMsg.Header = make(nats.Header)
 	natsMsg.Data = []byte(key)
 	otel.GetTextMapPropagator().Inject(ctx, natsHeaderCarrier(natsMsg.Header))
 
