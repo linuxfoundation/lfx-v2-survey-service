@@ -13,6 +13,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
+	"go.opentelemetry.io/otel/trace"
+	goahttp "goa.design/goa/v3/http"
+
 	apieventing "github.com/linuxfoundation/lfx-v2-survey-service/cmd/survey-api/eventing"
 	openapisvr "github.com/linuxfoundation/lfx-v2-survey-service/gen/http/openapi/server"
 	surveysvr "github.com/linuxfoundation/lfx-v2-survey-service/gen/http/survey/server"
@@ -27,8 +33,6 @@ import (
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/service"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/utils"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	goahttp "goa.design/goa/v3/http"
 )
 
 // Build-time variables set via ldflags
@@ -179,6 +183,33 @@ func run() int {
 
 	// Create HTTP muxer
 	mux := goahttp.NewMuxer()
+
+	// Register route-tagging middleware inside chi's routing chain so that
+	// http.route is set on the OTel span after chi has matched the route pattern.
+	// The span name is also updated here to avoid high-cardinality names from
+	// using raw URL paths (which contain actual path parameter values).
+	// Must be registered before Mount calls per chi convention.
+	// Reads RoutePattern after next.ServeHTTP because chi populates the pattern
+	// during routing (inside ServeHTTP), not before.
+	mux.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				rctx := chi.RouteContext(r.Context())
+				if rctx != nil {
+					routePattern := rctx.RoutePattern()
+					if routePattern != "" {
+						if labeler, ok := otelhttp.LabelerFromContext(r.Context()); ok {
+							labeler.Add(semconv.HTTPRoute(routePattern))
+						}
+						span := trace.SpanFromContext(r.Context())
+						span.SetAttributes(semconv.HTTPRoute(routePattern))
+						span.SetName(r.Method + " " + routePattern)
+					}
+				}
+			}()
+			next.ServeHTTP(w, r)
+		})
+	})
 
 	// Resolve kodata path for serving OpenAPI spec files
 	koDataPath := os.Getenv("KO_DATA_PATH")
