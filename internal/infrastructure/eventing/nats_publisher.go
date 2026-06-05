@@ -16,9 +16,9 @@ import (
 	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/nats-io/nats.go"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -115,9 +115,7 @@ func (p *NATSPublisher) publishWithSpan(ctx context.Context, subject string, dat
 	msg := nats.NewMsg(subject)
 	msg.Header = make(nats.Header)
 	msg.Data = data
-	propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-	).Inject(ctx, natsHeaderCarrier(msg.Header))
+	otel.GetTextMapPropagator().Inject(ctx, natsHeaderCarrier(msg.Header))
 
 	if err := p.conn.PublishMsg(msg); err != nil {
 		span.RecordError(err)
@@ -420,7 +418,7 @@ func lookupUsernameToAuthSub(ctx context.Context, nc *nats.Conn, username string
 		trace.WithAttributes(
 			attribute.String("messaging.system", "nats"),
 			attribute.String("messaging.destination.name", subject),
-			attribute.String("messaging.operation.type", "publish"),
+			attribute.String("messaging.operation.type", "request"),
 			attribute.Int("messaging.message.body.size", len(username)),
 		),
 	)
@@ -429,9 +427,7 @@ func lookupUsernameToAuthSub(ctx context.Context, nc *nats.Conn, username string
 	natsMsg := nats.NewMsg(subject)
 	natsMsg.Header = make(nats.Header)
 	natsMsg.Data = []byte(username)
-	propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-	).Inject(ctx, natsHeaderCarrier(natsMsg.Header))
+	otel.GetTextMapPropagator().Inject(ctx, natsHeaderCarrier(natsMsg.Header))
 
 	msg, err := nc.RequestMsgWithContext(ctx, natsMsg)
 	if err != nil {
@@ -441,6 +437,8 @@ func lookupUsernameToAuthSub(ctx context.Context, nc *nats.Conn, username string
 	}
 	sub := string(msg.Data)
 	if sub == "" {
+		span.RecordError(fmt.Errorf("auth service returned empty sub for username %q", username))
+		span.SetStatus(codes.Error, "empty sub response")
 		return "", fmt.Errorf("auth service returned empty sub for username %q", username)
 	}
 	// The auth service returns a plain sub on success, or a JSON error object on failure.
@@ -454,6 +452,7 @@ func lookupUsernameToAuthSub(ctx context.Context, nc *nats.Conn, username string
 			return "", nil
 		}
 	}
+	span.SetStatus(codes.Ok, "")
 	return sub, nil
 }
 

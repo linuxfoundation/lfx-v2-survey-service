@@ -160,7 +160,6 @@ func (m *NATSMapper) lookup(ctx context.Context, key string) (string, error) {
 		}
 		return "", domain.NewUnavailableError("failed to lookup ID mapping", err)
 	}
-	span.SetStatus(codes.Ok, "")
 
 	// Parse response
 	response := string(msg.Data)
@@ -168,13 +167,18 @@ func (m *NATSMapper) lookup(ctx context.Context, key string) (string, error) {
 	// Check for error response (prefixed with "error: ")
 	if after, ok := strings.CutPrefix(response, "error: "); ok {
 		errMsg := after
+		span.RecordError(fmt.Errorf("v1-sync-helper error: %s", errMsg))
+		span.SetStatus(codes.Error, errMsg)
 		return "", domain.NewUnavailableError(fmt.Sprintf("v1-sync-helper error: %s", errMsg))
 	}
 
 	// Empty response means not found - return as validation error since client provided invalid ID
 	if response == "" {
+		span.RecordError(fmt.Errorf("mapping not found for %s", key))
+		span.SetStatus(codes.Error, "mapping not found")
 		return "", domain.NewValidationError(fmt.Sprintf("invalid ID: mapping not found for %s", key))
 	}
 
+	span.SetStatus(codes.Ok, "")
 	return response, nil
 }
