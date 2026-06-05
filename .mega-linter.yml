@@ -17,14 +17,13 @@ DISABLE_LINTERS:
   - SPELL_CSPELL
   # yamllint is sufficient for us.
   - YAML_PRETTIER
-DISABLE_ERRORS_LINTERS:
-  # This may be informative but doesn't need to break the build.
+  # Disable jscpd since generated code triggers many false positives.
   - COPYPASTE_JSCPD
+DISABLE_ERRORS_LINTERS:
   # TBD! Need to work through these.
   - REPOSITORY_TRIVY
   - REPOSITORY_CHECKOV
   - REPOSITORY_DEVSKIM
-COPYPASTE_JSCPD_ARGUMENTS: --ignore-patterns "gen/**"
 YAML_YAMLLINT_CONFIG_FILE: .yamllint
 # yamllint disable-line rule:line-length
 REPOSITORY_KICS_ARGUMENTS: scan --no-progress --exclude-severities="medium,low,info,trace" --exclude-paths="./gen/*" --exclude-paths="./cmd/survey-api/kodata/*"
@@ -37,7 +36,7 @@ SPELL_VALE_PRE_COMMANDS:
     cwd: "workspace"
 API_SPECTRAL_FILTER_REGEX_EXCLUDE: "gen|(cmd/survey-api/kodata)/"
 # Ignore YAML files with templating macros; these typically fail linting and/or
-# schema checking. Also exclude generated code from jscpd copy-paste analysis.
-FILTER_REGEX_EXCLUDE: '(templates/.*\.yml|templates/.*\.yaml|cmd/survey-api/kodata/*.yaml|gen/.*)'
+# schema checking.
+FILTER_REGEX_EXCLUDE: '(templates/.*\.yml|templates/.*\.yaml|cmd/survey-api/kodata/*.yaml)'
 KUBERNETES_DIRECTORY: charts/lfx-v2-survey-service
 KUBERNETES_HELM_ARGUMENTS: charts/lfx-v2-survey-service
