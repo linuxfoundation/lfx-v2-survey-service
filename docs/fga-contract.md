@@ -79,7 +79,7 @@ On delete, only `uid` is sent — all FGA tuples for `survey:{uid}` are removed 
 
 | Relation | Value | Condition |
 |---|---|---|
-| `owner` | Auth0 `sub` resolved from `Username` via `lfx.auth-service.username_to_sub` | Only when `Username` is non-empty and resolves successfully |
+| `owner` | LFX username (from v1 `username` field) | Only when `Username` is non-empty |
 
 ### References
 
