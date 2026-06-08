@@ -627,7 +627,7 @@ Authorization is handled by Heimdall with OpenFGA checks:
 - `viewer` - Can read survey details
 - `results_viewer` - Can view survey results
 - `participant` - Can submit survey responses
-- `owner` - Can update their own responses
+- `owner` - Can update their own responses (granted to the respondent's LFX username)
 - `auditor` - Can view response details
 
 ---
