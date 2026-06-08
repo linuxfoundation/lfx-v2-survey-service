@@ -85,7 +85,7 @@ func (p *NATSPublisher) PublishSurveyResponseEvent(ctx context.Context, action s
 			return fmt.Errorf("failed to send survey response delete access message: %w", err)
 		}
 	} else {
-		if err := p.sendSurveyResponseAccessMessage(response); err != nil {
+		if err := p.sendSurveyResponseAccessMessage(ctx, response); err != nil {
 			return fmt.Errorf("failed to send survey response access message: %w", err)
 		}
 	}
@@ -281,13 +281,13 @@ func (p *NATSPublisher) sendSurveyTemplateIndexerMessage(ctx context.Context, su
 }
 
 // sendSurveyResponseAccessMessage sends the message to the NATS server for the survey response access control
-func (p *NATSPublisher) sendSurveyResponseAccessMessage(data *domain.SurveyResponseData) error {
+func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, data *domain.SurveyResponseData) error {
 	relations := map[string][]string{}
 	if data.Username != "" {
 		if isValidLFXUsername(data.Username) {
 			relations["owner"] = []string{data.Username}
 		} else {
-			p.logger.Warn("skipping FGA owner relation for invalid LFX username",
+			p.logger.WarnContext(ctx, "skipping FGA owner relation for invalid LFX username",
 				"survey_response_uid", data.UID,
 				"username", data.Username,
 			)

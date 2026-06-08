@@ -4,6 +4,7 @@
 package eventing
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"testing"
@@ -129,8 +130,9 @@ func TestSendSurveyResponseAccessMessage(t *testing.T) {
 			sub, err := nc.SubscribeSync(fgaconstants.GenericUpdateAccessSubject)
 			require.NoError(t, err)
 
-			err = publisher.sendSurveyResponseAccessMessage(tt.data)
+			err = publisher.sendSurveyResponseAccessMessage(context.Background(), tt.data)
 			require.NoError(t, err)
+			require.NoError(t, nc.Flush())
 
 			msg, err := sub.NextMsg(250 * time.Millisecond)
 			if !tt.wantPublished {
