@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"regexp"
 	"slices"
 
 	fgaconstants "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/constants"
@@ -29,6 +30,12 @@ const (
 	// IndexSurveyTemplateSubject is the subject for survey template indexing
 	IndexSurveyTemplateSubject = "lfx.index.survey_template"
 )
+
+var lfxUsernamePattern = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
+
+func isValidLFXUsername(username string) bool {
+	return lfxUsernamePattern.MatchString(username)
+}
 
 // NATSPublisher implements the EventPublisher interface
 type NATSPublisher struct {
@@ -277,7 +284,14 @@ func (p *NATSPublisher) sendSurveyTemplateIndexerMessage(ctx context.Context, su
 func (p *NATSPublisher) sendSurveyResponseAccessMessage(data *domain.SurveyResponseData) error {
 	relations := map[string][]string{}
 	if data.Username != "" {
-		relations["owner"] = []string{data.Username}
+		if isValidLFXUsername(data.Username) {
+			relations["owner"] = []string{data.Username}
+		} else {
+			p.logger.Warn("skipping FGA owner relation for invalid LFX username",
+				"survey_response_uid", data.UID,
+				"username", data.Username,
+			)
+		}
 	}
 
 	references := map[string][]string{}
