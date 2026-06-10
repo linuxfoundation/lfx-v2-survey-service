@@ -10,6 +10,14 @@ The full OpenFGA type definitions (relations, schema) for all object types are d
 
 ---
 
+## Prerequisites
+
+> **Deployment order:** `fga-sync` must be updated to accept LFX usernames in relation values (e.g., `owner`) before this service version is deployed. See [LFXV2-1962](https://linuxfoundation.atlassian.net/browse/LFXV2-1962).
+
+> **Username handling:** This service forwards the v1 `username` field unchanged when it passes LFX username format validation (`^[a-zA-Z0-9._-]+$`). Invalid values are logged and omitted from the FGA `owner` relation. fga-sync builds OpenFGA user principals as `user:{username}` without additional sanitization.
+
+---
+
 ## Object Types
 
 - [Survey](#survey)
@@ -79,7 +87,7 @@ On delete, only `uid` is sent — all FGA tuples for `survey:{uid}` are removed 
 
 | Relation | Value | Condition |
 |---|---|---|
-| `owner` | Auth0 `sub` resolved from `Username` via `lfx.auth-service.username_to_sub` | Only when `Username` is non-empty and resolves successfully |
+| `owner` | LFX username (from v1 `username` field) | Only when `Username` is non-empty and passes LFX username format validation |
 
 ### References
 

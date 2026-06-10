@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"regexp"
 	"slices"
 
 	fgaconstants "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/constants"
@@ -29,6 +30,12 @@ const (
 	// IndexSurveyTemplateSubject is the subject for survey template indexing
 	IndexSurveyTemplateSubject = "lfx.index.survey_template"
 )
+
+var lfxUsernamePattern = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
+
+func isValidLFXUsername(username string) bool {
+	return lfxUsernamePattern.MatchString(username)
+}
 
 // NATSPublisher implements the EventPublisher interface
 type NATSPublisher struct {
@@ -277,13 +284,13 @@ func (p *NATSPublisher) sendSurveyTemplateIndexerMessage(ctx context.Context, su
 func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, data *domain.SurveyResponseData) error {
 	relations := map[string][]string{}
 	if data.Username != "" {
-		// fga-sync expects the Auth0 sub, not the raw v1 username.
-		authSub, err := lookupUsernameToAuthSub(ctx, p.conn, data.Username, p.logger)
-		if err != nil {
-			return fmt.Errorf("failed to resolve auth sub for survey response owner: %w", err)
-		}
-		if authSub != "" {
-			relations["owner"] = []string{authSub}
+		if isValidLFXUsername(data.Username) {
+			relations["owner"] = []string{data.Username}
+		} else {
+			p.logger.WarnContext(ctx, "skipping FGA owner relation for invalid LFX username",
+				"survey_response_uid", data.UID,
+				"username", data.Username,
+			)
 		}
 	}
 
@@ -397,34 +404,6 @@ func (p *NATSPublisher) sendIndexerCreateUpdateMessage(ctx context.Context, subj
 	}
 
 	return nil
-}
-
-// lookupUsernameToAuthSub calls the auth service over NATS to convert a v1 username
-// to the Auth0 sub format expected by fga-sync. Returns ("", nil) for an empty username.
-func lookupUsernameToAuthSub(ctx context.Context, nc *nats.Conn, username string, logger *slog.Logger) (string, error) {
-	if username == "" {
-		return "", nil
-	}
-	msg, err := nc.RequestWithContext(ctx, "lfx.auth-service.username_to_sub", []byte(username))
-	if err != nil {
-		return "", fmt.Errorf("auth service username lookup failed: %w", err)
-	}
-	sub := string(msg.Data)
-	if sub == "" {
-		return "", fmt.Errorf("auth service returned empty sub for username %q", username)
-	}
-	// The auth service returns a plain sub on success, or a JSON error object on failure.
-	if sub[0] == '{' {
-		var errResp struct {
-			Success bool   `json:"success"`
-			Error   string `json:"error"`
-		}
-		if jsonErr := json.Unmarshal(msg.Data, &errResp); jsonErr == nil && !errResp.Success {
-			logger.WarnContext(ctx, "auth service could not resolve username to sub", "username", username, "error", errResp.Error)
-			return "", nil
-		}
-	}
-	return sub, nil
 }
 
 // buildHeaders extracts headers from context for NATS messages

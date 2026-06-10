@@ -77,7 +77,7 @@ type SurveyResponseData struct {
 	ResponseDatetime              string                        `json:"response_datetime"`
 	LastReceivedTime              string                        `json:"last_received_time"`
 	NumAutomatedRemindersReceived int                           `json:"num_automated_reminders_received"`
-	Username                      string                        `json:"username"`
+	Username                      string                        `json:"username"` // LFX username
 	VotingStatus                  string                        `json:"voting_status"`
 	Role                          string                        `json:"role"`
 	JobTitle                      string                        `json:"job_title"`
