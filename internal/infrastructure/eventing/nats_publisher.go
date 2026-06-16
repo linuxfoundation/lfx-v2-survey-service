@@ -17,6 +17,10 @@ import (
 	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/nats-io/nats.go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // NATS subject constants for survey operations
@@ -60,11 +64,11 @@ func (p *NATSPublisher) PublishSurveyEvent(ctx context.Context, action string, s
 
 	// Send to FGA-sync - different message for delete vs create/update
 	if action == string(indexerConstants.ActionDeleted) {
-		if err := p.sendDeleteAccessMessage("survey", survey.UID); err != nil {
+		if err := p.sendDeleteAccessMessage(ctx, "survey", survey.UID); err != nil {
 			return fmt.Errorf("failed to send survey delete access message: %w", err)
 		}
 	} else {
-		if err := p.sendSurveyAccessMessage(survey); err != nil {
+		if err := p.sendSurveyAccessMessage(ctx, survey); err != nil {
 			return fmt.Errorf("failed to send survey access message: %w", err)
 		}
 	}
@@ -81,7 +85,7 @@ func (p *NATSPublisher) PublishSurveyResponseEvent(ctx context.Context, action s
 
 	// Send to FGA-sync - different message for delete vs create/update
 	if action == string(indexerConstants.ActionDeleted) {
-		if err := p.sendDeleteAccessMessage("survey_response", response.UID); err != nil {
+		if err := p.sendDeleteAccessMessage(ctx, "survey_response", response.UID); err != nil {
 			return fmt.Errorf("failed to send survey response delete access message: %w", err)
 		}
 	} else {
@@ -97,6 +101,33 @@ func (p *NATSPublisher) PublishSurveyResponseEvent(ctx context.Context, action s
 func (p *NATSPublisher) PublishSurveyTemplateEvent(ctx context.Context, action string, template *domain.SurveyTemplateData) error {
 	if err := p.sendSurveyTemplateIndexerMessage(ctx, IndexSurveyTemplateSubject, indexerConstants.MessageAction(action), template); err != nil {
 		return fmt.Errorf("failed to send survey template indexer message: %w", err)
+	}
+	return nil
+}
+
+// publishWithSpan wraps conn.PublishMsg with an OTel producer span and injects
+// trace context into the NATS message headers.
+func (p *NATSPublisher) publishWithSpan(ctx context.Context, subject string, data []byte) error {
+	ctx, span := tracer.Start(ctx, "nats.publish",
+		trace.WithSpanKind(trace.SpanKindProducer),
+		trace.WithAttributes(
+			attribute.String("messaging.system", "nats"),
+			attribute.String("messaging.destination.name", subject),
+			attribute.String("messaging.operation.type", "publish"),
+			attribute.Int("messaging.message.body.size", len(data)),
+		),
+	)
+	defer span.End()
+
+	msg := nats.NewMsg(subject)
+	msg.Header = make(nats.Header)
+	msg.Data = data
+	otel.GetTextMapPropagator().Inject(ctx, natsHeaderCarrier(msg.Header))
+
+	if err := p.conn.PublishMsg(msg); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return fmt.Errorf("failed to publish to subject %s: %w", subject, err)
 	}
 	return nil
 }
@@ -159,7 +190,7 @@ func (p *NATSPublisher) sendSurveyIndexerMessage(ctx context.Context, subject st
 }
 
 // sendSurveyAccessMessage sends the message to the NATS server for the survey access control
-func (p *NATSPublisher) sendSurveyAccessMessage(survey *domain.SurveyData) error {
+func (p *NATSPublisher) sendSurveyAccessMessage(ctx context.Context, survey *domain.SurveyData) error {
 	// Build committee and project references
 	committeeRefs := []string{}
 	projectRefs := []string{}
@@ -201,12 +232,7 @@ func (p *NATSPublisher) sendSurveyAccessMessage(survey *domain.SurveyData) error
 		return fmt.Errorf("failed to marshal access message: %w", err)
 	}
 
-	// Publish the message to NATS
-	if err := p.conn.Publish(fgaconstants.GenericUpdateAccessSubject, accessMsgBytes); err != nil {
-		return fmt.Errorf("failed to publish access message to subject %s: %w", fgaconstants.GenericUpdateAccessSubject, err)
-	}
-
-	return nil
+	return p.publishWithSpan(ctx, fgaconstants.GenericUpdateAccessSubject, accessMsgBytes)
 }
 
 // sendSurveyResponseIndexerMessage routes to the appropriate indexer message handler based on action
@@ -320,16 +346,11 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, dat
 		return fmt.Errorf("failed to marshal access message: %w", err)
 	}
 
-	// Publish the message to NATS
-	if err := p.conn.Publish(fgaconstants.GenericUpdateAccessSubject, accessMsgBytes); err != nil {
-		return fmt.Errorf("failed to publish access message to subject %s: %w", fgaconstants.GenericUpdateAccessSubject, err)
-	}
-
-	return nil
+	return p.publishWithSpan(ctx, fgaconstants.GenericUpdateAccessSubject, accessMsgBytes)
 }
 
 // sendDeleteAccessMessage sends a delete access message to FGA-sync
-func (p *NATSPublisher) sendDeleteAccessMessage(objectType string, uid string) error {
+func (p *NATSPublisher) sendDeleteAccessMessage(ctx context.Context, objectType string, uid string) error {
 	// Construct delete access message
 	deleteMsg := fgatypes.GenericFGAMessage{
 		ObjectType: objectType,
@@ -342,12 +363,7 @@ func (p *NATSPublisher) sendDeleteAccessMessage(objectType string, uid string) e
 		return fmt.Errorf("failed to marshal delete access message: %w", err)
 	}
 
-	// Publish the message to NATS
-	if err := p.conn.Publish(fgaconstants.GenericDeleteAccessSubject, deleteMsgBytes); err != nil {
-		return fmt.Errorf("failed to publish delete access message to subject %s: %w", fgaconstants.GenericDeleteAccessSubject, err)
-	}
-
-	return nil
+	return p.publishWithSpan(ctx, fgaconstants.GenericDeleteAccessSubject, deleteMsgBytes)
 }
 
 // sendIndexerDeleteMessage sends a generic delete message to the indexer with just the UID
@@ -368,12 +384,7 @@ func (p *NATSPublisher) sendIndexerDeleteMessage(ctx context.Context, subject st
 
 	p.logger.With("subject", subject, "action", action, "uid", uid).DebugContext(ctx, "constructed indexer delete message")
 
-	// Publish the message to NATS
-	if err := p.conn.Publish(subject, messageBytes); err != nil {
-		return fmt.Errorf("failed to publish indexer delete message to subject %s: %w", subject, err)
-	}
-
-	return nil
+	return p.publishWithSpan(ctx, subject, messageBytes)
 }
 
 // sendIndexerCreateUpdateMessage sends a generic create/update message to the indexer with full object and IndexingConfig
@@ -398,12 +409,7 @@ func (p *NATSPublisher) sendIndexerCreateUpdateMessage(ctx context.Context, subj
 
 	p.logger.With("subject", subject, "action", action).DebugContext(ctx, "constructed indexer message")
 
-	// Publish the message to NATS
-	if err := p.conn.Publish(subject, messageBytes); err != nil {
-		return fmt.Errorf("failed to publish indexer message to subject %s: %w", subject, err)
-	}
-
-	return nil
+	return p.publishWithSpan(ctx, subject, messageBytes)
 }
 
 // buildHeaders extracts headers from context for NATS messages
