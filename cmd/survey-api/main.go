@@ -181,9 +181,10 @@ func run() int {
 	// Start the invite_accepted subscriber and inject invite dependencies when the
 	// feature is fully configured.
 	var inviteAcceptedSubscriber *apieventing.InviteAcceptedSubscriber
+	var inviteNATSConn *natsgo.Conn
 	if inviteCfg.Enabled {
 		logger.Info("Invite feature is ENABLED - starting invite_accepted subscriber")
-		inviteNATSConn, err := natsgo.Connect(cfg.NATSURL,
+		nc, err := natsgo.Connect(cfg.NATSURL,
 			natsgo.Name("survey-service-invite-accepted"),
 			natsgo.DrainTimeout(30*time.Second),
 		)
@@ -191,6 +192,7 @@ func run() int {
 			logger.Error("Failed to connect to NATS for invite_accepted subscriber", "error", err)
 			return 1
 		}
+		inviteNATSConn = nc
 		inviteSender := infraNATS.NewInviteSender(inviteNATSConn, logger)
 		userReader := infraNATS.NewUserReader(inviteNATSConn, logger)
 
@@ -339,6 +341,9 @@ func run() int {
 	if inviteAcceptedSubscriber != nil {
 		logger.Info("Stopping invite_accepted subscriber...")
 		inviteAcceptedSubscriber.Stop()
+	}
+	if inviteNATSConn != nil {
+		inviteNATSConn.Close()
 	}
 
 	// Graceful shutdown of HTTP server with timeout
