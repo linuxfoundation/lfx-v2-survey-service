@@ -137,6 +137,34 @@ func run() int {
 	// Resolve invite feature configuration
 	inviteCfg := parseInviteConfig(cfg, logger)
 
+	// Start invite_accepted subscriber and create invite NATS deps before the event
+	// processor so that InjectInviteDependencies completes before any KV events are
+	// processed (avoids a startup window where invites would be silently skipped).
+	var inviteAcceptedSubscriber *apieventing.InviteAcceptedSubscriber
+	var inviteNATSConn *natsgo.Conn
+	var inviteSender *infraNATS.NATSInviteSender
+	var userReader *infraNATS.NATSUserReader
+	if inviteCfg.Enabled {
+		logger.Info("Invite feature is ENABLED - starting invite_accepted subscriber")
+		nc, err := natsgo.Connect(cfg.NATSURL,
+			natsgo.Name("survey-service-invite-accepted"),
+			natsgo.DrainTimeout(30*time.Second),
+		)
+		if err != nil {
+			logger.Error("Failed to connect to NATS for invite_accepted subscriber", "error", err)
+			return 1
+		}
+		inviteNATSConn = nc
+		inviteSender = infraNATS.NewInviteSender(inviteNATSConn, logger)
+		userReader = infraNATS.NewUserReader(inviteNATSConn, logger)
+
+		inviteAcceptedSubscriber = apieventing.NewInviteAcceptedSubscriber(inviteNATSConn, proxyClient, logger)
+		if err := inviteAcceptedSubscriber.Start(context.Background()); err != nil {
+			logger.Error("Failed to start invite_accepted subscriber", "error", err)
+			return 1
+		}
+	}
+
 	// Initialize event processor (if enabled)
 	var eventProcessor *apieventing.EventProcessor
 	eventProcessorCtx, eventProcessorCancel := context.WithCancel(context.Background())
@@ -162,6 +190,10 @@ func run() int {
 		}
 		eventProcessor = ep
 
+		if inviteSender != nil && userReader != nil {
+			eventProcessor.InjectInviteDependencies(inviteSender, userReader)
+		}
+
 		// Start event processor in goroutine
 		go func() {
 			if err := eventProcessor.Start(eventProcessorCtx); err != nil {
@@ -176,35 +208,6 @@ func run() int {
 		logger.Info("Event processor started in background")
 	} else {
 		logger.Info("Event processing is DISABLED - skipping event processor initialization")
-	}
-
-	// Start the invite_accepted subscriber and inject invite dependencies when the
-	// feature is fully configured.
-	var inviteAcceptedSubscriber *apieventing.InviteAcceptedSubscriber
-	var inviteNATSConn *natsgo.Conn
-	if inviteCfg.Enabled {
-		logger.Info("Invite feature is ENABLED - starting invite_accepted subscriber")
-		nc, err := natsgo.Connect(cfg.NATSURL,
-			natsgo.Name("survey-service-invite-accepted"),
-			natsgo.DrainTimeout(30*time.Second),
-		)
-		if err != nil {
-			logger.Error("Failed to connect to NATS for invite_accepted subscriber", "error", err)
-			return 1
-		}
-		inviteNATSConn = nc
-		inviteSender := infraNATS.NewInviteSender(inviteNATSConn, logger)
-		userReader := infraNATS.NewUserReader(inviteNATSConn, logger)
-
-		if eventProcessor != nil {
-			eventProcessor.InjectInviteDependencies(inviteSender, userReader)
-		}
-
-		inviteAcceptedSubscriber = apieventing.NewInviteAcceptedSubscriber(inviteNATSConn, proxyClient, logger)
-		if err := inviteAcceptedSubscriber.Start(context.Background()); err != nil {
-			logger.Error("Failed to start invite_accepted subscriber", "error", err)
-			return 1
-		}
 	}
 
 	// Initialize service layer
