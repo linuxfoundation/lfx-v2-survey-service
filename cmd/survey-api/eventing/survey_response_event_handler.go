@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log/slog"
 	"strconv"
+	"strings"
 
 	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
@@ -185,6 +186,7 @@ func handleSurveyResponseUpdate(
 	idMapper domain.IDMapper,
 	mappingsKV jetstream.KeyValue,
 	v1ObjectsKV jetstream.KeyValue,
+	inviteHandler *SurveyResponseInviteHandler,
 	logger *slog.Logger,
 ) bool {
 	funcLogger := logger.With("key", key, "handler", "survey_response")
@@ -265,6 +267,12 @@ func handleSurveyResponseUpdate(
 	if _, err := mappingsKV.Put(ctx, mappingKey, []byte("1")); err != nil {
 		funcLogger.With(errKey, err).WarnContext(ctx, "failed to store survey response mapping")
 		// Don't retry on mapping storage failures
+	}
+
+	// Best-effort: send an LFID invite to new participants who have no username yet.
+	if shouldSendSurveyResponseInvite(indexerAction, responseData.Username, responseData.Email) {
+		displayName := strings.TrimSpace(responseData.FirstName + " " + responseData.LastName)
+		inviteHandler.maybeSendInvite(ctx, funcLogger, responseData.UID, responseData.Email, displayName, responseData.SurveyID)
 	}
 
 	funcLogger.InfoContext(ctx, "successfully sent survey response indexer and access messages")

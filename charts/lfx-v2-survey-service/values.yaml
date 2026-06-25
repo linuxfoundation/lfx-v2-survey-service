@@ -101,6 +101,20 @@ app:
     EVENT_STREAM_NAME:
       value: KV_v1-objects
 
+    # LFID invite feature (LFXV2-1834)
+    # Set to "true" to enable sending LFID invites when a no-LFID participant is added to a survey
+    # and to start the invite_accepted enrichment subscriber.
+    INVITES_ENABLED:
+      value: "false"
+    # LFX environment tag — used to derive the default LFX_SELF_SERVE_BASE_URL when not set explicitly.
+    # Values: dev (default), staging, prod
+    LFX_ENVIRONMENT:
+      value: dev
+    # Override the LFX self-serve app base URL embedded in invite emails.
+    # When empty the URL is derived from LFX_ENVIRONMENT automatically.
+    # LFX_SELF_SERVE_BASE_URL:
+    #   value: ""
+
     # OpenTelemetry configuration
     OTEL_SERVICE_NAME:
       value: lfx-v2-survey-service
