@@ -373,9 +373,9 @@ type config struct {
 	EventConsumerName      string
 	EventStreamName        string
 	// Invite feature
-	InvitesEnabled    bool
-	SelfServeBaseURL  string
-	LFXEnvironment    string
+	InvitesEnabled   bool
+	SelfServeBaseURL string
+	LFXEnvironment   string
 }
 
 // loadConfig loads configuration from environment variables
