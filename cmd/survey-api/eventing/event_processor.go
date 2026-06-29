@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
@@ -21,22 +22,24 @@ const (
 
 // EventProcessor handles NATS KV bucket event processing
 type EventProcessor struct {
-	natsConn    *nats.Conn
-	jsInstance  jetstream.JetStream
-	consumer    jetstream.Consumer
-	consumeCtx  jetstream.ConsumeContext
-	publisher   domain.EventPublisher
-	idMapper    domain.IDMapper
-	mappingsKV  jetstream.KeyValue
-	v1ObjectsKV jetstream.KeyValue
-	logger      *slog.Logger
-	config      eventing.Config
+	natsConn      *nats.Conn
+	jsInstance    jetstream.JetStream
+	consumer      jetstream.Consumer
+	consumeCtx    jetstream.ConsumeContext
+	publisher     domain.EventPublisher
+	idMapper      domain.IDMapper
+	mappingsKV    jetstream.KeyValue
+	v1ObjectsKV   jetstream.KeyValue
+	inviteHandler *SurveyResponseInviteHandler
+	logger        *slog.Logger
+	config        eventing.Config
 }
 
 // NewEventProcessor creates a new event processor
 func NewEventProcessor(
 	cfg eventing.Config,
 	idMapper domain.IDMapper,
+	inviteCfg InviteFeatureConfig,
 	logger *slog.Logger,
 ) (*EventProcessor, error) {
 	// Connect to NATS
@@ -82,16 +85,39 @@ func NewEventProcessor(
 		return nil, fmt.Errorf("failed to access %s KV bucket: %w", V1ObjectsBucket, err)
 	}
 
+	// Build the outbound invite handler when the feature is enabled and a base URL is set.
+	var inviteHandler *SurveyResponseInviteHandler
+	if inviteCfg.Enabled && strings.TrimSpace(inviteCfg.SelfServeBaseURL) != "" {
+		inviteHandler = &SurveyResponseInviteHandler{
+			v1ObjectsKV:      v1ObjectsKV,
+			v1MappingsKV:     mappingsKV,
+			selfServeBaseURL: inviteCfg.SelfServeBaseURL,
+			// inviteSender and userReader are injected by InjectInviteDependencies after
+			// the NATS connection for the invite feature is established in main.go.
+		}
+		logger.Info("survey response LFID invite handler configured", "base_url", inviteCfg.SelfServeBaseURL)
+	}
+
 	return &EventProcessor{
-		natsConn:    conn,
-		jsInstance:  jsContext,
-		publisher:   publisher,
-		idMapper:    idMapper,
-		mappingsKV:  mappingsKV,
-		v1ObjectsKV: v1ObjectsKV,
-		logger:      logger,
-		config:      cfg,
+		natsConn:      conn,
+		jsInstance:    jsContext,
+		publisher:     publisher,
+		idMapper:      idMapper,
+		mappingsKV:    mappingsKV,
+		v1ObjectsKV:   v1ObjectsKV,
+		inviteHandler: inviteHandler,
+		logger:        logger,
+		config:        cfg,
 	}, nil
+}
+
+// InjectInviteDependencies sets the invite sender and user reader on the invite handler
+// after the invite NATS connection has been established. This is called from main.go.
+func (ep *EventProcessor) InjectInviteDependencies(sender domain.InviteSender, reader domain.UserReader) {
+	if ep.inviteHandler != nil {
+		ep.inviteHandler.inviteSender = sender
+		ep.inviteHandler.userReader = reader
+	}
 }
 
 // Start starts the event processor
@@ -117,7 +143,7 @@ func (ep *EventProcessor) Start(ctx context.Context) error {
 
 	// Start consuming messages
 	consumeCtx, err := consumer.Consume(func(msg jetstream.Msg) {
-		kvMessageHandler(ctx, msg, ep.publisher, ep.idMapper, ep.mappingsKV, ep.v1ObjectsKV, ep.logger)
+		kvMessageHandler(ctx, msg, ep.publisher, ep.idMapper, ep.mappingsKV, ep.v1ObjectsKV, ep.inviteHandler, ep.logger)
 	}, jetstream.ConsumeErrHandler(func(_ jetstream.ConsumeContext, err error) {
 		ep.logger.With("error", err).Error("KV consumer error encountered")
 	}))

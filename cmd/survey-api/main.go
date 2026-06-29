@@ -23,10 +23,13 @@ import (
 	openapisvr "github.com/linuxfoundation/lfx-v2-survey-service/gen/http/openapi/server"
 	surveysvr "github.com/linuxfoundation/lfx-v2-survey-service/gen/http/survey/server"
 	surveysvc "github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
+	natsgo "github.com/nats-io/nats.go"
+
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/auth"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/eventing"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/idmapper"
+	infraNATS "github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/nats"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/proxy"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/logging"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/middleware"
@@ -131,6 +134,37 @@ func run() int {
 	// Create shutdown channel for coordinating graceful shutdown
 	shutdown := make(chan struct{}, 1)
 
+	// Resolve invite feature configuration
+	inviteCfg := parseInviteConfig(cfg, logger)
+
+	// Start invite_accepted subscriber and create invite NATS deps before the event
+	// processor so that InjectInviteDependencies completes before any KV events are
+	// processed (avoids a startup window where invites would be silently skipped).
+	var inviteAcceptedSubscriber *apieventing.InviteAcceptedSubscriber
+	var inviteNATSConn *natsgo.Conn
+	var inviteSender *infraNATS.NATSInviteSender
+	var userReader *infraNATS.NATSUserReader
+	if inviteCfg.Enabled {
+		logger.Info("Invite feature is ENABLED - starting invite_accepted subscriber")
+		nc, err := natsgo.Connect(cfg.NATSURL,
+			natsgo.Name("survey-service-invite-accepted"),
+			natsgo.DrainTimeout(30*time.Second),
+		)
+		if err != nil {
+			logger.Error("Failed to connect to NATS for invite_accepted subscriber", "error", err)
+			return 1
+		}
+		inviteNATSConn = nc
+		inviteSender = infraNATS.NewInviteSender(inviteNATSConn, logger)
+		userReader = infraNATS.NewUserReader(inviteNATSConn, logger)
+
+		inviteAcceptedSubscriber = apieventing.NewInviteAcceptedSubscriber(inviteNATSConn, proxyClient, logger)
+		if err := inviteAcceptedSubscriber.Start(context.Background()); err != nil {
+			logger.Error("Failed to start invite_accepted subscriber", "error", err)
+			return 1
+		}
+	}
+
 	// Initialize event processor (if enabled)
 	var eventProcessor *apieventing.EventProcessor
 	eventProcessorCtx, eventProcessorCancel := context.WithCancel(context.Background())
@@ -149,12 +183,16 @@ func run() int {
 			MaxDeliver:    3,
 			AckWait:       30 * time.Second,
 			MaxAckPending: 1000,
-		}, idMapper, logger)
+		}, idMapper, inviteCfg, logger)
 		if err != nil {
 			logger.Error("Failed to initialize event processor", "error", err)
 			return 1
 		}
 		eventProcessor = ep
+
+		if inviteSender != nil && userReader != nil {
+			eventProcessor.InjectInviteDependencies(inviteSender, userReader)
+		}
 
 		// Start event processor in goroutine
 		go func() {
@@ -302,6 +340,15 @@ func run() int {
 		}
 	}
 
+	// Stop the invite_accepted subscriber (if enabled)
+	if inviteAcceptedSubscriber != nil {
+		logger.Info("Stopping invite_accepted subscriber...")
+		inviteAcceptedSubscriber.Stop()
+	}
+	if inviteNATSConn != nil {
+		inviteNATSConn.Close()
+	}
+
 	// Graceful shutdown of HTTP server with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -333,6 +380,10 @@ type config struct {
 	EventProcessingEnabled bool
 	EventConsumerName      string
 	EventStreamName        string
+	// Invite feature
+	InvitesEnabled   bool
+	SelfServeBaseURL string
+	LFXEnvironment   string
 }
 
 // loadConfig loads configuration from environment variables
@@ -354,6 +405,44 @@ func loadConfig() config {
 		EventProcessingEnabled: getEnv("EVENT_PROCESSING_ENABLED", "true") == "true",
 		EventConsumerName:      getEnv("EVENT_CONSUMER_NAME", "survey-service-kv-consumer"),
 		EventStreamName:        getEnv("EVENT_STREAM_NAME", "KV_v1-objects"),
+		InvitesEnabled:         getEnv("INVITES_ENABLED", "false") == "true",
+		SelfServeBaseURL:       getEnv("LFX_SELF_SERVE_BASE_URL", ""),
+		LFXEnvironment:         getEnv("LFX_ENVIRONMENT", "dev"),
+	}
+}
+
+// selfServeBaseURLForEnv returns the default LFX self-serve base URL for the given environment.
+// The result is used when LFX_SELF_SERVE_BASE_URL is not explicitly set.
+func selfServeBaseURLForEnv(env string) string {
+	switch env {
+	case "prod", "production":
+		return "https://lfx.linuxfoundation.org"
+	case "staging", "stage":
+		return "https://lfx.staging.platform.linuxfoundation.org"
+	default: // dev, local, or anything else
+		return "https://lfx.dev.platform.linuxfoundation.org"
+	}
+}
+
+// parseInviteConfig resolves the InviteFeatureConfig from config and env defaults.
+func parseInviteConfig(cfg config, logger *slog.Logger) apieventing.InviteFeatureConfig {
+	if !cfg.InvitesEnabled {
+		logger.Info("Invite feature is DISABLED (INVITES_ENABLED != true)")
+		return apieventing.InviteFeatureConfig{}
+	}
+
+	baseURL := cfg.SelfServeBaseURL
+	if baseURL == "" {
+		baseURL = selfServeBaseURLForEnv(cfg.LFXEnvironment)
+		logger.Info("LFX_SELF_SERVE_BASE_URL not set; using environment default",
+			"env", cfg.LFXEnvironment,
+			"base_url", baseURL,
+		)
+	}
+
+	return apieventing.InviteFeatureConfig{
+		Enabled:          true,
+		SelfServeBaseURL: baseURL,
 	}
 }
 

@@ -72,6 +72,7 @@ func kvMessageHandler(
 	idMapper domain.IDMapper,
 	mappingsKV jetstream.KeyValue,
 	v1ObjectsKV jetstream.KeyValue,
+	inviteHandler *SurveyResponseInviteHandler,
 	logger *slog.Logger,
 ) {
 	// Parse the message as a KV entry
@@ -103,7 +104,7 @@ func kvMessageHandler(
 	}
 
 	// Process the KV entry and check if retry is needed
-	shouldRetry := kvHandler(ctx, entry, publisher, idMapper, mappingsKV, v1ObjectsKV, logger)
+	shouldRetry := kvHandler(ctx, entry, publisher, idMapper, mappingsKV, v1ObjectsKV, inviteHandler, logger)
 
 	// Handle message acknowledgment based on retry decision
 	if shouldRetry {
@@ -151,11 +152,12 @@ func kvHandler(
 	idMapper domain.IDMapper,
 	mappingsKV jetstream.KeyValue,
 	v1ObjectsKV jetstream.KeyValue,
+	inviteHandler *SurveyResponseInviteHandler,
 	logger *slog.Logger,
 ) bool {
 	switch entry.Operation() {
 	case jetstream.KeyValuePut:
-		return handleKVPut(ctx, entry, publisher, idMapper, mappingsKV, v1ObjectsKV, logger)
+		return handleKVPut(ctx, entry, publisher, idMapper, mappingsKV, v1ObjectsKV, inviteHandler, logger)
 	case jetstream.KeyValueDelete, jetstream.KeyValuePurge:
 		return handleKVDelete(ctx, entry, publisher, mappingsKV, logger)
 	default:
@@ -186,6 +188,7 @@ func handleKVPut(
 	idMapper domain.IDMapper,
 	mappingsKV jetstream.KeyValue,
 	v1ObjectsKV jetstream.KeyValue,
+	inviteHandler *SurveyResponseInviteHandler,
 	logger *slog.Logger,
 ) bool {
 	key := entry.Key()
@@ -214,7 +217,7 @@ func handleKVPut(
 	case "itx-surveys":
 		return handleSurveyUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, logger)
 	case "itx-survey-responses":
-		return handleSurveyResponseUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, v1ObjectsKV, logger)
+		return handleSurveyResponseUpdate(ctx, key, v1Data, publisher, idMapper, mappingsKV, v1ObjectsKV, inviteHandler, logger)
 	case "surveymonkey-surveys":
 		return handleSurveyTemplateUpdate(ctx, key, v1Data, publisher, mappingsKV, logger)
 	default:
