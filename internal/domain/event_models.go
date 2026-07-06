@@ -110,6 +110,7 @@ type SurveyResponseData struct {
 	// fields through the query service on their own.
 	SurveyTitle          string `json:"survey_title"`
 	SurveyStatus         string `json:"survey_status"`
+	SurveySendDate       string `json:"survey_send_date"`
 	SurveyCutoffDate     string `json:"survey_cutoff_date"`
 	IsNPSSurvey          bool   `json:"is_nps_survey"`
 	IsProjectSurvey      bool   `json:"is_project_survey"`

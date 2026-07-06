@@ -188,6 +188,7 @@ The following fields are denormalized from the parent survey at index time so th
 |---|---|---|
 | `survey_title` | string | Parent survey title (denormalized from survey) |
 | `survey_status` | string | Parent survey status (denormalized from survey) |
+| `survey_send_date` | string | Parent survey scheduled send date (RFC3339, denormalized from survey) |
 | `survey_cutoff_date` | string | Parent survey response cutoff date (RFC3339, denormalized from survey) |
 | `is_nps_survey` | bool | Whether the parent survey is an NPS survey (denormalized from survey) |
 | `is_project_survey` | bool | Whether the parent survey is a project-level survey (denormalized from survey) |
