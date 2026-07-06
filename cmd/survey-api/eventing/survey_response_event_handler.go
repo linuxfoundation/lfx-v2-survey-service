@@ -386,6 +386,7 @@ func extractSurveyDenormFields(v1Data map[string]interface{}) (*domain.SurveyDat
 	data := &domain.SurveyData{
 		SurveyTitle:       surveyDB.SurveyTitle,
 		SurveyStatus:      surveyDB.SurveyStatus,
+		SurveySendDate:    surveyDB.SurveySendDate,
 		SurveyCutoffDate:  surveyDB.SurveyCutoffDate,
 		IsNPSSurvey:       surveyDB.IsNPSSurvey,
 		IsProjectSurvey:   surveyDB.IsProjectSurvey,
@@ -411,6 +412,7 @@ func extractSurveyDenormFields(v1Data map[string]interface{}) (*domain.SurveyDat
 func applyParentSurveyDenormalization(r *domain.SurveyResponseData, s *domain.SurveyData) {
 	r.SurveyTitle = s.SurveyTitle
 	r.SurveyStatus = s.SurveyStatus
+	r.SurveySendDate = s.SurveySendDate
 	r.SurveyCutoffDate = s.SurveyCutoffDate
 	r.IsNPSSurvey = s.IsNPSSurvey
 	r.IsProjectSurvey = s.IsProjectSurvey
