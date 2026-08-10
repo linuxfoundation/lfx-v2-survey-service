@@ -9,6 +9,11 @@ image:
 
 replicaCount: 1
 
+# annotations are additional annotations applied to the Deployment itself.
+# Example:
+#   reloader.stakater.com/auto: "true"
+annotations: {}
+
 # podDisruptionBudget configures a PodDisruptionBudget for the deployment.
 # Only one of minAvailable or maxUnavailable may be set (not both).
 podDisruptionBudget:
