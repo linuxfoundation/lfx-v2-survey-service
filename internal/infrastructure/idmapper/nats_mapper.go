@@ -37,6 +37,9 @@ type NATSMapper struct {
 	timeout time.Duration
 }
 
+// Compile-time assertion: *NATSMapper must satisfy domain.IDMapper.
+var _ domain.IDMapper = (*NATSMapper)(nil)
+
 // NewNATSMapper creates a new NATS-based ID mapper
 func NewNATSMapper(cfg Config) (*NATSMapper, error) {
 	if cfg.URL == "" {

@@ -6,6 +6,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"strings"
 
@@ -44,6 +45,31 @@ func NewSurveyService(
 		idMapper:        idMapper,
 		logger:          logger,
 	}
+}
+
+// ServiceReady returns an error if any required dependency was not injected.
+// Call this during startup (before serving traffic) to fail fast on misconfiguration
+// rather than panicking at the first request.
+func (s *SurveyService) ServiceReady() error {
+	if s.auth == nil {
+		return fmt.Errorf("SurveyService: auth (Authenticator) is nil")
+	}
+	if s.surveyClient == nil {
+		return fmt.Errorf("SurveyService: surveyClient (SurveyClient) is nil")
+	}
+	if s.exclusionClient == nil {
+		return fmt.Errorf("SurveyService: exclusionClient (ExclusionClient) is nil")
+	}
+	if s.responseClient == nil {
+		return fmt.Errorf("SurveyService: responseClient (SurveyResponseClient) is nil")
+	}
+	if s.idMapper == nil {
+		return fmt.Errorf("SurveyService: idMapper (IDMapper) is nil")
+	}
+	if s.logger == nil {
+		return fmt.Errorf("SurveyService: logger is nil")
+	}
+	return nil
 }
 
 // ScheduleSurvey implements survey.Service.ScheduleSurvey

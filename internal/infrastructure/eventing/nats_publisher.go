@@ -47,6 +47,9 @@ type NATSPublisher struct {
 	logger *slog.Logger
 }
 
+// Compile-time assertion: *NATSPublisher must satisfy domain.EventPublisher.
+var _ domain.EventPublisher = (*NATSPublisher)(nil)
+
 // NewNATSPublisher creates a new NATS publisher
 func NewNATSPublisher(conn *nats.Conn, logger *slog.Logger) *NATSPublisher {
 	return &NATSPublisher{
