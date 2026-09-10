@@ -26,79 +26,92 @@ func (m *mockAuth) ParsePrincipal(_ context.Context, _ string, _ *slog.Logger) (
 	return m.principal, m.err
 }
 
-// mockProxy is a test double for domain.ITXProxyClient
-// Only ListResponses is implemented; all others panic if called unexpectedly.
-type mockProxy struct {
+// mockSurveyClient is a test double for domain.SurveyClient.
+// All methods panic — tests that only exercise response or exclusion paths
+// should never trigger these. Implement specific methods when writing survey tests.
+type mockSurveyClient struct{}
+
+func (m *mockSurveyClient) ScheduleSurvey(_ context.Context, _ *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+	panic("unexpected call to ScheduleSurvey")
+}
+func (m *mockSurveyClient) GetSurvey(_ context.Context, _ string, _ *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error) {
+	panic("unexpected call to GetSurvey")
+}
+func (m *mockSurveyClient) UpdateSurvey(_ context.Context, _ string, _ *itx.UpdateSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+	panic("unexpected call to UpdateSurvey")
+}
+func (m *mockSurveyClient) DeleteSurvey(_ context.Context, _ string) error {
+	panic("unexpected call to DeleteSurvey")
+}
+func (m *mockSurveyClient) ExtendSurvey(_ context.Context, _ string, _ *itx.ExtendSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+	panic("unexpected call to ExtendSurvey")
+}
+func (m *mockSurveyClient) EnableSurvey(_ context.Context, _ string) error {
+	panic("unexpected call to EnableSurvey")
+}
+func (m *mockSurveyClient) BulkResendSurvey(_ context.Context, _ string, _ *itx.BulkResendRequest) error {
+	panic("unexpected call to BulkResendSurvey")
+}
+func (m *mockSurveyClient) PreviewSend(_ context.Context, _ string, _ *string) (*itx.PreviewSendResponse, error) {
+	panic("unexpected call to PreviewSend")
+}
+func (m *mockSurveyClient) SendMissingRecipients(_ context.Context, _ string, _ *string) error {
+	panic("unexpected call to SendMissingRecipients")
+}
+func (m *mockSurveyClient) DeleteRecipientGroup(_ context.Context, _ string, _ *string, _ *string, _ *string) error {
+	panic("unexpected call to DeleteRecipientGroup")
+}
+func (m *mockSurveyClient) GetSurveyResults(_ context.Context, _ string) (*itx.SurveyResults, error) {
+	panic("unexpected call to GetSurveyResults")
+}
+func (m *mockSurveyClient) ValidateEmail(_ context.Context, _ *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error) {
+	panic("unexpected call to ValidateEmail")
+}
+
+// mockExclusionClient is a test double for domain.ExclusionClient.
+// All methods panic — tests that only exercise survey or response paths
+// should never trigger these. Implement specific methods when writing exclusion tests.
+type mockExclusionClient struct{}
+
+func (m *mockExclusionClient) CreateExclusion(_ context.Context, _ *itx.ExclusionRequest) (*itx.Exclusion, error) {
+	panic("unexpected call to CreateExclusion")
+}
+func (m *mockExclusionClient) DeleteExclusion(_ context.Context, _ *itx.ExclusionRequest) error {
+	panic("unexpected call to DeleteExclusion")
+}
+func (m *mockExclusionClient) GetExclusion(_ context.Context, _ string) (*itx.ExtendedExclusion, error) {
+	panic("unexpected call to GetExclusion")
+}
+func (m *mockExclusionClient) DeleteExclusionByID(_ context.Context, _ string) error {
+	panic("unexpected call to DeleteExclusionByID")
+}
+
+// mockResponseClient is a test double for domain.SurveyResponseClient.
+// ListResponses is the only method that can be configured — all others panic.
+// When writing response-op tests, extend this struct or add configurable fields.
+type mockResponseClient struct {
 	listResponsesResult *itx.PaginatedSurveyResponses
 	listResponsesErr    error
 	capturedSurveyID    string
 	capturedParams      *itx.ListResponsesParams
 }
 
-func (m *mockProxy) ScheduleSurvey(_ context.Context, _ *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
-	panic("unexpected call to ScheduleSurvey")
-}
-func (m *mockProxy) GetSurvey(_ context.Context, _ string, _ *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error) {
-	panic("unexpected call to GetSurvey")
-}
-func (m *mockProxy) UpdateSurvey(_ context.Context, _ string, _ *itx.UpdateSurveyRequest) (*itx.SurveyScheduleResponse, error) {
-	panic("unexpected call to UpdateSurvey")
-}
-func (m *mockProxy) DeleteSurvey(_ context.Context, _ string) error {
-	panic("unexpected call to DeleteSurvey")
-}
-func (m *mockProxy) ExtendSurvey(_ context.Context, _ string, _ *itx.ExtendSurveyRequest) (*itx.SurveyScheduleResponse, error) {
-	panic("unexpected call to ExtendSurvey")
-}
-func (m *mockProxy) EnableSurvey(_ context.Context, _ string) error {
-	panic("unexpected call to EnableSurvey")
-}
-func (m *mockProxy) BulkResendSurvey(_ context.Context, _ string, _ *itx.BulkResendRequest) error {
-	panic("unexpected call to BulkResendSurvey")
-}
-func (m *mockProxy) PreviewSend(_ context.Context, _ string, _ *string) (*itx.PreviewSendResponse, error) {
-	panic("unexpected call to PreviewSend")
-}
-func (m *mockProxy) SendMissingRecipients(_ context.Context, _ string, _ *string) error {
-	panic("unexpected call to SendMissingRecipients")
-}
-func (m *mockProxy) DeleteRecipientGroup(_ context.Context, _ string, _ *string, _ *string, _ *string) error {
-	panic("unexpected call to DeleteRecipientGroup")
-}
-func (m *mockProxy) CreateExclusion(_ context.Context, _ *itx.ExclusionRequest) (*itx.Exclusion, error) {
-	panic("unexpected call to CreateExclusion")
-}
-func (m *mockProxy) DeleteExclusion(_ context.Context, _ *itx.ExclusionRequest) error {
-	panic("unexpected call to DeleteExclusion")
-}
-func (m *mockProxy) GetExclusion(_ context.Context, _ string) (*itx.ExtendedExclusion, error) {
-	panic("unexpected call to GetExclusion")
-}
-func (m *mockProxy) DeleteExclusionByID(_ context.Context, _ string) error {
-	panic("unexpected call to DeleteExclusionByID")
-}
-func (m *mockProxy) GetSurveyResults(_ context.Context, _ string) (*itx.SurveyResults, error) {
-	panic("unexpected call to GetSurveyResults")
-}
-func (m *mockProxy) ValidateEmail(_ context.Context, _ *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error) {
-	panic("unexpected call to ValidateEmail")
-}
-func (m *mockProxy) CreateResponse(_ context.Context, _ *itx.CreateResponseRequest) error {
+func (m *mockResponseClient) CreateResponse(_ context.Context, _ *itx.CreateResponseRequest) error {
 	panic("unexpected call to CreateResponse")
 }
-func (m *mockProxy) GetResponse(_ context.Context, _ string) (*itx.ResponseResponse, error) {
+func (m *mockResponseClient) GetResponse(_ context.Context, _ string) (*itx.ResponseResponse, error) {
 	panic("unexpected call to GetResponse")
 }
-func (m *mockProxy) UpdateResponse(_ context.Context, _ string, _ *itx.UpdateResponseRequest) error {
+func (m *mockResponseClient) UpdateResponse(_ context.Context, _ string, _ *itx.UpdateResponseRequest) error {
 	panic("unexpected call to UpdateResponse")
 }
-func (m *mockProxy) DeleteResponse(_ context.Context, _ string, _ string) error {
+func (m *mockResponseClient) DeleteResponse(_ context.Context, _ string, _ string) error {
 	panic("unexpected call to DeleteResponse")
 }
-func (m *mockProxy) ResendResponse(_ context.Context, _ string, _ string) error {
+func (m *mockResponseClient) ResendResponse(_ context.Context, _ string, _ string) error {
 	panic("unexpected call to ResendResponse")
 }
-func (m *mockProxy) ListResponses(_ context.Context, surveyID string, params *itx.ListResponsesParams) (*itx.PaginatedSurveyResponses, error) {
+func (m *mockResponseClient) ListResponses(_ context.Context, surveyID string, params *itx.ListResponsesParams) (*itx.PaginatedSurveyResponses, error) {
 	m.capturedSurveyID = surveyID
 	m.capturedParams = params
 	return m.listResponsesResult, m.listResponsesErr
@@ -109,11 +122,11 @@ func (m *mockProxy) ListResponses(_ context.Context, surveyID string, params *it
 func strPtr(s string) *string   { return &s }
 func f64Ptr(f float64) *float64 { return &f }
 
-func newTestService(proxy domain.ITXProxyClient) *service.SurveyService {
+func newTestService(responseClient *mockResponseClient) *service.SurveyService {
 	auth := &mockAuth{principal: "test-user"}
 	mapper := idmapper.NewNoOpMapper()
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
-	return service.NewSurveyService(auth, proxy, mapper, logger)
+	return service.NewSurveyService(auth, &mockSurveyClient{}, &mockExclusionClient{}, responseClient, mapper, logger)
 }
 
 func TestListSurveyResponses_Success(t *testing.T) {
@@ -122,7 +135,7 @@ func TestListSurveyResponses_Success(t *testing.T) {
 	choiceID := "c-001"
 	choiceText := "Very satisfied"
 
-	proxy := &mockProxy{
+	proxy := &mockResponseClient{
 		listResponsesResult: &itx.PaginatedSurveyResponses{
 			Data: []itx.SurveyRecipientResponse{
 				{
@@ -208,7 +221,7 @@ func TestListSurveyResponses_Success(t *testing.T) {
 
 func TestListSurveyResponses_ProjectWithNoID_OmitsUID(t *testing.T) {
 	// When a response has a project object but no id, UID must be nil (not a pointer to "").
-	proxy := &mockProxy{
+	proxy := &mockResponseClient{
 		listResponsesResult: &itx.PaginatedSurveyResponses{
 			Data: []itx.SurveyRecipientResponse{
 				{
@@ -242,7 +255,7 @@ func TestListSurveyResponses_ProjectWithNoID_OmitsUID(t *testing.T) {
 }
 
 func TestListSurveyResponses_EmptyData(t *testing.T) {
-	proxy := &mockProxy{
+	proxy := &mockResponseClient{
 		listResponsesResult: &itx.PaginatedSurveyResponses{
 			Data: []itx.SurveyRecipientResponse{},
 			Meta: itx.PageMetadata{TotalResults: 0, TotalPages: 0, PerPage: 25},
@@ -269,7 +282,7 @@ func TestListSurveyResponses_EmptyData(t *testing.T) {
 }
 
 func TestListSurveyResponses_ITX404_MapsToNotFound(t *testing.T) {
-	proxy := &mockProxy{
+	proxy := &mockResponseClient{
 		listResponsesErr: domain.NewNotFoundError("survey not found", nil),
 	}
 
@@ -292,7 +305,7 @@ func TestListSurveyResponses_ITX404_MapsToNotFound(t *testing.T) {
 func TestListSurveyResponses_ProjectUIDs_ForwardedToProxy(t *testing.T) {
 	// Verify that comma-delimited project_uids is V2→V1 mapped and forwarded as ProjectIDs.
 	// NoOpMapper returns each ID unchanged, so the joined string should equal the input.
-	proxy := &mockProxy{
+	proxy := &mockResponseClient{
 		listResponsesResult: &itx.PaginatedSurveyResponses{
 			Data: []itx.SurveyRecipientResponse{},
 			Meta: itx.PageMetadata{},
@@ -328,7 +341,7 @@ func TestListSurveyResponses_ProjectUIDs_ForwardedToProxy(t *testing.T) {
 func TestListSurveyResponses_ProjectUID_ForwardedToProxy(t *testing.T) {
 	// Verify project_uid is V2→V1 mapped and forwarded as ProjectID in ListResponses params.
 	// NoOpMapper returns the ID unchanged, so we can assert the value directly.
-	proxy := &mockProxy{
+	proxy := &mockResponseClient{
 		listResponsesResult: &itx.PaginatedSurveyResponses{
 			Data: []itx.SurveyRecipientResponse{},
 			Meta: itx.PageMetadata{},
@@ -374,7 +387,7 @@ func TestListSurveyResponses_ProjectUID_ForwardedToProxy(t *testing.T) {
 func TestListSurveyResponses_BothProjectFilters_ReturnsValidationError(t *testing.T) {
 	// project_uid and project_uids are mutually exclusive. Providing both must be rejected
 	// with a 400 Bad Request before any proxy or ID-mapping calls are made.
-	proxy := &mockProxy{}
+	proxy := &mockResponseClient{}
 	svc := newTestService(proxy)
 	token := "test-token"
 	projectUID := "v2-project-uid"

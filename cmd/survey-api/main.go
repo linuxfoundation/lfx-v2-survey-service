@@ -210,8 +210,9 @@ func run() int {
 		logger.Info("Event processing is DISABLED - skipping event processor initialization")
 	}
 
-	// Initialize service layer
-	surveyService := service.NewSurveyService(jwtAuth, proxyClient, idMapper, logger)
+	// Initialize service layer — pass proxyClient for each sub-interface; the concrete
+	// *proxy.Client satisfies domain.ITXProxyClient, which embeds all three.
+	surveyService := service.NewSurveyService(jwtAuth, proxyClient, proxyClient, proxyClient, idMapper, logger)
 
 	// Initialize API layer
 	surveyAPI := NewSurveyAPI(surveyService)

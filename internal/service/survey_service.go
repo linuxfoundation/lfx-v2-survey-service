@@ -16,23 +16,33 @@ import (
 )
 
 type SurveyService struct {
-	auth     domain.Authenticator
-	proxy    domain.ITXProxyClient
-	idMapper domain.IDMapper
-	logger   *slog.Logger
+	auth            domain.Authenticator
+	surveyClient    domain.SurveyClient
+	exclusionClient domain.ExclusionClient
+	responseClient  domain.SurveyResponseClient
+	idMapper        domain.IDMapper
+	logger          *slog.Logger
 }
 
+// NewSurveyService wires the service with the three focused sub-interfaces.
+// In production, pass the same *proxy.Client for all three — it satisfies
+// domain.ITXProxyClient, which embeds all three. In tests, supply a narrower
+// mock for the sub-interface under test and a no-op stub for the others.
 func NewSurveyService(
-	auth domain.Authenticator,
-	proxy domain.ITXProxyClient,
-	idMapper domain.IDMapper,
-	logger *slog.Logger,
+	auth            domain.Authenticator,
+	surveyClient    domain.SurveyClient,
+	exclusionClient domain.ExclusionClient,
+	responseClient  domain.SurveyResponseClient,
+	idMapper        domain.IDMapper,
+	logger          *slog.Logger,
 ) *SurveyService {
 	return &SurveyService{
-		auth:     auth,
-		proxy:    proxy,
-		idMapper: idMapper,
-		logger:   logger,
+		auth:            auth,
+		surveyClient:    surveyClient,
+		exclusionClient: exclusionClient,
+		responseClient:  responseClient,
+		idMapper:        idMapper,
+		logger:          logger,
 	}
 }
 
@@ -90,7 +100,7 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.ScheduleSurvey(ctx, itxRequest)
+	itxResponse, err := s.surveyClient.ScheduleSurvey(ctx, itxRequest)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -175,7 +185,7 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.GetSurvey(ctx, p.SurveyUID, queryParams)
+	itxResponse, err := s.surveyClient.GetSurvey(ctx, p.SurveyUID, queryParams)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -238,7 +248,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.UpdateSurvey(ctx, p.SurveyUID, itxRequest)
+	itxResponse, err := s.surveyClient.UpdateSurvey(ctx, p.SurveyUID, itxRequest)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -273,7 +283,7 @@ func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurvey
 	)
 
 	// Call ITX API
-	err = s.proxy.DeleteSurvey(ctx, p.SurveyUID)
+	err = s.surveyClient.DeleteSurvey(ctx, p.SurveyUID)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -305,7 +315,7 @@ func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkRese
 	}
 
 	// Call ITX API
-	err = s.proxy.BulkResendSurvey(ctx, p.SurveyUID, itxRequest)
+	err = s.surveyClient.BulkResendSurvey(ctx, p.SurveyUID, itxRequest)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -338,7 +348,7 @@ func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.Preview
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.PreviewSend(ctx, p.SurveyUID, committeeV1)
+	itxResponse, err := s.surveyClient.PreviewSend(ctx, p.SurveyUID, committeeV1)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -381,7 +391,7 @@ func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.Sen
 	}
 
 	// Call ITX API
-	err = s.proxy.SendMissingRecipients(ctx, p.SurveyUID, committeeV1)
+	err = s.surveyClient.SendMissingRecipients(ctx, p.SurveyUID, committeeV1)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -408,7 +418,7 @@ func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.Dele
 	)
 
 	// Call ITX API
-	err = s.proxy.DeleteResponse(ctx, p.SurveyUID, p.ResponseID)
+	err = s.responseClient.DeleteResponse(ctx, p.SurveyUID, p.ResponseID)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -436,7 +446,7 @@ func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.Rese
 	)
 
 	// Call ITX API
-	err = s.proxy.ResendResponse(ctx, p.SurveyUID, p.ResponseID)
+	err = s.responseClient.ResendResponse(ctx, p.SurveyUID, p.ResponseID)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -478,7 +488,7 @@ func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.Dele
 	}
 
 	// Call ITX API
-	err = s.proxy.DeleteRecipientGroup(ctx, p.SurveyUID, committeeV1, projectV1, p.FoundationID)
+	err = s.surveyClient.DeleteRecipientGroup(ctx, p.SurveyUID, committeeV1, projectV1, p.FoundationID)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -520,7 +530,7 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.CreateExclusion(ctx, itxRequest)
+	itxResponse, err := s.exclusionClient.CreateExclusion(ctx, itxRequest)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -571,7 +581,7 @@ func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExc
 	}
 
 	// Call ITX API
-	err = s.proxy.DeleteExclusion(ctx, itxRequest)
+	err = s.exclusionClient.DeleteExclusion(ctx, itxRequest)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -595,7 +605,7 @@ func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusion
 	)
 
 	// Call ITX API
-	itxResponse, err := s.proxy.GetExclusion(ctx, p.ExclusionID)
+	itxResponse, err := s.exclusionClient.GetExclusion(ctx, p.ExclusionID)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -630,7 +640,7 @@ func (s *SurveyService) DeleteExclusionByID(ctx context.Context, p *survey.Delet
 	)
 
 	// Call ITX API
-	err = s.proxy.DeleteExclusionByID(ctx, p.ExclusionID)
+	err = s.exclusionClient.DeleteExclusionByID(ctx, p.ExclusionID)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -661,7 +671,7 @@ func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEma
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.ValidateEmail(ctx, itxRequest)
+	itxResponse, err := s.surveyClient.ValidateEmail(ctx, itxRequest)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -739,7 +749,7 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.ListResponses(ctx, p.SurveyUID, params)
+	itxResponse, err := s.responseClient.ListResponses(ctx, p.SurveyUID, params)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
