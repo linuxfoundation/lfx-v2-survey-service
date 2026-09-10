@@ -209,14 +209,14 @@ func run() int {
 
 	// Initialize service layer — pass proxyClient for each sub-interface; the concrete
 	// *proxy.Client satisfies domain.ITXProxyClient, which embeds all three.
-	surveyService := service.NewSurveyService(jwtAuth, proxyClient, proxyClient, proxyClient, idMapper, logger)
+	surveyService := service.NewSurveyService(proxyClient, proxyClient, proxyClient, idMapper, logger)
 	if err := surveyService.ServiceReady(); err != nil {
 		logger.Error("Survey service dependency check failed", "error", err)
 		return 1
 	}
 
 	// Initialize API layer
-	surveyAPI := NewSurveyAPI(surveyService)
+	surveyAPI := NewSurveyAPI(surveyService, jwtAuth)
 
 	// Create Goa endpoints
 	surveyEndpoints := surveysvc.NewEndpoints(surveyAPI)

@@ -26,10 +26,9 @@ func strPtr(s string) *string   { return &s }
 func f64Ptr(f float64) *float64 { return &f }
 
 func newTestService(responseClient *mocks.MockSurveyResponseClient) *service.SurveyService {
-	auth := &mocks.MockAuthenticator{Principal: "test-user"}
 	mapper := idmapper.NewNoOpMapper()
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
-	return service.NewSurveyService(auth, &mocks.MockSurveyClient{}, &mocks.MockExclusionClient{}, responseClient, mapper, logger)
+	return service.NewSurveyService(&mocks.MockSurveyClient{}, &mocks.MockExclusionClient{}, responseClient, mapper, logger)
 }
 
 func TestListSurveyResponses_Success(t *testing.T) {

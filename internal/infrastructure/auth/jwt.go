@@ -117,7 +117,11 @@ func NewJWTAuth(config Config) (*JWTAuth, error) {
 }
 
 // ParsePrincipal extracts the principal from the JWT claims.
-func (j *JWTAuth) ParsePrincipal(ctx context.Context, token string, logger *slog.Logger) (string, error) {
+// Logging uses slog.Default() — the logger is an adapter concern and is not
+// part of the domain.Authenticator interface.
+func (j *JWTAuth) ParsePrincipal(ctx context.Context, token string) (string, error) {
+	logger := slog.Default()
+
 	// To avoid having to use a valid JWT token for local development, we can use the
 	// MockLocalPrincipal configuration parameter.
 	if j.config.MockLocalPrincipal != "" {
