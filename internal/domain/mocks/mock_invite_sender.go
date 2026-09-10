@@ -6,7 +6,6 @@ package mocks
 import (
 	"context"
 
-	inviteapi "github.com/linuxfoundation/lfx-v2-invite-service/pkg/api"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 )
 
@@ -18,15 +17,15 @@ type MockInviteSender struct {
 	Result          *domain.InviteResult
 	Err             error
 	Called          bool
-	LastRequest     inviteapi.SendInviteRequest
-	SendInviteFunc  func(ctx context.Context, req inviteapi.SendInviteRequest) (*domain.InviteResult, error)
+	LastRequest     domain.InviteRequest
+	SendInviteFunc  func(ctx context.Context, req domain.InviteRequest) (*domain.InviteResult, error)
 }
 
 // Compile-time assertion.
 var _ domain.InviteSender = (*MockInviteSender)(nil)
 
 // SendInvite records the call and returns the configured result.
-func (m *MockInviteSender) SendInvite(ctx context.Context, req inviteapi.SendInviteRequest) (*domain.InviteResult, error) {
+func (m *MockInviteSender) SendInvite(ctx context.Context, req domain.InviteRequest) (*domain.InviteResult, error) {
 	m.Called = true
 	m.LastRequest = req
 	if m.SendInviteFunc != nil {
