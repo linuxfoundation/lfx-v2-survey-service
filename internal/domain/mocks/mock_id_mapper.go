@@ -12,10 +12,10 @@ import (
 // MockIDMapper is a configurable test double for domain.IDMapper.
 // Each method has a corresponding Func field; when nil the method panics.
 type MockIDMapper struct {
-	MapProjectV2ToV1Func    func(ctx context.Context, v2UID string) (string, error)
-	MapProjectV1ToV2Func    func(ctx context.Context, v1SFID string) (string, error)
-	MapCommitteeV2ToV1Func  func(ctx context.Context, v2UID string) (string, error)
-	MapCommitteeV1ToV2Func  func(ctx context.Context, v1SFID string) (string, error)
+	MapProjectV2ToV1Func   func(ctx context.Context, v2UID string) (string, error)
+	MapProjectV1ToV2Func   func(ctx context.Context, v1SFID string) (string, error)
+	MapCommitteeV2ToV1Func func(ctx context.Context, v2UID string) (string, error)
+	MapCommitteeV1ToV2Func func(ctx context.Context, v1SFID string) (string, error)
 }
 
 // Compile-time assertion.

@@ -12,8 +12,8 @@ import (
 // MockInviteAcceptanceClient is a configurable test double for domain.InviteAcceptanceClient.
 // Set Err for a fixed error response, or set AcceptInviteFunc for dynamic behaviour.
 type MockInviteAcceptanceClient struct {
-	Err               error
-	AcceptInviteFunc  func(ctx context.Context, email, username string) error
+	Err              error
+	AcceptInviteFunc func(ctx context.Context, email, username string) error
 }
 
 // Compile-time assertion.

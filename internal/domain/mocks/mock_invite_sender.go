@@ -14,11 +14,11 @@ import (
 // Set Result and Err for a fixed response, or set SendInviteFunc for dynamic behaviour.
 // Called tracks whether SendInvite was invoked; LastRequest captures the most recent call.
 type MockInviteSender struct {
-	Result          *domain.InviteResult
-	Err             error
-	Called          bool
-	LastRequest     domain.InviteRequest
-	SendInviteFunc  func(ctx context.Context, req domain.InviteRequest) (*domain.InviteResult, error)
+	Result         *domain.InviteResult
+	Err            error
+	Called         bool
+	LastRequest    domain.InviteRequest
+	SendInviteFunc func(ctx context.Context, req domain.InviteRequest) (*domain.InviteResult, error)
 }
 
 // Compile-time assertion.

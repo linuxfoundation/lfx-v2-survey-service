@@ -43,10 +43,10 @@ type Client struct {
 // composite. If a method is added to any sub-interface but not implemented here,
 // the build fails immediately rather than at runtime.
 var (
-	_ domain.SurveyClient       = (*Client)(nil)
-	_ domain.ExclusionClient    = (*Client)(nil)
+	_ domain.SurveyClient         = (*Client)(nil)
+	_ domain.ExclusionClient      = (*Client)(nil)
 	_ domain.SurveyResponseClient = (*Client)(nil)
-	_ domain.ITXProxyClient     = (*Client)(nil)
+	_ domain.ITXProxyClient       = (*Client)(nil)
 )
 
 // auth0TokenSource implements oauth2.TokenSource using Auth0 SDK with private key

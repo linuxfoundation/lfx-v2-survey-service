@@ -13,9 +13,9 @@ import (
 // MockExclusionClient is a configurable test double for domain.ExclusionClient.
 // Each method has a corresponding Func field; when nil the method panics.
 type MockExclusionClient struct {
-	CreateExclusionFunc    func(ctx context.Context, req *itx.ExclusionRequest) (*itx.Exclusion, error)
-	DeleteExclusionFunc    func(ctx context.Context, req *itx.ExclusionRequest) error
-	GetExclusionFunc       func(ctx context.Context, exclusionID string) (*itx.ExtendedExclusion, error)
+	CreateExclusionFunc     func(ctx context.Context, req *itx.ExclusionRequest) (*itx.Exclusion, error)
+	DeleteExclusionFunc     func(ctx context.Context, req *itx.ExclusionRequest) error
+	GetExclusionFunc        func(ctx context.Context, exclusionID string) (*itx.ExtendedExclusion, error)
 	DeleteExclusionByIDFunc func(ctx context.Context, exclusionID string) error
 }
 

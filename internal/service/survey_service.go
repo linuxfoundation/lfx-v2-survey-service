@@ -35,11 +35,11 @@ type SurveyService struct {
 // method is invoked. Service methods read the principal via
 // ctx.Value(constants.PrincipalContextID).
 func NewSurveyService(
-	surveyClient    domain.SurveyClient,
+	surveyClient domain.SurveyClient,
 	exclusionClient domain.ExclusionClient,
-	responseClient  domain.SurveyResponseClient,
-	idMapper        domain.IDMapper,
-	logger          *slog.Logger,
+	responseClient domain.SurveyResponseClient,
+	idMapper domain.IDMapper,
+	logger *slog.Logger,
 ) *SurveyService {
 	return &SurveyService{
 		surveyClient:    surveyClient,
