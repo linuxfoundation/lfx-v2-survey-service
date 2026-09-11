@@ -16,12 +16,18 @@ import (
 	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
 	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
+	infraNATS "github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/nats"
 	"github.com/nats-io/nats.go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
+
+// tracer is safe to initialize at package level — otel.Tracer() returns a
+// delegating tracer that forwards to whatever TracerProvider is registered at
+// call time, so otel.SetTracerProvider() updates it regardless of init order.
+var tracer = otel.Tracer("github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/eventing")
 
 // NATS subject constants for survey operations
 const (
@@ -46,6 +52,9 @@ type NATSPublisher struct {
 	conn   *nats.Conn
 	logger *slog.Logger
 }
+
+// Compile-time assertion: *NATSPublisher must satisfy domain.EventPublisher.
+var _ domain.EventPublisher = (*NATSPublisher)(nil)
 
 // NewNATSPublisher creates a new NATS publisher
 func NewNATSPublisher(conn *nats.Conn, logger *slog.Logger) *NATSPublisher {
@@ -122,7 +131,7 @@ func (p *NATSPublisher) publishWithSpan(ctx context.Context, subject string, dat
 	msg := nats.NewMsg(subject)
 	msg.Header = make(nats.Header)
 	msg.Data = data
-	otel.GetTextMapPropagator().Inject(ctx, natsHeaderCarrier(msg.Header))
+	otel.GetTextMapPropagator().Inject(ctx, infraNATS.NatsHeaderCarrier(msg.Header))
 
 	if err := p.conn.PublishMsg(msg); err != nil {
 		span.RecordError(err)

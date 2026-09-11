@@ -137,9 +137,9 @@ func run() int {
 	// Resolve invite feature configuration
 	inviteCfg := parseInviteConfig(cfg, logger)
 
-	// Start invite_accepted subscriber and create invite NATS deps before the event
-	// processor so that InjectInviteDependencies completes before any KV events are
-	// processed (avoids a startup window where invites would be silently skipped).
+	// Set up invite NATS connection and deps before the event processor so that
+	// all dependencies are fully wired at construction time — no post-construction
+	// injection required.
 	var inviteAcceptedSubscriber *apieventing.InviteAcceptedSubscriber
 	var inviteNATSConn *natsgo.Conn
 	var inviteSender *infraNATS.NATSInviteSender
@@ -165,7 +165,8 @@ func run() int {
 		}
 	}
 
-	// Initialize event processor (if enabled)
+	// Initialize event processor (if enabled). Invite deps are passed directly so the
+	// processor is fully wired at construction — no InjectInviteDependencies call needed.
 	var eventProcessor *apieventing.EventProcessor
 	eventProcessorCtx, eventProcessorCancel := context.WithCancel(context.Background())
 	defer eventProcessorCancel()
@@ -183,16 +184,12 @@ func run() int {
 			MaxDeliver:    3,
 			AckWait:       30 * time.Second,
 			MaxAckPending: 1000,
-		}, idMapper, inviteCfg, logger)
+		}, idMapper, inviteCfg, inviteSender, userReader, logger)
 		if err != nil {
 			logger.Error("Failed to initialize event processor", "error", err)
 			return 1
 		}
 		eventProcessor = ep
-
-		if inviteSender != nil && userReader != nil {
-			eventProcessor.InjectInviteDependencies(inviteSender, userReader)
-		}
 
 		// Start event processor in goroutine
 		go func() {
@@ -210,11 +207,16 @@ func run() int {
 		logger.Info("Event processing is DISABLED - skipping event processor initialization")
 	}
 
-	// Initialize service layer
-	surveyService := service.NewSurveyService(jwtAuth, proxyClient, idMapper, logger)
+	// Initialize service layer — pass proxyClient for each sub-interface; the concrete
+	// *proxy.Client satisfies domain.ITXProxyClient, which embeds all three.
+	surveyService := service.NewSurveyService(proxyClient, proxyClient, proxyClient, idMapper, logger)
+	if err := surveyService.ServiceReady(); err != nil {
+		logger.Error("Survey service dependency check failed", "error", err)
+		return 1
+	}
 
 	// Initialize API layer
-	surveyAPI := NewSurveyAPI(surveyService)
+	surveyAPI := NewSurveyAPI(surveyService, jwtAuth)
 
 	// Create Goa endpoints
 	surveyEndpoints := surveysvc.NewEndpoints(surveyAPI)

@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
-	inviteapi "github.com/linuxfoundation/lfx-v2-invite-service/pkg/api"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	surveyconstants "github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/nats-io/nats.go/jetstream"
@@ -95,12 +94,12 @@ func (h *SurveyResponseInviteHandler) maybeSendInvite(
 
 	returnURL := fmt.Sprintf("%s/surveys/%s", strings.TrimRight(h.selfServeBaseURL, "/"), url.PathEscape(surveyID))
 	name := strings.TrimSpace(displayName)
-	req := inviteapi.SendInviteRequest{
-		Recipient: &inviteapi.Recipient{
+	req := domain.InviteRequest{
+		Recipient: domain.InviteRecipient{
 			Email: email,
 			Name:  name,
 		},
-		Resource: &inviteapi.Resource{
+		Resource: domain.InviteResource{
 			UID:  surveyID,
 			Name: surveyName,
 			Type: surveyconstants.ResourceTypeSurvey,

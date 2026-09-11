@@ -10,12 +10,18 @@ import (
 	"time"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
+	infraNATS "github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/nats"
 	"github.com/nats-io/nats.go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
+
+// tracer is safe to initialize at package level — otel.Tracer() returns a
+// delegating tracer that forwards to whatever TracerProvider is registered at
+// call time, so otel.SetTracerProvider() updates it regardless of init order.
+var tracer = otel.Tracer("github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/idmapper")
 
 const (
 	// NATS subject for v1-sync-helper lookup
@@ -36,6 +42,9 @@ type NATSMapper struct {
 	conn    *nats.Conn
 	timeout time.Duration
 }
+
+// Compile-time assertion: *NATSMapper must satisfy domain.IDMapper.
+var _ domain.IDMapper = (*NATSMapper)(nil)
 
 // NewNATSMapper creates a new NATS-based ID mapper
 func NewNATSMapper(cfg Config) (*NATSMapper, error) {
@@ -149,7 +158,7 @@ func (m *NATSMapper) lookup(ctx context.Context, key string) (string, error) {
 	natsMsg := nats.NewMsg(lookupSubject)
 	natsMsg.Header = make(nats.Header)
 	natsMsg.Data = []byte(key)
-	otel.GetTextMapPropagator().Inject(ctx, natsHeaderCarrier(natsMsg.Header))
+	otel.GetTextMapPropagator().Inject(ctx, infraNATS.NatsHeaderCarrier(natsMsg.Header))
 
 	msg, err := m.conn.RequestMsgWithContext(ctx, natsMsg)
 	if err != nil {

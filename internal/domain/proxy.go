@@ -9,7 +9,8 @@ import (
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/models/itx"
 )
 
-// SurveyClient defines the interface for survey management operations in ITX
+// SurveyClient defines the interface for survey lifecycle and send operations in ITX.
+// Callers that only manage surveys or send campaigns should declare this narrower type.
 type SurveyClient interface {
 	// ScheduleSurvey schedules a new survey in ITX
 	ScheduleSurvey(ctx context.Context, req *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error)
@@ -41,6 +42,16 @@ type SurveyClient interface {
 	// DeleteRecipientGroup removes a recipient group from survey and recalculates statistics in ITX
 	DeleteRecipientGroup(ctx context.Context, surveyID string, committeeID *string, projectID *string, foundationID *string) error
 
+	// GetSurveyResults retrieves aggregated survey results from ITX
+	GetSurveyResults(ctx context.Context, surveyID string) (*itx.SurveyResults, error)
+
+	// ValidateEmail validates email template body and subject in ITX
+	ValidateEmail(ctx context.Context, req *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error)
+}
+
+// ExclusionClient defines the interface for survey exclusion operations in ITX.
+// Callers that only manage exclusions should declare this narrower type.
+type ExclusionClient interface {
 	// CreateExclusion creates a survey or global exclusion in ITX
 	CreateExclusion(ctx context.Context, req *itx.ExclusionRequest) (*itx.Exclusion, error)
 
@@ -52,15 +63,10 @@ type SurveyClient interface {
 
 	// DeleteExclusionByID deletes an exclusion by its ID from ITX
 	DeleteExclusionByID(ctx context.Context, exclusionID string) error
-
-	// GetSurveyResults retrieves aggregated survey results from ITX
-	GetSurveyResults(ctx context.Context, surveyID string) (*itx.SurveyResults, error)
-
-	// ValidateEmail validates email template body and subject in ITX
-	ValidateEmail(ctx context.Context, req *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error)
 }
 
-// SurveyResponseClient defines the interface for survey response operations in ITX
+// SurveyResponseClient defines the interface for survey response operations in ITX.
+// Callers that only read or mutate per-recipient responses should declare this narrower type.
 type SurveyResponseClient interface {
 	// CreateResponse submits a survey response in ITX
 	CreateResponse(ctx context.Context, req *itx.CreateResponseRequest) error
@@ -81,8 +87,11 @@ type SurveyResponseClient interface {
 	ListResponses(ctx context.Context, surveyID string, params *itx.ListResponsesParams) (*itx.PaginatedSurveyResponses, error)
 }
 
-// ITXProxyClient combines both survey and survey response operations
+// ITXProxyClient is the composite adapter interface implemented by the concrete proxy.Client.
+// Prefer injecting the narrower sub-interfaces (SurveyClient, ExclusionClient,
+// SurveyResponseClient) wherever possible so callers and tests only see the methods they use.
 type ITXProxyClient interface {
 	SurveyClient
+	ExclusionClient
 	SurveyResponseClient
 }
