@@ -30,7 +30,6 @@ const (
 	warn  = "warn"
 	err   = "error"
 	info  = "info"
-
 )
 
 type contextHandler struct {
@@ -110,4 +109,3 @@ func InitStructureLogConfig() slog.Handler {
 
 	return h
 }
-
