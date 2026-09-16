@@ -112,6 +112,3 @@ jetstream/
 *.backup
 *.bak
 
-# IDE/agent tooling
-.cursor/
-.claude/
