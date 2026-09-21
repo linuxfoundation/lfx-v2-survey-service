@@ -29,10 +29,26 @@ func NewInviteSender(nc Requester, logger *slog.Logger) *NATSInviteSender {
 	return &NATSInviteSender{nc: nc, logger: logger}
 }
 
-// SendInvite sends an LFID invite request to the invite service over NATS and
-// returns the invite metadata from the reply.
-func (s *NATSInviteSender) SendInvite(ctx context.Context, req inviteapi.SendInviteRequest) (*domain.InviteResult, error) {
-	payload, err := json.Marshal(req)
+// SendInvite translates a domain.InviteRequest into the invite-service wire format,
+// sends it via NATS request/reply, and returns the invite metadata from the reply.
+// Wire-format concerns (field names, JSON tags, inviteapi types) are confined to this adapter.
+func (s *NATSInviteSender) SendInvite(ctx context.Context, req domain.InviteRequest) (*domain.InviteResult, error) {
+	wire := inviteapi.SendInviteRequest{
+		Recipient: &inviteapi.Recipient{
+			Email: req.Recipient.Email,
+			Name:  req.Recipient.Name,
+		},
+		Resource: &inviteapi.Resource{
+			UID:  req.Resource.UID,
+			Name: req.Resource.Name,
+			Type: req.Resource.Type,
+		},
+		Role:           req.Role,
+		ReturnURL:      req.ReturnURL,
+		ExpirationDays: req.ExpirationDays,
+	}
+
+	payload, err := json.Marshal(wire)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal invite request: %w", err)
 	}

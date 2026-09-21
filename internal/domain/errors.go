@@ -36,15 +36,6 @@ func (e *DomainError) Unwrap() error {
 	return e.Err
 }
 
-// GetErrorType returns the ErrorType from a domain error or defaults to Internal
-func GetErrorType(err error) ErrorType {
-	var domainErr *DomainError
-	if errors.As(err, &domainErr) {
-		return domainErr.Type
-	}
-	return ErrorTypeInternal // default fallback
-}
-
 // NewValidationError creates a validation error (400 Bad Request)
 func NewValidationError(message string, err ...error) *DomainError {
 	return &DomainError{

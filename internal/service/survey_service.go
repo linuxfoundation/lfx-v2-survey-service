@@ -6,43 +6,75 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"strings"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/concurrent"
+	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/models/itx"
 )
 
 type SurveyService struct {
-	auth     domain.Authenticator
-	proxy    domain.ITXProxyClient
-	idMapper domain.IDMapper
-	logger   *slog.Logger
+	surveyClient    domain.SurveyClient
+	exclusionClient domain.ExclusionClient
+	responseClient  domain.SurveyResponseClient
+	idMapper        domain.IDMapper
+	logger          *slog.Logger
 }
 
+// NewSurveyService wires the service with the three focused sub-interfaces.
+// In production, pass the same *proxy.Client for all three — it satisfies
+// domain.ITXProxyClient, which embeds all three. In tests, supply a narrower
+// mock for the sub-interface under test and a no-op stub for the others.
+//
+// Authentication is NOT a service concern: it is handled by JWTAuth in the
+// Goa adapter layer, which stores the principal in context before any service
+// method is invoked. Service methods read the principal via
+// ctx.Value(constants.PrincipalContextID).
 func NewSurveyService(
-	auth domain.Authenticator,
-	proxy domain.ITXProxyClient,
+	surveyClient domain.SurveyClient,
+	exclusionClient domain.ExclusionClient,
+	responseClient domain.SurveyResponseClient,
 	idMapper domain.IDMapper,
 	logger *slog.Logger,
 ) *SurveyService {
 	return &SurveyService{
-		auth:     auth,
-		proxy:    proxy,
-		idMapper: idMapper,
-		logger:   logger,
+		surveyClient:    surveyClient,
+		exclusionClient: exclusionClient,
+		responseClient:  responseClient,
+		idMapper:        idMapper,
+		logger:          logger,
 	}
+}
+
+// ServiceReady returns an error if any required dependency was not injected.
+// Call this during startup (before serving traffic) to fail fast on misconfiguration
+// rather than panicking at the first request.
+func (s *SurveyService) ServiceReady() error {
+	if s.surveyClient == nil {
+		return fmt.Errorf("SurveyService: surveyClient (SurveyClient) is nil")
+	}
+	if s.exclusionClient == nil {
+		return fmt.Errorf("SurveyService: exclusionClient (ExclusionClient) is nil")
+	}
+	if s.responseClient == nil {
+		return fmt.Errorf("SurveyService: responseClient (SurveyResponseClient) is nil")
+	}
+	if s.idMapper == nil {
+		return fmt.Errorf("SurveyService: idMapper (IDMapper) is nil")
+	}
+	if s.logger == nil {
+		return fmt.Errorf("SurveyService: logger is nil")
+	}
+	return nil
 }
 
 // ScheduleSurvey implements survey.Service.ScheduleSurvey
 func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSurveyPayload) (*survey.SurveyScheduleResult, error) {
-	// Parse JWT token to get principal (or use mock principal if configured)
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return nil, err
-	}
+	principal := principalFromCtx(ctx)
 
 	s.logger.InfoContext(ctx, "scheduling survey",
 		"principal", principal,
@@ -90,7 +122,7 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.ScheduleSurvey(ctx, itxRequest)
+	itxResponse, err := s.surveyClient.ScheduleSurvey(ctx, itxRequest)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -114,11 +146,7 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 
 // GetSurvey implements survey.Service.GetSurvey
 func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayload) (*survey.SurveyScheduleResult, error) {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return nil, err
-	}
+	principal := principalFromCtx(ctx)
 
 	s.logger.InfoContext(ctx, "getting survey",
 		"principal", principal,
@@ -175,7 +203,7 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.GetSurvey(ctx, p.SurveyUID, queryParams)
+	itxResponse, err := s.surveyClient.GetSurvey(ctx, p.SurveyUID, queryParams)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -198,11 +226,7 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 
 // UpdateSurvey implements survey.Service.UpdateSurvey
 func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurveyPayload) (*survey.SurveyScheduleResult, error) {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return nil, err
-	}
+	principal := principalFromCtx(ctx)
 
 	s.logger.InfoContext(ctx, "updating survey",
 		"principal", principal,
@@ -238,7 +262,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.UpdateSurvey(ctx, p.SurveyUID, itxRequest)
+	itxResponse, err := s.surveyClient.UpdateSurvey(ctx, p.SurveyUID, itxRequest)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -261,11 +285,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 
 // DeleteSurvey implements survey.Service.DeleteSurvey
 func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurveyPayload) error {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return err
-	}
+	principal := principalFromCtx(ctx)
 
 	s.logger.InfoContext(ctx, "deleting survey",
 		"principal", principal,
@@ -273,7 +293,7 @@ func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurvey
 	)
 
 	// Call ITX API
-	err = s.proxy.DeleteSurvey(ctx, p.SurveyUID)
+	err := s.surveyClient.DeleteSurvey(ctx, p.SurveyUID)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -287,11 +307,7 @@ func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurvey
 
 // BulkResendSurvey implements survey.Service.BulkResendSurvey
 func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkResendSurveyPayload) error {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return err
-	}
+	principal := principalFromCtx(ctx)
 
 	s.logger.InfoContext(ctx, "bulk resending survey",
 		"principal", principal,
@@ -305,7 +321,7 @@ func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkRese
 	}
 
 	// Call ITX API
-	err = s.proxy.BulkResendSurvey(ctx, p.SurveyUID, itxRequest)
+	err := s.surveyClient.BulkResendSurvey(ctx, p.SurveyUID, itxRequest)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -319,11 +335,7 @@ func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkRese
 
 // PreviewSendSurvey implements survey.Service.PreviewSendSurvey
 func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.PreviewSendSurveyPayload) (*survey.PreviewSendResult, error) {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return nil, err
-	}
+	principal := principalFromCtx(ctx)
 
 	s.logger.InfoContext(ctx, "previewing survey send",
 		"principal", principal,
@@ -338,7 +350,7 @@ func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.Preview
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.PreviewSend(ctx, p.SurveyUID, committeeV1)
+	itxResponse, err := s.surveyClient.PreviewSend(ctx, p.SurveyUID, committeeV1)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -362,11 +374,7 @@ func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.Preview
 
 // SendMissingRecipients implements survey.Service.SendMissingRecipients
 func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.SendMissingRecipientsPayload) error {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return err
-	}
+	principal := principalFromCtx(ctx)
 
 	s.logger.InfoContext(ctx, "sending survey to missing recipients",
 		"principal", principal,
@@ -381,7 +389,7 @@ func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.Sen
 	}
 
 	// Call ITX API
-	err = s.proxy.SendMissingRecipients(ctx, p.SurveyUID, committeeV1)
+	err = s.surveyClient.SendMissingRecipients(ctx, p.SurveyUID, committeeV1)
 	if err != nil {
 		return mapDomainError(err)
 	}
@@ -393,262 +401,9 @@ func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.Sen
 	return nil
 }
 
-// DeleteSurveyResponse removes a recipient from survey and recalculates statistics
-func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.DeleteSurveyResponsePayload) error {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return err
-	}
-
-	s.logger.InfoContext(ctx, "deleting survey response",
-		"principal", principal,
-		"survey_uid", p.SurveyUID,
-		"response_id", p.ResponseID,
-	)
-
-	// Call ITX API
-	err = s.proxy.DeleteResponse(ctx, p.SurveyUID, p.ResponseID)
-	if err != nil {
-		return mapDomainError(err)
-	}
-
-	s.logger.InfoContext(ctx, "survey response deleted successfully",
-		"survey_uid", p.SurveyUID,
-		"response_id", p.ResponseID,
-	)
-
-	return nil
-}
-
-// ResendSurveyResponse resends the survey email to a specific user
-func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.ResendSurveyResponsePayload) error {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return err
-	}
-
-	s.logger.InfoContext(ctx, "resending survey response",
-		"principal", principal,
-		"survey_uid", p.SurveyUID,
-		"response_id", p.ResponseID,
-	)
-
-	// Call ITX API
-	err = s.proxy.ResendResponse(ctx, p.SurveyUID, p.ResponseID)
-	if err != nil {
-		return mapDomainError(err)
-	}
-
-	s.logger.InfoContext(ctx, "survey response resent successfully",
-		"survey_uid", p.SurveyUID,
-		"response_id", p.ResponseID,
-	)
-
-	return nil
-}
-
-// DeleteRecipientGroup removes a recipient group from survey and recalculates statistics
-func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.DeleteRecipientGroupPayload) error {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return err
-	}
-
-	s.logger.InfoContext(ctx, "deleting recipient group from survey",
-		"principal", principal,
-		"survey_uid", p.SurveyUID,
-		"committee_uid", p.CommitteeUID,
-		"project_uid", p.ProjectUID,
-		"foundation_id", p.FoundationID,
-	)
-
-	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
-	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
-	if err != nil {
-		return mapDomainError(err)
-	}
-
-	// Map project UID from V2 to V1 if provided (ITX expects V1 SFID)
-	projectV1, err := s.mapOptionalProjectV2ToV1(ctx, p.ProjectUID)
-	if err != nil {
-		return mapDomainError(err)
-	}
-
-	// Call ITX API
-	err = s.proxy.DeleteRecipientGroup(ctx, p.SurveyUID, committeeV1, projectV1, p.FoundationID)
-	if err != nil {
-		return mapDomainError(err)
-	}
-
-	s.logger.InfoContext(ctx, "recipient group deleted successfully",
-		"survey_uid", p.SurveyUID,
-	)
-
-	return nil
-}
-
-// CreateExclusion creates a survey or global exclusion
-func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExclusionPayload) (*survey.ExclusionResult, error) {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return nil, err
-	}
-
-	s.logger.InfoContext(ctx, "creating exclusion",
-		"principal", principal,
-		"email", p.Email,
-		"user_id", p.UserID,
-	)
-
-	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
-	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
-	if err != nil {
-		return nil, mapDomainError(err)
-	}
-
-	// Build ITX request
-	itxRequest := &itx.ExclusionRequest{
-		Email:           p.Email,
-		UserID:          p.UserID,
-		SurveyID:        p.SurveyUID,
-		CommitteeID:     committeeV1,
-		GlobalExclusion: p.GlobalExclusion,
-	}
-
-	// Call ITX API
-	itxResponse, err := s.proxy.CreateExclusion(ctx, itxRequest)
-	if err != nil {
-		return nil, mapDomainError(err)
-	}
-
-	// Map response back to goa result (including V1 to V2 ID mapping)
-	result, err := s.mapExclusionToResult(ctx, itxResponse)
-	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map exclusion response",
-			"error", err,
-		)
-		return nil, mapDomainError(err)
-	}
-
-	s.logger.InfoContext(ctx, "exclusion created successfully",
-		"exclusion_uid", result.UID,
-	)
-
-	return result, nil
-}
-
-// DeleteExclusion deletes a survey or global exclusion
-func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExclusionPayload) error {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return err
-	}
-
-	s.logger.InfoContext(ctx, "deleting exclusion",
-		"principal", principal,
-		"email", p.Email,
-		"user_id", p.UserID,
-	)
-
-	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
-	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
-	if err != nil {
-		return mapDomainError(err)
-	}
-
-	// Build ITX request
-	itxRequest := &itx.ExclusionRequest{
-		Email:           p.Email,
-		UserID:          p.UserID,
-		SurveyID:        p.SurveyUID,
-		CommitteeID:     committeeV1,
-		GlobalExclusion: p.GlobalExclusion,
-	}
-
-	// Call ITX API
-	err = s.proxy.DeleteExclusion(ctx, itxRequest)
-	if err != nil {
-		return mapDomainError(err)
-	}
-
-	s.logger.InfoContext(ctx, "exclusion deleted successfully")
-
-	return nil
-}
-
-// GetExclusion retrieves an exclusion by ID
-func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusionPayload) (*survey.ExtendedExclusionResult, error) {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return nil, err
-	}
-
-	s.logger.InfoContext(ctx, "getting exclusion",
-		"principal", principal,
-		"exclusion_id", p.ExclusionID,
-	)
-
-	// Call ITX API
-	itxResponse, err := s.proxy.GetExclusion(ctx, p.ExclusionID)
-	if err != nil {
-		return nil, mapDomainError(err)
-	}
-
-	// Map response back to goa result (including V1 to V2 ID mapping)
-	result, err := s.mapExtendedExclusionToResult(ctx, itxResponse)
-	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map extended exclusion response",
-			"error", err,
-		)
-		return nil, mapDomainError(err)
-	}
-
-	s.logger.InfoContext(ctx, "exclusion retrieved successfully",
-		"exclusion_uid", result.UID,
-	)
-
-	return result, nil
-}
-
-// DeleteExclusionByID deletes an exclusion by its ID
-func (s *SurveyService) DeleteExclusionByID(ctx context.Context, p *survey.DeleteExclusionByIDPayload) error {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return err
-	}
-
-	s.logger.InfoContext(ctx, "deleting exclusion by ID",
-		"principal", principal,
-		"exclusion_id", p.ExclusionID,
-	)
-
-	// Call ITX API
-	err = s.proxy.DeleteExclusionByID(ctx, p.ExclusionID)
-	if err != nil {
-		return mapDomainError(err)
-	}
-
-	s.logger.InfoContext(ctx, "exclusion deleted successfully",
-		"exclusion_id", p.ExclusionID,
-	)
-
-	return nil
-}
-
 // ValidateEmail validates email template body and subject
 func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEmailPayload) (*survey.ValidateEmailResult, error) {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return nil, err
-	}
+	principal := principalFromCtx(ctx)
 
 	s.logger.InfoContext(ctx, "validating email template",
 		"principal", principal,
@@ -661,7 +416,7 @@ func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEma
 	}
 
 	// Call ITX API
-	itxResponse, err := s.proxy.ValidateEmail(ctx, itxRequest)
+	itxResponse, err := s.surveyClient.ValidateEmail(ctx, itxRequest)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -677,107 +432,16 @@ func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEma
 	return result, nil
 }
 
-// ListSurveyResponses returns a paginated list of individual per-recipient responses for a survey
-func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListSurveyResponsesPayload) (*survey.SurveyResponsesPage, error) {
-	// Parse JWT token to get principal
-	principal, err := s.parsePrincipal(ctx, p.Token)
-	if err != nil {
-		return nil, err
-	}
+// ──────────────────────────────────────────────────────────────────────────────
+// Shared private helpers (used across multiple service files)
+// ──────────────────────────────────────────────────────────────────────────────
 
-	s.logger.InfoContext(ctx, "listing survey responses",
-		"principal", principal,
-		"survey_uid", p.SurveyUID,
-		"project_uid", p.ProjectUID,
-		"project_uids", p.ProjectUids,
-		"per_page", p.PerPage,
-	)
-
-	// project_uid and project_uids are mutually exclusive — reject early.
-	if p.ProjectUID != nil && *p.ProjectUID != "" &&
-		p.ProjectUids != nil && *p.ProjectUids != "" {
-		return nil, mapDomainError(domain.NewValidationError(
-			"project_uid and project_uids are mutually exclusive"))
-	}
-
-	// Build ITX params with optional V2→V1 ID mapping for project filters
-	params := &itx.ListResponsesParams{
-		PageToken: p.PageToken,
-		PerPage:   p.PerPage,
-	}
-
-	if p.ProjectUID != nil && *p.ProjectUID != "" {
-		projectV1, err := s.idMapper.MapProjectV2ToV1(ctx, *p.ProjectUID)
-		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map project_uid to V1",
-				"project_uid", *p.ProjectUID,
-				"error", err,
-			)
-			return nil, mapDomainError(err)
-		}
-		params.ProjectID = &projectV1
-		s.logger.DebugContext(ctx, "mapped project_uid for responses filter",
-			"project_v2_uid", *p.ProjectUID,
-			"project_v1_sfid", projectV1,
-		)
-	}
-
-	if p.ProjectUids != nil && *p.ProjectUids != "" {
-		projectV1IDs, err := s.mapProjectUIDsV2ToV1(ctx, *p.ProjectUids)
-		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map project_uids to V1",
-				"project_uids", *p.ProjectUids,
-				"error", err,
-			)
-			return nil, mapDomainError(err)
-		}
-		params.ProjectIDs = &projectV1IDs
-		s.logger.DebugContext(ctx, "mapped project_uids for responses filter",
-			"project_v2_uids", *p.ProjectUids,
-			"project_v1_sfids", projectV1IDs,
-		)
-	}
-
-	// Call ITX API
-	itxResponse, err := s.proxy.ListResponses(ctx, p.SurveyUID, params)
-	if err != nil {
-		return nil, mapDomainError(err)
-	}
-
-	// Map response back to Goa result (V1→V2 ID mapping per response)
-	result, err := s.mapITXResponsesToPage(ctx, itxResponse)
-	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map ITX responses",
-			"error", err,
-		)
-		return nil, mapDomainError(err)
-	}
-
-	s.logger.InfoContext(ctx, "survey responses listed successfully",
-		"survey_uid", p.SurveyUID,
-		"count", len(result.Data),
-	)
-
-	return result, nil
-}
-
-// Helper functions
-
-// parsePrincipal extracts and validates the JWT token, returning the principal
-func (s *SurveyService) parsePrincipal(ctx context.Context, token *string) (string, error) {
-	t := ""
-	if token != nil {
-		t = *token
-	}
-	principal, err := s.auth.ParsePrincipal(ctx, t, s.logger)
-	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to parse JWT", "error", err)
-		return "", &survey.UnauthorizedError{
-			Code:    "401",
-			Message: "Unauthorized: " + err.Error(),
-		}
-	}
-	return principal, nil
+// principalFromCtx reads the authenticated principal that JWTAuth stored in context.
+// If no principal is present (e.g. in tests) an empty string is returned; the value
+// is used only for structured logging, not for authorization decisions.
+func principalFromCtx(ctx context.Context) string {
+	principal, _ := ctx.Value(constants.PrincipalContextID).(string)
+	return principal
 }
 
 // mapOptionalCommitteeV2ToV1 maps an optional committee UID from V2 to V1 with logging
@@ -875,6 +539,49 @@ func (s *SurveyService) mapProjectUIDsV2ToV1(ctx context.Context, projectUIDs st
 	// Join back into comma-delimited string
 	return strings.Join(v1IDs, ","), nil
 }
+
+// mapDomainError converts a domain error into the appropriate Goa error type.
+func mapDomainError(err error) error {
+	var domainErr *domain.DomainError
+	if !errors.As(err, &domainErr) {
+		return &survey.InternalServerError{
+			Code:    "500",
+			Message: "Internal server error",
+		}
+	}
+
+	switch domainErr.Type {
+	case domain.ErrorTypeValidation:
+		return &survey.BadRequestError{
+			Code:    "400",
+			Message: domainErr.Message,
+		}
+	case domain.ErrorTypeNotFound:
+		return &survey.NotFoundError{
+			Code:    "404",
+			Message: domainErr.Message,
+		}
+	case domain.ErrorTypeConflict:
+		return &survey.ConflictError{
+			Code:    "409",
+			Message: domainErr.Message,
+		}
+	case domain.ErrorTypeUnavailable:
+		return &survey.ServiceUnavailableError{
+			Code:    "503",
+			Message: domainErr.Message,
+		}
+	default:
+		return &survey.InternalServerError{
+			Code:    "500",
+			Message: domainErr.Message,
+		}
+	}
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Survey response mappers (used by ScheduleSurvey, GetSurvey, UpdateSurvey)
+// ──────────────────────────────────────────────────────────────────────────────
 
 // mapITXResponseToResult maps ITX response to Goa result with V1→V2 ID mapping
 func (s *SurveyService) mapITXResponseToResult(ctx context.Context, itxResponse *itx.SurveyScheduleResponse) (*survey.SurveyScheduleResult, error) {
@@ -1143,258 +850,4 @@ func mapITXPreviewRecipientsToResult(recipients []itx.ITXPreviewRecipient) []*su
 		})
 	}
 	return result
-}
-
-func (s *SurveyService) mapExclusionToResult(ctx context.Context, itxExclusion *itx.Exclusion) (*survey.ExclusionResult, error) {
-	// Map committee ID from V1 to V2 if present
-	var committeeV2 *string
-	if itxExclusion.CommitteeID != nil && *itxExclusion.CommitteeID != "" {
-		mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, *itxExclusion.CommitteeID)
-		if err != nil {
-			s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2, using V1 ID",
-				"committee_v1_sfid", *itxExclusion.CommitteeID,
-				"error", err,
-			)
-			// Fall back to V1 ID if mapping fails
-			committeeV2 = itxExclusion.CommitteeID
-		} else {
-			committeeV2 = &mapped
-		}
-	}
-
-	return &survey.ExclusionResult{
-		UID:             itxExclusion.ID,
-		Email:           itxExclusion.Email,
-		SurveyUID:       itxExclusion.SurveyID,
-		CommitteeUID:    committeeV2,
-		GlobalExclusion: itxExclusion.GlobalExclusion,
-		UserID:          itxExclusion.UserID,
-	}, nil
-}
-
-func (s *SurveyService) mapExtendedExclusionToResult(ctx context.Context, itxExclusion *itx.ExtendedExclusion) (*survey.ExtendedExclusionResult, error) {
-	// Map committee ID from V1 to V2 if present
-	var committeeV2 *string
-	if itxExclusion.CommitteeID != nil && *itxExclusion.CommitteeID != "" {
-		mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, *itxExclusion.CommitteeID)
-		if err != nil {
-			s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2, using V1 ID",
-				"committee_v1_sfid", *itxExclusion.CommitteeID,
-				"error", err,
-			)
-			// Fall back to V1 ID if mapping fails
-			committeeV2 = itxExclusion.CommitteeID
-		} else {
-			committeeV2 = &mapped
-		}
-	}
-
-	result := &survey.ExtendedExclusionResult{
-		UID:             itxExclusion.ID,
-		Email:           itxExclusion.Email,
-		SurveyUID:       itxExclusion.SurveyID,
-		CommitteeUID:    committeeV2,
-		GlobalExclusion: itxExclusion.GlobalExclusion,
-		UserID:          itxExclusion.UserID,
-	}
-
-	if itxExclusion.User != nil {
-		emails := make([]*survey.UserEmail, 0, len(itxExclusion.User.Emails))
-		for _, e := range itxExclusion.User.Emails {
-			emails = append(emails, &survey.UserEmail{
-				ID:           e.ID,
-				EmailAddress: e.EmailAddress,
-				IsPrimary:    e.IsPrimary,
-			})
-		}
-
-		result.User = &survey.ExclusionUser{
-			ID:       itxExclusion.User.ID,
-			Username: itxExclusion.User.Username,
-			Emails:   emails,
-		}
-	}
-
-	return result, nil
-}
-
-// mapITXResponsesToPage maps ITX paginated responses to a Goa result with V1→V2 ID mapping.
-// Uses a worker pool to run per-item NATS ID-mapper lookups concurrently, matching the
-// pattern used by mapSurveyCommitteesToResult and mapLFXProjectsToResult.
-func (s *SurveyService) mapITXResponsesToPage(ctx context.Context, itxResponse *itx.PaginatedSurveyResponses) (*survey.SurveyResponsesPage, error) {
-	data := make([]*survey.SurveyResponseItem, len(itxResponse.Data))
-
-	pool := concurrent.NewWorkerPool(5)
-	mappingFunctions := make([]func() error, len(itxResponse.Data))
-	for i, r := range itxResponse.Data {
-		i, r := i, r
-		mappingFunctions[i] = func() error {
-			item, err := s.mapITXRecipientResponseToItem(ctx, r)
-			if err != nil {
-				return err
-			}
-			data[i] = item
-			return nil
-		}
-	}
-
-	// pool.Run blocks until all functions complete; data[i] writes are index-disjoint and safe.
-	if err := pool.Run(ctx, mappingFunctions...); err != nil {
-		return nil, err
-	}
-
-	return &survey.SurveyResponsesPage{
-		Data: data,
-		Meta: &survey.SurveyResponsePageMeta{
-			PageToken:    &itxResponse.Meta.PageToken,
-			TotalPages:   &itxResponse.Meta.TotalPages,
-			TotalResults: &itxResponse.Meta.TotalResults,
-			PerPage:      &itxResponse.Meta.PerPage,
-		},
-	}, nil
-}
-
-// mapITXRecipientResponseToItem maps a single ITX SurveyRecipientResponse to a Goa SurveyResponseItem
-func (s *SurveyService) mapITXRecipientResponseToItem(ctx context.Context, r itx.SurveyRecipientResponse) (*survey.SurveyResponseItem, error) {
-	// Map project V1 ID → V2 UID if present; fall back to original on failure
-	var projectResult *survey.SurveyResponseProj
-	if r.Project != nil {
-		var uid *string
-		name := r.Project.Name
-		if r.Project.ID != nil && *r.Project.ID != "" {
-			mapped, err := s.idMapper.MapProjectV1ToV2(ctx, *r.Project.ID)
-			if err != nil {
-				s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2 for response, using V1 ID",
-					"project_v1_sfid", *r.Project.ID,
-					"error", err,
-				)
-				uid = r.Project.ID
-			} else {
-				uid = &mapped
-			}
-		}
-		projectResult = &survey.SurveyResponseProj{
-			UID:  uid,
-			Name: name,
-		}
-	}
-
-	// Map committee V1 ID → V2 UID if present; fall back to original on failure
-	var committeeUID *string
-	if r.CommitteeID != nil && *r.CommitteeID != "" {
-		mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, *r.CommitteeID)
-		if err != nil {
-			s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2 for response, using V1 ID",
-				"committee_v1_sfid", *r.CommitteeID,
-				"error", err,
-			)
-			committeeUID = r.CommitteeID
-		} else {
-			committeeUID = &mapped
-		}
-	}
-
-	// Map organization (no ID mapping needed — org IDs are not V1 SFIDs)
-	var orgResult *survey.SurveyResponseOrg
-	if r.Organization != nil {
-		orgResult = &survey.SurveyResponseOrg{
-			ID:   r.Organization.ID,
-			Name: r.Organization.Name,
-		}
-	}
-
-	// Map SurveyMonkey question answers — always an empty slice, never nil
-	answers := make([]*survey.SurveyQuestionAnswer, 0, len(r.SurveyMonkeyQuestionAnswers))
-	for _, qa := range r.SurveyMonkeyQuestionAnswers {
-		choices := make([]*survey.SurveyAnswerChoice, 0, len(qa.Answers))
-		for _, a := range qa.Answers {
-			choices = append(choices, &survey.SurveyAnswerChoice{
-				ChoiceID: a.ChoiceID,
-				Text:     a.Text,
-			})
-		}
-		answers = append(answers, &survey.SurveyQuestionAnswer{
-			QuestionID:      qa.QuestionID,
-			QuestionText:    qa.QuestionText,
-			QuestionFamily:  qa.QuestionFamily,
-			QuestionSubtype: qa.QuestionSubtype,
-			Answers:         choices,
-		})
-	}
-
-	return &survey.SurveyResponseItem{
-		ID:                            r.ID,
-		SurveyUID:                     r.SurveyID,
-		SurveyLink:                    r.SurveyLink,
-		CommitteeUID:                  committeeUID,
-		Email:                         r.Email,
-		FirstName:                     r.FirstName,
-		LastName:                      r.LastName,
-		Username:                      r.Username,
-		Role:                          r.Role,
-		JobTitle:                      r.JobTitle,
-		MembershipTier:                r.MembershipTier,
-		VotingStatus:                  r.VotingStatus,
-		Organization:                  orgResult,
-		Project:                       projectResult,
-		ResponseStatus:                r.ResponseStatus,
-		CreatedAt:                     r.CreatedAt,
-		ResponseDatetime:              r.ResponseDatetime,
-		LastReceivedTime:              r.LastReceivedTime,
-		NumAutomatedRemindersReceived: r.NumAutomatedRemindersReceived,
-		NpsValue:                      r.NPSValue,
-		SurveyMonkeyRespondentID:      r.SurveyMonkeyRespondentID,
-		SurveyMonkeyQuestionAnswers:   answers,
-		// SES tracking
-		SesMessageID:            r.SESMessageID,
-		SesDeliverySuccessful:   r.SESDeliverySuccessful,
-		SesBounceType:           r.SESBounceType,
-		SesBounceSubtype:        r.SESBounceSubtype,
-		SesBounceDiagnosticCode: r.SESBounceDiagnosticCode,
-		SesComplaintExists:      r.SESComplaintExists,
-		SesComplaintType:        r.SESComplaintType,
-		SesComplaintDate:        r.SESComplaintDate,
-		SesEmailOpened:          r.SESEmailOpened,
-		SesEmailOpenedLastTime:  r.SESEmailOpenedLastTime,
-		SesLinkClicked:          r.SESLinkClicked,
-		SesLinkClickedLastTime:  r.SESLinkClickedLastTime,
-	}, nil
-}
-
-func mapDomainError(err error) error {
-	var domainErr *domain.DomainError
-	if !errors.As(err, &domainErr) {
-		return &survey.InternalServerError{
-			Code:    "500",
-			Message: "Internal server error",
-		}
-	}
-
-	switch domainErr.Type {
-	case domain.ErrorTypeValidation:
-		return &survey.BadRequestError{
-			Code:    "400",
-			Message: domainErr.Message,
-		}
-	case domain.ErrorTypeNotFound:
-		return &survey.NotFoundError{
-			Code:    "404",
-			Message: domainErr.Message,
-		}
-	case domain.ErrorTypeConflict:
-		return &survey.ConflictError{
-			Code:    "409",
-			Message: domainErr.Message,
-		}
-	case domain.ErrorTypeUnavailable:
-		return &survey.ServiceUnavailableError{
-			Code:    "503",
-			Message: domainErr.Message,
-		}
-	default:
-		return &survey.InternalServerError{
-			Code:    "500",
-			Message: domainErr.Message,
-		}
-	}
 }

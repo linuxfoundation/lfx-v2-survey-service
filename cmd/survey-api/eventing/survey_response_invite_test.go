@@ -12,7 +12,6 @@ import (
 	"time"
 
 	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
-	inviteapi "github.com/linuxfoundation/lfx-v2-invite-service/pkg/api"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	surveyconstants "github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/nats-io/nats.go/jetstream"
@@ -35,10 +34,10 @@ type stubSurveyInviteSender struct {
 	result *domain.InviteResult
 	err    error
 	called bool
-	last   inviteapi.SendInviteRequest
+	last   domain.InviteRequest
 }
 
-func (s *stubSurveyInviteSender) SendInvite(_ context.Context, req inviteapi.SendInviteRequest) (*domain.InviteResult, error) {
+func (s *stubSurveyInviteSender) SendInvite(_ context.Context, req domain.InviteRequest) (*domain.InviteResult, error) {
 	s.called = true
 	s.last = req
 	if s.err != nil {

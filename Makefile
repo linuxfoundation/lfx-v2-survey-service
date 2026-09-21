@@ -46,7 +46,7 @@ deps:
 	@echo "==> Installing dependencies..."
 	@command -v goa >/dev/null 2>&1 || { \
 		echo "==> Installing goa CLI..."; \
-		go install goa.design/goa/v3/cmd/goa@latest; \
+		go install goa.design/goa/v3/cmd/goa@v3.24.1; \
 	}
 	@command -v golangci-lint >/dev/null 2>&1 || { \
 		echo "==> Installing golangci-lint..."; \

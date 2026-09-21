@@ -7,19 +7,26 @@ import (
 	"context"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
+	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/service"
+	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"goa.design/goa/v3/security"
 )
 
 // SurveyAPI implements the survey.Service and survey.Auther interfaces
 type SurveyAPI struct {
 	surveyService *service.SurveyService
+	auth          domain.Authenticator
 }
 
-// NewSurveyAPI creates a new SurveyAPI instance
-func NewSurveyAPI(surveyService *service.SurveyService) *SurveyAPI {
+// NewSurveyAPI creates a new SurveyAPI instance.
+// auth is wired here rather than into SurveyService so that validation is
+// concentrated at the single Goa JWTAuth seam instead of being sprayed across
+// every service method.
+func NewSurveyAPI(surveyService *service.SurveyService, auth domain.Authenticator) *SurveyAPI {
 	return &SurveyAPI{
 		surveyService: surveyService,
+		auth:          auth,
 	}
 }
 
@@ -103,10 +110,18 @@ func (api *SurveyAPI) ValidateEmail(ctx context.Context, p *survey.ValidateEmail
 	return api.surveyService.ValidateEmail(ctx, p)
 }
 
-// JWTAuth implements survey.Auther.JWTAuth
-// This is called by goa to validate JWT tokens before calling service methods
-func (api *SurveyAPI) JWTAuth(ctx context.Context, token string, scheme *security.JWTScheme) (context.Context, error) {
-	// The actual JWT validation is performed in the service layer
-	// Here we just pass the context through since goa needs this method to exist
-	return ctx, nil
+// JWTAuth implements survey.Auther.JWTAuth.
+// It is the single authentication seam: validates the Heimdall-issued JWT,
+// extracts the principal, and stores it in context so service methods can read
+// it via ctx.Value(constants.PrincipalContextID) without needing an Authenticator
+// dependency of their own.
+func (api *SurveyAPI) JWTAuth(ctx context.Context, token string, _ *security.JWTScheme) (context.Context, error) {
+	principal, err := api.auth.ParsePrincipal(ctx, token)
+	if err != nil {
+		return ctx, &survey.UnauthorizedError{
+			Code:    "401",
+			Message: "Unauthorized: " + err.Error(),
+		}
+	}
+	return context.WithValue(ctx, constants.PrincipalContextID, principal), nil
 }

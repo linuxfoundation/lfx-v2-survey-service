@@ -35,11 +35,15 @@ type EventProcessor struct {
 	config        eventing.Config
 }
 
-// NewEventProcessor creates a new event processor
+// NewEventProcessor creates a new event processor with all dependencies wired at
+// construction time. inviteSender and userReader must be non-nil when
+// inviteCfg.Enabled is true; they are ignored (and may be nil) when disabled.
 func NewEventProcessor(
 	cfg eventing.Config,
 	idMapper domain.IDMapper,
 	inviteCfg InviteFeatureConfig,
+	inviteSender domain.InviteSender,
+	userReader domain.UserReader,
 	logger *slog.Logger,
 ) (*EventProcessor, error) {
 	// Connect to NATS
@@ -92,8 +96,8 @@ func NewEventProcessor(
 			v1ObjectsKV:      v1ObjectsKV,
 			v1MappingsKV:     mappingsKV,
 			selfServeBaseURL: inviteCfg.SelfServeBaseURL,
-			// inviteSender and userReader are injected by InjectInviteDependencies after
-			// the NATS connection for the invite feature is established in main.go.
+			inviteSender:     inviteSender,
+			userReader:       userReader,
 		}
 		logger.Info("survey response LFID invite handler configured", "base_url", inviteCfg.SelfServeBaseURL)
 	}
@@ -109,15 +113,6 @@ func NewEventProcessor(
 		logger:        logger,
 		config:        cfg,
 	}, nil
-}
-
-// InjectInviteDependencies sets the invite sender and user reader on the invite handler
-// after the invite NATS connection has been established. This is called from main.go.
-func (ep *EventProcessor) InjectInviteDependencies(sender domain.InviteSender, reader domain.UserReader) {
-	if ep.inviteHandler != nil {
-		ep.inviteHandler.inviteSender = sender
-		ep.inviteHandler.userReader = reader
-	}
 }
 
 // Start starts the event processor
