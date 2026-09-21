@@ -3,7 +3,7 @@
 
 module github.com/linuxfoundation/lfx-v2-survey-service
 
-go 1.25.4
+go 1.25.14
 
 require (
 	github.com/auth0/go-auth0 v1.48.0
