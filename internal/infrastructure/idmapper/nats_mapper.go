@@ -1,0 +1,193 @@
+// Copyright The Linux Foundation and each contributor to LFX.
+// SPDX-License-Identifier: MIT
+
+package idmapper
+
+import (
+	"context"
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
+	infraNATS "github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/nats"
+	"github.com/nats-io/nats.go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
+)
+
+// tracer is safe to initialize at package level — otel.Tracer() returns a
+// delegating tracer that forwards to whatever TracerProvider is registered at
+// call time, so otel.SetTracerProvider() updates it regardless of init order.
+var tracer = otel.Tracer("github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/idmapper")
+
+const (
+	// NATS subject for v1-sync-helper lookup
+	lookupSubject = "lfx.lookup_v1_mapping"
+
+	// Default request timeout
+	defaultTimeout = 5 * time.Second
+)
+
+// Config holds the configuration for the NATS-based ID mapper
+type Config struct {
+	URL     string
+	Timeout time.Duration
+}
+
+// NATSMapper implements IDMapper using NATS messaging to the v1-sync-helper service
+type NATSMapper struct {
+	conn    *nats.Conn
+	timeout time.Duration
+}
+
+// Compile-time assertion: *NATSMapper must satisfy domain.IDMapper.
+var _ domain.IDMapper = (*NATSMapper)(nil)
+
+// NewNATSMapper creates a new NATS-based ID mapper
+func NewNATSMapper(cfg Config) (*NATSMapper, error) {
+	if cfg.URL == "" {
+		return nil, fmt.Errorf("NATS URL is required")
+	}
+
+	timeout := cfg.Timeout
+	if timeout == 0 {
+		timeout = defaultTimeout
+	}
+
+	// Connect to NATS server
+	conn, err := nats.Connect(cfg.URL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to NATS: %w", err)
+	}
+
+	return &NATSMapper{
+		conn:    conn,
+		timeout: timeout,
+	}, nil
+}
+
+// Close closes the NATS connection
+func (m *NATSMapper) Close() {
+	if m.conn != nil {
+		m.conn.Close()
+	}
+}
+
+// MapProjectV2ToV1 maps a v2 project UID to v1 project SFID
+func (m *NATSMapper) MapProjectV2ToV1(ctx context.Context, v2UID string) (string, error) {
+	if v2UID == "" {
+		return "", domain.NewValidationError("v2 project UID is required")
+	}
+
+	// Request format: project.uid.{v2_uuid} returns {v1_sfid}
+	key := fmt.Sprintf("project.uid.%s", v2UID)
+	return m.lookup(ctx, key)
+}
+
+// MapProjectV1ToV2 maps a v1 project SFID to v2 project UID
+func (m *NATSMapper) MapProjectV1ToV2(ctx context.Context, v1SFID string) (string, error) {
+	if v1SFID == "" {
+		return "", domain.NewValidationError("v1 project SFID is required")
+	}
+
+	// Request format: project.sfid.{v1_sfid} returns {v2_uuid}
+	key := fmt.Sprintf("project.sfid.%s", v1SFID)
+	return m.lookup(ctx, key)
+}
+
+// MapCommitteeV2ToV1 maps a v2 committee UID to v1 committee SFID
+// The NATS response format is {project_sfid}:{committee_sfid}, but we only return the committee SFID
+func (m *NATSMapper) MapCommitteeV2ToV1(ctx context.Context, v2UID string) (string, error) {
+	if v2UID == "" {
+		return "", domain.NewValidationError("v2 committee UID is required")
+	}
+
+	// Request format: committee.uid.{v2_uuid} returns {project_sfid}:{committee_sfid}
+	key := fmt.Sprintf("committee.uid.%s", v2UID)
+	response, err := m.lookup(ctx, key)
+	if err != nil {
+		return "", err
+	}
+
+	// Parse the response to extract only the committee SFID
+	// Format: "projectSFID:committeeSFID" -> we want "committeeSFID"
+	// If no colon present, assume the response is already just the committee SFID
+	parts := strings.Split(response, ":")
+	if len(parts) == 1 {
+		return response, nil
+	}
+
+	if len(parts) != 2 {
+		return "", domain.NewUnavailableError(fmt.Sprintf("unexpected committee mapping format: %s", response))
+	}
+
+	committeeSFID := parts[1]
+	if committeeSFID == "" {
+		return "", domain.NewUnavailableError("committee SFID is empty in mapping response")
+	}
+
+	return committeeSFID, nil
+}
+
+// MapCommitteeV1ToV2 maps a v1 committee SFID to v2 committee UID
+func (m *NATSMapper) MapCommitteeV1ToV2(ctx context.Context, v1SFID string) (string, error) {
+	if v1SFID == "" {
+		return "", domain.NewValidationError("v1 committee SFID is required")
+	}
+
+	// Request format: committee.sfid.{v1_sfid} returns {v2_uuid}
+	key := fmt.Sprintf("committee.sfid.%s", v1SFID)
+	return m.lookup(ctx, key)
+}
+
+// lookup performs the NATS request/reply lookup
+func (m *NATSMapper) lookup(ctx context.Context, key string) (string, error) {
+	ctx, span := tracer.Start(ctx, "nats.request",
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(
+			attribute.String("messaging.system", "nats"),
+			attribute.String("messaging.destination.name", lookupSubject),
+			attribute.Int("messaging.message.body.size", len(key)),
+		),
+	)
+	defer span.End()
+
+	natsMsg := nats.NewMsg(lookupSubject)
+	natsMsg.Header = make(nats.Header)
+	natsMsg.Data = []byte(key)
+	otel.GetTextMapPropagator().Inject(ctx, infraNATS.NatsHeaderCarrier(natsMsg.Header))
+
+	msg, err := m.conn.RequestMsgWithContext(ctx, natsMsg)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		if err == context.DeadlineExceeded || err == nats.ErrTimeout {
+			return "", domain.NewUnavailableError("v1-sync-helper lookup timed out", err)
+		}
+		return "", domain.NewUnavailableError("failed to lookup ID mapping", err)
+	}
+
+	// Parse response
+	response := string(msg.Data)
+
+	// Check for error response (prefixed with "error: ")
+	if after, ok := strings.CutPrefix(response, "error: "); ok {
+		errMsg := after
+		span.RecordError(fmt.Errorf("v1-sync-helper error: %s", errMsg))
+		span.SetStatus(codes.Error, errMsg)
+		return "", domain.NewUnavailableError(fmt.Sprintf("v1-sync-helper error: %s", errMsg))
+	}
+
+	// Empty response means not found - return as validation error since client provided invalid ID
+	if response == "" {
+		span.RecordError(fmt.Errorf("mapping not found for %s", key))
+		span.SetStatus(codes.Error, "mapping not found")
+		return "", domain.NewValidationError(fmt.Sprintf("invalid ID: mapping not found for %s", key))
+	}
+
+	span.SetStatus(codes.Ok, "")
+	return response, nil
+}

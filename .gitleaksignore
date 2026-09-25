@@ -1,0 +1,11 @@
+# Allowlist for known false positives in git history.
+# These are example/documentation values in generated OpenAPI specs — not real secrets.
+# The base64 string eyJwYWdlIjogMn0= was used as a page_token example in commit f0017d2
+# and replaced with a plain string in a subsequent commit.
+f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi.yaml:generic-api-key:2225
+f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi.yaml:generic-api-key:2260
+f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi3.yaml:generic-api-key:949
+f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi3.yaml:generic-api-key:2702
+f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi3.yaml:generic-api-key:2736
+f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi.json:generic-api-key:1
+f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi3.json:generic-api-key:1
