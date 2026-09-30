@@ -65,6 +65,16 @@ func TestNATSUserReader_UsernameByEmail(t *testing.T) {
 			wantErr: domain.ErrUserNotFound,
 		},
 		{
+			name:    "JSON user-not-found-by-criteria envelope returns ErrUserNotFound",
+			reply:   replyMsg([]byte(`{"success":false,"error":"user not found by criteria"}`)),
+			wantErr: domain.ErrUserNotFound,
+		},
+		{
+			name:       "backend failure mentioning not found returns service error",
+			reply:      replyMsg([]byte(`{"success":false,"error":"failed to search user: 404 Not Found"}`)),
+			wantErrStr: "email_to_username failed: failed to search user: 404 Not Found",
+		},
+		{
 			name:       "JSON envelope missing success field returns descriptive error",
 			reply:      replyMsg([]byte(`{"error":"something unexpected"}`)),
 			wantErrStr: "email_to_username response missing success field",
