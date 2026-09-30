@@ -98,7 +98,7 @@ On delete, only `uid` is sent — all FGA tuples for `survey:{uid}` are removed 
 
 > The update message is skipped entirely when no relations and no references would be sent (no resolvable owner and an empty `SurveyUID`).
 >
-> **Ownership preservation:** fga-sync's `update_access` is a destructive full sync — a relation absent from the payload has its live tuples deleted. Whenever the message is sent without an `owner` relation, it carries `exclude_relations: ["owner"]` so a previously granted owner tuple survives re-sends and edits. A preserved owner is only revoked by deleting the response (fga-sync `delete_access`) or by an operator deleting the tuple directly in OpenFGA.
+> **Ownership preservation:** fga-sync's `update_access` is a destructive full sync — a relation absent from the payload has its live tuples deleted. Whenever the message is sent without an `owner` relation, it carries `exclude_relations: ["owner"]` so a previously granted owner tuple survives re-sends and edits. A preserved owner is revoked when a later create/update resolves an owner (that message sends the new `owner` relation without `exclude_relations`, so the full sync replaces the preserved tuple), when the response is deleted (fga-sync `delete_access`), or when an operator deletes the tuple directly in OpenFGA.
 >
 > **Unresolvable emails:** the auth-service lookup searches the account's primary email first and then retries linked alternate emails (`EmailToUsername` delegates to `searchByEmailWithFallback`); only an invitation addressed to an email with no linked account never resolves to an owner. No access-model exception is made for account-less invitees — the platform's LFID invite conversion flow remains their path to access.
 
