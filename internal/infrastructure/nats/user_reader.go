@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"regexp"
 	"strings"
 	"time"
 
@@ -62,7 +63,7 @@ func (r *NATSUserReader) UsernameByEmail(ctx context.Context, email string) (str
 		}
 		if !*envelope.Success {
 			if errMsg := strings.TrimSpace(envelope.Error); errMsg != "" && !IsEmailLookupNotFound(errMsg) {
-				return "", fmt.Errorf("email_to_username failed: %s", errMsg)
+				return "", fmt.Errorf("email_to_username failed: %s", redactEmails(errMsg))
 			}
 			return "", domain.ErrUserNotFound
 		}
@@ -80,3 +81,13 @@ func IsEmailLookupNotFound(errMsg string) bool {
 }
 
 var _ domain.UserReader = (*NATSUserReader)(nil)
+
+// emailPattern matches plain and URL-escaped (%40) email addresses.
+var emailPattern = regexp.MustCompile(`[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+`)
+
+// redactEmails strips email addresses from auth-service error text before it is
+// wrapped into errors that callers log and retry (Auth0 transport failures embed
+// the users-by-email request URL, which carries the invitee's address).
+func redactEmails(s string) string {
+	return emailPattern.ReplaceAllString(s, "[redacted-email]")
+}

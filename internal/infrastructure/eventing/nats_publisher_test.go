@@ -6,15 +6,17 @@ package eventing
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log/slog"
-	"sync/atomic"
+
 	"testing"
 	"time"
 
 	fgaconstants "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/constants"
 	fgatypes "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
-	surveyconstants "github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
+	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain/mocks"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
@@ -39,13 +41,13 @@ func startTestNATSServer(t *testing.T) (*server.Server, string) {
 	return ns, ns.ClientURL()
 }
 
-func setupTestPublisher(t *testing.T) (*NATSPublisher, *nats.Conn, func()) {
+func setupTestPublisher(t *testing.T, userReader domain.UserReader) (*NATSPublisher, *nats.Conn, func()) {
 	ns, url := startTestNATSServer(t)
 
 	nc, err := nats.Connect(url)
 	require.NoError(t, err)
 
-	publisher := NewNATSPublisher(nc, slog.Default())
+	publisher := NewNATSPublisher(nc, userReader, slog.Default())
 
 	cleanup := func() {
 		nc.Close()
@@ -129,7 +131,7 @@ func TestSendSurveyResponseAccessMessage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			publisher, nc, cleanup := setupTestPublisher(t)
+			publisher, nc, cleanup := setupTestPublisher(t, &mocks.MockUserReader{Err: domain.ErrUserNotFound})
 			defer cleanup()
 
 			sub, err := nc.SubscribeSync(fgaconstants.GenericUpdateAccessSubject)
@@ -170,45 +172,27 @@ func TestSendSurveyResponseAccessMessage(t *testing.T) {
 	}
 }
 
-// respondAsAuthService installs a fake auth-service responder on the
-// email_to_sub subject and returns a counter of requests it received.
-func respondAsAuthService(t *testing.T, nc *nats.Conn, reply []byte) *atomic.Int32 {
-	t.Helper()
-	var calls atomic.Int32
-	sub, err := nc.Subscribe(surveyconstants.AuthEmailToSubSubject, func(msg *nats.Msg) {
-		calls.Add(1)
-		_ = msg.Respond(reply)
-	})
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = sub.Unsubscribe() })
-	return &calls
-}
-
 func TestSendSurveyResponseAccessMessageEmailFallback(t *testing.T) {
-	handlerErrorEnvelope := []byte(`{"success":false,"error":"user not found"}`)
-	transportNotFoundEnvelope := []byte(`{"error":"no user with that email"}`)
-	transportErrorEnvelope := []byte(`{"error":"auth0 unavailable"}`)
-	malformedEnvelope := []byte(`{not json`)
-
 	tests := []struct {
 		name             string
 		data             *domain.SurveyResponseData
-		authReply        []byte // nil = no auth-service responder installed
-		wantAuthCalled   bool
-		wantErr          bool // transient/unknown failure: no publish, event retries
+		readerUsername   string
+		readerErr        error
+		wantReaderCalled bool
+		wantErrIs        []error // non-nil: lookup failure, no publish, event retries
 		wantOwner        []string
 		wantExcludeOwner bool
 	}{
 		{
-			name: "resolves email to auth sub when username is empty",
+			name: "resolves email to LFX username when username is empty",
 			data: &domain.SurveyResponseData{
 				UID:       "sr-1",
 				Email:     "invitee@example.com",
 				SurveyUID: "survey-1",
 			},
-			authReply:      []byte("auth0|abc123"),
-			wantAuthCalled: true,
-			wantOwner:      []string{"auth0|abc123"},
+			readerUsername:   "invitee",
+			wantReaderCalled: true,
+			wantOwner:        []string{"invitee"},
 		},
 		{
 			name: "falls back to email when username is present but invalid",
@@ -218,9 +202,9 @@ func TestSendSurveyResponseAccessMessageEmailFallback(t *testing.T) {
 				Email:     "invitee@example.com",
 				SurveyUID: "survey-1",
 			},
-			authReply:      []byte("auth0|abc123"),
-			wantAuthCalled: true,
-			wantOwner:      []string{"auth0|abc123"},
+			readerUsername:   "invitee",
+			wantReaderCalled: true,
+			wantOwner:        []string{"invitee"},
 		},
 		{
 			name: "preserves owner when email does not resolve",
@@ -229,44 +213,64 @@ func TestSendSurveyResponseAccessMessageEmailFallback(t *testing.T) {
 				Email:     "ghost@example.com",
 				SurveyUID: "survey-1",
 			},
-			authReply:        handlerErrorEnvelope,
-			wantAuthCalled:   true,
-			wantOwner:        nil,
+			readerErr:        domain.ErrUserNotFound,
+			wantReaderCalled: true,
 			wantExcludeOwner: true,
 		},
 		{
-			name: "preserves owner on transport-level not-found envelope",
-			data: &domain.SurveyResponseData{
-				UID:       "sr-1",
-				Email:     "ghost@example.com",
-				SurveyUID: "survey-1",
-			},
-			authReply:        transportNotFoundEnvelope,
-			wantAuthCalled:   true,
-			wantOwner:        nil,
-			wantExcludeOwner: true,
-		},
-		{
-			name: "errors on transient auth-service backend failure so the event retries",
+			name: "preserves owner when auth-service returns an empty username",
 			data: &domain.SurveyResponseData{
 				UID:       "sr-1",
 				Email:     "invitee@example.com",
 				SurveyUID: "survey-1",
 			},
-			authReply:      transportErrorEnvelope,
-			wantAuthCalled: true,
-			wantErr:        true,
+			readerUsername:   "",
+			wantReaderCalled: true,
+			wantExcludeOwner: true,
 		},
 		{
-			name: "errors on unrecognized reply envelope so the event retries",
+			name: "rejects an invalid username from auth-service as the owner principal",
 			data: &domain.SurveyResponseData{
 				UID:       "sr-1",
 				Email:     "invitee@example.com",
 				SurveyUID: "survey-1",
 			},
-			authReply:      malformedEnvelope,
-			wantAuthCalled: true,
-			wantErr:        true,
+			readerUsername:   "*",
+			wantReaderCalled: true,
+			wantExcludeOwner: true,
+		},
+		{
+			name: "errors on auth-service backend failure so the event retries",
+			data: &domain.SurveyResponseData{
+				UID:       "sr-1",
+				Email:     "invitee@example.com",
+				SurveyUID: "survey-1",
+			},
+			readerErr:        errors.New("email_to_username failed: auth0 unavailable"),
+			wantReaderCalled: true,
+			wantErrIs:        []error{domain.ErrAuthServiceLookupFailed},
+		},
+		{
+			name: "errors on transport failure and keeps the cause in the chain",
+			data: &domain.SurveyResponseData{
+				UID:       "sr-1",
+				Email:     "invitee@example.com",
+				SurveyUID: "survey-1",
+			},
+			readerErr:        fmt.Errorf("email_to_username request failed: %w", nats.ErrNoResponders),
+			wantReaderCalled: true,
+			wantErrIs:        []error{domain.ErrAuthServiceLookupFailed, nats.ErrNoResponders},
+		},
+		{
+			name: "errors on context cancellation so the event retries",
+			data: &domain.SurveyResponseData{
+				UID:       "sr-1",
+				Email:     "invitee@example.com",
+				SurveyUID: "survey-1",
+			},
+			readerErr:        fmt.Errorf("email_to_username request failed: %w", context.Canceled),
+			wantReaderCalled: true,
+			wantErrIs:        []error{domain.ErrAuthServiceLookupFailed, context.Canceled},
 		},
 		{
 			name: "does not call auth-service when username is present",
@@ -276,9 +280,25 @@ func TestSendSurveyResponseAccessMessageEmailFallback(t *testing.T) {
 				Email:     "invitee@example.com",
 				SurveyUID: "survey-1",
 			},
-			authReply:      handlerErrorEnvelope, // must never be sent a request
-			wantAuthCalled: false,
-			wantOwner:      []string{"testuser"},
+			wantOwner: []string{"testuser"},
+		},
+		{
+			name: "does not call auth-service for a whitespace-only email",
+			data: &domain.SurveyResponseData{
+				UID:       "sr-1",
+				Email:     "   ",
+				SurveyUID: "survey-1",
+			},
+			wantExcludeOwner: true,
+		},
+		{
+			name: "does not call auth-service for a malformed email",
+			data: &domain.SurveyResponseData{
+				UID:       "sr-1",
+				Email:     "not-an-email",
+				SurveyUID: "survey-1",
+			},
+			wantExcludeOwner: true,
 		},
 		{
 			name: "preserves owner when neither username nor email is present",
@@ -286,40 +306,46 @@ func TestSendSurveyResponseAccessMessageEmailFallback(t *testing.T) {
 				UID:       "sr-1",
 				SurveyUID: "survey-1",
 			},
-			authReply:        nil,
-			wantAuthCalled:   false,
-			wantOwner:        nil,
 			wantExcludeOwner: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			publisher, nc, cleanup := setupTestPublisher(t)
-			defer cleanup()
-
-			var authCalls *atomic.Int32
-			if tt.authReply != nil {
-				authCalls = respondAsAuthService(t, nc, tt.authReply)
+			var gotEmails []string
+			reader := &mocks.MockUserReader{
+				UsernameByEmailFunc: func(_ context.Context, email string) (string, error) {
+					gotEmails = append(gotEmails, email)
+					return tt.readerUsername, tt.readerErr
+				},
 			}
+			publisher, nc, cleanup := setupTestPublisher(t, reader)
+			defer cleanup()
 
 			sub, err := nc.SubscribeSync(fgaconstants.GenericUpdateAccessSubject)
 			require.NoError(t, err)
 
 			err = publisher.sendSurveyResponseAccessMessage(context.Background(), tt.data)
-			if tt.wantErr {
+
+			if tt.wantReaderCalled {
+				assert.Equal(t, []string{tt.data.Email}, gotEmails)
+			} else {
+				assert.Empty(t, gotEmails)
+			}
+
+			if tt.wantErrIs != nil {
 				// Lookup failure must surface as an error (so the KV event is
 				// NAKed and retried) and nothing may be published to fga-sync.
 				require.Error(t, err)
 				// The retry classification is structural: the error must carry the
-				// sentinel that isTransientError (cmd/survey-api/eventing) matches.
-				assert.ErrorIs(t, err, domain.ErrAuthServiceLookupFailed)
+				// sentinel that isTransientError (cmd/survey-api/eventing) matches,
+				// and keep the original cause.
+				for _, target := range tt.wantErrIs {
+					assert.ErrorIs(t, err, target)
+				}
 				require.NoError(t, nc.Flush())
 				_, msgErr := sub.NextMsg(100 * time.Millisecond)
 				assert.ErrorIs(t, msgErr, nats.ErrTimeout)
-				if tt.authReply != nil && tt.wantAuthCalled {
-					assert.Greater(t, authCalls.Load(), int32(0))
-				}
 				return
 			}
 			require.NoError(t, err)
@@ -343,37 +369,6 @@ func TestSendSurveyResponseAccessMessageEmailFallback(t *testing.T) {
 			} else {
 				assert.Empty(t, accessData.ExcludeRelations)
 			}
-			if tt.authReply != nil {
-				if tt.wantAuthCalled {
-					assert.Greater(t, authCalls.Load(), int32(0))
-				} else {
-					assert.Equal(t, int32(0), authCalls.Load())
-				}
-			}
 		})
 	}
-}
-
-func TestSendSurveyResponseAccessMessageAuthServiceUnavailable(t *testing.T) {
-	publisher, nc, cleanup := setupTestPublisher(t)
-	defer cleanup()
-
-	sub, err := nc.SubscribeSync(fgaconstants.GenericUpdateAccessSubject)
-	require.NoError(t, err)
-
-	// No auth-service responder: the lookup must fail (so the event can be
-	// retried) rather than silently dropping the owner grant.
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	defer cancel()
-
-	err = publisher.sendSurveyResponseAccessMessage(ctx, &domain.SurveyResponseData{
-		UID:       "sr-1",
-		Email:     "invitee@example.com",
-		SurveyUID: "survey-1",
-	})
-	require.Error(t, err)
-
-	// Nothing should have been published to fga-sync.
-	_, err = sub.NextMsg(100 * time.Millisecond)
-	assert.ErrorIs(t, err, nats.ErrTimeout)
 }

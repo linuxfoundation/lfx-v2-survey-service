@@ -55,6 +55,11 @@ func TestNATSUserReader_UsernameByEmail(t *testing.T) {
 			wantErrStr: "email_to_username failed: auth service unavailable",
 		},
 		{
+			name:       "email addresses in service error text are redacted",
+			reply:      replyMsg([]byte(`{"success":false,"error":"failed to search user: Get \"https://auth0.example/users-by-email?email=invitee%40example.com\": dial tcp: i/o timeout (invitee@example.com)"}`)),
+			wantErrStr: "email=[redacted-email]\": dial tcp: i/o timeout ([redacted-email])",
+		},
+		{
 			name:    "JSON user-not-found envelope returns ErrUserNotFound",
 			reply:   replyMsg([]byte(`{"success":false,"error":"user not found"}`)),
 			wantErr: domain.ErrUserNotFound,

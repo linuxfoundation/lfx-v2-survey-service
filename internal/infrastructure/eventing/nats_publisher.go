@@ -6,12 +6,13 @@ package eventing
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
+	"net/mail"
 	"regexp"
 	"slices"
 	"strings"
-	"time"
 
 	fgaconstants "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/constants"
 	fgatypes "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/types"
@@ -19,7 +20,6 @@ import (
 	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	infraNATS "github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/nats"
-	surveyconstants "github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/nats-io/nats.go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -44,11 +44,6 @@ const (
 	IndexSurveyTemplateSubject = "lfx.index.survey_template"
 )
 
-const (
-	// authLookupTimeout bounds the auth-service email_to_sub request/reply lookup.
-	authLookupTimeout = 5 * time.Second
-)
-
 var lfxUsernamePattern = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
 func isValidLFXUsername(username string) bool {
@@ -57,18 +52,21 @@ func isValidLFXUsername(username string) bool {
 
 // NATSPublisher implements the EventPublisher interface
 type NATSPublisher struct {
-	conn   *nats.Conn
-	logger *slog.Logger
+	conn       *nats.Conn
+	userReader domain.UserReader
+	logger     *slog.Logger
 }
 
 // Compile-time assertion: *NATSPublisher must satisfy domain.EventPublisher.
 var _ domain.EventPublisher = (*NATSPublisher)(nil)
 
-// NewNATSPublisher creates a new NATS publisher
-func NewNATSPublisher(conn *nats.Conn, logger *slog.Logger) *NATSPublisher {
+// NewNATSPublisher creates a new NATS publisher. userReader resolves invitee
+// emails to LFX usernames for survey response owner tuples.
+func NewNATSPublisher(conn *nats.Conn, userReader domain.UserReader, logger *slog.Logger) *NATSPublisher {
 	return &NATSPublisher{
-		conn:   conn,
-		logger: logger,
+		conn:       conn,
+		userReader: userReader,
+		logger:     logger,
 	}
 }
 
@@ -325,30 +323,14 @@ func (p *NATSPublisher) sendSurveyTemplateIndexerMessage(ctx context.Context, su
 
 // sendSurveyResponseAccessMessage sends the message to the NATS server for the survey response access control
 func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, data *domain.SurveyResponseData) error {
-	relations := map[string][]string{}
-	if data.Username != "" {
-		if isValidLFXUsername(data.Username) {
-			relations["owner"] = []string{data.Username}
-		} else {
-			p.logger.WarnContext(ctx, "skipping FGA owner relation for invalid LFX username",
-				"survey_response_uid", data.UID,
-				"username", data.Username,
-			)
-		}
+	owner, err := p.resolveResponseOwner(ctx, data)
+	if err != nil {
+		return err
 	}
 
-	// Invitations without a usable username (empty, or a legacy value that fails
-	// LFX username validation) resolve the invitee's primary email to their
-	// Auth0 sub instead, so the FGA owner tuple lands on their account and the
-	// response surfaces in their Pending Actions / My Surveys.
-	if _, hasOwner := relations["owner"]; !hasOwner && data.Email != "" {
-		sub, err := p.lookupEmailToAuthSub(ctx, data.Email)
-		if err != nil {
-			return fmt.Errorf("failed to resolve invitee email to auth sub: %w", err)
-		}
-		if sub != "" {
-			relations["owner"] = []string{sub}
-		}
+	relations := map[string][]string{}
+	if owner != "" {
+		relations["owner"] = []string{owner}
 	}
 
 	references := map[string][]string{}
@@ -373,7 +355,10 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, dat
 	// the payload has its live tuples deleted. Whenever no owner could be
 	// resolved, exclude the owner relation so a previously granted owner tuple
 	// (e.g. from an earlier invitation) survives re-sends and edits.
-	if _, hasOwner := relations["owner"]; !hasOwner {
+	if owner == "" {
+		p.logger.DebugContext(ctx, "no resolvable owner; preserving any existing owner tuple",
+			"survey_response_uid", data.UID,
+		)
 		accessData.ExcludeRelations = []string{"owner"}
 	}
 
@@ -391,76 +376,53 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, dat
 	return p.publishWithSpan(ctx, fgaconstants.GenericUpdateAccessSubject, accessMsgBytes)
 }
 
-// lookupEmailToAuthSub resolves an email address to the user's Auth0 sub via the
-// auth-service email_to_sub request/reply subject, following the same NATS
-// request/reply pattern as idmapper.NATSMapper.lookup. A definitive resolution
-// failure (unknown email) returns ("", nil) so the caller can degrade gracefully;
-// transport failures (timeout, no responder) and transient auth-service backend
-// failures (e.g. its Auth0 upstream) return an error so the event is retried
-// instead of silently dropping the owner grant.
-func (p *NATSPublisher) lookupEmailToAuthSub(ctx context.Context, email string) (string, error) {
-	// auth-service lowercases and trims on its side too; send it canonical.
-	payload := []byte(strings.ToLower(strings.TrimSpace(email)))
-
-	ctx, span := tracer.Start(ctx, "nats.request",
-		trace.WithSpanKind(trace.SpanKindClient),
-		trace.WithAttributes(
-			attribute.String("messaging.system", "nats"),
-			attribute.String("messaging.destination.name", surveyconstants.AuthEmailToSubSubject),
-			attribute.Int("messaging.message.body.size", len(payload)),
-		),
-	)
-	defer span.End()
-
-	reqCtx, cancel := context.WithTimeout(ctx, authLookupTimeout)
-	defer cancel()
-
-	natsMsg := nats.NewMsg(surveyconstants.AuthEmailToSubSubject)
-	natsMsg.Header = make(nats.Header)
-	natsMsg.Data = payload
-	otel.GetTextMapPropagator().Inject(reqCtx, infraNATS.NatsHeaderCarrier(natsMsg.Header))
-
-	msg, err := p.conn.RequestMsgWithContext(reqCtx, natsMsg)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return "", fmt.Errorf("auth-service email_to_sub request failed: %w", err)
+// resolveResponseOwner returns the LFX username to grant the survey response
+// owner relation, or "" when no owner can be resolved. A valid v1 username is
+// used as-is. Otherwise the invitation email is resolved via auth-service so
+// email-only invitations land on the invitee's account and surface in their
+// Pending Actions / My Surveys. A definitive not-found degrades to ""; any
+// other lookup failure is wrapped in domain.ErrAuthServiceLookupFailed so the
+// KV event retries instead of silently dropping the grant.
+func (p *NATSPublisher) resolveResponseOwner(ctx context.Context, data *domain.SurveyResponseData) (string, error) {
+	if isValidLFXUsername(data.Username) {
+		return data.Username, nil
+	}
+	if data.Username != "" {
+		p.logger.WarnContext(ctx, "ignoring invalid LFX username for FGA owner relation",
+			"survey_response_uid", data.UID,
+			"username", data.Username,
+		)
 	}
 
-	response := strings.TrimSpace(string(msg.Data))
-	if response == "" {
+	email := strings.TrimSpace(data.Email)
+	if p.userReader == nil || email == "" {
+		return "", nil
+	}
+	// A malformed address is a deterministic auth-service refusal; retrying it
+	// would only exhaust the delivery budget and drop the survey reference too.
+	if _, err := mail.ParseAddress(email); err != nil {
+		p.logger.WarnContext(ctx, "invitation email is not a valid address; skipping FGA owner lookup",
+			"survey_response_uid", data.UID,
+		)
 		return "", nil
 	}
 
-	// auth-service reports resolution failures as JSON error envelopes —
-	// handler-level {"success":false,"error":...} or transport-level
-	// {"error":...} — while a success reply is the plain-text sub (never JSON).
-	if strings.HasPrefix(response, "{") {
-		var envelope struct {
-			Error string `json:"error"`
-		}
-		if jsonErr := json.Unmarshal([]byte(response), &envelope); jsonErr != nil {
-			p.logger.WarnContext(ctx, "unrecognized auth-service email_to_sub reply", "error", jsonErr)
-			span.SetStatus(codes.Error, "unrecognized reply")
-			return "", fmt.Errorf("%w: unrecognized email_to_sub reply: %v", domain.ErrAuthServiceLookupFailed, jsonErr)
-		}
-		if infraNATS.IsEmailLookupNotFound(envelope.Error) {
-			// Definitive: no account owns this email. Degrade gracefully —
-			// account-less invitees are an expected case (LFID invite flow).
-			p.logger.DebugContext(ctx, "auth-service email_to_sub: no account for invitee email")
-			span.SetStatus(codes.Ok, "email not resolvable")
-			return "", nil
-		}
-		// Any other envelope error may be transient inside auth-service (e.g. its
-		// Auth0 backend) — surface it so the KV event retries instead of silently
-		// dropping the owner grant.
-		p.logger.WarnContext(ctx, "auth-service email_to_sub lookup failed", "reason", envelope.Error)
-		span.SetStatus(codes.Error, envelope.Error)
-		return "", fmt.Errorf("%w: email_to_sub: %s", domain.ErrAuthServiceLookupFailed, envelope.Error)
+	username, err := p.userReader.UsernameByEmail(ctx, data.Email)
+	if errors.Is(err, domain.ErrUserNotFound) {
+		// Account-less invitees are expected; the LFID invite flow covers them.
+		return "", nil
+	}
+	if err != nil {
+		return "", fmt.Errorf("%w: resolve invitee email to LFX username: %w", domain.ErrAuthServiceLookupFailed, err)
 	}
 
-	span.SetStatus(codes.Ok, "")
-	return response, nil
+	if !isValidLFXUsername(username) {
+		p.logger.WarnContext(ctx, "auth-service returned invalid LFX username; skipping FGA owner relation",
+			"survey_response_uid", data.UID,
+		)
+		return "", nil
+	}
+	return username, nil
 }
 
 // sendDeleteAccessMessage sends a delete access message to FGA-sync

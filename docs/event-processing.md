@@ -63,7 +63,7 @@ The survey service implements NATS KV bucket event processing to automatically s
 
    - **FGA-Sync Service** (`lfx.fga-sync.update_access`, `lfx.fga-sync.delete_access`)
      - Updates Fine-Grained Authorization (FGA) tuples
-     - Grants survey response `owner` to the respondent's LFX username, or to their Auth0 sub resolved from the invite email when no usable username exists (see [FGA Contract](fga-contract.md#survey-response))
+     - Grants survey response `owner` to the respondent's LFX username, or to the LFX username resolved from the invite email when no usable username exists (see [FGA Contract](fga-contract.md#survey-response))
      - Links surveys to committees and projects
 
 4. **Track**: Records processed events in `v1-mappings` KV bucket for deduplication
@@ -320,7 +320,7 @@ When processing a survey response, the handler checks that the parent survey map
 
 - Receives access control updates
 - Manages OpenFGA authorization tuples
-- Sets `survey_response:{uid}:owner` to the respondent's LFX username — or their Auth0 sub via email lookup for email-only invitations; when no owner resolves, `exclude_relations: ["owner"]` preserves any previously granted owner tuple (see [FGA Contract](fga-contract.md#survey-response))
+- Sets `survey_response:{uid}:owner` to the respondent's LFX username — or the LFX username resolved via email lookup for email-only invitations; when no owner resolves, `exclude_relations: ["owner"]` preserves any previously granted owner tuple (see [FGA Contract](fga-contract.md#survey-response))
 - Links resources to parent entities (committees, projects, surveys)
 
 ## Development

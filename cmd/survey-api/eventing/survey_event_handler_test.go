@@ -30,14 +30,14 @@ func TestIsTransientError(t *testing.T) {
 		{name: "permanent error", err: errors.New("invalid payload"), want: false},
 		{
 			name: "auth-service lookup failure is retryable",
-			err:  fmt.Errorf("failed to resolve invitee email to auth sub: %w", domain.ErrAuthServiceLookupFailed),
+			err:  fmt.Errorf("%w: resolve invitee email to LFX username: %w", domain.ErrAuthServiceLookupFailed, errors.New("email_to_username failed: auth0 unavailable")),
 			want: true,
 		},
 		{
 			name: "auth-service lookup failure is retryable through multiple wraps",
 			err: fmt.Errorf("failed to publish survey response event: %w",
 				fmt.Errorf("failed to send survey response access message: %w",
-					fmt.Errorf("failed to resolve invitee email to auth sub: %w: email_to_sub: 429 too many requests", domain.ErrAuthServiceLookupFailed))),
+					fmt.Errorf("%w: resolve invitee email to LFX username: %w", domain.ErrAuthServiceLookupFailed, errors.New("email_to_username failed: 429 too many requests")))),
 			want: true,
 		},
 	}

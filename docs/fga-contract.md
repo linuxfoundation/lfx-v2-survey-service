@@ -88,7 +88,7 @@ On delete, only `uid` is sent — all FGA tuples for `survey:{uid}` are removed 
 | Relation | Value | Condition |
 | --- | --- | --- |
 | `owner` | LFX username (from v1 `username` field) | `Username` is non-empty and passes LFX username format validation |
-| `owner` | Auth0 sub resolved from the invitee's primary email via the auth-service `lfx.auth-service.email_to_sub` request/reply | No owner was resolved from `Username` (empty or invalid), `Email` is non-empty, and the email resolves to an existing account |
+| `owner` | LFX username resolved from the invitation email via the auth-service `lfx.auth-service.email_to_username` request/reply | No owner was resolved from `Username` (empty or invalid), `Email` is non-empty, and the email resolves to an existing account whose username passes LFX username format validation |
 
 ### References
 
@@ -98,9 +98,9 @@ On delete, only `uid` is sent — all FGA tuples for `survey:{uid}` are removed 
 
 > The update message is skipped entirely when no relations and no references would be sent (no resolvable owner and an empty `SurveyUID`).
 >
-> **Ownership preservation:** fga-sync's `update_access` is a destructive full sync — a relation absent from the payload has its live tuples deleted. Whenever the message is sent without an `owner` relation, it carries `exclude_relations: ["owner"]` so a previously granted owner tuple survives re-sends and edits.
+> **Ownership preservation:** fga-sync's `update_access` is a destructive full sync — a relation absent from the payload has its live tuples deleted. Whenever the message is sent without an `owner` relation, it carries `exclude_relations: ["owner"]` so a previously granted owner tuple survives re-sends and edits. A preserved owner is only revoked by deleting the response (fga-sync `delete_access`) or by an operator deleting the tuple directly in OpenFGA.
 >
-> **Unresolvable emails:** the auth-service lookup matches primary email only; invitations addressed to an alternate email, or to an email with no account, never resolve to an owner. No access-model exception is made for account-less invitees — the platform's LFID invite conversion flow remains their path to access.
+> **Unresolvable emails:** the auth-service lookup matches the account's primary email first, then its linked alternate emails; only invitations addressed to an email with no account never resolve to an owner. No access-model exception is made for account-less invitees — the platform's LFID invite conversion flow remains their path to access.
 
 ### Delete
 

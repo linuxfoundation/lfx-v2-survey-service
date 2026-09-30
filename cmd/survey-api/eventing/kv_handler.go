@@ -73,6 +73,7 @@ func kvMessageHandler(
 	mappingsKV jetstream.KeyValue,
 	v1ObjectsKV jetstream.KeyValue,
 	inviteHandler *SurveyResponseInviteHandler,
+	maxDeliver int,
 	logger *slog.Logger,
 ) {
 	// Parse the message as a KV entry
@@ -113,6 +114,12 @@ func kvMessageHandler(
 		if err != nil {
 			logger.With("error", err, "key", key).Warn("failed to get message metadata, using default delay")
 			metadata = &jetstream.MsgMetadata{NumDelivered: 1}
+		}
+
+		// JetStream will not redeliver past MaxDeliver: surface the drop so it is alertable.
+		if maxDeliver > 0 && metadata.NumDelivered >= uint64(maxDeliver) {
+			logger.With("key", key, "attempt", metadata.NumDelivered, "max_deliver", maxDeliver).
+				Error("KV message delivery budget exhausted; event dropped - index/access state may be incomplete")
 		}
 
 		// Calculate exponential backoff delay based on delivery attempt
