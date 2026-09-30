@@ -179,6 +179,7 @@ func TestSendSurveyResponseAccessMessageEmailFallback(t *testing.T) {
 		readerUsername   string
 		readerErr        error
 		wantReaderCalled bool
+		wantLookupEmail  string  // address auth-service should receive; defaults to data.Email
 		wantErrIs        []error // non-nil: lookup failure, no publish, event retries
 		wantOwner        []string
 		wantExcludeOwner bool
@@ -204,6 +205,18 @@ func TestSendSurveyResponseAccessMessageEmailFallback(t *testing.T) {
 			},
 			readerUsername:   "invitee",
 			wantReaderCalled: true,
+			wantOwner:        []string{"invitee"},
+		},
+		{
+			name: "looks up the parsed address for display-name emails",
+			data: &domain.SurveyResponseData{
+				UID:       "sr-1",
+				Email:     "Jane <invitee@example.com>",
+				SurveyUID: "survey-1",
+			},
+			readerUsername:   "invitee",
+			wantReaderCalled: true,
+			wantLookupEmail:  "invitee@example.com",
 			wantOwner:        []string{"invitee"},
 		},
 		{
@@ -328,7 +341,11 @@ func TestSendSurveyResponseAccessMessageEmailFallback(t *testing.T) {
 			err = publisher.sendSurveyResponseAccessMessage(context.Background(), tt.data)
 
 			if tt.wantReaderCalled {
-				assert.Equal(t, []string{tt.data.Email}, gotEmails)
+				wantLookupEmail := tt.wantLookupEmail
+				if wantLookupEmail == "" {
+					wantLookupEmail = tt.data.Email
+				}
+				assert.Equal(t, []string{wantLookupEmail}, gotEmails)
 			} else {
 				assert.Empty(t, gotEmails)
 			}

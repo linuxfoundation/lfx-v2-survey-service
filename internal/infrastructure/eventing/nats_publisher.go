@@ -400,14 +400,17 @@ func (p *NATSPublisher) resolveResponseOwner(ctx context.Context, data *domain.S
 	}
 	// A malformed address is a deterministic auth-service refusal; retrying it
 	// would only exhaust the delivery budget and drop the survey reference too.
-	if _, err := mail.ParseAddress(email); err != nil {
+	addr, err := mail.ParseAddress(email)
+	if err != nil {
 		p.logger.WarnContext(ctx, "invitation email is not a valid address; skipping FGA owner lookup",
 			"survey_response_uid", data.UID,
 		)
 		return "", nil
 	}
 
-	username, err := p.userReader.UsernameByEmail(ctx, data.Email)
+	// Look up the parsed mailbox, not the raw value: display-name forms
+	// ("Jane <invitee@example.com>") pass the guard but never match an account.
+	username, err := p.userReader.UsernameByEmail(ctx, addr.Address)
 	if errors.Is(err, domain.ErrUserNotFound) {
 		// Account-less invitees are expected; the LFID invite flow covers them.
 		return "", nil
