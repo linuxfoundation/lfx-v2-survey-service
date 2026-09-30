@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -62,7 +64,7 @@ func (r *NATSUserReader) UsernameByEmail(ctx context.Context, email string) (str
 		}
 		if !*envelope.Success {
 			if errMsg := strings.TrimSpace(envelope.Error); errMsg != "" && !isEmailToUsernameNotFound(errMsg) {
-				return "", fmt.Errorf("email_to_username failed: %s", errMsg)
+				return "", fmt.Errorf("email_to_username failed: %s", redactEmails(errMsg, email))
 			}
 			return "", domain.ErrUserNotFound
 		}
@@ -72,9 +74,32 @@ func (r *NATSUserReader) UsernameByEmail(ctx context.Context, email string) (str
 	return body, nil
 }
 
+// isEmailToUsernameNotFound reports whether an auth-service email lookup error message
+// means "no account owns this email" (definitive) as opposed to a transient backend failure.
+// Every auth-service backend reports a miss as "user not found" (the mock appends " by criteria").
 func isEmailToUsernameNotFound(errMsg string) bool {
-	lower := strings.ToLower(errMsg)
-	return strings.Contains(lower, "not found") || strings.Contains(lower, "no user")
+	return strings.HasPrefix(strings.ToLower(errMsg), "user not found")
 }
 
 var _ domain.UserReader = (*NATSUserReader)(nil)
+
+// emailPattern matches plain and URL-escaped (%40) email addresses.
+var emailPattern = regexp.MustCompile(`[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9.-]+`)
+
+// redactEmails strips email addresses from auth-service error text before it is
+// wrapped into errors that callers log and retry (Auth0 transport failures embed
+// the users-by-email request URL, which carries the invitee's address).
+//
+// The exact requested address and its percent-encoded form are replaced first:
+// they are the most likely PII and catch quoted or Unicode local parts (for
+// example `"john doe"@example.com`) that the pattern misses. The pattern then
+// catches any other plain or URL-escaped (%40) addresses in the text.
+func redactEmails(s, email string) string {
+	if email != "" {
+		s = strings.ReplaceAll(s, email, "[redacted-email]")
+		if enc := url.QueryEscape(email); enc != email {
+			s = strings.ReplaceAll(s, enc, "[redacted-email]")
+		}
+	}
+	return emailPattern.ReplaceAllString(s, "[redacted-email]")
+}

@@ -23,6 +23,7 @@ func replyMsg(data []byte) *natsgo.Msg { return &natsgo.Msg{Data: data} }
 func TestNATSUserReader_UsernameByEmail(t *testing.T) {
 	tests := []struct {
 		name       string
+		email      string
 		reply      *natsgo.Msg
 		replyErr   error
 		wantUser   string
@@ -55,9 +56,36 @@ func TestNATSUserReader_UsernameByEmail(t *testing.T) {
 			wantErrStr: "email_to_username failed: auth service unavailable",
 		},
 		{
+			name:       "email addresses in service error text are redacted",
+			reply:      replyMsg([]byte(`{"success":false,"error":"failed to search user: Get \"https://auth0.example/users-by-email?email=invitee%40example.com\": dial tcp: i/o timeout (invitee@example.com)"}`)),
+			wantErrStr: "email=[redacted-email]\": dial tcp: i/o timeout ([redacted-email])",
+		},
+		{
+			name:       "quoted email address in service error text is redacted",
+			email:      `"john doe"@example.com`,
+			reply:      replyMsg([]byte(`{"success":false,"error":"invalid address \"john doe\"@example.com rejected"}`)),
+			wantErrStr: "invalid address [redacted-email] rejected",
+		},
+		{
+			name:       "unicode email address in service error text is redacted",
+			email:      "用户@example.com",
+			reply:      replyMsg([]byte(`{"success":false,"error":"failed to search user 用户@example.com: 500 Internal Server Error"}`)),
+			wantErrStr: "failed to search user [redacted-email]: 500 Internal Server Error",
+		},
+		{
 			name:    "JSON user-not-found envelope returns ErrUserNotFound",
 			reply:   replyMsg([]byte(`{"success":false,"error":"user not found"}`)),
 			wantErr: domain.ErrUserNotFound,
+		},
+		{
+			name:    "JSON user-not-found-by-criteria envelope returns ErrUserNotFound",
+			reply:   replyMsg([]byte(`{"success":false,"error":"user not found by criteria"}`)),
+			wantErr: domain.ErrUserNotFound,
+		},
+		{
+			name:       "backend failure mentioning not found returns service error",
+			reply:      replyMsg([]byte(`{"success":false,"error":"failed to search user: 404 Not Found"}`)),
+			wantErrStr: "email_to_username failed: failed to search user: 404 Not Found",
 		},
 		{
 			name:       "JSON envelope missing success field returns descriptive error",
@@ -88,8 +116,13 @@ func TestNATSUserReader_UsernameByEmail(t *testing.T) {
 			mockConn.On("RequestWithContext", mock.Anything, surveyconstants.AuthEmailToUsernameSubject, mock.Anything).
 				Return(tt.reply, tt.replyErr)
 
+			email := tt.email
+			if email == "" {
+				email = "test@example.com"
+			}
+
 			reader := NewUserReader(mockConn, slog.Default())
-			got, err := reader.UsernameByEmail(context.Background(), "test@example.com")
+			got, err := reader.UsernameByEmail(context.Background(), email)
 
 			switch {
 			case tt.wantErr != nil:

@@ -80,6 +80,10 @@ func TestShouldSendSurveyResponseInvite(t *testing.T) {
 	assert.False(t, shouldSendSurveyResponseInvite(indexerConstants.ActionUpdated, "", "guest@example.com"))
 	assert.False(t, shouldSendSurveyResponseInvite(indexerConstants.ActionCreated, "existing", "guest@example.com"))
 	assert.False(t, shouldSendSurveyResponseInvite(indexerConstants.ActionCreated, "", ""))
+	// A legacy invalid username counts as no usable username (same rule as owner
+	// resolution), so account-less invitees still get the invite fallback.
+	assert.True(t, shouldSendSurveyResponseInvite(indexerConstants.ActionCreated, "auth0|legacy", "guest@example.com"))
+	assert.False(t, shouldSendSurveyResponseInvite(indexerConstants.ActionCreated, "auth0|legacy", ""))
 }
 
 func TestMaybeSendSurveyInvite(t *testing.T) {

@@ -6,6 +6,7 @@ package eventing
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -253,9 +254,24 @@ func handleSurveyResponseUpdate(
 		indexerAction = indexerConstants.ActionUpdated
 	}
 
+	// Best-effort: send an LFID invite to new participants who have no valid LFX username yet.
+	trySendInvite := func() {
+		if shouldSendSurveyResponseInvite(indexerAction, responseData.Username, responseData.Email) {
+			displayName := strings.TrimSpace(responseData.FirstName + " " + responseData.LastName)
+			inviteHandler.maybeSendInvite(ctx, funcLogger, responseData.UID, responseData.Email, displayName, responseData.SurveyID)
+		}
+	}
+
 	// Publish to indexer and FGA-sync
 	if err := publisher.PublishSurveyResponseEvent(ctx, string(indexerAction), responseData); err != nil {
 		funcLogger.With(errKey, err).ErrorContext(ctx, "failed to publish survey response event")
+		// An auth-service outage blocks the owner grant and can exhaust MaxDeliver
+		// before the invite below is ever reached; attempt it independently so
+		// account-less invitees are not stranded. The invite-sent marker dedups
+		// the retry that succeeds once auth-service recovers.
+		if errors.Is(err, domain.ErrAuthServiceLookupFailed) {
+			trySendInvite()
+		}
 		// Check if this is a transient error that should be retried
 		if isTransientError(err) {
 			return true // NAK for retry
@@ -269,11 +285,7 @@ func handleSurveyResponseUpdate(
 		// Don't retry on mapping storage failures
 	}
 
-	// Best-effort: send an LFID invite to new participants who have no username yet.
-	if shouldSendSurveyResponseInvite(indexerAction, responseData.Username, responseData.Email) {
-		displayName := strings.TrimSpace(responseData.FirstName + " " + responseData.LastName)
-		inviteHandler.maybeSendInvite(ctx, funcLogger, responseData.UID, responseData.Email, displayName, responseData.SurveyID)
-	}
+	trySendInvite()
 
 	funcLogger.InfoContext(ctx, "successfully sent survey response indexer and access messages")
 	return false // Success, ACK the message

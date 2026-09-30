@@ -13,6 +13,7 @@ import (
 
 	indexerConstants "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
+	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/eventing"
 	surveyconstants "github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -131,9 +132,12 @@ func (h *SurveyResponseInviteHandler) maybeSendInvite(
 	)
 }
 
-// shouldSendSurveyResponseInvite reports whether a new no-LFID survey response should trigger an invite.
+// shouldSendSurveyResponseInvite reports whether a new no-LFID survey response
+// should trigger an invite. Eligibility mirrors owner resolution: a legacy
+// invalid username (e.g. "auth0|legacy") counts as no usable username, so
+// account-less invitees still receive the account-creation invite fallback.
 func shouldSendSurveyResponseInvite(indexerAction indexerConstants.MessageAction, username, email string) bool {
 	return indexerAction == indexerConstants.ActionCreated &&
-		strings.TrimSpace(username) == "" &&
+		!eventing.IsValidLFXUsername(username) &&
 		strings.TrimSpace(email) != ""
 }

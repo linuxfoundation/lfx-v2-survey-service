@@ -12,6 +12,7 @@ import (
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/eventing"
+	infraNATS "github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/nats"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
@@ -71,8 +72,10 @@ func NewEventProcessor(
 		return nil, fmt.Errorf("failed to create JetStream context: %w", err)
 	}
 
-	// Initialize publisher
-	publisher := eventing.NewNATSPublisher(conn, logger)
+	// Initialize publisher. Its user reader rides this connection (not the
+	// invite-gated one) so email-only invitations get owner tuples even when the
+	// invite feature is disabled.
+	publisher := eventing.NewNATSPublisher(conn, infraNATS.NewUserReader(conn, logger), logger)
 
 	// Access the V1 mappings KV bucket
 	mappingsKV, err := jsContext.KeyValue(context.Background(), V1MappingsBucket)
@@ -138,7 +141,7 @@ func (ep *EventProcessor) Start(ctx context.Context) error {
 
 	// Start consuming messages
 	consumeCtx, err := consumer.Consume(func(msg jetstream.Msg) {
-		kvMessageHandler(ctx, msg, ep.publisher, ep.idMapper, ep.mappingsKV, ep.v1ObjectsKV, ep.inviteHandler, ep.logger)
+		kvMessageHandler(ctx, msg, ep.publisher, ep.idMapper, ep.mappingsKV, ep.v1ObjectsKV, ep.inviteHandler, ep.config.MaxDeliver, ep.logger)
 	}, jetstream.ConsumeErrHandler(func(_ jetstream.ConsumeContext, err error) {
 		ep.logger.With("error", err).Error("KV consumer error encountered")
 	}))

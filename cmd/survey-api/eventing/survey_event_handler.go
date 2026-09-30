@@ -531,6 +531,13 @@ func isTransientError(err error) bool {
 		return true
 	}
 
+	// Auth-service lookup failures must retry rather than degrade (degrading would
+	// silently drop an access grant); the publisher wraps every non-not-found lookup failure
+	// in domain.ErrAuthServiceLookupFailed, keeping the original cause in the chain.
+	if errors.Is(err, domain.ErrAuthServiceLookupFailed) {
+		return true
+	}
+
 	errStr := err.Error()
 	// Catch any remaining transient patterns not covered by sentinel checks above.
 	if strings.Contains(errStr, "timeout") || strings.Contains(errStr, "connection") ||

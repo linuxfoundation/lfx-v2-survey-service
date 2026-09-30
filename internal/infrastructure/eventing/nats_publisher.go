@@ -6,10 +6,13 @@ package eventing
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
+	"net/mail"
 	"regexp"
 	"slices"
+	"strings"
 
 	fgaconstants "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/constants"
 	fgatypes "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/types"
@@ -43,24 +46,31 @@ const (
 
 var lfxUsernamePattern = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
-func isValidLFXUsername(username string) bool {
+// IsValidLFXUsername reports whether username is a syntactically valid LFX
+// username. Legacy IdP-format values (e.g. "auth0|legacy") are not valid and
+// must be treated as "no usable username" by both owner resolution and invite
+// eligibility.
+func IsValidLFXUsername(username string) bool {
 	return lfxUsernamePattern.MatchString(username)
 }
 
 // NATSPublisher implements the EventPublisher interface
 type NATSPublisher struct {
-	conn   *nats.Conn
-	logger *slog.Logger
+	conn       *nats.Conn
+	userReader domain.UserReader
+	logger     *slog.Logger
 }
 
 // Compile-time assertion: *NATSPublisher must satisfy domain.EventPublisher.
 var _ domain.EventPublisher = (*NATSPublisher)(nil)
 
-// NewNATSPublisher creates a new NATS publisher
-func NewNATSPublisher(conn *nats.Conn, logger *slog.Logger) *NATSPublisher {
+// NewNATSPublisher creates a new NATS publisher. userReader resolves invitee
+// emails to LFX usernames for survey response owner tuples.
+func NewNATSPublisher(conn *nats.Conn, userReader domain.UserReader, logger *slog.Logger) *NATSPublisher {
 	return &NATSPublisher{
-		conn:   conn,
-		logger: logger,
+		conn:       conn,
+		userReader: userReader,
+		logger:     logger,
 	}
 }
 
@@ -317,16 +327,14 @@ func (p *NATSPublisher) sendSurveyTemplateIndexerMessage(ctx context.Context, su
 
 // sendSurveyResponseAccessMessage sends the message to the NATS server for the survey response access control
 func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, data *domain.SurveyResponseData) error {
+	owner, err := p.resolveResponseOwner(ctx, data)
+	if err != nil {
+		return err
+	}
+
 	relations := map[string][]string{}
-	if data.Username != "" {
-		if isValidLFXUsername(data.Username) {
-			relations["owner"] = []string{data.Username}
-		} else {
-			p.logger.WarnContext(ctx, "skipping FGA owner relation for invalid LFX username",
-				"survey_response_uid", data.UID,
-				"username", data.Username,
-			)
-		}
+	if owner != "" {
+		relations["owner"] = []string{owner}
 	}
 
 	references := map[string][]string{}
@@ -334,20 +342,34 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, dat
 		references["survey"] = []string{data.SurveyUID}
 	}
 
-	// Skip sending access message if there are no relations or references
+	// Skip sending access message if there are no relations or references.
+	// Skipping also preserves any existing owner tuple: no sync, no deletion.
 	if len(relations) == 0 && len(references) == 0 {
 		return nil
+	}
+
+	accessData := fgatypes.GenericAccessData{
+		UID:        data.UID,
+		Public:     false,
+		Relations:  relations,
+		References: references,
+	}
+
+	// fga-sync's update_access is a destructive full sync: a relation absent from
+	// the payload has its live tuples deleted. Whenever no owner could be
+	// resolved, exclude the owner relation so a previously granted owner tuple
+	// (e.g. from an earlier invitation) survives re-sends and edits.
+	if owner == "" {
+		p.logger.DebugContext(ctx, "no resolvable owner; preserving any existing owner tuple",
+			"survey_response_uid", data.UID,
+		)
+		accessData.ExcludeRelations = []string{"owner"}
 	}
 
 	accessMsg := fgatypes.GenericFGAMessage{
 		ObjectType: "survey_response",
 		Operation:  "update_access",
-		Data: fgatypes.GenericAccessData{
-			UID:        data.UID,
-			Public:     false,
-			Relations:  relations,
-			References: references,
-		},
+		Data:       accessData,
 	}
 
 	accessMsgBytes, err := json.Marshal(accessMsg)
@@ -356,6 +378,58 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, dat
 	}
 
 	return p.publishWithSpan(ctx, fgaconstants.GenericUpdateAccessSubject, accessMsgBytes)
+}
+
+// resolveResponseOwner returns the LFX username to grant the survey response
+// owner relation, or "" when no owner can be resolved. A valid v1 username is
+// used as-is. Otherwise the invitation email is resolved via auth-service so
+// email-only invitations land on the invitee's account and surface in their
+// Pending Actions / My Surveys. A definitive not-found degrades to ""; any
+// other lookup failure is wrapped in domain.ErrAuthServiceLookupFailed so the
+// KV event retries instead of silently dropping the grant.
+func (p *NATSPublisher) resolveResponseOwner(ctx context.Context, data *domain.SurveyResponseData) (string, error) {
+	if IsValidLFXUsername(data.Username) {
+		return data.Username, nil
+	}
+	if data.Username != "" {
+		p.logger.WarnContext(ctx, "ignoring invalid LFX username for FGA owner relation",
+			"survey_response_uid", data.UID,
+			"username", data.Username,
+		)
+	}
+
+	email := strings.TrimSpace(data.Email)
+	if p.userReader == nil || email == "" {
+		return "", nil
+	}
+	// A malformed address is a deterministic auth-service refusal; retrying it
+	// would only exhaust the delivery budget and drop the survey reference too.
+	addr, err := mail.ParseAddress(email)
+	if err != nil {
+		p.logger.WarnContext(ctx, "invitation email is not a valid address; skipping FGA owner lookup",
+			"survey_response_uid", data.UID,
+		)
+		return "", nil
+	}
+
+	// Look up the parsed mailbox, not the raw value: display-name forms
+	// ("Jane <invitee@example.com>") pass the guard but never match an account.
+	username, err := p.userReader.UsernameByEmail(ctx, addr.Address)
+	if errors.Is(err, domain.ErrUserNotFound) {
+		// Account-less invitees are expected; the LFID invite flow covers them.
+		return "", nil
+	}
+	if err != nil {
+		return "", fmt.Errorf("%w: resolve invitee email to LFX username: %w", domain.ErrAuthServiceLookupFailed, err)
+	}
+
+	if !IsValidLFXUsername(username) {
+		p.logger.WarnContext(ctx, "auth-service returned invalid LFX username; skipping FGA owner relation",
+			"survey_response_uid", data.UID,
+		)
+		return "", nil
+	}
+	return username, nil
 }
 
 // sendDeleteAccessMessage sends a delete access message to FGA-sync
