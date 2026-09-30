@@ -254,7 +254,7 @@ func handleSurveyResponseUpdate(
 		indexerAction = indexerConstants.ActionUpdated
 	}
 
-	// Best-effort: send an LFID invite to new participants who have no username yet.
+	// Best-effort: send an LFID invite to new participants who have no valid LFX username yet.
 	trySendInvite := func() {
 		if shouldSendSurveyResponseInvite(indexerAction, responseData.Username, responseData.Email) {
 			displayName := strings.TrimSpace(responseData.FirstName + " " + responseData.LastName)

@@ -86,6 +86,18 @@ func TestHandleSurveyResponseUpdate_InviteOnPublishFailure(t *testing.T) {
 			wantRetry:   true,
 			wantInvite:  false,
 		},
+		{
+			name:       "auth outage still invites when username is a legacy invalid value",
+			publishErr: authOutageErr,
+			username:   "auth0|legacy",
+			setupInvite: func(mappingsKV *mockKeyValue) {
+				mappingsKV.On("Get", mock.Anything, inviteSentKey).Return(nil, jetstream.ErrKeyNotFound)
+				mappingsKV.On("Put", mock.Anything, inviteSentKey, []byte("pending")).Return(uint64(1), nil)
+				mappingsKV.On("Put", mock.Anything, inviteSentKey, []byte("invite-new")).Return(uint64(2), nil)
+			},
+			wantRetry:  true,
+			wantInvite: true,
+		},
 	}
 
 	for _, tt := range tests {

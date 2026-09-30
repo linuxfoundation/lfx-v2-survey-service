@@ -46,7 +46,11 @@ const (
 
 var lfxUsernamePattern = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
-func isValidLFXUsername(username string) bool {
+// IsValidLFXUsername reports whether username is a syntactically valid LFX
+// username. Legacy IdP-format values (e.g. "auth0|legacy") are not valid and
+// must be treated as "no usable username" by both owner resolution and invite
+// eligibility.
+func IsValidLFXUsername(username string) bool {
 	return lfxUsernamePattern.MatchString(username)
 }
 
@@ -384,7 +388,7 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, dat
 // other lookup failure is wrapped in domain.ErrAuthServiceLookupFailed so the
 // KV event retries instead of silently dropping the grant.
 func (p *NATSPublisher) resolveResponseOwner(ctx context.Context, data *domain.SurveyResponseData) (string, error) {
-	if isValidLFXUsername(data.Username) {
+	if IsValidLFXUsername(data.Username) {
 		return data.Username, nil
 	}
 	if data.Username != "" {
@@ -419,7 +423,7 @@ func (p *NATSPublisher) resolveResponseOwner(ctx context.Context, data *domain.S
 		return "", fmt.Errorf("%w: resolve invitee email to LFX username: %w", domain.ErrAuthServiceLookupFailed, err)
 	}
 
-	if !isValidLFXUsername(username) {
+	if !IsValidLFXUsername(username) {
 		p.logger.WarnContext(ctx, "auth-service returned invalid LFX username; skipping FGA owner relation",
 			"survey_response_uid", data.UID,
 		)

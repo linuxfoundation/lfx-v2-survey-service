@@ -72,7 +72,7 @@ func TestIsValidLFXUsername(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.username, func(t *testing.T) {
-			assert.Equal(t, tt.want, isValidLFXUsername(tt.username))
+			assert.Equal(t, tt.want, IsValidLFXUsername(tt.username))
 		})
 	}
 }
