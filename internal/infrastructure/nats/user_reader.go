@@ -61,7 +61,7 @@ func (r *NATSUserReader) UsernameByEmail(ctx context.Context, email string) (str
 			return "", fmt.Errorf("email_to_username response missing success field")
 		}
 		if !*envelope.Success {
-			if errMsg := strings.TrimSpace(envelope.Error); errMsg != "" && !isEmailToUsernameNotFound(errMsg) {
+			if errMsg := strings.TrimSpace(envelope.Error); errMsg != "" && !IsEmailLookupNotFound(errMsg) {
 				return "", fmt.Errorf("email_to_username failed: %s", errMsg)
 			}
 			return "", domain.ErrUserNotFound
@@ -72,7 +72,9 @@ func (r *NATSUserReader) UsernameByEmail(ctx context.Context, email string) (str
 	return body, nil
 }
 
-func isEmailToUsernameNotFound(errMsg string) bool {
+// IsEmailLookupNotFound reports whether an auth-service email lookup error message
+// means "no account owns this email" (definitive) as opposed to a transient backend failure.
+func IsEmailLookupNotFound(errMsg string) bool {
 	lower := strings.ToLower(errMsg)
 	return strings.Contains(lower, "not found") || strings.Contains(lower, "no user")
 }

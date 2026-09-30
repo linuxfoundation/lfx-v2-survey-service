@@ -19,6 +19,7 @@ import (
 	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	infraNATS "github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/nats"
+	surveyconstants "github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/nats-io/nats.go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -44,12 +45,6 @@ const (
 )
 
 const (
-	// authServiceEmailToSubSubject is the auth-service request/reply subject that
-	// resolves a user's primary email address to their Auth0 sub. Mirrors
-	// UserEmailToSubSubject in lfx-v2-auth-service (not imported; the
-	// auth-service module is not a dependency of this service).
-	authServiceEmailToSubSubject = "lfx.auth-service.email_to_sub"
-
 	// authLookupTimeout bounds the auth-service email_to_sub request/reply lookup.
 	authLookupTimeout = 5 * time.Second
 )
@@ -404,11 +399,15 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, dat
 // failures (e.g. its Auth0 upstream) return an error so the event is retried
 // instead of silently dropping the owner grant.
 func (p *NATSPublisher) lookupEmailToAuthSub(ctx context.Context, email string) (string, error) {
+	// auth-service lowercases and trims on its side too; send it canonical.
+	payload := []byte(strings.ToLower(strings.TrimSpace(email)))
+
 	ctx, span := tracer.Start(ctx, "nats.request",
 		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(
 			attribute.String("messaging.system", "nats"),
-			attribute.String("messaging.destination.name", authServiceEmailToSubSubject),
+			attribute.String("messaging.destination.name", surveyconstants.AuthEmailToSubSubject),
+			attribute.Int("messaging.message.body.size", len(payload)),
 		),
 	)
 	defer span.End()
@@ -416,10 +415,9 @@ func (p *NATSPublisher) lookupEmailToAuthSub(ctx context.Context, email string) 
 	reqCtx, cancel := context.WithTimeout(ctx, authLookupTimeout)
 	defer cancel()
 
-	natsMsg := nats.NewMsg(authServiceEmailToSubSubject)
+	natsMsg := nats.NewMsg(surveyconstants.AuthEmailToSubSubject)
 	natsMsg.Header = make(nats.Header)
-	// auth-service lowercases and trims on its side too; send it canonical.
-	natsMsg.Data = []byte(strings.ToLower(strings.TrimSpace(email)))
+	natsMsg.Data = payload
 	otel.GetTextMapPropagator().Inject(reqCtx, infraNATS.NatsHeaderCarrier(natsMsg.Header))
 
 	msg, err := p.conn.RequestMsgWithContext(reqCtx, natsMsg)
@@ -444,9 +442,9 @@ func (p *NATSPublisher) lookupEmailToAuthSub(ctx context.Context, email string) 
 		if jsonErr := json.Unmarshal([]byte(response), &envelope); jsonErr != nil {
 			p.logger.WarnContext(ctx, "unrecognized auth-service email_to_sub reply", "error", jsonErr)
 			span.SetStatus(codes.Error, "unrecognized reply")
-			return "", fmt.Errorf("unrecognized auth-service email_to_sub reply: %w", jsonErr)
+			return "", fmt.Errorf("%w: unrecognized email_to_sub reply: %v", domain.ErrAuthServiceLookupFailed, jsonErr)
 		}
-		if isEmailToSubNotFound(envelope.Error) {
+		if infraNATS.IsEmailLookupNotFound(envelope.Error) {
 			// Definitive: no account owns this email. Degrade gracefully —
 			// account-less invitees are an expected case (LFID invite flow).
 			p.logger.DebugContext(ctx, "auth-service email_to_sub: no account for invitee email")
@@ -458,19 +456,11 @@ func (p *NATSPublisher) lookupEmailToAuthSub(ctx context.Context, email string) 
 		// dropping the owner grant.
 		p.logger.WarnContext(ctx, "auth-service email_to_sub lookup failed", "reason", envelope.Error)
 		span.SetStatus(codes.Error, envelope.Error)
-		return "", fmt.Errorf("auth-service email_to_sub lookup failed: %s", envelope.Error)
+		return "", fmt.Errorf("%w: email_to_sub: %s", domain.ErrAuthServiceLookupFailed, envelope.Error)
 	}
 
 	span.SetStatus(codes.Ok, "")
 	return response, nil
-}
-
-// isEmailToSubNotFound reports whether an auth-service error envelope message
-// means "no account owns this email" (definitive) as opposed to a transient
-// backend failure. Mirrors isEmailToUsernameNotFound in infrastructure/nats.
-func isEmailToSubNotFound(errMsg string) bool {
-	lower := strings.ToLower(errMsg)
-	return strings.Contains(lower, "not found") || strings.Contains(lower, "no user")
 }
 
 // sendDeleteAccessMessage sends a delete access message to FGA-sync

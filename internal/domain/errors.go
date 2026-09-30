@@ -83,3 +83,7 @@ func NewUnavailableError(message string, err ...error) *DomainError {
 
 // ErrUserNotFound is returned by UserReader when no registered user matches the lookup.
 var ErrUserNotFound = errors.New("user not found")
+
+// ErrAuthServiceLookupFailed marks auth-service lookup failures that must be retried:
+// the lookup result is unknown, so degrading would silently drop an access grant.
+var ErrAuthServiceLookupFailed = errors.New("auth-service lookup failed")

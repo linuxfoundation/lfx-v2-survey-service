@@ -14,7 +14,7 @@ The full OpenFGA type definitions (relations, schema) for all object types are d
 
 > **Deployment order:** `fga-sync` must be updated to accept LFX usernames in relation values (e.g., `owner`) before this service version is deployed. See [LFXV2-1962](https://linuxfoundation.atlassian.net/browse/LFXV2-1962).
 
-> **Username handling:** This service forwards the v1 `username` field unchanged when it passes LFX username format validation (`^[a-zA-Z0-9._-]+$`). Invalid values are logged and omitted from the FGA `owner` relation. fga-sync builds OpenFGA user principals as `user:{username}` without additional sanitization. For email-only invitations (no `username`), the owner principal is `user:{auth0 sub}` resolved via auth-service — see [Survey Response](#survey-response).
+> **Username handling:** This service forwards the v1 `username` field unchanged when it passes LFX username format validation (`^[a-zA-Z0-9._-]+$`). Invalid values are logged and omitted from the FGA `owner` relation. fga-sync builds OpenFGA user principals as `user:{username}` without additional sanitization. For email-only invitations (no usable `username`), the owner principal is `user:{auth0 sub}` resolved via auth-service — see [Survey Response](#survey-response).
 
 ---
 

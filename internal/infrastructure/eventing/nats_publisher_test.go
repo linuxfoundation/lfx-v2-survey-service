@@ -14,6 +14,7 @@ import (
 	fgaconstants "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/constants"
 	fgatypes "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
+	surveyconstants "github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
@@ -174,7 +175,7 @@ func TestSendSurveyResponseAccessMessage(t *testing.T) {
 func respondAsAuthService(t *testing.T, nc *nats.Conn, reply []byte) *atomic.Int32 {
 	t.Helper()
 	var calls atomic.Int32
-	sub, err := nc.Subscribe(authServiceEmailToSubSubject, func(msg *nats.Msg) {
+	sub, err := nc.Subscribe(surveyconstants.AuthEmailToSubSubject, func(msg *nats.Msg) {
 		calls.Add(1)
 		_ = msg.Respond(reply)
 	})
@@ -310,6 +311,9 @@ func TestSendSurveyResponseAccessMessageEmailFallback(t *testing.T) {
 				// Lookup failure must surface as an error (so the KV event is
 				// NAKed and retried) and nothing may be published to fga-sync.
 				require.Error(t, err)
+				// The retry classification is structural: the error must carry the
+				// sentinel that isTransientError (cmd/survey-api/eventing) matches.
+				assert.ErrorIs(t, err, domain.ErrAuthServiceLookupFailed)
 				require.NoError(t, nc.Flush())
 				_, msgErr := sub.NextMsg(100 * time.Millisecond)
 				assert.ErrorIs(t, msgErr, nats.ErrTimeout)
