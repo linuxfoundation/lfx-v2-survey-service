@@ -14,7 +14,7 @@ The full OpenFGA type definitions (relations, schema) for all object types are d
 
 > **Deployment order:** `fga-sync` must be updated to accept LFX usernames in relation values (e.g., `owner`) before this service version is deployed. See [LFXV2-1962](https://linuxfoundation.atlassian.net/browse/LFXV2-1962).
 
-> **Username handling:** This service forwards the v1 `username` field unchanged when it passes LFX username format validation (`^[a-zA-Z0-9._-]+$`). Invalid values are logged and omitted from the FGA `owner` relation. fga-sync builds OpenFGA user principals as `user:{username}` without additional sanitization.
+> **Username handling:** This service forwards the v1 `username` field unchanged when it passes LFX username format validation (`^[a-zA-Z0-9._-]+$`). Invalid values are logged and omitted from the FGA `owner` relation. fga-sync builds OpenFGA user principals as `user:{username}` without additional sanitization. For email-only invitations (no `username`), the owner principal is `user:{auth0 sub}` resolved via auth-service — see [Survey Response](#survey-response).
 
 ---
 
@@ -30,7 +30,7 @@ The full OpenFGA type definitions (relations, schema) for all object types are d
 All messages use the generic FGA message format on the following NATS subjects:
 
 | Subject | Used for |
-|---|---|
+| --- | --- |
 | `lfx.fga-sync.update_access` | Create and update operations |
 | `lfx.fga-sync.delete_access` | Delete operations |
 
@@ -47,7 +47,7 @@ Each message carries `object_type`, `operation`, and a `data` map. The sections 
 ### Access Config
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | `object_type` | `survey` |
 | `public` | `false` (always) |
 
@@ -58,7 +58,7 @@ _(none set by this service)_
 ### References
 
 | Reference | Value | Condition |
-|---|---|---|
+| --- | --- | --- |
 | `committee` | `CommitteeUID` | One entry per committee in `Committees` where `CommitteeUID` is non-empty |
 | `project` | `ProjectUID` | One entry per unique project across all committees (deduplicated); omitted when empty |
 
@@ -79,23 +79,28 @@ On delete, only `uid` is sent — all FGA tuples for `survey:{uid}` are removed 
 ### Access Config
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | `object_type` | `survey_response` |
 | `public` | `false` (always) |
 
 ### Relations
 
 | Relation | Value | Condition |
-|---|---|---|
-| `owner` | LFX username (from v1 `username` field) | Only when `Username` is non-empty and passes LFX username format validation |
+| --- | --- | --- |
+| `owner` | LFX username (from v1 `username` field) | `Username` is non-empty and passes LFX username format validation |
+| `owner` | Auth0 sub resolved from the invitee's primary email via the auth-service `lfx.auth-service.email_to_sub` request/reply | No owner was resolved from `Username` (empty or invalid), `Email` is non-empty, and the email resolves to an existing account |
 
 ### References
 
 | Reference | Value | Condition |
-|---|---|---|
+| --- | --- | --- |
 | `survey` | `SurveyUID` | Only when `SurveyUID` is non-empty |
 
-> The update message is skipped entirely if both `Username` and `SurveyUID` are empty.
+> The update message is skipped entirely when no relations and no references would be sent (no resolvable owner and an empty `SurveyUID`).
+>
+> **Ownership preservation:** fga-sync's `update_access` is a destructive full sync — a relation absent from the payload has its live tuples deleted. Whenever the message is sent without an `owner` relation, it carries `exclude_relations: ["owner"]` so a previously granted owner tuple survives re-sends and edits.
+>
+> **Unresolvable emails:** the auth-service lookup matches primary email only; invitations addressed to an alternate email, or to an email with no account, never resolve to an owner. No access-model exception is made for account-less invitees — the platform's LFID invite conversion flow remains their path to access.
 
 ### Delete
 
@@ -106,11 +111,11 @@ On delete, only `uid` is sent — all FGA tuples for `survey_response:{uid}` are
 ## Triggers
 
 | Operation | Object Type | Subject | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Create survey | `survey` | `lfx.fga-sync.update_access` | Skipped if all committee and project UIDs are empty |
 | Update survey | `survey` | `lfx.fga-sync.update_access` | Skipped if all committee and project UIDs are empty |
 | Delete survey | `survey` | `lfx.fga-sync.delete_access` | Always sent |
-| Create survey response | `survey_response` | `lfx.fga-sync.update_access` | Skipped if both `Username` and `SurveyUID` are empty |
-| Update survey response | `survey_response` | `lfx.fga-sync.update_access` | Skipped if both `Username` and `SurveyUID` are empty |
+| Create survey response | `survey_response` | `lfx.fga-sync.update_access` | Skipped when no owner resolves and `SurveyUID` is empty; carries `exclude_relations: ["owner"]` when no owner resolves |
+| Update survey response | `survey_response` | `lfx.fga-sync.update_access` | Skipped when no owner resolves and `SurveyUID` is empty; carries `exclude_relations: ["owner"]` when no owner resolves |
 | Delete survey response | `survey_response` | `lfx.fga-sync.delete_access` | Always sent |
 | Create/update/delete survey template | _(none)_ | _(none)_ | No FGA message sent |

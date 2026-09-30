@@ -10,6 +10,8 @@ import (
 	"log/slog"
 	"regexp"
 	"slices"
+	"strings"
+	"time"
 
 	fgaconstants "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/constants"
 	fgatypes "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/types"
@@ -39,6 +41,17 @@ const (
 
 	// IndexSurveyTemplateSubject is the subject for survey template indexing
 	IndexSurveyTemplateSubject = "lfx.index.survey_template"
+)
+
+const (
+	// authServiceEmailToSubSubject is the auth-service request/reply subject that
+	// resolves a user's primary email address to their Auth0 sub. Mirrors
+	// UserEmailToSubSubject in lfx-v2-auth-service (not imported; the
+	// auth-service module is not a dependency of this service).
+	authServiceEmailToSubSubject = "lfx.auth-service.email_to_sub"
+
+	// authLookupTimeout bounds the auth-service email_to_sub request/reply lookup.
+	authLookupTimeout = 5 * time.Second
 )
 
 var lfxUsernamePattern = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
@@ -329,25 +342,50 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, dat
 		}
 	}
 
+	// Invitations without a usable username (empty, or a legacy value that fails
+	// LFX username validation) resolve the invitee's primary email to their
+	// Auth0 sub instead, so the FGA owner tuple lands on their account and the
+	// response surfaces in their Pending Actions / My Surveys.
+	if _, hasOwner := relations["owner"]; !hasOwner && data.Email != "" {
+		sub, err := p.lookupEmailToAuthSub(ctx, data.Email)
+		if err != nil {
+			return fmt.Errorf("failed to resolve invitee email to auth sub: %w", err)
+		}
+		if sub != "" {
+			relations["owner"] = []string{sub}
+		}
+	}
+
 	references := map[string][]string{}
 	if data.SurveyUID != "" {
 		references["survey"] = []string{data.SurveyUID}
 	}
 
-	// Skip sending access message if there are no relations or references
+	// Skip sending access message if there are no relations or references.
+	// Skipping also preserves any existing owner tuple: no sync, no deletion.
 	if len(relations) == 0 && len(references) == 0 {
 		return nil
+	}
+
+	accessData := fgatypes.GenericAccessData{
+		UID:        data.UID,
+		Public:     false,
+		Relations:  relations,
+		References: references,
+	}
+
+	// fga-sync's update_access is a destructive full sync: a relation absent from
+	// the payload has its live tuples deleted. Whenever no owner could be
+	// resolved, exclude the owner relation so a previously granted owner tuple
+	// (e.g. from an earlier invitation) survives re-sends and edits.
+	if _, hasOwner := relations["owner"]; !hasOwner {
+		accessData.ExcludeRelations = []string{"owner"}
 	}
 
 	accessMsg := fgatypes.GenericFGAMessage{
 		ObjectType: "survey_response",
 		Operation:  "update_access",
-		Data: fgatypes.GenericAccessData{
-			UID:        data.UID,
-			Public:     false,
-			Relations:  relations,
-			References: references,
-		},
+		Data:       accessData,
 	}
 
 	accessMsgBytes, err := json.Marshal(accessMsg)
@@ -356,6 +394,83 @@ func (p *NATSPublisher) sendSurveyResponseAccessMessage(ctx context.Context, dat
 	}
 
 	return p.publishWithSpan(ctx, fgaconstants.GenericUpdateAccessSubject, accessMsgBytes)
+}
+
+// lookupEmailToAuthSub resolves an email address to the user's Auth0 sub via the
+// auth-service email_to_sub request/reply subject, following the same NATS
+// request/reply pattern as idmapper.NATSMapper.lookup. A definitive resolution
+// failure (unknown email) returns ("", nil) so the caller can degrade gracefully;
+// transport failures (timeout, no responder) and transient auth-service backend
+// failures (e.g. its Auth0 upstream) return an error so the event is retried
+// instead of silently dropping the owner grant.
+func (p *NATSPublisher) lookupEmailToAuthSub(ctx context.Context, email string) (string, error) {
+	ctx, span := tracer.Start(ctx, "nats.request",
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(
+			attribute.String("messaging.system", "nats"),
+			attribute.String("messaging.destination.name", authServiceEmailToSubSubject),
+		),
+	)
+	defer span.End()
+
+	reqCtx, cancel := context.WithTimeout(ctx, authLookupTimeout)
+	defer cancel()
+
+	natsMsg := nats.NewMsg(authServiceEmailToSubSubject)
+	natsMsg.Header = make(nats.Header)
+	// auth-service lowercases and trims on its side too; send it canonical.
+	natsMsg.Data = []byte(strings.ToLower(strings.TrimSpace(email)))
+	otel.GetTextMapPropagator().Inject(reqCtx, infraNATS.NatsHeaderCarrier(natsMsg.Header))
+
+	msg, err := p.conn.RequestMsgWithContext(reqCtx, natsMsg)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return "", fmt.Errorf("auth-service email_to_sub request failed: %w", err)
+	}
+
+	response := strings.TrimSpace(string(msg.Data))
+	if response == "" {
+		return "", nil
+	}
+
+	// auth-service reports resolution failures as JSON error envelopes —
+	// handler-level {"success":false,"error":...} or transport-level
+	// {"error":...} — while a success reply is the plain-text sub (never JSON).
+	if strings.HasPrefix(response, "{") {
+		var envelope struct {
+			Error string `json:"error"`
+		}
+		if jsonErr := json.Unmarshal([]byte(response), &envelope); jsonErr != nil {
+			p.logger.WarnContext(ctx, "unrecognized auth-service email_to_sub reply", "error", jsonErr)
+			span.SetStatus(codes.Error, "unrecognized reply")
+			return "", fmt.Errorf("unrecognized auth-service email_to_sub reply: %w", jsonErr)
+		}
+		if isEmailToSubNotFound(envelope.Error) {
+			// Definitive: no account owns this email. Degrade gracefully —
+			// account-less invitees are an expected case (LFID invite flow).
+			p.logger.DebugContext(ctx, "auth-service email_to_sub: no account for invitee email")
+			span.SetStatus(codes.Ok, "email not resolvable")
+			return "", nil
+		}
+		// Any other envelope error may be transient inside auth-service (e.g. its
+		// Auth0 backend) — surface it so the KV event retries instead of silently
+		// dropping the owner grant.
+		p.logger.WarnContext(ctx, "auth-service email_to_sub lookup failed", "reason", envelope.Error)
+		span.SetStatus(codes.Error, envelope.Error)
+		return "", fmt.Errorf("auth-service email_to_sub lookup failed: %s", envelope.Error)
+	}
+
+	span.SetStatus(codes.Ok, "")
+	return response, nil
+}
+
+// isEmailToSubNotFound reports whether an auth-service error envelope message
+// means "no account owns this email" (definitive) as opposed to a transient
+// backend failure. Mirrors isEmailToUsernameNotFound in infrastructure/nats.
+func isEmailToSubNotFound(errMsg string) bool {
+	lower := strings.ToLower(errMsg)
+	return strings.Contains(lower, "not found") || strings.Contains(lower, "no user")
 }
 
 // sendDeleteAccessMessage sends a delete access message to FGA-sync
