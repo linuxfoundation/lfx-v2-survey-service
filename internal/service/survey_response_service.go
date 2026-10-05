@@ -182,30 +182,13 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 // ──────────────────────────────────────────────────────────────────────────────
 
 // mapITXResponsesToPage maps ITX paginated responses to a Goa result with V1→V2 ID mapping.
-// Uses a worker pool to run per-item NATS ID-mapper lookups concurrently, matching the
-// pattern used by mapSurveyCommitteesToResult and mapLFXProjectsToResult.
 func (s *SurveyService) mapITXResponsesToPage(ctx context.Context, itxResponse *itx.PaginatedSurveyResponses) (*survey.SurveyResponsesPage, error) {
-	data := make([]*survey.SurveyResponseItem, len(itxResponse.Data))
-
-	pool := concurrent.NewWorkerPool(5)
-	mappingFunctions := make([]func() error, len(itxResponse.Data))
-	for i, r := range itxResponse.Data {
-		i, r := i, r
-		mappingFunctions[i] = func() error {
-			item, err := s.mapITXRecipientResponseToItem(ctx, r)
-			if err != nil {
-				return err
-			}
-			data[i] = item
-			return nil
-		}
-	}
-
-	// pool.Run blocks until all functions complete; data[i] writes are index-disjoint and safe.
-	if err := pool.Run(ctx, mappingFunctions...); err != nil {
+	data, err := concurrent.BatchMap(ctx, itxResponse.Data, func(r itx.SurveyRecipientResponse) (*survey.SurveyResponseItem, error) {
+		return s.mapITXRecipientResponseToItem(ctx, r)
+	})
+	if err != nil {
 		return nil, err
 	}
-
 	return &survey.SurveyResponsesPage{
 		Data: data,
 		Meta: &survey.SurveyResponsePageMeta{

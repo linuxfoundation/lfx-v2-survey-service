@@ -491,9 +491,7 @@ func (s *SurveyService) mapOptionalProjectV2ToV1(ctx context.Context, projectUID
 }
 
 // mapProjectUIDsV2ToV1 maps a comma-delimited list of project UIDs from V2 to V1.
-// Mapping calls are fanned out concurrently using the shared WorkerPool — each goroutine
-// writes to a pre-allocated, index-disjoint slot in v1IDs (the same pattern used by
-// mapSurveyCommitteesToResult and mapITXResponsesToPage).
+// Mapping calls are fanned out concurrently via BatchMap.
 func (s *SurveyService) mapProjectUIDsV2ToV1(ctx context.Context, projectUIDs string) (string, error) {
 	if projectUIDs == "" {
 		return "", nil
@@ -511,32 +509,20 @@ func (s *SurveyService) mapProjectUIDsV2ToV1(ctx context.Context, projectUIDs st
 		return "", nil
 	}
 
-	// Pre-allocate result slice; goroutines write to index-disjoint slots.
-	v1IDs := make([]string, len(validUIDs))
-	pool := concurrent.NewWorkerPool(5)
-	mappingFunctions := make([]func() error, len(validUIDs))
-	for i, uid := range validUIDs {
-		i, uid := i, uid
-		mappingFunctions[i] = func() error {
-			mapped, err := s.idMapper.MapProjectV2ToV1(ctx, uid)
-			if err != nil {
-				s.logger.ErrorContext(ctx, "failed to map project UID to V1",
-					"project_v2_uid", uid,
-					"error", err,
-				)
-				return err
-			}
-			v1IDs[i] = mapped
-			return nil
+	v1IDs, err := concurrent.BatchMap(ctx, validUIDs, func(uid string) (string, error) {
+		mapped, err := s.idMapper.MapProjectV2ToV1(ctx, uid)
+		if err != nil {
+			s.logger.ErrorContext(ctx, "failed to map project UID to V1",
+				"project_v2_uid", uid,
+				"error", err,
+			)
+			return "", err
 		}
-	}
-
-	// pool.Run blocks until all functions complete; v1IDs[i] writes are index-disjoint and safe.
-	if err := pool.Run(ctx, mappingFunctions...); err != nil {
+		return mapped, nil
+	})
+	if err != nil {
 		return "", err
 	}
-
-	// Join back into comma-delimited string
 	return strings.Join(v1IDs, ","), nil
 }
 
@@ -635,69 +621,48 @@ func (s *SurveyService) mapSurveyCommitteesToResult(ctx context.Context, committ
 	if committees == nil {
 		return nil, nil
 	}
-
-	result := make([]*survey.SurveyCommittee, len(committees))
-
-	// Create worker pool with 5 workers
-	pool := concurrent.NewWorkerPool(5)
-
-	// Build mapping functions for each committee
-	mappingFunctions := make([]func() error, len(committees))
-	for i, c := range committees {
-		mappingFunctions[i] = func() error {
-			// Map committee ID from V1 to V2 if present
-			var committeeV2 *string
-			if c.CommitteeID != nil && *c.CommitteeID != "" {
-				mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, *c.CommitteeID)
-				if err != nil {
-					s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2, using V1 ID",
-						"committee_v1_sfid", *c.CommitteeID,
-						"error", err,
-					)
-					// Fall back to V1 ID if mapping fails
-					committeeV2 = c.CommitteeID
-				} else {
-					committeeV2 = &mapped
-				}
+	return concurrent.BatchMap(ctx, committees, func(c itx.SurveyCommittee) (*survey.SurveyCommittee, error) {
+		// Map committee ID from V1 to V2 if present
+		var committeeV2 *string
+		if c.CommitteeID != nil && *c.CommitteeID != "" {
+			mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, *c.CommitteeID)
+			if err != nil {
+				s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2, using V1 ID",
+					"committee_v1_sfid", *c.CommitteeID,
+					"error", err,
+				)
+				committeeV2 = c.CommitteeID
+			} else {
+				committeeV2 = &mapped
 			}
-
-			// Map project ID from V1 to V2 if present
-			var projectV2 *string
-			if c.ProjectID != nil && *c.ProjectID != "" {
-				mapped, err := s.idMapper.MapProjectV1ToV2(ctx, *c.ProjectID)
-				if err != nil {
-					s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
-						"project_v1_sfid", *c.ProjectID,
-						"error", err,
-					)
-					// Fall back to V1 ID if mapping fails
-					projectV2 = c.ProjectID
-				} else {
-					projectV2 = &mapped
-				}
-			}
-
-			result[i] = &survey.SurveyCommittee{
-				CommitteeName:   c.CommitteeName,
-				CommitteeUID:    committeeV2,
-				ProjectUID:      projectV2,
-				ProjectName:     c.ProjectName,
-				SurveyURL:       c.SurveyURL,
-				TotalRecipients: c.TotalRecipients,
-				TotalResponses:  c.TotalResponses,
-				NpsValue:        c.NPSValue,
-			}
-
-			return nil
 		}
-	}
 
-	// Execute all mapping functions concurrently
-	if err := pool.Run(ctx, mappingFunctions...); err != nil {
-		return nil, err
-	}
+		// Map project ID from V1 to V2 if present
+		var projectV2 *string
+		if c.ProjectID != nil && *c.ProjectID != "" {
+			mapped, err := s.idMapper.MapProjectV1ToV2(ctx, *c.ProjectID)
+			if err != nil {
+				s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
+					"project_v1_sfid", *c.ProjectID,
+					"error", err,
+				)
+				projectV2 = c.ProjectID
+			} else {
+				projectV2 = &mapped
+			}
+		}
 
-	return result, nil
+		return &survey.SurveyCommittee{
+			CommitteeName:   c.CommitteeName,
+			CommitteeUID:    committeeV2,
+			ProjectUID:      projectV2,
+			ProjectName:     c.ProjectName,
+			SurveyURL:       c.SurveyURL,
+			TotalRecipients: c.TotalRecipients,
+			TotalResponses:  c.TotalResponses,
+			NpsValue:        c.NPSValue,
+		}, nil
+	})
 }
 
 func (s *SurveyService) mapPreviewSendResponseToResult(ctx context.Context, itxResponse *itx.PreviewSendResponse) (*survey.PreviewSendResult, error) {
@@ -725,49 +690,27 @@ func (s *SurveyService) mapLFXProjectsToResult(ctx context.Context, projects []i
 	if len(projects) == 0 {
 		return make([]*survey.LFXProject, 0), nil
 	}
-
-	result := make([]*survey.LFXProject, len(projects))
-
-	// Create worker pool with 5 workers
-	pool := concurrent.NewWorkerPool(5)
-
-	// Build mapping functions for each project
-	mappingFunctions := make([]func() error, len(projects))
-	for i, p := range projects {
-		mappingFunctions[i] = func() error {
-			// Map project ID from V1 to V2 if present
-			projectV2 := p.ID
-			if p.ID != "" {
-				mapped, err := s.idMapper.MapProjectV1ToV2(ctx, p.ID)
-				if err != nil {
-					s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
-						"project_v1_sfid", p.ID,
-						"error", err,
-					)
-					// Fall back to V1 ID if mapping fails
-				} else {
-					projectV2 = mapped
-				}
+	return concurrent.BatchMap(ctx, projects, func(p itx.LFXProject) (*survey.LFXProject, error) {
+		projectV2 := p.ID
+		if p.ID != "" {
+			mapped, err := s.idMapper.MapProjectV1ToV2(ctx, p.ID)
+			if err != nil {
+				s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
+					"project_v1_sfid", p.ID,
+					"error", err,
+				)
+			} else {
+				projectV2 = mapped
 			}
-
-			result[i] = &survey.LFXProject{
-				ID:      projectV2,
-				Name:    p.Name,
-				Slug:    p.Slug,
-				Status:  p.Status,
-				LogoURL: p.LogoURL,
-			}
-
-			return nil
 		}
-	}
-
-	// Execute all mapping functions concurrently
-	if err := pool.Run(ctx, mappingFunctions...); err != nil {
-		return nil, err
-	}
-
-	return result, nil
+		return &survey.LFXProject{
+			ID:      projectV2,
+			Name:    p.Name,
+			Slug:    p.Slug,
+			Status:  p.Status,
+			LogoURL: p.LogoURL,
+		}, nil
+	})
 }
 
 func (s *SurveyService) mapExcludedCommitteesToResult(ctx context.Context, committees []itx.ExcludedCommittee) ([]*survey.ExcludedCommittee, error) {
@@ -775,64 +718,41 @@ func (s *SurveyService) mapExcludedCommitteesToResult(ctx context.Context, commi
 	if len(committees) == 0 {
 		return make([]*survey.ExcludedCommittee, 0), nil
 	}
-
-	result := make([]*survey.ExcludedCommittee, len(committees))
-
-	// Create worker pool with 5 workers
-	pool := concurrent.NewWorkerPool(5)
-
-	// Build mapping functions for each committee
-	mappingFunctions := make([]func() error, len(committees))
-	for i, c := range committees {
-		mappingFunctions[i] = func() error {
-			// Map committee ID from V1 to V2 if present
-			committeeV2 := c.CommitteeID
-			if c.CommitteeID != "" {
-				mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, c.CommitteeID)
-				if err != nil {
-					s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2, using V1 ID",
-						"committee_v1_sfid", c.CommitteeID,
-						"error", err,
-					)
-					// Fall back to V1 ID if mapping fails
-				} else {
-					committeeV2 = mapped
-				}
+	return concurrent.BatchMap(ctx, committees, func(c itx.ExcludedCommittee) (*survey.ExcludedCommittee, error) {
+		committeeV2 := c.CommitteeID
+		if c.CommitteeID != "" {
+			mapped, err := s.idMapper.MapCommitteeV1ToV2(ctx, c.CommitteeID)
+			if err != nil {
+				s.logger.WarnContext(ctx, "failed to map committee ID from V1 to V2, using V1 ID",
+					"committee_v1_sfid", c.CommitteeID,
+					"error", err,
+				)
+			} else {
+				committeeV2 = mapped
 			}
-
-			// Map project ID from V1 to V2 if present
-			projectV2 := c.ProjectID
-			if c.ProjectID != "" {
-				mapped, err := s.idMapper.MapProjectV1ToV2(ctx, c.ProjectID)
-				if err != nil {
-					s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
-						"project_v1_sfid", c.ProjectID,
-						"error", err,
-					)
-					// Fall back to V1 ID if mapping fails
-				} else {
-					projectV2 = mapped
-				}
-			}
-
-			result[i] = &survey.ExcludedCommittee{
-				ProjectUID:        projectV2,
-				ProjectName:       c.ProjectName,
-				CommitteeUID:      committeeV2,
-				CommitteeName:     c.CommitteeName,
-				CommitteeCategory: c.CommitteeCategory,
-			}
-
-			return nil
 		}
-	}
 
-	// Execute all mapping functions concurrently
-	if err := pool.Run(ctx, mappingFunctions...); err != nil {
-		return nil, err
-	}
+		projectV2 := c.ProjectID
+		if c.ProjectID != "" {
+			mapped, err := s.idMapper.MapProjectV1ToV2(ctx, c.ProjectID)
+			if err != nil {
+				s.logger.WarnContext(ctx, "failed to map project ID from V1 to V2, using V1 ID",
+					"project_v1_sfid", c.ProjectID,
+					"error", err,
+				)
+			} else {
+				projectV2 = mapped
+			}
+		}
 
-	return result, nil
+		return &survey.ExcludedCommittee{
+			ProjectUID:        projectV2,
+			ProjectName:       c.ProjectName,
+			CommitteeUID:      committeeV2,
+			CommitteeName:     c.CommitteeName,
+			CommitteeCategory: c.CommitteeCategory,
+		}, nil
+	})
 }
 
 func mapITXPreviewRecipientsToResult(recipients []itx.ITXPreviewRecipient) []*survey.ITXPreviewRecipient {

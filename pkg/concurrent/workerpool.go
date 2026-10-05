@@ -54,3 +54,31 @@ func NewWorkerPool(workerCount int) *WorkerPool {
 		workerCount: workerCount,
 	}
 }
+
+// BatchMap runs fn concurrently over every element of items using a pool of 5
+// workers, collecting results into a slice that mirrors the input index order.
+// It returns on the first error; partial results are discarded.
+// If items is empty or nil, a non-nil empty slice is returned immediately.
+func BatchMap[In, Out any](ctx context.Context, items []In, fn func(In) (Out, error)) ([]Out, error) {
+	if len(items) == 0 {
+		return make([]Out, 0), nil
+	}
+
+	result := make([]Out, len(items))
+	fns := make([]func() error, len(items))
+	for i, item := range items {
+		fns[i] = func() error {
+			r, err := fn(item)
+			if err != nil {
+				return err
+			}
+			result[i] = r
+			return nil
+		}
+	}
+
+	if err := NewWorkerPool(5).Run(ctx, fns...); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
