@@ -17,6 +17,7 @@ import (
 	indexerTypes "github.com/linuxfoundation/lfx-v2-indexer-service/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	infraNATS "github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/nats"
+	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/nats-io/nats.go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -421,12 +422,14 @@ func (p *NATSPublisher) sendIndexerCreateUpdateMessage(ctx context.Context, subj
 	return p.publishWithSpan(ctx, subject, messageBytes)
 }
 
-// buildHeaders extracts headers from context for NATS messages
+// buildHeaders extracts headers from context for NATS messages.
+// Both keys are typed contextKey constants — using plain string literals here
+// would silently miss the values (Go context lookups compare key type AND value).
 func (p *NATSPublisher) buildHeaders(ctx context.Context) map[string]string {
 	headers := make(map[string]string)
 
 	// Extract authorization from context if available
-	if authorization, ok := ctx.Value("authorization").(string); ok {
+	if authorization, ok := ctx.Value(constants.AuthorizationContextID).(string); ok && authorization != "" {
 		headers["authorization"] = authorization
 	} else {
 		// Fallback for system-generated events
@@ -434,7 +437,7 @@ func (p *NATSPublisher) buildHeaders(ctx context.Context) map[string]string {
 	}
 
 	// Extract principal from context if available
-	if principal, ok := ctx.Value("principal").(string); ok {
+	if principal, ok := ctx.Value(constants.PrincipalContextID).(string); ok {
 		headers["x-on-behalf-of"] = principal
 	}
 

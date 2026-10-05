@@ -13,6 +13,7 @@ import (
 	fgaconstants "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/constants"
 	fgatypes "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/types"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
+	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
@@ -158,4 +159,34 @@ func TestSendSurveyResponseAccessMessage(t *testing.T) {
 			assert.Equal(t, tt.wantSurveyRef, accessData.References["survey"])
 		})
 	}
+}
+
+func TestBuildHeaders_TypedContextKeys(t *testing.T) {
+	p := &NATSPublisher{}
+
+	t.Run("fallback when context is empty", func(t *testing.T) {
+		headers := p.buildHeaders(context.Background())
+		assert.Equal(t, "Bearer survey-service", headers["authorization"])
+		assert.Empty(t, headers["x-on-behalf-of"])
+	})
+
+	t.Run("extracts typed authorization and principal keys", func(t *testing.T) {
+		ctx := context.WithValue(context.Background(), constants.AuthorizationContextID, "Bearer real-token")
+		ctx = context.WithValue(ctx, constants.PrincipalContextID, "user-123")
+
+		headers := p.buildHeaders(ctx)
+		assert.Equal(t, "Bearer real-token", headers["authorization"])
+		assert.Equal(t, "user-123", headers["x-on-behalf-of"])
+	})
+
+	t.Run("untyped string keys do NOT match (regression guard)", func(t *testing.T) {
+		// Storing under plain string must NOT be picked up — only the typed constant works.
+		type plainKey string
+		ctx := context.WithValue(context.Background(), plainKey("authorization"), "Bearer wrong")
+		ctx = context.WithValue(ctx, plainKey("principal"), "wrong-user")
+
+		headers := p.buildHeaders(ctx)
+		assert.Equal(t, "Bearer survey-service", headers["authorization"], "plain-string key must not match typed contextKey")
+		assert.Empty(t, headers["x-on-behalf-of"], "plain-string key must not match typed contextKey")
+	})
 }
