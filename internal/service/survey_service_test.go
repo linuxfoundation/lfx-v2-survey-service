@@ -5,6 +5,7 @@ package service_test
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"os"
 	"testing"
@@ -200,13 +201,7 @@ func TestListSurveyResponses_ITX404_MapsToNotFound(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 	var domErr *domain.DomainError
-	if !func() bool {
-		e, ok := err.(*domain.DomainError)
-		if ok {
-			domErr = e
-		}
-		return ok
-	}() || domErr.Type != domain.ErrorTypeNotFound {
+	if !errors.As(err, &domErr) || domErr.Type != domain.ErrorTypeNotFound {
 		t.Errorf("expected *domain.DomainError with ErrorTypeNotFound, got %T: %v", err, err)
 	}
 }
@@ -313,13 +308,7 @@ func TestListSurveyResponses_BothProjectFilters_ReturnsValidationError(t *testin
 		t.Fatal("expected a validation error when both project_uid and project_uids are set, got nil")
 	}
 	var domErr *domain.DomainError
-	if !func() bool {
-		e, ok := err.(*domain.DomainError)
-		if ok {
-			domErr = e
-		}
-		return ok
-	}() || domErr.Type != domain.ErrorTypeValidation {
+	if !errors.As(err, &domErr) || domErr.Type != domain.ErrorTypeValidation {
 		t.Fatalf("expected *domain.DomainError with ErrorTypeValidation, got %T: %v", err, err)
 	}
 	// Proxy must not have been called — the guard fires before any I/O.

@@ -142,7 +142,7 @@ func TestBatchMap_PropagatesFirstError(t *testing.T) {
 	})
 
 	require.Error(t, err)
-	assert.Equal(t, boom, err)
+	assert.True(t, errors.Is(err, boom), "expected err to wrap boom, got %v", err)
 }
 
 func TestBatchMap_PreservesIndexOrder(t *testing.T) {
