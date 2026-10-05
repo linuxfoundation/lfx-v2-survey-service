@@ -25,7 +25,7 @@ func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.Dele
 	// Call ITX API
 	err := s.responseClient.DeleteResponse(ctx, p.SurveyUID, p.ResponseID)
 	if err != nil {
-		return mapDomainError(err)
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "survey response deleted successfully",
@@ -49,7 +49,7 @@ func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.Rese
 	// Call ITX API
 	err := s.responseClient.ResendResponse(ctx, p.SurveyUID, p.ResponseID)
 	if err != nil {
-		return mapDomainError(err)
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "survey response resent successfully",
@@ -75,19 +75,19 @@ func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.Dele
 	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
 	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
 	if err != nil {
-		return mapDomainError(err)
+		return err
 	}
 
 	// Map project UID from V2 to V1 if provided (ITX expects V1 SFID)
 	projectV1, err := s.mapOptionalProjectV2ToV1(ctx, p.ProjectUID)
 	if err != nil {
-		return mapDomainError(err)
+		return err
 	}
 
 	// Call ITX API
 	err = s.surveyClient.DeleteRecipientGroup(ctx, p.SurveyUID, committeeV1, projectV1, p.FoundationID)
 	if err != nil {
-		return mapDomainError(err)
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "recipient group deleted successfully",
@@ -112,8 +112,8 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 	// project_uid and project_uids are mutually exclusive — reject early.
 	if p.ProjectUID != nil && *p.ProjectUID != "" &&
 		p.ProjectUids != nil && *p.ProjectUids != "" {
-		return nil, mapDomainError(domain.NewValidationError(
-			"project_uid and project_uids are mutually exclusive"))
+		return nil, domain.NewValidationError(
+			"project_uid and project_uids are mutually exclusive")
 	}
 
 	// Build ITX params with optional V2→V1 ID mapping for project filters
@@ -129,7 +129,7 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 				"project_uid", *p.ProjectUID,
 				"error", err,
 			)
-			return nil, mapDomainError(err)
+			return nil, err
 		}
 		params.ProjectID = &projectV1
 		s.logger.DebugContext(ctx, "mapped project_uid for responses filter",
@@ -145,7 +145,7 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 				"project_uids", *p.ProjectUids,
 				"error", err,
 			)
-			return nil, mapDomainError(err)
+			return nil, err
 		}
 		params.ProjectIDs = &projectV1IDs
 		s.logger.DebugContext(ctx, "mapped project_uids for responses filter",
@@ -157,7 +157,7 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 	// Call ITX API
 	itxResponse, err := s.responseClient.ListResponses(ctx, p.SurveyUID, params)
 	if err != nil {
-		return nil, mapDomainError(err)
+		return nil, err
 	}
 
 	// Map response back to Goa result (V1→V2 ID mapping per response)
@@ -166,7 +166,7 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 		s.logger.ErrorContext(ctx, "failed to map ITX responses",
 			"error", err,
 		)
-		return nil, mapDomainError(err)
+		return nil, err
 	}
 
 	s.logger.InfoContext(ctx, "survey responses listed successfully",
@@ -182,30 +182,13 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 // ──────────────────────────────────────────────────────────────────────────────
 
 // mapITXResponsesToPage maps ITX paginated responses to a Goa result with V1→V2 ID mapping.
-// Uses a worker pool to run per-item NATS ID-mapper lookups concurrently, matching the
-// pattern used by mapSurveyCommitteesToResult and mapLFXProjectsToResult.
 func (s *SurveyService) mapITXResponsesToPage(ctx context.Context, itxResponse *itx.PaginatedSurveyResponses) (*survey.SurveyResponsesPage, error) {
-	data := make([]*survey.SurveyResponseItem, len(itxResponse.Data))
-
-	pool := concurrent.NewWorkerPool(5)
-	mappingFunctions := make([]func() error, len(itxResponse.Data))
-	for i, r := range itxResponse.Data {
-		i, r := i, r
-		mappingFunctions[i] = func() error {
-			item, err := s.mapITXRecipientResponseToItem(ctx, r)
-			if err != nil {
-				return err
-			}
-			data[i] = item
-			return nil
-		}
-	}
-
-	// pool.Run blocks until all functions complete; data[i] writes are index-disjoint and safe.
-	if err := pool.Run(ctx, mappingFunctions...); err != nil {
+	data, err := concurrent.BatchMap(ctx, itxResponse.Data, func(r itx.SurveyRecipientResponse) (*survey.SurveyResponseItem, error) {
+		return s.mapITXRecipientResponseToItem(ctx, r)
+	})
+	if err != nil {
 		return nil, err
 	}
-
 	return &survey.SurveyResponsesPage{
 		Data: data,
 		Meta: &survey.SurveyResponsePageMeta{

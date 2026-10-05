@@ -92,3 +92,70 @@ func TestWorkerPool_Run_WithCancelledContext(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, context.Canceled, err)
 }
+
+func TestBatchMap_HappyPath(t *testing.T) {
+	ctx := context.Background()
+	in := []int{1, 2, 3, 4, 5}
+
+	out, err := BatchMap(ctx, in, func(n int) (int, error) {
+		return n * 2, nil
+	})
+
+	require.NoError(t, err)
+	assert.ElementsMatch(t, []int{2, 4, 6, 8, 10}, out)
+}
+
+func TestBatchMap_EmptyInput(t *testing.T) {
+	ctx := context.Background()
+
+	out, err := BatchMap(ctx, []string{}, func(s string) (string, error) {
+		return s, nil
+	})
+
+	require.NoError(t, err)
+	assert.NotNil(t, out)
+	assert.Empty(t, out)
+}
+
+func TestBatchMap_NilInput(t *testing.T) {
+	ctx := context.Background()
+
+	out, err := BatchMap(ctx, nil, func(s string) (string, error) {
+		return s, nil
+	})
+
+	require.NoError(t, err)
+	assert.NotNil(t, out)
+	assert.Empty(t, out)
+}
+
+func TestBatchMap_PropagatesFirstError(t *testing.T) {
+	ctx := context.Background()
+	boom := errors.New("mapping failed")
+	in := []int{1, 2, 3}
+
+	_, err := BatchMap(ctx, in, func(n int) (int, error) {
+		if n == 2 {
+			return 0, boom
+		}
+		return n, nil
+	})
+
+	require.Error(t, err)
+	assert.True(t, errors.Is(err, boom), "expected err to wrap boom, got %v", err)
+}
+
+func TestBatchMap_PreservesIndexOrder(t *testing.T) {
+	ctx := context.Background()
+	in := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"}
+
+	out, err := BatchMap(ctx, in, func(s string) (string, error) {
+		return s + s, nil
+	})
+
+	require.NoError(t, err)
+	require.Len(t, out, len(in))
+	for i, s := range in {
+		assert.Equal(t, s+s, out[i], "index %d mismatch", i)
+	}
+}

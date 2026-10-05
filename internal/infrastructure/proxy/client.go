@@ -179,43 +179,92 @@ func (c *Client) mapHTTPError(statusCode int, body []byte) error {
 	}
 }
 
-// AcceptInvite calls the ITX survey service to enrich all survey-response records for the
-// given email address with the acceptor's username and profile data. This is called after
-// a no-LFID participant accepts their invite and gains a username.
-func (c *Client) AcceptInvite(ctx context.Context, email, username string) error {
-	body, err := json.Marshal(map[string]string{
-		"email":    email,
-		"username": username,
-	})
+// marshalJSON encodes v as JSON and returns an io.Reader over the bytes.
+// On failure it returns a domain.InternalError so callers can return it directly.
+func marshalJSON(v any) (io.Reader, error) {
+	b, err := json.Marshal(v)
 	if err != nil {
-		return domain.NewInternalError("failed to marshal invite_accepted request", err)
+		return nil, domain.NewInternalError("failed to marshal request", err)
 	}
+	return bytes.NewReader(b), nil
+}
 
-	reqURL := fmt.Sprintf("%sv2/surveys/responses/invite_accepted", c.config.BaseURL)
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewReader(body))
+// doJSON executes an HTTP request and decodes the successful JSON response into T.
+// Pass a non-nil body for requests that carry a JSON payload; pass nil for GET / no-body
+// DELETE. When body is non-nil the Content-Type header is set automatically.
+func doJSON[T any](ctx context.Context, c *Client, method, urlStr string, body io.Reader) (*T, error) {
+	httpReq, err := http.NewRequestWithContext(ctx, method, urlStr, body)
 	if err != nil {
-		return domain.NewInternalError("failed to create invite_accepted request", err)
+		return nil, domain.NewInternalError("failed to create request", err)
 	}
-
-	httpReq.Header.Set("Content-Type", "application/json")
+	if body != nil {
+		httpReq.Header.Set("Content-Type", "application/json")
+	}
+	httpReq.Header.Set("Accept", "application/json")
 	httpReq.Header.Set("x-scope", "manage:surveys")
 
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
-		return domain.NewUnavailableError("ITX invite_accepted request failed", err)
+		return nil, domain.NewUnavailableError("ITX service request failed", err)
 	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return domain.NewInternalError("failed to read invite_accepted response", err)
+		return nil, domain.NewInternalError("failed to read response", err)
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, c.mapHTTPError(resp.StatusCode, respBody)
 	}
 
+	var result T
+	if err := json.Unmarshal(respBody, &result); err != nil {
+		return nil, domain.NewInternalError("failed to parse response", err)
+	}
+	return &result, nil
+}
+
+// doNoBody executes an HTTP request and returns only a success/error signal —
+// the response body is consumed and discarded (never decoded).
+// Pass a non-nil body for requests that carry a JSON payload; Content-Type is set
+// automatically when body is non-nil.
+func doNoBody(ctx context.Context, c *Client, method, urlStr string, body io.Reader) error {
+	httpReq, err := http.NewRequestWithContext(ctx, method, urlStr, body)
+	if err != nil {
+		return domain.NewInternalError("failed to create request", err)
+	}
+	if body != nil {
+		httpReq.Header.Set("Content-Type", "application/json")
+	}
+	httpReq.Header.Set("x-scope", "manage:surveys")
+
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return domain.NewUnavailableError("ITX service request failed", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return domain.NewInternalError("failed to read response", err)
+	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return c.mapHTTPError(resp.StatusCode, respBody)
 	}
-
 	return nil
+}
+
+// AcceptInvite calls the ITX survey service to enrich all survey-response records for the
+// given email address with the acceptor's username and profile data. This is called after
+// a no-LFID participant accepts their invite and gains a username.
+func (c *Client) AcceptInvite(ctx context.Context, email, username string) error {
+	body, err := marshalJSON(map[string]string{
+		"email":    email,
+		"username": username,
+	})
+	if err != nil {
+		return err
+	}
+	return doNoBody(ctx, c, http.MethodPost,
+		fmt.Sprintf("%sv2/surveys/responses/invite_accepted", c.config.BaseURL), body)
 }
