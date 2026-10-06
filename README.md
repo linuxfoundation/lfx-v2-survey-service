@@ -101,7 +101,7 @@ For detailed API contracts showing request/response schemas and differences betw
 
 ## Prerequisites
 
-- Go 1.25.4 or later
+- Go 1.25.14 or later
 - Docker (for containerization)
 - Kubernetes cluster (for deployment)
 - Helm 3 (for deployment)
@@ -275,4 +275,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on development setup, code
 Copyright The Linux Foundation and each contributor to LFX.
 
 Licensed under the MIT License. See [LICENSE](LICENSE) for details.
-

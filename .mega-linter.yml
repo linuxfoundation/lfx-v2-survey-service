@@ -33,6 +33,9 @@ YAML_YAMLLINT_CONFIG_FILE: .yamllint
 # yamllint disable-line rule:line-length
 REPOSITORY_KICS_ARGUMENTS: scan --no-progress --exclude-severities="medium,low,info,trace" --exclude-paths="./gen/*" --exclude-paths="./cmd/survey-api/kodata/*"
 SPELL_CSPELL_ANALYZE_FILE_NAMES: false
+# Analyze workflow action references without GitHub API access because shared
+# private-repository references are unavailable to external scanners.
+ACTION_ZIZMOR_ARGUMENTS: "--offline"
 # Make sure Vale is setup to run with the styles it needs.
 SPELL_VALE_PRE_COMMANDS:
   - command: mkdir -p styles
