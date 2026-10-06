@@ -23,7 +23,7 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
 	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
 	if err != nil {
-		return nil, mapDomainError(err)
+		return nil, err
 	}
 
 	// Build ITX request
@@ -38,7 +38,7 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 	// Call ITX API
 	itxResponse, err := s.exclusionClient.CreateExclusion(ctx, itxRequest)
 	if err != nil {
-		return nil, mapDomainError(err)
+		return nil, err
 	}
 
 	// Map response back to goa result (including V1 to V2 ID mapping)
@@ -47,7 +47,7 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 		s.logger.ErrorContext(ctx, "failed to map exclusion response",
 			"error", err,
 		)
-		return nil, mapDomainError(err)
+		return nil, err
 	}
 
 	s.logger.InfoContext(ctx, "exclusion created successfully",
@@ -70,7 +70,7 @@ func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExc
 	// Map committee UID from V2 to V1 if provided (ITX expects V1 SFID)
 	committeeV1, err := s.mapOptionalCommitteeV2ToV1(ctx, p.CommitteeUID)
 	if err != nil {
-		return mapDomainError(err)
+		return err
 	}
 
 	// Build ITX request
@@ -85,7 +85,7 @@ func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExc
 	// Call ITX API
 	err = s.exclusionClient.DeleteExclusion(ctx, itxRequest)
 	if err != nil {
-		return mapDomainError(err)
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "exclusion deleted successfully")
@@ -105,7 +105,7 @@ func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusion
 	// Call ITX API
 	itxResponse, err := s.exclusionClient.GetExclusion(ctx, p.ExclusionID)
 	if err != nil {
-		return nil, mapDomainError(err)
+		return nil, err
 	}
 
 	// Map response back to goa result (including V1 to V2 ID mapping)
@@ -114,7 +114,7 @@ func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusion
 		s.logger.ErrorContext(ctx, "failed to map extended exclusion response",
 			"error", err,
 		)
-		return nil, mapDomainError(err)
+		return nil, err
 	}
 
 	s.logger.InfoContext(ctx, "exclusion retrieved successfully",
@@ -136,7 +136,7 @@ func (s *SurveyService) DeleteExclusionByID(ctx context.Context, p *survey.Delet
 	// Call ITX API
 	err := s.exclusionClient.DeleteExclusionByID(ctx, p.ExclusionID)
 	if err != nil {
-		return mapDomainError(err)
+		return err
 	}
 
 	s.logger.InfoContext(ctx, "exclusion deleted successfully",

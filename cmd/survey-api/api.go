@@ -5,6 +5,7 @@ package main
 
 import (
 	"context"
+	"errors"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
@@ -30,84 +31,165 @@ func NewSurveyAPI(surveyService *service.SurveyService, auth domain.Authenticato
 	}
 }
 
+// mapDomainError translates a domain error into the appropriate Goa transport
+// error type. It lives here — at the outermost adapter layer — because Goa
+// error types are a transport concern; the service layer must not import them.
+func mapDomainError(err error) error {
+	var domainErr *domain.DomainError
+	if !errors.As(err, &domainErr) {
+		return &survey.InternalServerError{
+			Code:    "500",
+			Message: "Internal server error",
+		}
+	}
+	switch domainErr.Type {
+	case domain.ErrorTypeValidation:
+		return &survey.BadRequestError{Code: "400", Message: domainErr.Message}
+	case domain.ErrorTypeNotFound:
+		return &survey.NotFoundError{Code: "404", Message: domainErr.Message}
+	case domain.ErrorTypeConflict:
+		return &survey.ConflictError{Code: "409", Message: domainErr.Message}
+	case domain.ErrorTypeUnavailable:
+		return &survey.ServiceUnavailableError{Code: "503", Message: domainErr.Message}
+	default:
+		return &survey.InternalServerError{Code: "500", Message: domainErr.Message}
+	}
+}
+
 // ScheduleSurvey implements survey.Service.ScheduleSurvey
 func (api *SurveyAPI) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSurveyPayload) (*survey.SurveyScheduleResult, error) {
-	return api.surveyService.ScheduleSurvey(ctx, p)
+	result, err := api.surveyService.ScheduleSurvey(ctx, p)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+	return result, nil
 }
 
 // GetSurvey implements survey.Service.GetSurvey
 func (api *SurveyAPI) GetSurvey(ctx context.Context, p *survey.GetSurveyPayload) (*survey.SurveyScheduleResult, error) {
-	return api.surveyService.GetSurvey(ctx, p)
+	result, err := api.surveyService.GetSurvey(ctx, p)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+	return result, nil
 }
 
 // UpdateSurvey implements survey.Service.UpdateSurvey
 func (api *SurveyAPI) UpdateSurvey(ctx context.Context, p *survey.UpdateSurveyPayload) (*survey.SurveyScheduleResult, error) {
-	return api.surveyService.UpdateSurvey(ctx, p)
+	result, err := api.surveyService.UpdateSurvey(ctx, p)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+	return result, nil
 }
 
 // DeleteSurvey implements survey.Service.DeleteSurvey
 func (api *SurveyAPI) DeleteSurvey(ctx context.Context, p *survey.DeleteSurveyPayload) error {
-	return api.surveyService.DeleteSurvey(ctx, p)
+	if err := api.surveyService.DeleteSurvey(ctx, p); err != nil {
+		return mapDomainError(err)
+	}
+	return nil
 }
 
 // BulkResendSurvey implements survey.Service.BulkResendSurvey
 func (api *SurveyAPI) BulkResendSurvey(ctx context.Context, p *survey.BulkResendSurveyPayload) error {
-	return api.surveyService.BulkResendSurvey(ctx, p)
+	if err := api.surveyService.BulkResendSurvey(ctx, p); err != nil {
+		return mapDomainError(err)
+	}
+	return nil
 }
 
 // PreviewSendSurvey implements survey.Service.PreviewSendSurvey
 func (api *SurveyAPI) PreviewSendSurvey(ctx context.Context, p *survey.PreviewSendSurveyPayload) (*survey.PreviewSendResult, error) {
-	return api.surveyService.PreviewSendSurvey(ctx, p)
+	result, err := api.surveyService.PreviewSendSurvey(ctx, p)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+	return result, nil
 }
 
 // SendMissingRecipients implements survey.Service.SendMissingRecipients
 func (api *SurveyAPI) SendMissingRecipients(ctx context.Context, p *survey.SendMissingRecipientsPayload) error {
-	return api.surveyService.SendMissingRecipients(ctx, p)
+	if err := api.surveyService.SendMissingRecipients(ctx, p); err != nil {
+		return mapDomainError(err)
+	}
+	return nil
 }
 
 // DeleteSurveyResponse implements survey.Service.DeleteSurveyResponse
 func (api *SurveyAPI) DeleteSurveyResponse(ctx context.Context, p *survey.DeleteSurveyResponsePayload) error {
-	return api.surveyService.DeleteSurveyResponse(ctx, p)
+	if err := api.surveyService.DeleteSurveyResponse(ctx, p); err != nil {
+		return mapDomainError(err)
+	}
+	return nil
 }
 
 // ResendSurveyResponse implements survey.Service.ResendSurveyResponse
 func (api *SurveyAPI) ResendSurveyResponse(ctx context.Context, p *survey.ResendSurveyResponsePayload) error {
-	return api.surveyService.ResendSurveyResponse(ctx, p)
+	if err := api.surveyService.ResendSurveyResponse(ctx, p); err != nil {
+		return mapDomainError(err)
+	}
+	return nil
 }
 
 // DeleteRecipientGroup implements survey.Service.DeleteRecipientGroup
 func (api *SurveyAPI) DeleteRecipientGroup(ctx context.Context, p *survey.DeleteRecipientGroupPayload) error {
-	return api.surveyService.DeleteRecipientGroup(ctx, p)
+	if err := api.surveyService.DeleteRecipientGroup(ctx, p); err != nil {
+		return mapDomainError(err)
+	}
+	return nil
 }
 
 // CreateExclusion implements survey.Service.CreateExclusion
 func (api *SurveyAPI) CreateExclusion(ctx context.Context, p *survey.CreateExclusionPayload) (*survey.ExclusionResult, error) {
-	return api.surveyService.CreateExclusion(ctx, p)
+	result, err := api.surveyService.CreateExclusion(ctx, p)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+	return result, nil
 }
 
 // DeleteExclusion implements survey.Service.DeleteExclusion
 func (api *SurveyAPI) DeleteExclusion(ctx context.Context, p *survey.DeleteExclusionPayload) error {
-	return api.surveyService.DeleteExclusion(ctx, p)
+	if err := api.surveyService.DeleteExclusion(ctx, p); err != nil {
+		return mapDomainError(err)
+	}
+	return nil
 }
 
 // GetExclusion implements survey.Service.GetExclusion
 func (api *SurveyAPI) GetExclusion(ctx context.Context, p *survey.GetExclusionPayload) (*survey.ExtendedExclusionResult, error) {
-	return api.surveyService.GetExclusion(ctx, p)
+	result, err := api.surveyService.GetExclusion(ctx, p)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+	return result, nil
 }
 
 // DeleteExclusionByID implements survey.Service.DeleteExclusionByID
 func (api *SurveyAPI) DeleteExclusionByID(ctx context.Context, p *survey.DeleteExclusionByIDPayload) error {
-	return api.surveyService.DeleteExclusionByID(ctx, p)
+	if err := api.surveyService.DeleteExclusionByID(ctx, p); err != nil {
+		return mapDomainError(err)
+	}
+	return nil
 }
 
 // ListSurveyResponses implements survey.Service.ListSurveyResponses
 func (api *SurveyAPI) ListSurveyResponses(ctx context.Context, p *survey.ListSurveyResponsesPayload) (*survey.SurveyResponsesPage, error) {
-	return api.surveyService.ListSurveyResponses(ctx, p)
+	result, err := api.surveyService.ListSurveyResponses(ctx, p)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+	return result, nil
 }
 
 // ValidateEmail implements survey.Service.ValidateEmail
 func (api *SurveyAPI) ValidateEmail(ctx context.Context, p *survey.ValidateEmailPayload) (*survey.ValidateEmailResult, error) {
-	return api.surveyService.ValidateEmail(ctx, p)
+	result, err := api.surveyService.ValidateEmail(ctx, p)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+	return result, nil
 }
 
 // JWTAuth implements survey.Auther.JWTAuth.
