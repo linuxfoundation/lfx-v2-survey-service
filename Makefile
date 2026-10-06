@@ -54,6 +54,11 @@ deps:
 		echo "==> Installing golangci-lint..."; \
 		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
 	}
+	@command -v jq >/dev/null 2>&1 || { \
+		echo "==> jq is required by 'make apigen' to patch generated OpenAPI output."; \
+		echo "    Install it (e.g. 'brew install jq' or 'apt-get install jq') and re-run."; \
+		exit 1; \
+	}
 	@echo "==> Downloading Go modules..."
 	@go mod download
 
@@ -64,8 +69,7 @@ apigen:
 	@# (e.g. "jwt_header_Authorization": null instead of an empty array),
 	@# which Swagger 2 validators reject. Patch the requirement values back
 	@# to empty arrays until upstream fixes this.
-	@jq 'walk(if type == "object" and has("security") and (.security | type) == "array" then .security |= map(with_entries(.value = (.value // []))) else . end)' gen/http/openapi.json > /tmp/openapi.json.fixed \
-		&& mv /tmp/openapi.json.fixed gen/http/openapi.json
+	@tmp=$$(mktemp /tmp/openapi.json.XXXXXX) && jq 'walk(if type == "object" and has("security") and (.security | type) == "array" then .security |= map(with_entries(.value = (.value // []))) else . end)' gen/http/openapi.json > "$$tmp" && mv "$$tmp" gen/http/openapi.json
 	@echo "==> API generation complete"
 
 build:

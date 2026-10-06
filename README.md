@@ -102,6 +102,7 @@ For detailed API contracts showing request/response schemas and differences betw
 ## Prerequisites
 
 - Go 1.25.14 or later
+- jq (for `make apigen` post-processing)
 - Docker (for containerization)
 - Kubernetes cluster (for deployment)
 - Helm 3 (for deployment)
