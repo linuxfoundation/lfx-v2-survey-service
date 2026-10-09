@@ -19,6 +19,10 @@ HELM_VALUES_FILE=./charts/lfx-v2-survey-service/values.local.yaml
 # Go files
 GO_FILES=$(shell find . -name "*.go" -not -path "./gen/*" -not -path "./vendor/*")
 
+# Goa CLI version, derived from go.mod so it can never drift out of sync with
+# the goa.design/goa/v3 runtime version this repo builds against.
+GOA_VERSION := $(shell awk '/goa.design\/goa\/v3 /{print $$2}' go.mod)
+
 # Help target
 help:
 	@echo "Available targets:"
@@ -44,13 +48,16 @@ help:
 # Install dependencies
 deps:
 	@echo "==> Installing dependencies..."
-	@command -v goa >/dev/null 2>&1 || { \
-		echo "==> Installing goa CLI..."; \
-		go install goa.design/goa/v3/cmd/goa@v3.24.1; \
-	}
+	@echo "==> Installing goa CLI $(GOA_VERSION)..."
+	@go install goa.design/goa/v3/cmd/goa@$(GOA_VERSION)
 	@command -v golangci-lint >/dev/null 2>&1 || { \
 		echo "==> Installing golangci-lint..."; \
 		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
+	}
+	@command -v jq >/dev/null 2>&1 || { \
+		echo "==> jq is required by 'make apigen' to patch generated OpenAPI output."; \
+		echo "    Install it (e.g. 'brew install jq' or 'apt-get install jq') and re-run."; \
+		exit 1; \
 	}
 	@echo "==> Downloading Go modules..."
 	@go mod download
@@ -58,6 +65,11 @@ deps:
 apigen:
 	@echo "==> Generating API code from Goa design..."
 	goa gen github.com/linuxfoundation/lfx-v2-survey-service/api/survey/v1/design
+	@# Goa v3.30.0 emits invalid Swagger 2 "security" requirements
+	@# (e.g. "jwt_header_Authorization": null instead of an empty array),
+	@# which Swagger 2 validators reject. Patch the requirement values back
+	@# to empty arrays until upstream fixes this.
+	@tmp=$$(mktemp /tmp/openapi.json.XXXXXX) && jq 'walk(if type == "object" and has("security") and (.security | type) == "array" then .security |= map(with_entries(.value = (.value // []))) else . end)' gen/http/openapi.json > "$$tmp" && mv "$$tmp" gen/http/openapi.json
 	@echo "==> API generation complete"
 
 build:
