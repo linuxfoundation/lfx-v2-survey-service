@@ -151,6 +151,7 @@ Response body is identical to Proxy API response.
 | Proxy API (LFX) | ITX API | Notes |
 |-----------------|---------|-------|
 | `committee_uid` (single string, required) | `committees` (array) | Proxy accepts single committee UID, converted to array for ITX |
+| `creator_username`, `creator_id`, `creator_name` | Same | Request values are **ignored**. The proxy sets `creator_username` and `creator_id` to the authenticated user's LFID username and `creator_name` to that user's display name from the auth service (the username when the lookup is unavailable) |
 | All other request fields | Same | Request fields are identical |
 | All response fields | Same | Response fields are identical |
 
@@ -282,7 +283,8 @@ Response body is identical to ITX Create Survey response with updated values.
 | Proxy API (LFX) | ITX API | Notes |
 |-----------------|---------|-------|
 | `/surveys/{survey_id}` | `/v2/surveys/{survey_id}/schedule` | Path differs - proxy has shorter path |
-| All fields | Same | Request/response fields are identical |
+| `creator_id` | `creator_username`, `creator_id` | The request value is **ignored**. The proxy sets both to the authenticated user's LFID username; ITX records `creator_username` as the survey's last modifier |
+| All other fields | Same | Request/response fields are identical |
 
 ---
 

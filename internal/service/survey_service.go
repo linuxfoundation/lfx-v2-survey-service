@@ -21,6 +21,7 @@ type SurveyService struct {
 	exclusionClient domain.ExclusionClient
 	responseClient  domain.SurveyResponseClient
 	idMapper        domain.IDMapper
+	userNameReader  domain.UserNameReader // optional; see WithUserNameReader
 	logger          *slog.Logger
 }
 
@@ -47,6 +48,14 @@ func NewSurveyService(
 		idMapper:        idMapper,
 		logger:          logger,
 	}
+}
+
+// WithUserNameReader sets the trusted source for the creator's display name.
+// It is optional: without it, or when a lookup fails, the creator name falls
+// back to the creator's username.
+func (s *SurveyService) WithUserNameReader(r domain.UserNameReader) *SurveyService {
+	s.userNameReader = r
+	return s
 }
 
 // ServiceReady returns an error if any required dependency was not injected.
@@ -98,15 +107,27 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 		"committee_v1_sfid", committeeV1,
 	)
 
+	// The creator comes from the authenticated principal; any creator_* values in
+	// the request body are ignored.
+	creatorUsername, creatorName, err := s.creatorFromPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if clientCreatorDiffers(creatorUsername, p.CreatorUsername, p.CreatorID) {
+		s.logger.WarnContext(ctx, "ignoring client-supplied creator fields that differ from the authenticated principal",
+			"principal", creatorUsername,
+		)
+	}
+
 	// Build ITX request - convert single committee_uid to array for ITX
 	committees := []string{committeeV1}
 
 	itxRequest := &itx.ScheduleSurveyRequest{
 		IsProjectSurvey:        p.IsProjectSurvey,
 		StageFilter:            p.StageFilter,
-		CreatorUsername:        p.CreatorUsername,
-		CreatorName:            p.CreatorName,
-		CreatorID:              p.CreatorID,
+		CreatorUsername:        &creatorUsername,
+		CreatorName:            &creatorName,
+		CreatorID:              &creatorUsername,
 		SurveyMonkeyID:         p.SurveyMonkeyID,
 		SurveyTitle:            p.SurveyTitle,
 		SendImmediately:        p.SendImmediately,
@@ -247,8 +268,21 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 		}
 	}
 
+	// ITX records who modified the survey from creator_username, so both identity
+	// fields come from the authenticated principal; the body's creator_id is ignored.
+	creatorUsername, _, err := s.creatorFromPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if clientCreatorDiffers(creatorUsername, nil, p.CreatorID) {
+		s.logger.WarnContext(ctx, "ignoring client-supplied creator fields that differ from the authenticated principal",
+			"principal", creatorUsername,
+		)
+	}
+
 	itxRequest := &itx.UpdateSurveyRequest{
-		CreatorID:              p.CreatorID,
+		CreatorUsername:        &creatorUsername,
+		CreatorID:              &creatorUsername,
 		SurveyTitle:            p.SurveyTitle,
 		SurveySendDate:         p.SurveySendDate,
 		SurveyCutoffDate:       p.SurveyCutoffDate,
@@ -441,6 +475,44 @@ func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEma
 func principalFromCtx(ctx context.Context) string {
 	principal, _ := ctx.Value(constants.PrincipalContextID).(string)
 	return principal
+}
+
+// creatorFromPrincipal resolves the identity stamped on a survey from the
+// authenticated principal, the LFID username JWTAuth stored in context. The
+// display name comes from the trusted user-name lookup and falls back to the
+// username when no reader is configured or the lookup fails, so a survey is never
+// blocked on it.
+func (s *SurveyService) creatorFromPrincipal(ctx context.Context) (username, name string, err error) {
+	username = strings.TrimSpace(principalFromCtx(ctx))
+	if username == "" {
+		return "", "", domain.NewValidationError("an authenticated user is required to create or update a survey")
+	}
+
+	name = username
+	if s.userNameReader != nil {
+		resolved, lookupErr := s.userNameReader.DisplayNameByUsername(ctx, username)
+		switch {
+		case lookupErr != nil:
+			s.logger.WarnContext(ctx, "failed to resolve creator display name; using username",
+				"principal", username,
+				"error", lookupErr,
+			)
+		case strings.TrimSpace(resolved) != "":
+			name = strings.TrimSpace(resolved)
+		}
+	}
+	return username, name, nil
+}
+
+// clientCreatorDiffers reports whether a client-supplied creator username or ID
+// is set and differs from the authenticated principal.
+func clientCreatorDiffers(principal string, clientUsername, clientID *string) bool {
+	for _, v := range []*string{clientUsername, clientID} {
+		if v != nil && strings.TrimSpace(*v) != "" && strings.TrimSpace(*v) != principal {
+			return true
+		}
+	}
+	return false
 }
 
 // mapOptionalCommitteeV2ToV1 maps an optional committee UID from V2 to V1 with logging

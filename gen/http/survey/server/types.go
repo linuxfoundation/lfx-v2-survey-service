@@ -22,11 +22,11 @@ type ScheduleSurveyRequestBody struct {
 	IsProjectSurvey *bool `form:"is_project_survey,omitempty" json:"is_project_survey,omitempty" xml:"is_project_survey,omitempty"`
 	// Project stage filter for global surveys
 	StageFilter *string `form:"stage_filter,omitempty" json:"stage_filter,omitempty" xml:"stage_filter,omitempty"`
-	// Creator's username
+	// Ignored. The creator is the authenticated user.
 	CreatorUsername *string `form:"creator_username,omitempty" json:"creator_username,omitempty" xml:"creator_username,omitempty"`
-	// Creator's full name
+	// Ignored. The creator's name is resolved from the authenticated user.
 	CreatorName *string `form:"creator_name,omitempty" json:"creator_name,omitempty" xml:"creator_name,omitempty"`
-	// Creator's user ID
+	// Ignored. The creator is the authenticated user.
 	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
 	// SurveyMonkey survey ID
 	SurveyMonkeyID *string `form:"survey_monkey_id,omitempty" json:"survey_monkey_id,omitempty" xml:"survey_monkey_id,omitempty"`
@@ -55,7 +55,7 @@ type ScheduleSurveyRequestBody struct {
 type UpdateSurveyRequestBody struct {
 	// Committee UID to send survey to
 	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
-	// Creator's user ID
+	// Ignored. The modifier is the authenticated user.
 	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
 	// Survey title
 	SurveyTitle *string `form:"survey_title,omitempty" json:"survey_title,omitempty" xml:"survey_title,omitempty"`

@@ -173,6 +173,7 @@ type SurveyCommittee struct {
 
 // UpdateSurveyRequest represents the request to update a survey
 type UpdateSurveyRequest struct {
+	CreatorUsername        *string  `json:"creator_username,omitempty"`
 	CreatorID              *string  `json:"creator_id,omitempty"`
 	SurveyTitle            *string  `json:"survey_title,omitempty"`
 	SurveySendDate         *string  `json:"survey_send_date,omitempty"`   // RFC3339 string
