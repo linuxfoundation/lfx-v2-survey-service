@@ -158,7 +158,9 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
     committees := []string{committeeV1}
     itxRequest := &itx.ScheduleSurveyRequest{
         Committees:             committees,
-        CreatorID:              p.CreatorID,
+        CreatorUsername:        &creatorUsername, // from the authenticated principal, not the body
+        CreatorID:              &creatorUsername,
+        CreatorName:            &creatorName,     // resolved from the principal via the auth service
         SurveyTitle:            p.SurveyTitle,
         // ... other fields are identical
     }

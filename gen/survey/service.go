@@ -394,11 +394,11 @@ type ScheduleSurveyPayload struct {
 	IsProjectSurvey *bool
 	// Project stage filter for global surveys
 	StageFilter *string
-	// Creator's username
+	// Ignored. The creator is the authenticated user.
 	CreatorUsername *string
-	// Creator's full name
+	// Ignored. The creator's name is resolved from the authenticated user.
 	CreatorName *string
-	// Creator's user ID
+	// Ignored. The creator is the authenticated user.
 	CreatorID *string
 	// SurveyMonkey survey ID
 	SurveyMonkeyID *string
@@ -686,7 +686,7 @@ type UpdateSurveyPayload struct {
 	SurveyUID string
 	// Committee UID to send survey to
 	CommitteeUID *string
-	// Creator's user ID
+	// Ignored. The modifier is the authenticated user.
 	CreatorID *string
 	// Survey title
 	SurveyTitle *string

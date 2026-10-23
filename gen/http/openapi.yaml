@@ -2536,15 +2536,15 @@ definitions:
                 example: false
             creator_id:
                 type: string
-                description: Creator's user ID
+                description: Ignored. The creator is the authenticated user.
                 example: Numquam nesciunt.
             creator_name:
                 type: string
-                description: Creator's full name
+                description: Ignored. The creator's name is resolved from the authenticated user.
                 example: Maiores exercitationem.
             creator_username:
                 type: string
-                description: Creator's username
+                description: Ignored. The creator is the authenticated user.
                 example: Aut tempora officiis voluptatem ducimus.
             email_body:
                 type: string
@@ -2624,7 +2624,7 @@ definitions:
                 example: false
             creator_id:
                 type: string
-                description: Creator's user ID
+                description: Ignored. The modifier is the authenticated user.
                 example: Omnis et ut asperiores ullam cumque perspiciatis.
             email_body:
                 type: string

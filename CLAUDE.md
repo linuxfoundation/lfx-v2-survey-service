@@ -71,4 +71,6 @@ pkg/                    ← Shared utilities and ITX API models
 
 **Event processing**: The `eventing/event_processor.go` watches NATS JetStream KV buckets for keys matching `$KV.v1-objects.itx-surveys.>` and `$KV.v1-objects.itx-survey-responses.>`. Handlers transform v1 payloads to v2 `SurveyData`/`SurveyResponseData` and publish to the v2 indexer via NATS. Durable consumer: `survey-service-kv-consumer`, max 3 redeliveries.
 
+**Creator identity**: `ScheduleSurvey` and `UpdateSurvey` never trust `creator_*` values from the request body. The creator is the JWT principal (LFID username); the display name comes from the auth service (`lfx.auth-service.user_metadata.read`) through the optional `UserNameReader`, falling back to the username. ITX stores the name as sent and does not look it up.
+
 **Structured logging**: Uses `slog` throughout. The `internal/logging/` package sets up OpenTelemetry-aware structured logging. Pass the logger via context or direct injection — avoid `log.Print*`.
