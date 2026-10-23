@@ -213,7 +213,7 @@ func run() int {
 
 	// The creator's display name is resolved from the auth service over NATS. It is
 	// best-effort: without NATS the service stamps the username as the name.
-	if !cfg.IDMappingDisabled && cfg.NATSURL != "" {
+	if cfg.NATSURL != "" {
 		nameNC, err := natsgo.Connect(cfg.NATSURL,
 			natsgo.Name("survey-service-user-metadata"),
 			natsgo.DrainTimeout(30*time.Second),

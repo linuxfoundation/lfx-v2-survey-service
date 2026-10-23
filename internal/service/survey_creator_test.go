@@ -123,6 +123,22 @@ func TestUpdateSurvey_CreatorFromPrincipal(t *testing.T) {
 		assert.Equal(t, "alice", *sent.CreatorID)
 	})
 
+	t.Run("does not look up the display name on update", func(t *testing.T) {
+		sent = nil
+		names := &mocks.MockUserNameReader{
+			DisplayNameByUsernameFunc: func(context.Context, string) (string, error) {
+				t.Error("display name lookup must not run on update")
+				return "", nil
+			},
+		}
+		svc := newCreatorTestService(client, names)
+
+		_, err := svc.UpdateSurvey(ctxWithPrincipal("alice"), &survey.UpdateSurveyPayload{SurveyUID: "survey-1"})
+
+		require.NoError(t, err)
+		assert.Equal(t, "alice", *sent.CreatorUsername)
+	})
+
 	t.Run("rejects the request without an authenticated principal", func(t *testing.T) {
 		sent = nil
 		svc := newCreatorTestService(client, nil)

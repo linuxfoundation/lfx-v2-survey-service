@@ -270,7 +270,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 
 	// ITX records who modified the survey from creator_username, so both identity
 	// fields come from the authenticated principal; the body's creator_id is ignored.
-	creatorUsername, _, err := s.creatorFromPrincipal(ctx)
+	creatorUsername, err := s.principalUsername(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -477,15 +477,24 @@ func principalFromCtx(ctx context.Context) string {
 	return principal
 }
 
-// creatorFromPrincipal resolves the identity stamped on a survey from the
-// authenticated principal, the LFID username JWTAuth stored in context. The
-// display name comes from the trusted user-name lookup and falls back to the
-// username when no reader is configured or the lookup fails, so a survey is never
-// blocked on it.
-func (s *SurveyService) creatorFromPrincipal(ctx context.Context) (username, name string, err error) {
-	username = strings.TrimSpace(principalFromCtx(ctx))
+// principalUsername returns the authenticated principal, the LFID username
+// JWTAuth stored in context, or a validation error when there is none.
+func (s *SurveyService) principalUsername(ctx context.Context) (string, error) {
+	username := strings.TrimSpace(principalFromCtx(ctx))
 	if username == "" {
-		return "", "", domain.NewValidationError("an authenticated user is required to create or update a survey")
+		return "", domain.NewValidationError("an authenticated user is required to create or update a survey")
+	}
+	return username, nil
+}
+
+// creatorFromPrincipal resolves the identity stamped on a new survey from the
+// authenticated principal. The display name comes from the trusted user-name
+// lookup and falls back to the username when no reader is configured or the
+// lookup fails, so a survey is never blocked on it.
+func (s *SurveyService) creatorFromPrincipal(ctx context.Context) (username, name string, err error) {
+	username, err = s.principalUsername(ctx)
+	if err != nil {
+		return "", "", err
 	}
 
 	name = username
