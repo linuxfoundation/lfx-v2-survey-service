@@ -222,7 +222,9 @@ The service requires Auth0 credentials stored in AWS Secrets Manager:
    - `client_id` - Auth0 client ID
    - `client_private_key` - RSA private key in raw PEM format (not base64)
 
-3. The External Secrets Operator will sync these to Kubernetes automatically
+3. The External Secrets Operator will sync these to Kubernetes automatically.
+   The ExternalSecret and SecretStore that do this are declared in
+   `lfx-v2-argocd` (`custom-resources/lfx-v2-survey-service/`), not in this chart.
 
 ### Verify Deployment
 
