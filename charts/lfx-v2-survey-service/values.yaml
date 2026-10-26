@@ -72,7 +72,7 @@ app:
     # Auth0 domain used for M2M token requests to ITX
     ITX_AUTH0_DOMAIN:
       value: linuxfoundation-dev.auth0.com
-    # Auth0 client ID — loaded from Kubernetes secret (see externalSecretsOperator below)
+    # Auth0 client ID — loaded from Kubernetes secret (provisioned by an ExternalSecret declared in lfx-v2-argocd)
     ITX_CLIENT_ID:
       valueFrom:
         secretKeyRef:
@@ -140,11 +140,6 @@ traefik:
     name: lfx-platform-gateway
     namespace: lfx
 
-# global is the configuration for the global settings
-global:
-  # awsRegion is the AWS region for the External Secrets Operator
-  awsRegion: us-west-2
-
 # lfx is the configuration for LFX platform
 lfx:
   # domain is the base domain for routing
@@ -187,26 +182,3 @@ heimdall:
   enabled: true
   url: http://lfx-platform-heimdall.lfx.svc.cluster.local:4456
   add_middleware: false
-
-# External Secrets Operator
-externalSecretsOperator:
-  # Enable/disable External Secrets Operator integration
-  enabled: false
-
-  # ExternalSecret configuration
-  externalSecret:
-    # How often to refresh secrets from AWS
-    refreshInterval: "10m"
-
-    # Secret data mappings
-    # REQUIRED: Secrets must exist in AWS Secrets Manager (global.awsRegion)
-    # NOTE: client_private_key should be stored as raw PEM format (not base64-encoded)
-    data:
-      - secretKey: ITX_CLIENT_ID
-        remoteRef:
-          key: /cloudops/managed-secrets/auth0/LFX_V2_Surveys_Service
-          property: client_id
-      - secretKey: ITX_CLIENT_PRIVATE_KEY
-        remoteRef:
-          key: /cloudops/managed-secrets/auth0/LFX_V2_Surveys_Service
-          property: client_private_key
