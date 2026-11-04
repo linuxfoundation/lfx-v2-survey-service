@@ -18,6 +18,7 @@ import (
 
 	survey "github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	goahttp "goa.design/goa/v3/http"
+	goa "goa.design/goa/v3/pkg"
 )
 
 // BuildScheduleSurveyRequest instantiates a HTTP request object with method
@@ -2494,6 +2495,171 @@ func DecodeListSurveyResponsesResponse(decoder func(*http.Response) goahttp.Deco
 	}
 }
 
+// BuildListSurveyTemplatesRequest instantiates a HTTP request object with
+// method and path set to call the "survey" service "list_survey_templates"
+// endpoint
+func (c *Client) BuildListSurveyTemplatesRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ListSurveyTemplatesSurveyPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("survey", "list_survey_templates", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeListSurveyTemplatesRequest returns an encoder for requests sent to the
+// survey list_survey_templates server.
+func EncodeListSurveyTemplatesRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*survey.ListSurveyTemplatesPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("survey", "list_survey_templates", "*survey.ListSurveyTemplatesPayload", v)
+		}
+		if p.Token != nil {
+			head := *p.Token
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		values := req.URL.Query()
+		values.Add("project_uid", p.ProjectUID)
+		if p.CommitteeUID != nil {
+			values.Add("committee_uid", *p.CommitteeUID)
+		}
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodeListSurveyTemplatesResponse returns a decoder for responses returned
+// by the survey list_survey_templates endpoint. restoreBody controls whether
+// the response body should be restored after having been read.
+// DecodeListSurveyTemplatesResponse may return the following errors:
+//   - "BadRequest" (type *survey.BadRequestError): http.StatusBadRequest
+//   - "Forbidden" (type *survey.ForbiddenError): http.StatusForbidden
+//   - "InternalServerError" (type *survey.InternalServerError): http.StatusInternalServerError
+//   - "ServiceUnavailable" (type *survey.ServiceUnavailableError): http.StatusServiceUnavailable
+//   - "Unauthorized" (type *survey.UnauthorizedError): http.StatusUnauthorized
+//   - error: internal error
+func DecodeListSurveyTemplatesResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body ListSurveyTemplatesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "list_survey_templates", err)
+			}
+			for _, e := range body {
+				if e != nil {
+					if err2 := ValidateSurveyTemplateResponse(e); err2 != nil {
+						err = goa.MergeErrors(err, err2)
+					}
+				}
+			}
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "list_survey_templates", err)
+			}
+			res := NewListSurveyTemplatesSurveyTemplateOK(body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body ListSurveyTemplatesBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "list_survey_templates", err)
+			}
+			err = ValidateListSurveyTemplatesBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "list_survey_templates", err)
+			}
+			return nil, NewListSurveyTemplatesBadRequest(&body)
+		case http.StatusForbidden:
+			var (
+				body ListSurveyTemplatesForbiddenResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "list_survey_templates", err)
+			}
+			err = ValidateListSurveyTemplatesForbiddenResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "list_survey_templates", err)
+			}
+			return nil, NewListSurveyTemplatesForbidden(&body)
+		case http.StatusInternalServerError:
+			var (
+				body ListSurveyTemplatesInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "list_survey_templates", err)
+			}
+			err = ValidateListSurveyTemplatesInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "list_survey_templates", err)
+			}
+			return nil, NewListSurveyTemplatesInternalServerError(&body)
+		case http.StatusServiceUnavailable:
+			var (
+				body ListSurveyTemplatesServiceUnavailableResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "list_survey_templates", err)
+			}
+			err = ValidateListSurveyTemplatesServiceUnavailableResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "list_survey_templates", err)
+			}
+			return nil, NewListSurveyTemplatesServiceUnavailable(&body)
+		case http.StatusUnauthorized:
+			var (
+				body ListSurveyTemplatesUnauthorizedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("survey", "list_survey_templates", err)
+			}
+			err = ValidateListSurveyTemplatesUnauthorizedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("survey", "list_survey_templates", err)
+			}
+			return nil, NewListSurveyTemplatesUnauthorized(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("survey", "list_survey_templates", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // BuildValidateEmailRequest instantiates a HTTP request object with method and
 // path set to call the "survey" service "validate_email" endpoint
 func (c *Client) BuildValidateEmailRequest(ctx context.Context, v any) (*http.Request, error) {
@@ -2888,6 +3054,19 @@ func unmarshalSurveyResponsePageMetaResponseBodyToSurveySurveyResponsePageMeta(v
 		TotalPages:   v.TotalPages,
 		TotalResults: v.TotalResults,
 		PerPage:      v.PerPage,
+	}
+
+	return res
+}
+
+// unmarshalSurveyTemplateResponseToSurveySurveyTemplate builds a value of type
+// *survey.SurveyTemplate from a value of type *SurveyTemplateResponse.
+func unmarshalSurveyTemplateResponseToSurveySurveyTemplate(v *SurveyTemplateResponse) *survey.SurveyTemplate {
+	res := &survey.SurveyTemplate{
+		ID:       *v.ID,
+		Title:    *v.Title,
+		Nickname: v.Nickname,
+		Href:     v.Href,
 	}
 
 	return res

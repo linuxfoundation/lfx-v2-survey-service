@@ -355,3 +355,11 @@ type ValidateEmailResponse struct {
 	Body    string `json:"body"`
 	Subject string `json:"subject"`
 }
+
+// SurveyTemplate represents a SurveyMonkey survey template returned by ITX
+type SurveyTemplate struct {
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Nickname string `json:"nickname"`
+	Href     string `json:"href"`
+}

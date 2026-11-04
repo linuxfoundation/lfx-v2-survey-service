@@ -24,7 +24,7 @@ func BuildScheduleSurveyPayload(surveyScheduleSurveyBody string, surveyScheduleS
 	{
 		err = json.Unmarshal([]byte(surveyScheduleSurveyBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_uid\": \"qa1e8536-a985-4cf5-b981-a170927a1d11\",\n      \"committee_voting_enabled\": true,\n      \"creator_id\": \"Quam esse saepe eum non omnis amet.\",\n      \"creator_name\": \"Consequatur quod numquam et provident dolorem voluptatem.\",\n      \"creator_username\": \"Numquam eum suscipit labore odio rerum.\",\n      \"email_body\": \"Repellendus sunt omnis voluptate minima possimus.\",\n      \"email_body_text\": \"Occaecati sunt odit quia quia fugiat est.\",\n      \"email_subject\": \"Quis vero voluptatem et temporibus.\",\n      \"is_project_survey\": true,\n      \"send_immediately\": true,\n      \"stage_filter\": \"Dolorem quia et in.\",\n      \"survey_cutoff_date\": \"Omnis sint reprehenderit.\",\n      \"survey_monkey_id\": \"Omnis est at omnis.\",\n      \"survey_reminder_rate_days\": 3291766316701683331,\n      \"survey_send_date\": \"Et nulla quia.\",\n      \"survey_title\": \"Dolorum cumque.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_uid\": \"qa1e8536-a985-4cf5-b981-a170927a1d11\",\n      \"committee_voting_enabled\": false,\n      \"creator_id\": \"Omnis est at omnis.\",\n      \"creator_name\": \"Quam esse saepe eum non omnis amet.\",\n      \"creator_username\": \"Consequatur quod numquam et provident dolorem voluptatem.\",\n      \"email_body\": \"Odit quia quia fugiat est quas.\",\n      \"email_body_text\": \"Est et sint quas eveniet eaque.\",\n      \"email_subject\": \"Minima possimus deleniti occaecati.\",\n      \"is_project_survey\": false,\n      \"send_immediately\": false,\n      \"stage_filter\": \"Numquam eum suscipit labore odio rerum.\",\n      \"survey_cutoff_date\": \"Eligendi repellendus sunt.\",\n      \"survey_monkey_id\": \"Dolorum cumque.\",\n      \"survey_reminder_rate_days\": 270870315583994130,\n      \"survey_send_date\": \"Ipsam et quis vero voluptatem et.\",\n      \"survey_title\": \"Neque et nulla quia facilis omnis.\"\n   }'")
 		}
 	}
 	var token *string
@@ -482,6 +482,42 @@ func BuildListSurveyResponsesPayload(surveyListSurveyResponsesSurveyUID string, 
 	return v, nil
 }
 
+// BuildListSurveyTemplatesPayload builds the payload for the survey
+// list_survey_templates endpoint from CLI flags.
+func BuildListSurveyTemplatesPayload(surveyListSurveyTemplatesProjectUID string, surveyListSurveyTemplatesCommitteeUID string, surveyListSurveyTemplatesToken string) (*survey.ListSurveyTemplatesPayload, error) {
+	var err error
+	var projectUID string
+	{
+		projectUID = surveyListSurveyTemplatesProjectUID
+		err = goa.MergeErrors(err, goa.ValidateFormat("project_uid", projectUID, goa.FormatUUID))
+		if err != nil {
+			return nil, err
+		}
+	}
+	var committeeUID *string
+	{
+		if surveyListSurveyTemplatesCommitteeUID != "" {
+			committeeUID = &surveyListSurveyTemplatesCommitteeUID
+			err = goa.MergeErrors(err, goa.ValidateFormat("committee_uid", *committeeUID, goa.FormatUUID))
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var token *string
+	{
+		if surveyListSurveyTemplatesToken != "" {
+			token = &surveyListSurveyTemplatesToken
+		}
+	}
+	v := &survey.ListSurveyTemplatesPayload{}
+	v.ProjectUID = projectUID
+	v.CommitteeUID = committeeUID
+	v.Token = token
+
+	return v, nil
+}
+
 // BuildValidateEmailPayload builds the payload for the survey validate_email
 // endpoint from CLI flags.
 func BuildValidateEmailPayload(surveyValidateEmailBody string, surveyValidateEmailToken string) (*survey.ValidateEmailPayload, error) {
@@ -490,7 +526,7 @@ func BuildValidateEmailPayload(surveyValidateEmailBody string, surveyValidateEma
 	{
 		err = json.Unmarshal([]byte(surveyValidateEmailBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"body\": \"Quia rerum esse adipisci quia.\",\n      \"subject\": \"Qui est sint.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"body\": \"Rerum sunt non minus.\",\n      \"subject\": \"Et sunt itaque facilis aut doloribus perspiciatis.\"\n   }'")
 		}
 	}
 	var token *string

@@ -316,3 +316,91 @@ func TestListSurveyResponses_BothProjectFilters_ReturnsValidationError(t *testin
 		t.Error("expected proxy not to be called when validation fails, but capturedParams is set")
 	}
 }
+
+// ─── ListSurveyTemplates ─────────────────────────────────────────────────────
+
+func newTemplatesTestService(fn func(ctx context.Context) ([]itx.SurveyTemplate, error)) *service.SurveyService {
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
+	return service.NewSurveyService(
+		&mocks.MockSurveyClient{ListSurveyTemplatesFunc: fn},
+		&mocks.MockExclusionClient{},
+		&mocks.MockSurveyResponseClient{},
+		idmapper.NewNoOpMapper(),
+		logger,
+	)
+}
+
+func TestListSurveyTemplates_MapsFields(t *testing.T) {
+	svc := newTemplatesTestService(func(ctx context.Context) ([]itx.SurveyTemplate, error) {
+		return []itx.SurveyTemplate{
+			{ID: "412349483", Title: "Board Member NPS", Nickname: "Board NPS", Href: "https://api.surveymonkey.com/v3/surveys/412349483"},
+			{ID: "512349484", Title: "Contributor NPS"},
+		}, nil
+	})
+
+	result, err := svc.ListSurveyTemplates(context.Background(), &survey.ListSurveyTemplatesPayload{
+		ProjectUID:   "7cad5a8d-19d0-41a4-81a6-043453daf9ee",
+		CommitteeUID: strPtr("b03cdbaf-53b1-4d47-bc04-dd7e459dd309"),
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result) != 2 {
+		t.Fatalf("expected 2 templates, got %d", len(result))
+	}
+
+	first := result[0]
+	if first.ID != "412349483" || first.Title != "Board Member NPS" {
+		t.Errorf("unexpected first template id/title: %q / %q", first.ID, first.Title)
+	}
+	if first.Nickname == nil || *first.Nickname != "Board NPS" {
+		t.Errorf("expected nickname Board NPS, got %v", first.Nickname)
+	}
+	if first.Href == nil || *first.Href != "https://api.surveymonkey.com/v3/surveys/412349483" {
+		t.Errorf("unexpected href: %v", first.Href)
+	}
+
+	second := result[1]
+	if second.ID != "512349484" || second.Title != "Contributor NPS" {
+		t.Errorf("unexpected second template id/title: %q / %q", second.ID, second.Title)
+	}
+	if second.Nickname != nil || second.Href != nil {
+		t.Errorf("expected nil nickname/href for empty ITX values, got %v / %v", second.Nickname, second.Href)
+	}
+}
+
+func TestListSurveyTemplates_EmptyList(t *testing.T) {
+	svc := newTemplatesTestService(func(ctx context.Context) ([]itx.SurveyTemplate, error) {
+		return []itx.SurveyTemplate{}, nil
+	})
+
+	result, err := svc.ListSurveyTemplates(context.Background(), &survey.ListSurveyTemplatesPayload{
+		ProjectUID: "7cad5a8d-19d0-41a4-81a6-043453daf9ee",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result == nil {
+		t.Fatal("expected non-nil empty result")
+	}
+	if len(result) != 0 {
+		t.Errorf("expected empty result, got %d items", len(result))
+	}
+}
+
+func TestListSurveyTemplates_PropagatesProxyError(t *testing.T) {
+	proxyErr := domain.NewUnavailableError("ITX service request failed")
+	svc := newTemplatesTestService(func(ctx context.Context) ([]itx.SurveyTemplate, error) {
+		return nil, proxyErr
+	})
+
+	result, err := svc.ListSurveyTemplates(context.Background(), &survey.ListSurveyTemplatesPayload{
+		ProjectUID: "7cad5a8d-19d0-41a4-81a6-043453daf9ee",
+	})
+	if result != nil {
+		t.Errorf("expected nil result on error, got %+v", result)
+	}
+	if !errors.Is(err, proxyErr) {
+		t.Fatalf("expected proxy error returned unchanged, got %T: %v", err, err)
+	}
+}

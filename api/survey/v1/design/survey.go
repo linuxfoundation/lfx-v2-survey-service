@@ -592,6 +592,45 @@ var _ = Service("survey", func() {
 		})
 	})
 
+	Method("list_survey_templates", func() {
+		Description("List SurveyMonkey survey templates (proxies to ITX GET /v2/surveys/templates)")
+
+		Security(JWTAuth, func() {
+			Scope("manage:projects")
+			Scope("manage:surveys")
+		})
+
+		Payload(func() {
+			BearerTokenAttribute()
+
+			Attribute("project_uid", String, "LFX project UID (v2) used for the writer check", func() {
+				Format(FormatUUID)
+				Example("7cad5a8d-19d0-41a4-81a6-043453daf9ee")
+			})
+
+			Attribute("committee_uid", String, "Optional committee UID (v2); a committee writer may list templates instead of a project writer", func() {
+				Format(FormatUUID)
+				Example("b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
+			})
+
+			Required("project_uid")
+		})
+
+		Result(ArrayOf(SurveyTemplate))
+
+		HTTP(func() {
+			GET("/surveys/templates")
+			Param("project_uid")
+			Param("committee_uid")
+			Response(StatusOK)
+			Response("BadRequest", StatusBadRequest)
+			Response("Unauthorized", StatusUnauthorized)
+			Response("Forbidden", StatusForbidden)
+			Response("InternalServerError", StatusInternalServerError)
+			Response("ServiceUnavailable", StatusServiceUnavailable)
+		})
+	})
+
 	Method("validate_email", func() {
 		Description("Validate email template body and subject (proxies to ITX POST /v2/surveys/validate_email)")
 

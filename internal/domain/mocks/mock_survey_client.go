@@ -26,6 +26,7 @@ type MockSurveyClient struct {
 	DeleteRecipientGroupFunc  func(ctx context.Context, surveyID string, committeeID *string, projectID *string, foundationID *string) error
 	GetSurveyResultsFunc      func(ctx context.Context, surveyID string) (*itx.SurveyResults, error)
 	ValidateEmailFunc         func(ctx context.Context, req *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error)
+	ListSurveyTemplatesFunc   func(ctx context.Context) ([]itx.SurveyTemplate, error)
 }
 
 // Compile-time assertion.
@@ -113,4 +114,11 @@ func (m *MockSurveyClient) ValidateEmail(ctx context.Context, req *itx.ValidateE
 		return m.ValidateEmailFunc(ctx, req)
 	}
 	panic("MockSurveyClient.ValidateEmail: not configured")
+}
+
+func (m *MockSurveyClient) ListSurveyTemplates(ctx context.Context) ([]itx.SurveyTemplate, error) {
+	if m.ListSurveyTemplatesFunc != nil {
+		return m.ListSurveyTemplatesFunc(ctx)
+	}
+	panic("MockSurveyClient.ListSurveyTemplates: not configured")
 }

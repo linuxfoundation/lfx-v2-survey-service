@@ -87,6 +87,11 @@ func ListSurveyResponsesSurveyPath(surveyUID string) string {
 	return fmt.Sprintf("/surveys/%v/responses", surveyUID)
 }
 
+// ListSurveyTemplatesSurveyPath returns the URL path to the survey service list_survey_templates HTTP endpoint.
+func ListSurveyTemplatesSurveyPath() string {
+	return "/surveys/templates"
+}
+
 // ValidateEmailSurveyPath returns the URL path to the survey service validate_email HTTP endpoint.
 func ValidateEmailSurveyPath() string {
 	return "/surveys/validate_email"

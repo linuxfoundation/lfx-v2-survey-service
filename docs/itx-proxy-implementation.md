@@ -436,6 +436,7 @@ Response IDs are mapped from V1 to V2:
 | `DELETE /surveys/exclusion` | `DELETE /v2/surveys/exclusion` |
 | `GET /surveys/exclusion/{id}` | `GET /v2/surveys/exclusion/{id}` |
 | `DELETE /surveys/exclusion/{id}` | `DELETE /v2/surveys/exclusion/{id}` |
+| `GET /surveys/templates` | `GET /v2/surveys/templates` |
 | `POST /surveys/validate_email` | `POST /v2/surveys/validate_email` |
 
 **Pattern**: Proxy paths are shorter (no `/schedule` suffix for CRUD operations)

@@ -75,6 +75,7 @@ The service provides 15 REST API endpoints for survey management:
 
 ### Utilities
 
+- `GET /surveys/templates?project_uid={uuid}[&committee_uid={uuid}]` - List SurveyMonkey survey templates (project or committee writers)
 - `POST /surveys/validate_email` - Validate email template body and subject
 
 ### API Documentation

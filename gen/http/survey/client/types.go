@@ -408,6 +408,10 @@ type ListSurveyResponsesResponseBody struct {
 	Meta *SurveyResponsePageMetaResponseBody `form:"meta,omitempty" json:"meta,omitempty" xml:"meta,omitempty"`
 }
 
+// ListSurveyTemplatesResponseBody is the type of the "survey" service
+// "list_survey_templates" endpoint HTTP response body.
+type ListSurveyTemplatesResponseBody []*SurveyTemplateResponse
+
 // ValidateEmailResponseBody is the type of the "survey" service
 // "validate_email" endpoint HTTP response body.
 type ValidateEmailResponseBody struct {
@@ -1203,6 +1207,56 @@ type ListSurveyResponsesUnauthorizedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// ListSurveyTemplatesBadRequestResponseBody is the type of the "survey"
+// service "list_survey_templates" endpoint HTTP response body for the
+// "BadRequest" error.
+type ListSurveyTemplatesBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListSurveyTemplatesForbiddenResponseBody is the type of the "survey" service
+// "list_survey_templates" endpoint HTTP response body for the "Forbidden"
+// error.
+type ListSurveyTemplatesForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListSurveyTemplatesInternalServerErrorResponseBody is the type of the
+// "survey" service "list_survey_templates" endpoint HTTP response body for the
+// "InternalServerError" error.
+type ListSurveyTemplatesInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListSurveyTemplatesServiceUnavailableResponseBody is the type of the
+// "survey" service "list_survey_templates" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type ListSurveyTemplatesServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListSurveyTemplatesUnauthorizedResponseBody is the type of the "survey"
+// service "list_survey_templates" endpoint HTTP response body for the
+// "Unauthorized" error.
+type ListSurveyTemplatesUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ValidateEmailBadRequestResponseBody is the type of the "survey" service
 // "validate_email" endpoint HTTP response body for the "BadRequest" error.
 type ValidateEmailBadRequestResponseBody struct {
@@ -1454,6 +1508,18 @@ type SurveyResponsePageMetaResponseBody struct {
 	TotalResults *int `form:"total_results,omitempty" json:"total_results,omitempty" xml:"total_results,omitempty"`
 	// Number of results per page
 	PerPage *int `form:"per_page,omitempty" json:"per_page,omitempty" xml:"per_page,omitempty"`
+}
+
+// SurveyTemplateResponse is used to define fields on response body types.
+type SurveyTemplateResponse struct {
+	// SurveyMonkey survey ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Survey template title
+	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
+	// Survey template nickname
+	Nickname *string `form:"nickname,omitempty" json:"nickname,omitempty" xml:"nickname,omitempty"`
+	// SurveyMonkey API URL for the survey template
+	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
 }
 
 // NewScheduleSurveyRequestBody builds the HTTP request body from the payload
@@ -2693,6 +2759,76 @@ func NewListSurveyResponsesServiceUnavailable(body *ListSurveyResponsesServiceUn
 // NewListSurveyResponsesUnauthorized builds a survey service
 // list_survey_responses endpoint Unauthorized error.
 func NewListSurveyResponsesUnauthorized(body *ListSurveyResponsesUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesSurveyTemplateOK builds a "survey" service
+// "list_survey_templates" endpoint result from a HTTP "OK" response.
+func NewListSurveyTemplatesSurveyTemplateOK(body []*SurveyTemplateResponse) []*survey.SurveyTemplate {
+	v := make([]*survey.SurveyTemplate, len(body))
+	for i, val := range body {
+		if val == nil {
+			v[i] = nil
+			continue
+		}
+		v[i] = unmarshalSurveyTemplateResponseToSurveySurveyTemplate(val)
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesBadRequest builds a survey service
+// list_survey_templates endpoint BadRequest error.
+func NewListSurveyTemplatesBadRequest(body *ListSurveyTemplatesBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesForbidden builds a survey service
+// list_survey_templates endpoint Forbidden error.
+func NewListSurveyTemplatesForbidden(body *ListSurveyTemplatesForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesInternalServerError builds a survey service
+// list_survey_templates endpoint InternalServerError error.
+func NewListSurveyTemplatesInternalServerError(body *ListSurveyTemplatesInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesServiceUnavailable builds a survey service
+// list_survey_templates endpoint ServiceUnavailable error.
+func NewListSurveyTemplatesServiceUnavailable(body *ListSurveyTemplatesServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesUnauthorized builds a survey service
+// list_survey_templates endpoint Unauthorized error.
+func NewListSurveyTemplatesUnauthorized(body *ListSurveyTemplatesUnauthorizedResponseBody) *survey.UnauthorizedError {
 	v := &survey.UnauthorizedError{
 		Code:    *body.Code,
 		Message: *body.Message,
@@ -3946,6 +4082,67 @@ func ValidateListSurveyResponsesUnauthorizedResponseBody(body *ListSurveyRespons
 	return
 }
 
+// ValidateListSurveyTemplatesBadRequestResponseBody runs the validations
+// defined on list_survey_templates_BadRequest_response_body
+func ValidateListSurveyTemplatesBadRequestResponseBody(body *ListSurveyTemplatesBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListSurveyTemplatesForbiddenResponseBody runs the validations
+// defined on list_survey_templates_Forbidden_response_body
+func ValidateListSurveyTemplatesForbiddenResponseBody(body *ListSurveyTemplatesForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListSurveyTemplatesInternalServerErrorResponseBody runs the
+// validations defined on
+// list_survey_templates_InternalServerError_response_body
+func ValidateListSurveyTemplatesInternalServerErrorResponseBody(body *ListSurveyTemplatesInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListSurveyTemplatesServiceUnavailableResponseBody runs the
+// validations defined on list_survey_templates_ServiceUnavailable_response_body
+func ValidateListSurveyTemplatesServiceUnavailableResponseBody(body *ListSurveyTemplatesServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListSurveyTemplatesUnauthorizedResponseBody runs the validations
+// defined on list_survey_templates_Unauthorized_response_body
+func ValidateListSurveyTemplatesUnauthorizedResponseBody(body *ListSurveyTemplatesUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateValidateEmailBadRequestResponseBody runs the validations defined on
 // validate_email_BadRequest_response_body
 func ValidateValidateEmailBadRequestResponseBody(body *ValidateEmailBadRequestResponseBody) (err error) {
@@ -4113,6 +4310,18 @@ func ValidateSurveyResponseItemResponseBody(body *SurveyResponseItemResponseBody
 func ValidateSurveyQuestionAnswerResponseBody(body *SurveyQuestionAnswerResponseBody) (err error) {
 	if body.QuestionID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("question_id", "body"))
+	}
+	return
+}
+
+// ValidateSurveyTemplateResponse runs the validations defined on
+// SurveyTemplateResponse
+func ValidateSurveyTemplateResponse(body *SurveyTemplateResponse) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Title == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
 	}
 	return
 }
