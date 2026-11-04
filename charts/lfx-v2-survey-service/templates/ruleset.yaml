@@ -85,9 +85,10 @@ spec:
           config:
             values:
               relation: writer
-              object: "project:{{ "{{- .Request.URL.Query.project_uid -}}" }}"
-              or_relation: "{{ "{{- if .Request.URL.Query.committee_uid -}}writer{{- end -}}" }}"
-              or_object: "{{ "{{- if .Request.URL.Query.committee_uid -}}committee:{{- .Request.URL.Query.committee_uid -}}{{- end -}}" }}"
+              # Query values are arrays; Get selects the same first scalar as Goa.
+              object: 'project:{{ "{{- .Request.URL.Query.Get \"project_uid\" -}}" }}'
+              or_relation: '{{ "{{- if .Request.URL.Query.Get \"committee_uid\" -}}writer{{- end -}}" }}'
+              or_object: '{{ "{{- if .Request.URL.Query.Get \"committee_uid\" -}}committee:{{- .Request.URL.Query.Get \"committee_uid\" -}}{{- end -}}" }}'
         {{- else }}
         {{/*
           When OpenFGA is disabled, allow all requests

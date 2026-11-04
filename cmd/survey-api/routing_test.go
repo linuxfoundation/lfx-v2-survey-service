@@ -4,13 +4,16 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"testing"
+	"text/template"
 
 	surveysvr "github.com/linuxfoundation/lfx-v2-survey-service/gen/http/survey/server"
 	surveysvc "github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
@@ -20,6 +23,7 @@ import (
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/service"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/models/itx"
 	goahttp "goa.design/goa/v3/http"
+	"gopkg.in/yaml.v3"
 )
 
 // newRoutingTestHandler mounts the generated survey HTTP server the same way
@@ -116,5 +120,103 @@ func TestGetSurveyRoute_StillResolvesSurveyUID(t *testing.T) {
 	}
 	if rec.Code != http.StatusNotFound {
 		t.Errorf("expected 404 from mocked get_survey, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+// TestListSurveyTemplatesRule_UsesScalarQueryUIDs exercises the chart and runtime
+// Go templates; HTTP routing tests alone bypass Heimdall authorization.
+func TestListSurveyTemplatesRule_UsesScalarQueryUIDs(t *testing.T) {
+	source, err := os.ReadFile("../../charts/lfx-v2-survey-service/templates/ruleset.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	render := func(expression string, data any) string {
+		t.Helper()
+		tmpl, err := template.New("ruleset").Parse(expression)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var result bytes.Buffer
+		if err := tmpl.Execute(&result, data); err != nil {
+			t.Fatal(err)
+		}
+		return result.String()
+	}
+	chart := map[string]any{
+		"Chart": map[string]any{"Name": "lfx-v2-survey-service"},
+		"Values": map[string]any{
+			"heimdall": map[string]any{"enabled": true},
+			"openfga":  map[string]any{"enabled": true},
+			"app":      map[string]any{"use_oidc_contextualizer": false, "audience": "survey"},
+			"lfx":      map[string]any{"namespace": "lfx"},
+		},
+	}
+	var document struct {
+		Spec struct {
+			Rules []struct {
+				ID      string `yaml:"id"`
+				Execute []struct {
+					Authorizer string `yaml:"authorizer"`
+					Config     struct {
+						Values map[string]string `yaml:"values"`
+					} `yaml:"config"`
+				} `yaml:"execute"`
+			} `yaml:"rules"`
+		} `yaml:"spec"`
+	}
+	if err := yaml.Unmarshal([]byte(render(string(source), chart)), &document); err != nil {
+		t.Fatal(err)
+	}
+	var values map[string]string
+	for _, rule := range document.Spec.Rules {
+		if rule.ID == "rule:lfx:lfx-v2-survey-service:surveys:templates:list" {
+			for _, step := range rule.Execute {
+				if step.Authorizer == "openfga_or_check" {
+					values = step.Config.Values
+				}
+			}
+		}
+	}
+	if values == nil {
+		t.Fatal("template-list writer authorization rule not found")
+	}
+	if values["relation"] != "writer" {
+		t.Fatalf("expected primary relation writer, got %q", values["relation"])
+	}
+
+	const projectUID = "7cad5a8d-19d0-41a4-81a6-043453daf9ee"
+	const committeeUID = "b03cdbaf-53b1-4d47-bc04-dd7e459dd309"
+	for _, tt := range []struct {
+		name          string
+		query         string
+		wantSecondary string
+	}{
+		{name: "project writer", query: "project_uid=" + projectUID},
+		{name: "committee writer", query: "project_uid=" + projectUID + "&committee_uid=" + committeeUID, wantSecondary: "committee:" + committeeUID},
+		{name: "empty optional committee", query: "project_uid=" + projectUID + "&committee_uid="},
+		{name: "first project value matches Goa", query: "project_uid=" + projectUID + "&project_uid=" + committeeUID},
+		{name: "first committee value matches Goa", query: "project_uid=" + projectUID + "&committee_uid=" + committeeUID + "&committee_uid=" + projectUID, wantSecondary: "committee:" + committeeUID},
+		{name: "first empty committee stays absent", query: "project_uid=" + projectUID + "&committee_uid=&committee_uid=" + committeeUID},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			u, err := url.Parse("https://example.test/surveys/templates?" + tt.query)
+			if err != nil {
+				t.Fatal(err)
+			}
+			request := map[string]any{"Request": map[string]any{"URL": u}}
+			if got := render(values["object"], request); got != "project:"+projectUID {
+				t.Errorf("primary object: got %q, want %q", got, "project:"+projectUID)
+			}
+			if got := render(values["or_object"], request); got != tt.wantSecondary {
+				t.Errorf("secondary object: got %q, want %q", got, tt.wantSecondary)
+			}
+			wantRelation := ""
+			if tt.wantSecondary != "" {
+				wantRelation = "writer"
+			}
+			if got := render(values["or_relation"], request); got != wantRelation {
+				t.Errorf("secondary relation: got %q, want %q", got, wantRelation)
+			}
+		})
 	}
 }
