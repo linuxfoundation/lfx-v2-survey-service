@@ -656,7 +656,7 @@ The email validation endpoint supports various template variables that can be us
 
 **Method**: `GET /surveys/templates`
 
-**Authorization**: Requires `writer` permission on `project:{project_uid}`, or `writer` permission on `committee:{committee_uid}` when `committee_uid` is provided
+**Authorization**: Requires `writer_guard` permission on `project:{project_uid}` (project writers or global writers), or `writer` permission on `committee:{committee_uid}` when `committee_uid` is provided
 
 **Request Headers**:
 
