@@ -408,6 +408,10 @@ type ListSurveyResponsesResponseBody struct {
 	Meta *SurveyResponsePageMetaResponseBody `form:"meta" json:"meta" xml:"meta"`
 }
 
+// ListSurveyTemplatesResponseBody is the type of the "survey" service
+// "list_survey_templates" endpoint HTTP response body.
+type ListSurveyTemplatesResponseBody []*SurveyTemplateResponse
+
 // ValidateEmailResponseBody is the type of the "survey" service
 // "validate_email" endpoint HTTP response body.
 type ValidateEmailResponseBody struct {
@@ -1203,6 +1207,56 @@ type ListSurveyResponsesUnauthorizedResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// ListSurveyTemplatesBadRequestResponseBody is the type of the "survey"
+// service "list_survey_templates" endpoint HTTP response body for the
+// "BadRequest" error.
+type ListSurveyTemplatesBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyTemplatesForbiddenResponseBody is the type of the "survey" service
+// "list_survey_templates" endpoint HTTP response body for the "Forbidden"
+// error.
+type ListSurveyTemplatesForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyTemplatesInternalServerErrorResponseBody is the type of the
+// "survey" service "list_survey_templates" endpoint HTTP response body for the
+// "InternalServerError" error.
+type ListSurveyTemplatesInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyTemplatesServiceUnavailableResponseBody is the type of the
+// "survey" service "list_survey_templates" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type ListSurveyTemplatesServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyTemplatesUnauthorizedResponseBody is the type of the "survey"
+// service "list_survey_templates" endpoint HTTP response body for the
+// "Unauthorized" error.
+type ListSurveyTemplatesUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // ValidateEmailBadRequestResponseBody is the type of the "survey" service
 // "validate_email" endpoint HTTP response body for the "BadRequest" error.
 type ValidateEmailBadRequestResponseBody struct {
@@ -1456,6 +1510,18 @@ type SurveyResponsePageMetaResponseBody struct {
 	PerPage *int `form:"per_page,omitempty" json:"per_page,omitempty" xml:"per_page,omitempty"`
 }
 
+// SurveyTemplateResponse is used to define fields on response body types.
+type SurveyTemplateResponse struct {
+	// SurveyMonkey survey ID
+	ID string `form:"id" json:"id" xml:"id"`
+	// Survey template title
+	Title string `form:"title" json:"title" xml:"title"`
+	// Survey template nickname
+	Nickname *string `form:"nickname,omitempty" json:"nickname,omitempty" xml:"nickname,omitempty"`
+	// SurveyMonkey API URL for the survey template
+	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
+}
+
 // NewScheduleSurveyResponseBody builds the HTTP response body from the result
 // of the "schedule_survey" endpoint of the "survey" service.
 func NewScheduleSurveyResponseBody(res *survey.SurveyScheduleResult) *ScheduleSurveyResponseBody {
@@ -1701,6 +1767,20 @@ func NewListSurveyResponsesResponseBody(res *survey.SurveyResponsesPage) *ListSu
 	}
 	if res.Meta != nil {
 		body.Meta = marshalSurveySurveyResponsePageMetaToSurveyResponsePageMetaResponseBody(res.Meta)
+	}
+	return body
+}
+
+// NewListSurveyTemplatesResponseBody builds the HTTP response body from the
+// result of the "list_survey_templates" endpoint of the "survey" service.
+func NewListSurveyTemplatesResponseBody(res []*survey.SurveyTemplate) ListSurveyTemplatesResponseBody {
+	body := make([]*SurveyTemplateResponse, len(res))
+	for i, val := range res {
+		if val == nil {
+			body[i] = nil
+			continue
+		}
+		body[i] = marshalSurveySurveyTemplateToSurveyTemplateResponse(val)
 	}
 	return body
 }
@@ -2579,6 +2659,61 @@ func NewListSurveyResponsesUnauthorizedResponseBody(res *survey.UnauthorizedErro
 	return body
 }
 
+// NewListSurveyTemplatesBadRequestResponseBody builds the HTTP response body
+// from the result of the "list_survey_templates" endpoint of the "survey"
+// service.
+func NewListSurveyTemplatesBadRequestResponseBody(res *survey.BadRequestError) *ListSurveyTemplatesBadRequestResponseBody {
+	body := &ListSurveyTemplatesBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyTemplatesForbiddenResponseBody builds the HTTP response body
+// from the result of the "list_survey_templates" endpoint of the "survey"
+// service.
+func NewListSurveyTemplatesForbiddenResponseBody(res *survey.ForbiddenError) *ListSurveyTemplatesForbiddenResponseBody {
+	body := &ListSurveyTemplatesForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyTemplatesInternalServerErrorResponseBody builds the HTTP
+// response body from the result of the "list_survey_templates" endpoint of the
+// "survey" service.
+func NewListSurveyTemplatesInternalServerErrorResponseBody(res *survey.InternalServerError) *ListSurveyTemplatesInternalServerErrorResponseBody {
+	body := &ListSurveyTemplatesInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyTemplatesServiceUnavailableResponseBody builds the HTTP
+// response body from the result of the "list_survey_templates" endpoint of the
+// "survey" service.
+func NewListSurveyTemplatesServiceUnavailableResponseBody(res *survey.ServiceUnavailableError) *ListSurveyTemplatesServiceUnavailableResponseBody {
+	body := &ListSurveyTemplatesServiceUnavailableResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyTemplatesUnauthorizedResponseBody builds the HTTP response body
+// from the result of the "list_survey_templates" endpoint of the "survey"
+// service.
+func NewListSurveyTemplatesUnauthorizedResponseBody(res *survey.UnauthorizedError) *ListSurveyTemplatesUnauthorizedResponseBody {
+	body := &ListSurveyTemplatesUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewValidateEmailBadRequestResponseBody builds the HTTP response body from
 // the result of the "validate_email" endpoint of the "survey" service.
 func NewValidateEmailBadRequestResponseBody(res *survey.BadRequestError) *ValidateEmailBadRequestResponseBody {
@@ -2818,6 +2953,17 @@ func NewListSurveyResponsesPayload(surveyUID string, pageToken *string, perPage 
 	v.PerPage = perPage
 	v.ProjectUID = projectUID
 	v.ProjectUids = projectUids
+	v.Token = token
+
+	return v
+}
+
+// NewListSurveyTemplatesPayload builds a survey service list_survey_templates
+// endpoint payload.
+func NewListSurveyTemplatesPayload(projectUID string, committeeUID *string, token *string) *survey.ListSurveyTemplatesPayload {
+	v := &survey.ListSurveyTemplatesPayload{}
+	v.ProjectUID = projectUID
+	v.CommitteeUID = committeeUID
 	v.Token = token
 
 	return v

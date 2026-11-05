@@ -465,6 +465,43 @@ func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEma
 	return result, nil
 }
 
+// ListSurveyTemplates lists the SurveyMonkey survey templates available for
+// scheduling. project_uid and committee_uid are used only by the Heimdall
+// writer check; templates are global in ITX, so neither is forwarded.
+func (s *SurveyService) ListSurveyTemplates(ctx context.Context, p *survey.ListSurveyTemplatesPayload) ([]*survey.SurveyTemplate, error) {
+	s.logger.InfoContext(ctx, "listing survey templates",
+		"project_uid", p.ProjectUID,
+		"committee_uid", p.CommitteeUID,
+	)
+
+	templates, err := s.surveyClient.ListSurveyTemplates(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*survey.SurveyTemplate, 0, len(templates))
+	for i := range templates {
+		tmpl := &templates[i]
+		item := &survey.SurveyTemplate{
+			ID:    tmpl.ID,
+			Title: tmpl.Title,
+		}
+		if tmpl.Nickname != "" {
+			item.Nickname = &tmpl.Nickname
+		}
+		if tmpl.Href != "" {
+			item.Href = &tmpl.Href
+		}
+		result = append(result, item)
+	}
+
+	s.logger.InfoContext(ctx, "survey templates listed successfully",
+		"count", len(result),
+	)
+
+	return result, nil
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Shared private helpers (used across multiple service files)
 // ──────────────────────────────────────────────────────────────────────────────

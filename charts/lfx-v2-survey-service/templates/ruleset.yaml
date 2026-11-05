@@ -67,6 +67,40 @@ spec:
             values:
               aud: {{ .Values.app.audience }}
 
+    - id: "rule:lfx:lfx-v2-survey-service:surveys:templates:list"
+      match:
+        methods:
+          - GET
+        routes:
+          - path: /surveys/templates
+      allow_encoded_slashes: "off"
+      execute:
+        - authenticator: oidc
+        - authenticator: anonymous_authenticator
+        {{- if .Values.app.use_oidc_contextualizer }}
+        - contextualizer: oidc_contextualizer
+        {{- end }}
+        {{- if .Values.openfga.enabled }}
+        - authorizer: openfga_or_check
+          config:
+            values:
+              relation: writer_guard
+              # Query values are arrays; Get selects the same first scalar as Goa.
+              object: 'project:{{ "{{- .Request.URL.Query.Get \"project_uid\" -}}" }}'
+              or_relation: '{{ "{{- if .Request.URL.Query.Get \"committee_uid\" -}}writer{{- end -}}" }}'
+              or_object: '{{ "{{- if .Request.URL.Query.Get \"committee_uid\" -}}committee:{{- .Request.URL.Query.Get \"committee_uid\" -}}{{- end -}}" }}'
+        {{- else }}
+        {{/*
+          When OpenFGA is disabled, allow all requests
+          (Only meant for *local development* because OpenFGA should be enabled when deployed)
+        */}}
+        - authorizer: allow_all
+        {{- end }}
+        - finalizer: create_jwt
+          config:
+            values:
+              aud: {{ .Values.app.audience }}
+
     - id: "rule:lfx:lfx-v2-survey-service:surveys:get"
       match:
         methods:

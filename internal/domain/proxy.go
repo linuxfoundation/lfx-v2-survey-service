@@ -47,6 +47,9 @@ type SurveyClient interface {
 
 	// ValidateEmail validates email template body and subject in ITX
 	ValidateEmail(ctx context.Context, req *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error)
+
+	// ListSurveyTemplates lists the SurveyMonkey survey templates available in ITX
+	ListSurveyTemplates(ctx context.Context) ([]itx.SurveyTemplate, error)
 }
 
 // ExclusionClient defines the interface for survey exclusion operations in ITX.

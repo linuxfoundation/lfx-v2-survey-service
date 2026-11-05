@@ -2040,6 +2040,142 @@ func EncodeListSurveyResponsesError(encoder func(context.Context, http.ResponseW
 	}
 }
 
+// EncodeListSurveyTemplatesResponse returns an encoder for responses returned
+// by the survey list_survey_templates endpoint.
+func EncodeListSurveyTemplatesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res, _ := v.([]*survey.SurveyTemplate)
+		enc := encoder(ctx, w)
+		body := NewListSurveyTemplatesResponseBody(res)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeListSurveyTemplatesRequest returns a decoder for requests sent to the
+// survey list_survey_templates endpoint.
+func DecodeListSurveyTemplatesRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.ListSurveyTemplatesPayload, error) {
+	return func(r *http.Request) (*survey.ListSurveyTemplatesPayload, error) {
+		var (
+			projectUID   string
+			committeeUID *string
+			token        *string
+			err          error
+		)
+		qp := r.URL.Query()
+		projectUID = qp.Get("project_uid")
+		if projectUID == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("project_uid", "query string"))
+		}
+		err = goa.MergeErrors(err, goa.ValidateFormat("project_uid", projectUID, goa.FormatUUID))
+		committeeUIDRaw := qp.Get("committee_uid")
+		if committeeUIDRaw != "" {
+			committeeUID = &committeeUIDRaw
+		}
+		if committeeUID != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("committee_uid", *committeeUID, goa.FormatUUID))
+		}
+		tokenRaw := r.Header.Get("Authorization")
+		if tokenRaw != "" {
+			token = &tokenRaw
+		}
+		if err != nil {
+			return nil, err
+		}
+		payload := NewListSurveyTemplatesPayload(projectUID, committeeUID, token)
+		if payload.Token != nil {
+			if strings.Contains(*payload.Token, " ") {
+				// Remove authorization scheme prefix (e.g. "Bearer")
+				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				payload.Token = &cred
+			}
+		}
+
+		return payload, nil
+	}
+}
+
+// EncodeListSurveyTemplatesError returns an encoder for errors returned by the
+// list_survey_templates survey endpoint.
+func EncodeListSurveyTemplatesError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "BadRequest":
+			var res *survey.BadRequestError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyTemplatesBadRequestResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Forbidden":
+			var res *survey.ForbiddenError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyTemplatesForbiddenResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusForbidden)
+			return enc.Encode(body)
+		case "InternalServerError":
+			var res *survey.InternalServerError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyTemplatesInternalServerErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		case "ServiceUnavailable":
+			var res *survey.ServiceUnavailableError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyTemplatesServiceUnavailableResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return enc.Encode(body)
+		case "Unauthorized":
+			var res *survey.UnauthorizedError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyTemplatesUnauthorizedResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
 // EncodeValidateEmailResponse returns an encoder for responses returned by the
 // survey validate_email endpoint.
 func EncodeValidateEmailResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
@@ -2413,6 +2549,19 @@ func marshalSurveySurveyResponsePageMetaToSurveyResponsePageMetaResponseBody(v *
 		TotalPages:   v.TotalPages,
 		TotalResults: v.TotalResults,
 		PerPage:      v.PerPage,
+	}
+
+	return res
+}
+
+// marshalSurveySurveyTemplateToSurveyTemplateResponse builds a value of type
+// *SurveyTemplateResponse from a value of type *survey.SurveyTemplate.
+func marshalSurveySurveyTemplateToSurveyTemplateResponse(v *survey.SurveyTemplate) *SurveyTemplateResponse {
+	res := &SurveyTemplateResponse{
+		ID:       v.ID,
+		Title:    v.Title,
+		Nickname: v.Nickname,
+		Href:     v.Href,
 	}
 
 	return res

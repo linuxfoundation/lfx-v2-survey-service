@@ -183,6 +183,15 @@ func (api *SurveyAPI) ListSurveyResponses(ctx context.Context, p *survey.ListSur
 	return result, nil
 }
 
+// ListSurveyTemplates implements survey.Service.ListSurveyTemplates
+func (api *SurveyAPI) ListSurveyTemplates(ctx context.Context, p *survey.ListSurveyTemplatesPayload) ([]*survey.SurveyTemplate, error) {
+	result, err := api.surveyService.ListSurveyTemplates(ctx, p)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+	return result, nil
+}
+
 // ValidateEmail implements survey.Service.ValidateEmail
 func (api *SurveyAPI) ValidateEmail(ctx context.Context, p *survey.ValidateEmailPayload) (*survey.ValidateEmailResult, error) {
 	result, err := api.surveyService.ValidateEmail(ctx, p)

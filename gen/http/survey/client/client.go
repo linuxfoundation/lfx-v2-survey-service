@@ -78,6 +78,10 @@ type Client struct {
 	// list_survey_responses endpoint.
 	ListSurveyResponsesDoer goahttp.Doer
 
+	// ListSurveyTemplates Doer is the HTTP client used to make requests to the
+	// list_survey_templates endpoint.
+	ListSurveyTemplatesDoer goahttp.Doer
+
 	// ValidateEmail Doer is the HTTP client used to make requests to the
 	// validate_email endpoint.
 	ValidateEmailDoer goahttp.Doer
@@ -117,6 +121,7 @@ func NewClient(
 		GetExclusionDoer:          doer,
 		DeleteExclusionByIDDoer:   doer,
 		ListSurveyResponsesDoer:   doer,
+		ListSurveyTemplatesDoer:   doer,
 		ValidateEmailDoer:         doer,
 		RestoreResponseBody:       restoreBody,
 		scheme:                    scheme,
@@ -481,6 +486,30 @@ func (c *Client) ListSurveyResponses() goa.Endpoint {
 		resp, err := c.ListSurveyResponsesDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("survey", "list_survey_responses", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// ListSurveyTemplates returns an endpoint that makes HTTP requests to the
+// survey service list_survey_templates server.
+func (c *Client) ListSurveyTemplates() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeListSurveyTemplatesRequest(c.encoder)
+		decodeResponse = DecodeListSurveyTemplatesResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildListSurveyTemplatesRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.ListSurveyTemplatesDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("survey", "list_survey_templates", err)
 		}
 		return decodeResponse(resp)
 	}

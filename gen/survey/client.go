@@ -31,11 +31,12 @@ type Client struct {
 	GetExclusionEndpoint          goa.Endpoint
 	DeleteExclusionByIDEndpoint   goa.Endpoint
 	ListSurveyResponsesEndpoint   goa.Endpoint
+	ListSurveyTemplatesEndpoint   goa.Endpoint
 	ValidateEmailEndpoint         goa.Endpoint
 }
 
 // NewClient initializes a "survey" service client given the endpoints.
-func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResendSurvey, previewSendSurvey, sendMissingRecipients, deleteSurveyResponse, resendSurveyResponse, deleteRecipientGroup, createExclusion, deleteExclusion, getExclusion, deleteExclusionByID, listSurveyResponses, validateEmail goa.Endpoint) *Client {
+func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResendSurvey, previewSendSurvey, sendMissingRecipients, deleteSurveyResponse, resendSurveyResponse, deleteRecipientGroup, createExclusion, deleteExclusion, getExclusion, deleteExclusionByID, listSurveyResponses, listSurveyTemplates, validateEmail goa.Endpoint) *Client {
 	return &Client{
 		ScheduleSurveyEndpoint:        scheduleSurvey,
 		GetSurveyEndpoint:             getSurvey,
@@ -52,6 +53,7 @@ func NewClient(scheduleSurvey, getSurvey, updateSurvey, deleteSurvey, bulkResend
 		GetExclusionEndpoint:          getExclusion,
 		DeleteExclusionByIDEndpoint:   deleteExclusionByID,
 		ListSurveyResponsesEndpoint:   listSurveyResponses,
+		ListSurveyTemplatesEndpoint:   listSurveyTemplates,
 		ValidateEmailEndpoint:         validateEmail,
 	}
 }
@@ -317,6 +319,26 @@ func (c *Client) ListSurveyResponses(ctx context.Context, p *ListSurveyResponses
 		return
 	}
 	return ires.(*SurveyResponsesPage), nil
+}
+
+// ListSurveyTemplates calls the "list_survey_templates" endpoint of the
+// "survey" service.
+// ListSurveyTemplates may return the following errors:
+//   - "BadRequest" (type *BadRequestError): Bad request
+//   - "Unauthorized" (type *UnauthorizedError): Unauthorized
+//   - "Forbidden" (type *ForbiddenError): Forbidden
+//   - "NotFound" (type *NotFoundError): Not found
+//   - "Conflict" (type *ConflictError): Conflict
+//   - "InternalServerError" (type *InternalServerError): Internal server error
+//   - "ServiceUnavailable" (type *ServiceUnavailableError): Service unavailable
+//   - error: internal error
+func (c *Client) ListSurveyTemplates(ctx context.Context, p *ListSurveyTemplatesPayload) (res []*SurveyTemplate, err error) {
+	var ires any
+	ires, err = c.ListSurveyTemplatesEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.([]*SurveyTemplate), nil
 }
 
 // ValidateEmail calls the "validate_email" endpoint of the "survey" service.

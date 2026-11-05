@@ -666,3 +666,26 @@ var ValidateEmailResult = Type("ValidateEmailResult", func() {
 
 	Required("body", "subject")
 })
+
+// SurveyTemplate represents a SurveyMonkey survey template available for scheduling
+var SurveyTemplate = Type("SurveyTemplate", func() {
+	Description("SurveyMonkey survey template available for scheduling")
+
+	Attribute("id", String, "SurveyMonkey survey ID", func() {
+		Example("412349483")
+	})
+
+	Attribute("title", String, "Survey template title", func() {
+		Example("Board Member NPS")
+	})
+
+	Attribute("nickname", String, "Survey template nickname", func() {
+		Example("Board NPS")
+	})
+
+	Attribute("href", String, "SurveyMonkey API URL for the survey template", func() {
+		Example("https://api.surveymonkey.com/v3/surveys/412349483")
+	})
+
+	Required("id", "title")
+})
