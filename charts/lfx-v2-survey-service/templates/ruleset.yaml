@@ -84,7 +84,7 @@ spec:
         - authorizer: openfga_or_check
           config:
             values:
-              relation: writer
+              relation: writer_guard
               # Query values are arrays; Get selects the same first scalar as Goa.
               object: 'project:{{ "{{- .Request.URL.Query.Get \"project_uid\" -}}" }}'
               or_relation: '{{ "{{- if .Request.URL.Query.Get \"committee_uid\" -}}writer{{- end -}}" }}'

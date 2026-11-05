@@ -4,10 +4,13 @@
 package service_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
@@ -15,6 +18,7 @@ import (
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain/mocks"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/idmapper"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/service"
+	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/models/itx"
 )
 
@@ -328,6 +332,49 @@ func newTemplatesTestService(fn func(ctx context.Context) ([]itx.SurveyTemplate,
 		idmapper.NewNoOpMapper(),
 		logger,
 	)
+}
+
+func TestListSurveyTemplates_DoesNotLogPrincipal(t *testing.T) {
+	var logs bytes.Buffer
+	logger := slog.New(slog.NewJSONHandler(&logs, nil))
+	svc := service.NewSurveyService(
+		&mocks.MockSurveyClient{ListSurveyTemplatesFunc: func(context.Context) ([]itx.SurveyTemplate, error) {
+			return []itx.SurveyTemplate{}, nil
+		}},
+		&mocks.MockExclusionClient{},
+		&mocks.MockSurveyResponseClient{},
+		idmapper.NewNoOpMapper(),
+		logger,
+	)
+	const principal = "template-log-principal"
+	const projectUID = "7cad5a8d-19d0-41a4-81a6-043453daf9ee"
+	ctx := context.WithValue(context.Background(), constants.PrincipalContextID, principal)
+	_, err := svc.ListSurveyTemplates(ctx, &survey.ListSurveyTemplatesPayload{ProjectUID: projectUID})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if strings.Contains(logs.String(), principal) {
+		t.Fatal("template-list logs contain the caller's username")
+	}
+	lines := strings.Split(strings.TrimSpace(logs.String()), "\n")
+	if len(lines) != 2 {
+		t.Fatalf("expected request and success logs, got %d entries", len(lines))
+	}
+	for i, line := range lines {
+		var entry map[string]any
+		if err := json.Unmarshal([]byte(line), &entry); err != nil {
+			t.Fatalf("invalid log entry: %v", err)
+		}
+		if _, ok := entry["principal"]; ok {
+			t.Error("template-list logs contain a principal field")
+		}
+		if i == 0 && (entry["msg"] != "listing survey templates" || entry["project_uid"] != projectUID) {
+			t.Error("request log must preserve the message and project context")
+		}
+		if i == 1 && (entry["msg"] != "survey templates listed successfully" || entry["count"] != float64(0)) {
+			t.Error("success log must preserve the message and template count")
+		}
+	}
 }
 
 func TestListSurveyTemplates_MapsFields(t *testing.T) {

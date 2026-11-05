@@ -180,8 +180,8 @@ func TestListSurveyTemplatesRule_UsesScalarQueryUIDs(t *testing.T) {
 	if values == nil {
 		t.Fatal("template-list writer authorization rule not found")
 	}
-	if values["relation"] != "writer" {
-		t.Fatalf("expected primary relation writer, got %q", values["relation"])
+	if values["relation"] != "writer_guard" {
+		t.Fatalf("expected primary relation writer_guard, got %q", values["relation"])
 	}
 
 	const projectUID = "7cad5a8d-19d0-41a4-81a6-043453daf9ee"

@@ -48,7 +48,7 @@ See [ITX Proxy Implementation Architecture](docs/itx-proxy-implementation.md) fo
 
 ## API Endpoints
 
-The service provides 15 REST API endpoints for survey management:
+The service provides the following REST API endpoints for survey management:
 
 ### Survey Management
 

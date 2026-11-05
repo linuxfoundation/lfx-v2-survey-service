@@ -469,10 +469,7 @@ func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEma
 // scheduling. project_uid and committee_uid are used only by the Heimdall
 // writer check; templates are global in ITX, so neither is forwarded.
 func (s *SurveyService) ListSurveyTemplates(ctx context.Context, p *survey.ListSurveyTemplatesPayload) ([]*survey.SurveyTemplate, error) {
-	principal := principalFromCtx(ctx)
-
 	s.logger.InfoContext(ctx, "listing survey templates",
-		"principal", principal,
 		"project_uid", p.ProjectUID,
 		"committee_uid", p.CommitteeUID,
 	)
