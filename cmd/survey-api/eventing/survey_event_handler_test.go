@@ -92,9 +92,10 @@ func surveyV1Data() map[string]any {
 		"committees": []any{
 			map[string]any{
 				"committee_id": "c1", "committee_name": "Board", "project_id": "p1", "project_name": "Project One",
-				"nps_value": "30", "num_promoters": "6", "num_passives": "3", "num_detractors": "1",
-				"total_recipients": "10", "total_recipients_sent": "9", "total_responses": "8",
-				"total_recipients_opened": "7", "total_recipients_clicked": "6", "total_delivery_errors": "1",
+				// Every counter is distinct so a swapped pair of fields cannot pass.
+				"nps_value": "31", "num_promoters": "32", "num_passives": "33", "num_detractors": "34",
+				"total_recipients": "35", "total_recipients_sent": "36", "total_responses": "37",
+				"total_recipients_opened": "38", "total_recipients_clicked": "39", "total_delivery_errors": "40",
 			},
 			map[string]any{"committee_id": "c2", "committee_name": "TSC", "project_id": "p2", "project_name": "Project Two"},
 		},
@@ -123,9 +124,9 @@ func TestSurveyDBRaw_UnmarshalJSON(t *testing.T) {
 			TotalDeliveryErrors: 1, IsNPSSurvey: true, CollectorURL: "https://example.com/collect",
 			Committees: []SurveyCommitteeDBRaw{
 				{CommitteeID: "c1", CommitteeName: "Board", ProjectID: "p1", ProjectName: "Project One",
-					NPSValue: 30, NumPromoters: 6, NumPassives: 3, NumDetractors: 1, TotalRecipients: 10,
-					TotalSentRecipients: 9, TotalResponses: 8, TotalRecipientsOpened: 7, TotalRecipientsClicked: 6,
-					TotalDeliveryErrors: 1},
+					NPSValue: 31, NumPromoters: 32, NumPassives: 33, NumDetractors: 34, TotalRecipients: 35,
+					TotalSentRecipients: 36, TotalResponses: 37, TotalRecipientsOpened: 38, TotalRecipientsClicked: 39,
+					TotalDeliveryErrors: 40},
 				{CommitteeID: "c2", CommitteeName: "TSC", ProjectID: "p2", ProjectName: "Project Two"},
 			},
 		}, got)
@@ -242,9 +243,9 @@ func TestConvertMapToSurveyData(t *testing.T) {
 			Committees: []domain.SurveyCommitteeData{
 				{CommitteeUID: "v2-committee-c1", CommitteeID: "c1", CommitteeName: "Board",
 					ProjectUID: "v2-project-p1", ProjectID: "p1", ProjectName: "Project One",
-					NPSValue: 30, NumPromoters: 6, NumPassives: 3, NumDetractors: 1, TotalRecipients: 10,
-					TotalSentRecipients: 9, TotalResponses: 8, TotalRecipientsOpened: 7, TotalRecipientsClicked: 6,
-					TotalDeliveryErrors: 1},
+					NPSValue: 31, NumPromoters: 32, NumPassives: 33, NumDetractors: 34, TotalRecipients: 35,
+					TotalSentRecipients: 36, TotalResponses: 37, TotalRecipientsOpened: 38, TotalRecipientsClicked: 39,
+					TotalDeliveryErrors: 40},
 				{CommitteeUID: "v2-committee-c2", CommitteeID: "c2", CommitteeName: "TSC",
 					ProjectUID: "v2-project-p2", ProjectID: "p2", ProjectName: "Project Two"},
 			},
