@@ -7,9 +7,12 @@ import (
 	"context"
 	"io"
 	"log/slog"
+	"testing"
+	"time"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain/mocks"
+	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
@@ -50,11 +53,12 @@ func newRecordingPublisher(err error) (*mocks.MockEventPublisher, *[]publishedEv
 // fakeKV is a stateful in-memory jetstream.KeyValue limited to Get and Put,
 // which is all the event handlers use on the mappings bucket. Any other
 // method panics (nil embedded interface), so an unexpected call fails loudly.
-// Set putErr to make Put fail.
+// Set putErr to make Put fail, or getErr[key] to make Get fail for one key.
 type fakeKV struct {
 	jetstream.KeyValue
 	data   map[string][]byte
 	putErr error
+	getErr map[string]error
 }
 
 func newFakeKV(initial map[string]string) *fakeKV {
@@ -66,6 +70,9 @@ func newFakeKV(initial map[string]string) *fakeKV {
 }
 
 func (f *fakeKV) Get(_ context.Context, key string) (jetstream.KeyValueEntry, error) {
+	if err, ok := f.getErr[key]; ok {
+		return nil, err
+	}
 	v, ok := f.data[key]
 	if !ok {
 		return nil, jetstream.ErrKeyNotFound
@@ -83,3 +90,26 @@ func (f *fakeKV) Put(_ context.Context, key string, value []byte) (uint64, error
 
 // value returns the stored value for key ("" if absent).
 func (f *fakeKV) value(key string) string { return string(f.data[key]) }
+
+// startTestNATS runs an in-process JetStream-enabled NATS server on a random
+// port and returns its client URL. The server is shut down when the test ends.
+func startTestNATS(t *testing.T) string {
+	t.Helper()
+	ns, err := server.NewServer(&server.Options{
+		Host:      "127.0.0.1",
+		Port:      -1,
+		JetStream: true,
+		StoreDir:  t.TempDir(),
+		NoLog:     true,
+		NoSigs:    true,
+	})
+	if err != nil {
+		t.Fatalf("create NATS server: %v", err)
+	}
+	go ns.Start()
+	t.Cleanup(ns.Shutdown)
+	if !ns.ReadyForConnections(10 * time.Second) {
+		t.Fatal("NATS server not ready")
+	}
+	return ns.ClientURL()
+}
