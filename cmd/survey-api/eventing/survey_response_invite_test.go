@@ -18,7 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/vmihailenco/msgpack/v5"
 )
 
 type stubSurveyInviteUserReader struct {
@@ -44,35 +43,6 @@ func (s *stubSurveyInviteSender) SendInvite(_ context.Context, req domain.Invite
 		return nil, s.err
 	}
 	return s.result, nil
-}
-
-func TestDecodeKVData(t *testing.T) {
-	t.Run("decodes JSON", func(t *testing.T) {
-		payload := map[string]any{"name": "Member Survey 2025"}
-		raw, err := json.Marshal(payload)
-		require.NoError(t, err)
-
-		got, err := decodeKVValue(raw)
-		require.NoError(t, err)
-		assert.Equal(t, "Member Survey 2025", got["name"])
-	})
-
-	t.Run("decodes msgpack", func(t *testing.T) {
-		payload := map[string]any{"name": "Member Survey 2025"}
-		raw, err := msgpack.Marshal(payload)
-		require.NoError(t, err)
-
-		got, err := decodeKVValue(raw)
-		require.NoError(t, err)
-		assert.Equal(t, "Member Survey 2025", got["name"])
-	})
-
-	t.Run("returns combined error when both decoders fail", func(t *testing.T) {
-		_, err := decodeKVValue([]byte("not-json-or-msgpack"))
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "json:")
-		assert.Contains(t, err.Error(), "msgpack:")
-	})
 }
 
 func TestShouldSendSurveyResponseInvite(t *testing.T) {

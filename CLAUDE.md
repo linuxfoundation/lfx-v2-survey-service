@@ -75,4 +75,10 @@ pkg/                    ← Shared utilities and ITX API models
 
 **Test file naming**: a `_test.go` file must match an implementation file in the same directory (`foo_test.go` tests `foo.go`). Never add themed or suffixed test files such as `foo_gaps_test.go` or `foo_coverage_test.go`; put tests in the `_test.go` of the file that defines the code under test. Only shared fakes/helpers (`mock_*_test.go`, `helpers_test.go`) may lack a counterpart. Find violations with: `find . -name '*_test.go' ! -path './gen/*' | while read f; do [ -f "${f%_test.go}.go" ] || echo "$f"; done`.
 
+**Test doubles and harnesses**: reuse these instead of writing new fakes.
+- `internal/domain/mocks` has function-field mocks for every domain interface (service tests); an unconfigured method panics, so a test fails loudly if it calls something it did not set up.
+- `internal/infrastructure/proxy/client_test.go` has an `operation` table harness (`runOperations`). A new ITX proxy method gets one `operation` row in the `_test.go` of the file that defines it (`survey_proxy_test.go`, `response_proxy_test.go`, `exclusion_proxy_test.go`, `client_test.go`); the harness checks method, path, query, body, `x-scope` header, decoded result and 404 mapping.
+- `cmd/survey-api/eventing/helpers_test.go` has `fakeKV` (a stateful in-memory `jetstream.KeyValue` for Get/Put), `newRecordingPublisher` and `discardLogger` for the KV event handlers. Assert on what was published and stored rather than on call sequences.
+- Give every field in a "maps every field" fixture a distinct value, so a swapped pair of fields cannot pass.
+
 **Structured logging**: Uses `slog` throughout. The `internal/logging/` package sets up OpenTelemetry-aware structured logging. Pass the logger via context or direct injection — avoid `log.Print*`.
