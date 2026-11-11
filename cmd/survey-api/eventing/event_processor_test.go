@@ -147,28 +147,48 @@ func TestEventProcessor_Start(t *testing.T) {
 		require.NoError(t, err)
 
 		// The entry is written before the consumer exists, so it is only
-		// delivered because the consumer starts from the last value per subject.
-		// A survey template needs no ID mapping, so this exercises the whole
+		// delivered because the consumer replays existing entries. A survey
+		// template needs no ID mapping, so this exercises the whole
 		// consumer → kvMessageHandler → handler → publisher → mapping path.
 		_, err = objects.Put(ctx, "surveymonkey-surveys.tpl-1", mustJSON(t, templateV1Data()))
 		require.NoError(t, err)
 
-		done := make(chan error, 1)
-		go func() { done <- ep.Start(ctx) }()
+		// Registered before any fatal assertion so a failure cannot leave Start
+		// blocked or the NATS connection open for the rest of the test process.
+		var startErr error
+		exited := make(chan struct{})
+		stopped := false
+		stop := func() {
+			cancel()
+			select {
+			case <-time.After(5 * time.Second):
+				t.Error("Start did not return after the context was cancelled")
+			case <-exited:
+			}
+			if !stopped {
+				stopped = true
+				assert.NoError(t, ep.Stop())
+			}
+		}
+		t.Cleanup(stop)
+		go func() {
+			defer close(exited)
+			startErr = ep.Start(ctx)
+		}()
 
 		require.Eventually(t, func() bool {
 			_, err := mappings.Get(ctx, "survey_template."+templateV1Data()["id"].(string))
 			return err == nil
 		}, 10*time.Second, 50*time.Millisecond, "the template mapping is stored once the entry is processed")
 
-		cancel()
-		select {
-		case err := <-done:
-			assert.NoError(t, err)
-		case <-time.After(5 * time.Second):
-			t.Fatal("Start did not return after the context was cancelled")
-		}
-		assert.NoError(t, ep.Stop())
+		// DeliverAll would also deliver the single entry above, so pin the
+		// replay policy on the consumer itself.
+		consumer, err := js.Consumer(ctx, processorConfig(url).StreamName, processorConfig(url).ConsumerName)
+		require.NoError(t, err)
+		assert.Equal(t, jetstream.DeliverLastPerSubjectPolicy, consumer.CachedInfo().Config.DeliverPolicy)
+
+		stop()
+		assert.NoError(t, startErr)
 	})
 }
 
