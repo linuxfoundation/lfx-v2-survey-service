@@ -13,6 +13,8 @@ import (
 	"strings"
 	"testing"
 
+	"io"
+
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain/mocks"
@@ -20,14 +22,12 @@ import (
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/service"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/models/itx"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// Test doubles for domain interfaces are provided by internal/domain/mocks.
-// Do not re-declare mock types here — add to or extend the shared package instead.
+func strPtr(s string) *string { return &s }
 
-// helpers
-
-func strPtr(s string) *string   { return &s }
 func f64Ptr(f float64) *float64 { return &f }
 
 func newTestService(responseClient *mocks.MockSurveyResponseClient) *service.SurveyService {
@@ -35,293 +35,6 @@ func newTestService(responseClient *mocks.MockSurveyResponseClient) *service.Sur
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
 	return service.NewSurveyService(&mocks.MockSurveyClient{}, &mocks.MockExclusionClient{}, responseClient, mapper, logger)
 }
-
-func TestListSurveyResponses_Success(t *testing.T) {
-	questionID := "q-001"
-	questionText := "How satisfied are you?"
-	choiceID := "c-001"
-	choiceText := "Very satisfied"
-
-	proxy := &mocks.MockSurveyResponseClient{
-		ListResponsesResult: &itx.PaginatedSurveyResponses{
-			Data: []itx.SurveyRecipientResponse{
-				{
-					ID:             "resp-001",
-					SurveyID:       "survey-uid-abc",
-					Email:          strPtr("jane.doe@example.com"),
-					FirstName:      strPtr("Jane"),
-					LastName:       strPtr("Doe"),
-					ResponseStatus: strPtr("Responded"),
-					NPSValue:       f64Ptr(9.0),
-					Project:        &itx.SurveyResponseProject{ID: strPtr("proj-v1"), Name: strPtr("Kubernetes")},
-					Organization:   &itx.SurveyResponseOrganization{ID: strPtr("org-001"), Name: strPtr("Acme Corp")},
-					SurveyMonkeyQuestionAnswers: []itx.SurveyMonkeyQuestionAnswer{
-						{
-							QuestionID:   questionID,
-							QuestionText: &questionText,
-							Answers:      []itx.SurveyMonkeyAnswer{{ChoiceID: &choiceID, Text: &choiceText}},
-						},
-					},
-				},
-			},
-			Meta: itx.PageMetadata{
-				PageToken:    "",
-				TotalPages:   1,
-				TotalResults: 1,
-				PerPage:      25,
-			},
-		},
-	}
-
-	svc := newTestService(proxy)
-	token := "test-token"
-	surveyUID := "survey-uid-abc"
-
-	result, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
-		Token:     &token,
-		SurveyUID: surveyUID,
-	})
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result == nil {
-		t.Fatal("expected result, got nil")
-	}
-	if len(result.Data) != 1 {
-		t.Fatalf("expected 1 response, got %d", len(result.Data))
-	}
-
-	item := result.Data[0]
-	if item.ID != "resp-001" {
-		t.Errorf("expected ID resp-001, got %s", item.ID)
-	}
-	if item.Email == nil || *item.Email != "jane.doe@example.com" {
-		t.Errorf("expected email jane.doe@example.com, got %v", item.Email)
-	}
-	if len(item.SurveyMonkeyQuestionAnswers) != 1 {
-		t.Fatalf("expected 1 question answer, got %d", len(item.SurveyMonkeyQuestionAnswers))
-	}
-	qa := item.SurveyMonkeyQuestionAnswers[0]
-	if qa.QuestionID != "q-001" {
-		t.Errorf("expected question_id q-001, got %s", qa.QuestionID)
-	}
-	if len(qa.Answers) != 1 || qa.Answers[0].Text == nil || *qa.Answers[0].Text != "Very satisfied" {
-		t.Errorf("unexpected answers: %+v", qa.Answers)
-	}
-	if item.Project == nil || item.Project.Name == nil || *item.Project.Name != "Kubernetes" {
-		t.Errorf("expected project name Kubernetes, got %v", item.Project)
-	}
-	// NoOpMapper returns V1 ID unchanged, so UID should equal the V1 input
-	if item.Project.UID == nil || *item.Project.UID != "proj-v1" {
-		t.Errorf("expected project UID proj-v1 (noop mapper), got %v", item.Project.UID)
-	}
-
-	// Verify pagination meta
-	if result.Meta == nil {
-		t.Fatal("expected meta, got nil")
-	}
-	if result.Meta.TotalResults == nil || *result.Meta.TotalResults != 1 {
-		t.Errorf("expected TotalResults 1, got %v", result.Meta.TotalResults)
-	}
-}
-
-func TestListSurveyResponses_ProjectWithNoID_OmitsUID(t *testing.T) {
-	// When a response has a project object but no id, UID must be nil (not a pointer to "").
-	proxy := &mocks.MockSurveyResponseClient{
-		ListResponsesResult: &itx.PaginatedSurveyResponses{
-			Data: []itx.SurveyRecipientResponse{
-				{
-					ID:       "resp-002",
-					SurveyID: "survey-uid-abc",
-					Project:  &itx.SurveyResponseProject{ID: nil, Name: strPtr("Unnamed Project")},
-				},
-			},
-			Meta: itx.PageMetadata{},
-		},
-	}
-
-	svc := newTestService(proxy)
-	token := "test-token"
-
-	result, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
-		Token:     &token,
-		SurveyUID: "survey-uid-abc",
-	})
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	item := result.Data[0]
-	if item.Project == nil {
-		t.Fatal("expected project to be present")
-	}
-	if item.Project.UID != nil {
-		t.Errorf("expected project UID to be nil when no id provided, got %q", *item.Project.UID)
-	}
-}
-
-func TestListSurveyResponses_EmptyData(t *testing.T) {
-	proxy := &mocks.MockSurveyResponseClient{
-		ListResponsesResult: &itx.PaginatedSurveyResponses{
-			Data: []itx.SurveyRecipientResponse{},
-			Meta: itx.PageMetadata{TotalResults: 0, TotalPages: 0, PerPage: 25},
-		},
-	}
-
-	svc := newTestService(proxy)
-	token := "test-token"
-
-	result, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
-		Token:     &token,
-		SurveyUID: "survey-uid-empty",
-	})
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result == nil {
-		t.Fatal("expected result, got nil")
-	}
-	if len(result.Data) != 0 {
-		t.Errorf("expected empty data slice, got %d items", len(result.Data))
-	}
-}
-
-func TestListSurveyResponses_ITX404_MapsToNotFound(t *testing.T) {
-	proxy := &mocks.MockSurveyResponseClient{
-		ListResponsesErr: domain.NewNotFoundError("survey not found", nil),
-	}
-
-	svc := newTestService(proxy)
-	token := "test-token"
-
-	_, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
-		Token:     &token,
-		SurveyUID: "nonexistent-survey",
-	})
-
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
-	var domErr *domain.DomainError
-	if !errors.As(err, &domErr) || domErr.Type != domain.ErrorTypeNotFound {
-		t.Errorf("expected *domain.DomainError with ErrorTypeNotFound, got %T: %v", err, err)
-	}
-}
-
-func TestListSurveyResponses_ProjectUIDs_ForwardedToProxy(t *testing.T) {
-	// Verify that comma-delimited project_uids is V2→V1 mapped and forwarded as ProjectIDs.
-	// NoOpMapper returns each ID unchanged, so the joined string should equal the input.
-	proxy := &mocks.MockSurveyResponseClient{
-		ListResponsesResult: &itx.PaginatedSurveyResponses{
-			Data: []itx.SurveyRecipientResponse{},
-			Meta: itx.PageMetadata{},
-		},
-	}
-
-	svc := newTestService(proxy)
-	token := "test-token"
-	projectUIDs := "uid-one,uid-two,uid-three"
-
-	_, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
-		Token:       &token,
-		SurveyUID:   "survey-uid-abc",
-		ProjectUids: &projectUIDs,
-	})
-
-	if err != nil {
-		t.Fatalf("unexpected error when project_uids provided: %v", err)
-	}
-	if proxy.CapturedParams == nil {
-		t.Fatal("expected params to be forwarded, got nil")
-	}
-	// NoOpMapper returns each V2 UID unchanged — joined result should equal input
-	if proxy.CapturedParams.ProjectIDs == nil || *proxy.CapturedParams.ProjectIDs != "uid-one,uid-two,uid-three" {
-		t.Errorf("expected ProjectIDs uid-one,uid-two,uid-three, got %v", proxy.CapturedParams.ProjectIDs)
-	}
-	// ProjectID should be nil when only project_uids was provided
-	if proxy.CapturedParams.ProjectID != nil {
-		t.Errorf("expected ProjectID nil when only project_uids provided, got %v", proxy.CapturedParams.ProjectID)
-	}
-}
-
-func TestListSurveyResponses_ProjectUID_ForwardedToProxy(t *testing.T) {
-	// Verify project_uid is V2→V1 mapped and forwarded as ProjectID in ListResponses params.
-	// NoOpMapper returns the ID unchanged, so we can assert the value directly.
-	proxy := &mocks.MockSurveyResponseClient{
-		ListResponsesResult: &itx.PaginatedSurveyResponses{
-			Data: []itx.SurveyRecipientResponse{},
-			Meta: itx.PageMetadata{},
-		},
-	}
-
-	svc := newTestService(proxy)
-	token := "test-token"
-	projectUID := "v2-project-uid"
-	pageToken := "tok-abc"
-	perPage := "10"
-
-	_, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
-		Token:      &token,
-		SurveyUID:  "survey-uid-abc",
-		ProjectUID: &projectUID,
-		PageToken:  &pageToken,
-		PerPage:    &perPage,
-	})
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if proxy.CapturedSurveyID != "survey-uid-abc" {
-		t.Errorf("expected survey_uid survey-uid-abc forwarded, got %q", proxy.CapturedSurveyID)
-	}
-	if proxy.CapturedParams == nil {
-		t.Fatal("expected params to be forwarded, got nil")
-	}
-	// NoOpMapper returns V2 UID unchanged — assert it was set as ProjectID
-	if proxy.CapturedParams.ProjectID == nil || *proxy.CapturedParams.ProjectID != "v2-project-uid" {
-		t.Errorf("expected ProjectID v2-project-uid forwarded, got %v", proxy.CapturedParams.ProjectID)
-	}
-	// Pagination params passed through unchanged
-	if proxy.CapturedParams.PageToken == nil || *proxy.CapturedParams.PageToken != "tok-abc" {
-		t.Errorf("expected PageToken tok-abc forwarded, got %v", proxy.CapturedParams.PageToken)
-	}
-	if proxy.CapturedParams.PerPage == nil || *proxy.CapturedParams.PerPage != "10" {
-		t.Errorf("expected PerPage 10 forwarded, got %v", proxy.CapturedParams.PerPage)
-	}
-}
-
-func TestListSurveyResponses_BothProjectFilters_ReturnsValidationError(t *testing.T) {
-	// project_uid and project_uids are mutually exclusive. Providing both must be rejected
-	// with a 400 Bad Request before any proxy or ID-mapping calls are made.
-	proxy := &mocks.MockSurveyResponseClient{}
-	svc := newTestService(proxy)
-	token := "test-token"
-	projectUID := "v2-project-uid"
-	projectUIDs := "v2-uid-one,v2-uid-two"
-
-	_, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
-		Token:       &token,
-		SurveyUID:   "survey-uid-abc",
-		ProjectUID:  &projectUID,
-		ProjectUids: &projectUIDs,
-	})
-
-	if err == nil {
-		t.Fatal("expected a validation error when both project_uid and project_uids are set, got nil")
-	}
-	var domErr *domain.DomainError
-	if !errors.As(err, &domErr) || domErr.Type != domain.ErrorTypeValidation {
-		t.Fatalf("expected *domain.DomainError with ErrorTypeValidation, got %T: %v", err, err)
-	}
-	// Proxy must not have been called — the guard fires before any I/O.
-	if proxy.CapturedParams != nil {
-		t.Error("expected proxy not to be called when validation fails, but capturedParams is set")
-	}
-}
-
-// ─── ListSurveyTemplates ─────────────────────────────────────────────────────
 
 func newTemplatesTestService(fn func(ctx context.Context) ([]itx.SurveyTemplate, error)) *service.SurveyService {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
@@ -450,4 +163,776 @@ func TestListSurveyTemplates_PropagatesProxyError(t *testing.T) {
 	if !errors.Is(err, proxyErr) {
 		t.Fatalf("expected proxy error returned unchanged, got %T: %v", err, err)
 	}
+}
+
+func ctxWithPrincipal(principal string) context.Context {
+	return context.WithValue(context.Background(), constants.PrincipalContextID, principal)
+}
+
+func newCreatorTestService(client *mocks.MockSurveyClient, names domain.UserNameReader) *service.SurveyService {
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
+	svc := service.NewSurveyService(client, &mocks.MockExclusionClient{}, &mocks.MockSurveyResponseClient{}, idmapper.NewNoOpMapper(), logger)
+	if names != nil {
+		svc.WithUserNameReader(names)
+	}
+	return svc
+}
+
+func TestScheduleSurvey_CreatorFromPrincipal(t *testing.T) {
+	forgedPayload := func() *survey.ScheduleSurveyPayload {
+		return &survey.ScheduleSurveyPayload{
+			CommitteeUID:    "committee-1",
+			CreatorUsername: strPtr("victim"),
+			CreatorName:     strPtr("Victim Fixture"),
+			CreatorID:       strPtr("victim-id"),
+		}
+	}
+
+	var sent *itx.ScheduleSurveyRequest
+	client := &mocks.MockSurveyClient{
+		ScheduleSurveyFunc: func(_ context.Context, req *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+			sent = req
+			return &itx.SurveyScheduleResponse{}, nil
+		},
+	}
+
+	t.Run("stamps username, id and looked-up name over forged body values", func(t *testing.T) {
+		sent = nil
+		svc := newCreatorTestService(client, &mocks.MockUserNameReader{Name: "Alice Example"})
+
+		_, err := svc.ScheduleSurvey(ctxWithPrincipal("alice"), forgedPayload())
+
+		require.NoError(t, err)
+		require.NotNil(t, sent)
+		assert.Equal(t, "alice", *sent.CreatorUsername)
+		assert.Equal(t, "alice", *sent.CreatorID)
+		assert.Equal(t, "Alice Example", *sent.CreatorName)
+	})
+
+	t.Run("falls back to the username when the name lookup fails", func(t *testing.T) {
+		sent = nil
+		svc := newCreatorTestService(client, &mocks.MockUserNameReader{Err: errors.New("nats unavailable")})
+
+		_, err := svc.ScheduleSurvey(ctxWithPrincipal("alice"), forgedPayload())
+
+		require.NoError(t, err)
+		assert.Equal(t, "alice", *sent.CreatorName, "forged name must not be used when the lookup fails")
+	})
+
+	t.Run("falls back to the username when no name reader is configured", func(t *testing.T) {
+		sent = nil
+		svc := newCreatorTestService(client, nil)
+
+		_, err := svc.ScheduleSurvey(ctxWithPrincipal("alice"), forgedPayload())
+
+		require.NoError(t, err)
+		assert.Equal(t, "alice", *sent.CreatorName)
+	})
+
+	t.Run("rejects the request without an authenticated principal", func(t *testing.T) {
+		sent = nil
+		svc := newCreatorTestService(client, &mocks.MockUserNameReader{Name: "Alice Example"})
+
+		_, err := svc.ScheduleSurvey(context.Background(), forgedPayload())
+
+		var domErr *domain.DomainError
+		require.ErrorAs(t, err, &domErr)
+		assert.Equal(t, domain.ErrorTypeValidation, domErr.Type)
+		assert.Nil(t, sent, "ITX must not be called")
+	})
+}
+
+func TestUpdateSurvey_CreatorFromPrincipal(t *testing.T) {
+	var sent *itx.UpdateSurveyRequest
+	client := &mocks.MockSurveyClient{
+		UpdateSurveyFunc: func(_ context.Context, _ string, req *itx.UpdateSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+			sent = req
+			return &itx.SurveyScheduleResponse{}, nil
+		},
+	}
+
+	t.Run("stamps username and id from the principal over a forged creator_id", func(t *testing.T) {
+		sent = nil
+		svc := newCreatorTestService(client, nil)
+
+		_, err := svc.UpdateSurvey(ctxWithPrincipal("alice"), &survey.UpdateSurveyPayload{
+			SurveyUID: "survey-1",
+			CreatorID: strPtr("victim-id"),
+		})
+
+		require.NoError(t, err)
+		require.NotNil(t, sent)
+		assert.Equal(t, "alice", *sent.CreatorUsername)
+		assert.Equal(t, "alice", *sent.CreatorID)
+	})
+
+	t.Run("does not look up the display name on update", func(t *testing.T) {
+		sent = nil
+		names := &mocks.MockUserNameReader{
+			DisplayNameByUsernameFunc: func(context.Context, string) (string, error) {
+				t.Error("display name lookup must not run on update")
+				return "", nil
+			},
+		}
+		svc := newCreatorTestService(client, names)
+
+		_, err := svc.UpdateSurvey(ctxWithPrincipal("alice"), &survey.UpdateSurveyPayload{SurveyUID: "survey-1"})
+
+		require.NoError(t, err)
+		assert.Equal(t, "alice", *sent.CreatorUsername)
+	})
+
+	t.Run("rejects the request without an authenticated principal", func(t *testing.T) {
+		sent = nil
+		svc := newCreatorTestService(client, nil)
+
+		_, err := svc.UpdateSurvey(context.Background(), &survey.UpdateSurveyPayload{SurveyUID: "survey-1"})
+
+		var domErr *domain.DomainError
+		require.ErrorAs(t, err, &domErr)
+		assert.Equal(t, domain.ErrorTypeValidation, domErr.Type)
+		assert.Nil(t, sent, "ITX must not be called")
+	})
+}
+
+func intPtr(i int) *int { return &i }
+
+func boolPtr(b bool) *bool { return &b }
+
+// prefixMapper maps v2 IDs to "v1-<id>" and v1 IDs to "v2-<id>" for both projects and
+// committees, so a test can tell from the value alone which direction was applied.
+// failV2/failV1 name IDs whose mapping returns errMapper.
+var errMapper = errors.New("mapper unavailable")
+
+func prefixMapper(failV2, failV1 string) *mocks.MockIDMapper {
+	v2ToV1 := func(_ context.Context, id string) (string, error) {
+		if id == failV2 {
+			return "", errMapper
+		}
+		return "v1-" + id, nil
+	}
+	v1ToV2 := func(_ context.Context, id string) (string, error) {
+		if id == failV1 {
+			return "", errMapper
+		}
+		return "v2-" + id, nil
+	}
+	return &mocks.MockIDMapper{
+		MapProjectV2ToV1Func:   v2ToV1,
+		MapCommitteeV2ToV1Func: v2ToV1,
+		MapProjectV1ToV2Func:   v1ToV2,
+		MapCommitteeV1ToV2Func: v1ToV2,
+	}
+}
+
+func newServiceWith(client domain.SurveyClient, mapper domain.IDMapper) *service.SurveyService {
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	return service.NewSurveyService(client, &mocks.MockExclusionClient{}, &mocks.MockSurveyResponseClient{}, mapper, logger)
+}
+
+func requireErrorType(t *testing.T, err error, want domain.ErrorType) {
+	t.Helper()
+	var domErr *domain.DomainError
+	require.ErrorAs(t, err, &domErr)
+	assert.Equal(t, want, domErr.Type)
+}
+
+func TestSurveyService_ServiceReady(t *testing.T) {
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	sc, ec, rc, mapper := &mocks.MockSurveyClient{}, &mocks.MockExclusionClient{}, &mocks.MockSurveyResponseClient{}, &mocks.MockIDMapper{}
+
+	t.Run("all dependencies present", func(t *testing.T) {
+		assert.NoError(t, service.NewSurveyService(sc, ec, rc, mapper, logger).ServiceReady())
+	})
+
+	tests := []struct {
+		name string
+		svc  *service.SurveyService
+		want string
+	}{
+		{"missing survey client", service.NewSurveyService(nil, ec, rc, mapper, logger), "surveyClient"},
+		{"missing exclusion client", service.NewSurveyService(sc, nil, rc, mapper, logger), "exclusionClient"},
+		{"missing response client", service.NewSurveyService(sc, ec, nil, mapper, logger), "responseClient"},
+		{"missing id mapper", service.NewSurveyService(sc, ec, rc, nil, logger), "idMapper"},
+		{"missing logger", service.NewSurveyService(sc, ec, rc, mapper, nil), "logger"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.svc.ServiceReady()
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.want)
+		})
+	}
+}
+
+func TestScheduleSurvey_MapsRequestAndResponse(t *testing.T) {
+	var sent *itx.ScheduleSurveyRequest
+	client := &mocks.MockSurveyClient{
+		ScheduleSurveyFunc: func(_ context.Context, req *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+			sent = req
+			return &itx.SurveyScheduleResponse{
+				ID:                            "survey-1",
+				SurveyMonkeyID:                strPtr("sm-1"),
+				IsProjectSurvey:               boolPtr(true),
+				StageFilter:                   strPtr("Active"),
+				CreatorUsername:               strPtr("alice"),
+				CreatorName:                   strPtr("Alice Example"),
+				CreatorID:                     strPtr("alice"),
+				CreatedAt:                     strPtr("2026-01-01T00:00:00Z"),
+				LastModifiedAt:                strPtr("2026-01-02T00:00:00Z"),
+				LastModifiedBy:                strPtr("bob"),
+				SurveyTitle:                   strPtr("Annual Survey"),
+				SurveyStatus:                  "scheduled",
+				ResponseStatus:                strPtr("open"),
+				SurveySendDate:                strPtr("2026-02-01T00:00:00Z"),
+				SurveyCutoffDate:              strPtr("2026-03-01T00:00:00Z"),
+				SurveyReminderRateDays:        intPtr(7),
+				EmailSubject:                  strPtr("Subject"),
+				EmailBody:                     strPtr("<p>Body</p>"),
+				EmailBodyText:                 strPtr("Body"),
+				CommitteeCategory:             strPtr("Board"),
+				Committees:                    []itx.SurveyCommittee{{CommitteeName: strPtr("TSC"), CommitteeID: strPtr("c1"), ProjectID: strPtr("p1"), ProjectName: strPtr("Project One"), SurveyURL: strPtr("https://example.com/s"), TotalRecipients: intPtr(10), TotalResponses: intPtr(4), NPSValue: f64Ptr(42.5)}},
+				CommitteeVotingEnabled:        boolPtr(true),
+				SurveyURL:                     strPtr("https://example.com/survey"),
+				SendImmediately:               boolPtr(false),
+				TotalRecipients:               intPtr(10),
+				TotalResponses:                intPtr(4),
+				IsNPSSurvey:                   boolPtr(true),
+				NPSValue:                      f64Ptr(42.5),
+				NumPromoters:                  intPtr(5),
+				NumPassives:                   intPtr(3),
+				NumDetractors:                 intPtr(2),
+				TotalBouncedEmails:            intPtr(1),
+				NumAutomatedRemindersToSend:   intPtr(3),
+				NumAutomatedRemindersSent:     intPtr(1),
+				NextAutomatedReminderAt:       strPtr("2026-02-08T00:00:00Z"),
+				LatestAutomatedReminderSentAt: strPtr("2026-02-01T00:00:00Z"),
+			}, nil
+		},
+	}
+	svc := newServiceWith(client, prefixMapper("", ""))
+
+	got, err := svc.ScheduleSurvey(ctxWithPrincipal("alice"), &survey.ScheduleSurveyPayload{
+		CommitteeUID:           "c-uid",
+		IsProjectSurvey:        boolPtr(true),
+		StageFilter:            strPtr("Active"),
+		SurveyMonkeyID:         strPtr("sm-1"),
+		SurveyTitle:            strPtr("Annual Survey"),
+		SendImmediately:        boolPtr(false),
+		SurveySendDate:         strPtr("2026-02-01T00:00:00Z"),
+		SurveyCutoffDate:       strPtr("2026-03-01T00:00:00Z"),
+		SurveyReminderRateDays: intPtr(7),
+		EmailSubject:           strPtr("Subject"),
+		EmailBody:              strPtr("<p>Body</p>"),
+		EmailBodyText:          strPtr("Body"),
+		CommitteeVotingEnabled: boolPtr(true),
+	})
+	require.NoError(t, err)
+
+	t.Run("request: committee is mapped v2 to v1 and wrapped in a list, other fields forwarded", func(t *testing.T) {
+		require.NotNil(t, sent)
+		assert.Equal(t, []string{"v1-c-uid"}, sent.Committees)
+		assert.Equal(t, boolPtr(true), sent.IsProjectSurvey)
+		assert.Equal(t, strPtr("Active"), sent.StageFilter)
+		assert.Equal(t, strPtr("sm-1"), sent.SurveyMonkeyID)
+		assert.Equal(t, strPtr("Annual Survey"), sent.SurveyTitle)
+		assert.Equal(t, boolPtr(false), sent.SendImmediately)
+		assert.Equal(t, strPtr("2026-02-01T00:00:00Z"), sent.SurveySendDate)
+		assert.Equal(t, strPtr("2026-03-01T00:00:00Z"), sent.SurveyCutoffDate)
+		assert.Equal(t, intPtr(7), sent.SurveyReminderRateDays)
+		assert.Equal(t, strPtr("Subject"), sent.EmailSubject)
+		assert.Equal(t, strPtr("<p>Body</p>"), sent.EmailBody)
+		assert.Equal(t, strPtr("Body"), sent.EmailBodyText)
+		assert.Equal(t, boolPtr(true), sent.CommitteeVotingEnabled)
+	})
+
+	t.Run("response: every ITX field is carried over and committee ids are mapped v1 to v2", func(t *testing.T) {
+		want := &survey.SurveyScheduleResult{
+			UID:                    "survey-1",
+			SurveyMonkeyID:         strPtr("sm-1"),
+			IsProjectSurvey:        boolPtr(true),
+			StageFilter:            strPtr("Active"),
+			CreatorUsername:        strPtr("alice"),
+			CreatorName:            strPtr("Alice Example"),
+			CreatorID:              strPtr("alice"),
+			CreatedAt:              strPtr("2026-01-01T00:00:00Z"),
+			LastModifiedAt:         strPtr("2026-01-02T00:00:00Z"),
+			LastModifiedBy:         strPtr("bob"),
+			SurveyTitle:            strPtr("Annual Survey"),
+			SurveyStatus:           "scheduled",
+			ResponseStatus:         strPtr("open"),
+			SurveySendDate:         strPtr("2026-02-01T00:00:00Z"),
+			SurveyCutoffDate:       strPtr("2026-03-01T00:00:00Z"),
+			SurveyReminderRateDays: intPtr(7),
+			EmailSubject:           strPtr("Subject"),
+			EmailBody:              strPtr("<p>Body</p>"),
+			EmailBodyText:          strPtr("Body"),
+			CommitteeCategory:      strPtr("Board"),
+			Committees: []*survey.SurveyCommittee{{
+				CommitteeName: strPtr("TSC"), CommitteeUID: strPtr("v2-c1"), ProjectUID: strPtr("v2-p1"),
+				ProjectName: strPtr("Project One"), SurveyURL: strPtr("https://example.com/s"),
+				TotalRecipients: intPtr(10), TotalResponses: intPtr(4), NpsValue: f64Ptr(42.5),
+			}},
+			CommitteeVotingEnabled:        boolPtr(true),
+			SurveyURL:                     strPtr("https://example.com/survey"),
+			SendImmediately:               boolPtr(false),
+			TotalRecipients:               intPtr(10),
+			TotalResponses:                intPtr(4),
+			IsNpsSurvey:                   boolPtr(true),
+			NpsValue:                      f64Ptr(42.5),
+			NumPromoters:                  intPtr(5),
+			NumPassives:                   intPtr(3),
+			NumDetractors:                 intPtr(2),
+			TotalBouncedEmails:            intPtr(1),
+			NumAutomatedRemindersToSend:   intPtr(3),
+			NumAutomatedRemindersSent:     intPtr(1),
+			NextAutomatedReminderAt:       strPtr("2026-02-08T00:00:00Z"),
+			LatestAutomatedReminderSentAt: strPtr("2026-02-01T00:00:00Z"),
+		}
+		assert.Equal(t, want, got)
+	})
+}
+
+func TestScheduleSurvey_Errors(t *testing.T) {
+	t.Run("committee mapping failure is returned and ITX is not called", func(t *testing.T) {
+		client := &mocks.MockSurveyClient{} // any call panics
+		svc := newServiceWith(client, prefixMapper("bad-committee", ""))
+
+		_, err := svc.ScheduleSurvey(ctxWithPrincipal("alice"), &survey.ScheduleSurveyPayload{CommitteeUID: "bad-committee"})
+
+		assert.ErrorIs(t, err, errMapper)
+	})
+
+	t.Run("ITX error is returned unchanged", func(t *testing.T) {
+		itxErr := domain.NewUnavailableError("itx down")
+		client := &mocks.MockSurveyClient{
+			ScheduleSurveyFunc: func(context.Context, *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+				return nil, itxErr
+			},
+		}
+		svc := newServiceWith(client, prefixMapper("", ""))
+
+		_, err := svc.ScheduleSurvey(ctxWithPrincipal("alice"), &survey.ScheduleSurveyPayload{CommitteeUID: "c"})
+
+		assert.Same(t, itxErr, err)
+	})
+}
+
+func TestScheduleSurvey_ResponseCommitteeMapping(t *testing.T) {
+	respond := func(committees []itx.SurveyCommittee) *mocks.MockSurveyClient {
+		return &mocks.MockSurveyClient{
+			ScheduleSurveyFunc: func(context.Context, *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+				return &itx.SurveyScheduleResponse{ID: "s", Committees: committees}, nil
+			},
+		}
+	}
+	schedule := func(client *mocks.MockSurveyClient, mapper *mocks.MockIDMapper) (*survey.SurveyScheduleResult, error) {
+		return newServiceWith(client, mapper).ScheduleSurvey(ctxWithPrincipal("alice"), &survey.ScheduleSurveyPayload{CommitteeUID: "c"})
+	}
+
+	t.Run("no committees stays nil", func(t *testing.T) {
+		got, err := schedule(respond(nil), prefixMapper("", ""))
+		require.NoError(t, err)
+		assert.Nil(t, got.Committees)
+	})
+
+	t.Run("v1 id is kept when its mapping fails", func(t *testing.T) {
+		got, err := schedule(respond([]itx.SurveyCommittee{{CommitteeID: strPtr("c-bad"), ProjectID: strPtr("p-bad")}}), prefixMapper("", "c-bad"))
+		require.NoError(t, err)
+		require.Len(t, got.Committees, 1)
+		assert.Equal(t, "c-bad", *got.Committees[0].CommitteeUID, "committee falls back to the v1 id")
+		assert.Equal(t, "v2-p-bad", *got.Committees[0].ProjectUID, "project still maps")
+	})
+
+	t.Run("project v1 id is kept when its mapping fails", func(t *testing.T) {
+		got, err := schedule(respond([]itx.SurveyCommittee{{CommitteeID: strPtr("c1"), ProjectID: strPtr("p-bad")}}), prefixMapper("", "p-bad"))
+		require.NoError(t, err)
+		assert.Equal(t, "v2-c1", *got.Committees[0].CommitteeUID)
+		assert.Equal(t, "p-bad", *got.Committees[0].ProjectUID)
+	})
+
+	t.Run("missing or empty ids leave the uids nil", func(t *testing.T) {
+		got, err := schedule(respond([]itx.SurveyCommittee{{CommitteeName: strPtr("No ids")}, {CommitteeID: strPtr(""), ProjectID: strPtr("")}}), prefixMapper("", ""))
+		require.NoError(t, err)
+		require.Len(t, got.Committees, 2)
+		for _, c := range got.Committees {
+			assert.Nil(t, c.CommitteeUID)
+			assert.Nil(t, c.ProjectUID)
+		}
+	})
+
+	t.Run("order is preserved", func(t *testing.T) {
+		got, err := schedule(respond([]itx.SurveyCommittee{{CommitteeID: strPtr("a")}, {CommitteeID: strPtr("b")}, {CommitteeID: strPtr("c")}}), prefixMapper("", ""))
+		require.NoError(t, err)
+		require.Len(t, got.Committees, 3)
+		assert.Equal(t, "v2-a", *got.Committees[0].CommitteeUID)
+		assert.Equal(t, "v2-b", *got.Committees[1].CommitteeUID)
+		assert.Equal(t, "v2-c", *got.Committees[2].CommitteeUID)
+	})
+}
+
+func TestGetSurvey(t *testing.T) {
+	var gotID string
+	var gotParams *itx.GetSurveyParams
+	client := &mocks.MockSurveyClient{
+		GetSurveyFunc: func(_ context.Context, id string, params *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error) {
+			gotID, gotParams = id, params
+			return &itx.SurveyScheduleResponse{ID: id, SurveyStatus: "sent"}, nil
+		},
+	}
+	get := func(p *survey.GetSurveyPayload) (*survey.SurveyScheduleResult, error) {
+		gotID, gotParams = "", nil
+		return newServiceWith(client, prefixMapper("p-bad", "")).GetSurvey(context.Background(), p)
+	}
+
+	t.Run("without filters no query params are sent", func(t *testing.T) {
+		got, err := get(&survey.GetSurveyPayload{SurveyUID: "s-1"})
+		require.NoError(t, err)
+		assert.Equal(t, "s-1", gotID)
+		assert.Nil(t, gotParams)
+		assert.Equal(t, "s-1", got.UID)
+		assert.Equal(t, "sent", got.SurveyStatus)
+	})
+
+	t.Run("project_uid is mapped v2 to v1", func(t *testing.T) {
+		_, err := get(&survey.GetSurveyPayload{SurveyUID: "s-1", ProjectUID: strPtr("p1")})
+		require.NoError(t, err)
+		require.NotNil(t, gotParams)
+		assert.Equal(t, "v1-p1", *gotParams.ProjectID)
+		assert.Nil(t, gotParams.ProjectIDs)
+	})
+
+	t.Run("project_uids is split, trimmed, mapped and rejoined in order", func(t *testing.T) {
+		_, err := get(&survey.GetSurveyPayload{SurveyUID: "s-1", ProjectUids: strPtr(" p1, p2 ,,p3 ")})
+		require.NoError(t, err)
+		require.NotNil(t, gotParams)
+		assert.Equal(t, "v1-p1,v1-p2,v1-p3", *gotParams.ProjectIDs)
+		assert.Nil(t, gotParams.ProjectID)
+	})
+
+	t.Run("empty filter values add no filter", func(t *testing.T) {
+		_, err := get(&survey.GetSurveyPayload{SurveyUID: "s-1", ProjectUID: strPtr(""), ProjectUids: strPtr("")})
+		require.NoError(t, err)
+		if gotParams != nil {
+			assert.Nil(t, gotParams.ProjectID)
+			assert.Nil(t, gotParams.ProjectIDs)
+		}
+	})
+
+	t.Run("both project filters are rejected before ITX is called", func(t *testing.T) {
+		gotID = ""
+		_, err := get(&survey.GetSurveyPayload{SurveyUID: "s-1", ProjectUID: strPtr("p1"), ProjectUids: strPtr("p2")})
+		requireErrorType(t, err, domain.ErrorTypeValidation)
+		assert.Empty(t, gotID, "ITX must not be called")
+	})
+
+	t.Run("project_uid mapping failure is returned", func(t *testing.T) {
+		_, err := get(&survey.GetSurveyPayload{SurveyUID: "s-1", ProjectUID: strPtr("p-bad")})
+		assert.ErrorIs(t, err, errMapper)
+	})
+
+	t.Run("one failing project_uids entry fails the request", func(t *testing.T) {
+		_, err := get(&survey.GetSurveyPayload{SurveyUID: "s-1", ProjectUids: strPtr("p1,p-bad")})
+		assert.ErrorIs(t, err, errMapper)
+	})
+
+	t.Run("ITX error is returned unchanged", func(t *testing.T) {
+		itxErr := domain.NewNotFoundError("no such survey")
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			GetSurveyFunc: func(context.Context, string, *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error) {
+				return nil, itxErr
+			},
+		}, prefixMapper("", ""))
+
+		_, err := svc.GetSurvey(context.Background(), &survey.GetSurveyPayload{SurveyUID: "s-1"})
+
+		assert.Same(t, itxErr, err)
+	})
+}
+
+func TestUpdateSurvey_MapsRequestAndResponse(t *testing.T) {
+	var gotID string
+	var sent *itx.UpdateSurveyRequest
+	client := &mocks.MockSurveyClient{
+		UpdateSurveyFunc: func(_ context.Context, id string, req *itx.UpdateSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+			gotID, sent = id, req
+			return &itx.SurveyScheduleResponse{ID: id, SurveyStatus: "scheduled", Committees: []itx.SurveyCommittee{{CommitteeID: strPtr("c1")}}}, nil
+		},
+	}
+	update := func(p *survey.UpdateSurveyPayload) (*survey.SurveyScheduleResult, error) {
+		gotID, sent = "", nil
+		return newServiceWith(client, prefixMapper("c-bad", "")).UpdateSurvey(ctxWithPrincipal("alice"), p)
+	}
+
+	t.Run("committee is mapped and every field forwarded", func(t *testing.T) {
+		got, err := update(&survey.UpdateSurveyPayload{
+			SurveyUID:              "s-1",
+			CommitteeUID:           strPtr("c-uid"),
+			SurveyTitle:            strPtr("New title"),
+			SurveySendDate:         strPtr("2026-02-01T00:00:00Z"),
+			SurveyCutoffDate:       strPtr("2026-03-01T00:00:00Z"),
+			SurveyReminderRateDays: intPtr(5),
+			EmailSubject:           strPtr("Subject"),
+			EmailBody:              strPtr("<p>Body</p>"),
+			EmailBodyText:          strPtr("Body"),
+			CommitteeVotingEnabled: boolPtr(true),
+		})
+		require.NoError(t, err)
+		require.NotNil(t, sent)
+		assert.Equal(t, "s-1", gotID)
+		assert.Equal(t, []string{"v1-c-uid"}, sent.Committees)
+		assert.Equal(t, strPtr("New title"), sent.SurveyTitle)
+		assert.Equal(t, strPtr("2026-02-01T00:00:00Z"), sent.SurveySendDate)
+		assert.Equal(t, strPtr("2026-03-01T00:00:00Z"), sent.SurveyCutoffDate)
+		assert.Equal(t, intPtr(5), sent.SurveyReminderRateDays)
+		assert.Equal(t, strPtr("Subject"), sent.EmailSubject)
+		assert.Equal(t, strPtr("<p>Body</p>"), sent.EmailBody)
+		assert.Equal(t, strPtr("Body"), sent.EmailBodyText)
+		assert.Equal(t, boolPtr(true), sent.CommitteeVotingEnabled)
+
+		assert.Equal(t, "s-1", got.UID)
+		require.Len(t, got.Committees, 1)
+		assert.Equal(t, "v2-c1", *got.Committees[0].CommitteeUID, "response committee ids are mapped v1 to v2")
+	})
+
+	t.Run("omitted or empty committee sends no committees", func(t *testing.T) {
+		for name, uid := range map[string]*string{"nil": nil, "empty": strPtr("")} {
+			_, err := update(&survey.UpdateSurveyPayload{SurveyUID: "s-1", CommitteeUID: uid})
+			require.NoError(t, err, name)
+			assert.Nil(t, sent.Committees, name)
+		}
+	})
+
+	t.Run("committee mapping failure is returned and ITX is not called", func(t *testing.T) {
+		_, err := update(&survey.UpdateSurveyPayload{SurveyUID: "s-1", CommitteeUID: strPtr("c-bad")})
+		assert.ErrorIs(t, err, errMapper)
+		assert.Nil(t, sent)
+	})
+
+	t.Run("ITX error is returned unchanged", func(t *testing.T) {
+		itxErr := domain.NewConflictError("survey is not editable")
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			UpdateSurveyFunc: func(context.Context, string, *itx.UpdateSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+				return nil, itxErr
+			},
+		}, prefixMapper("", ""))
+
+		_, err := svc.UpdateSurvey(ctxWithPrincipal("alice"), &survey.UpdateSurveyPayload{SurveyUID: "s-1"})
+
+		assert.Same(t, itxErr, err)
+	})
+}
+
+func TestDeleteSurvey(t *testing.T) {
+	t.Run("forwards the survey id", func(t *testing.T) {
+		var gotID string
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			DeleteSurveyFunc: func(_ context.Context, id string) error { gotID = id; return nil },
+		}, prefixMapper("", ""))
+
+		require.NoError(t, svc.DeleteSurvey(context.Background(), &survey.DeleteSurveyPayload{SurveyUID: "s-1"}))
+		assert.Equal(t, "s-1", gotID)
+	})
+
+	t.Run("ITX error is returned unchanged", func(t *testing.T) {
+		itxErr := domain.NewNotFoundError("gone")
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			DeleteSurveyFunc: func(context.Context, string) error { return itxErr },
+		}, prefixMapper("", ""))
+
+		assert.Same(t, itxErr, svc.DeleteSurvey(context.Background(), &survey.DeleteSurveyPayload{SurveyUID: "s-1"}))
+	})
+}
+
+func TestBulkResendSurvey(t *testing.T) {
+	t.Run("forwards the survey id and recipient ids", func(t *testing.T) {
+		var gotID string
+		var gotReq *itx.BulkResendRequest
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			BulkResendSurveyFunc: func(_ context.Context, id string, req *itx.BulkResendRequest) error {
+				gotID, gotReq = id, req
+				return nil
+			},
+		}, prefixMapper("", ""))
+
+		require.NoError(t, svc.BulkResendSurvey(context.Background(), &survey.BulkResendSurveyPayload{SurveyUID: "s-1", RecipientIds: []string{"r1", "r2"}}))
+		assert.Equal(t, "s-1", gotID)
+		require.NotNil(t, gotReq)
+		assert.Equal(t, []string{"r1", "r2"}, gotReq.RecipientIDs)
+	})
+
+	t.Run("ITX error is returned unchanged", func(t *testing.T) {
+		itxErr := domain.NewUnavailableError("itx down")
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			BulkResendSurveyFunc: func(context.Context, string, *itx.BulkResendRequest) error { return itxErr },
+		}, prefixMapper("", ""))
+
+		assert.Same(t, itxErr, svc.BulkResendSurvey(context.Background(), &survey.BulkResendSurveyPayload{SurveyUID: "s-1"}))
+	})
+}
+
+func TestPreviewSendSurvey(t *testing.T) {
+	var gotID string
+	var gotCommittee *string
+	response := &itx.PreviewSendResponse{
+		AffectedProjects: []itx.LFXProject{
+			{ID: "p1", Name: "Project One", Slug: "project-one", Status: "Active", LogoURL: strPtr("https://example.com/logo.png")},
+			{ID: "p-bad", Name: "Unmapped", Slug: "unmapped", Status: "Active"},
+			{ID: "", Name: "No id"},
+		},
+		AffectedCommittees: []itx.ExcludedCommittee{
+			{ProjectID: "p1", ProjectName: "Project One", CommitteeID: "c1", CommitteeName: "TSC", CommitteeCategory: "Technical"},
+			{ProjectID: "p-bad", CommitteeID: "c-bad", CommitteeName: "Unmapped"},
+		},
+		AffectedRecipients: []itx.ITXPreviewRecipient{
+			{UserID: "u1", Name: strPtr("Alice Example"), FirstName: strPtr("Alice"), LastName: strPtr("Example"), Username: strPtr("alice"), Email: "alice@example.com", Role: strPtr("Chair")},
+			{UserID: "u2", Email: "bob@example.com"},
+		},
+	}
+	client := &mocks.MockSurveyClient{
+		PreviewSendFunc: func(_ context.Context, id string, committee *string) (*itx.PreviewSendResponse, error) {
+			gotID, gotCommittee = id, committee
+			return response, nil
+		},
+	}
+	t.Run("maps projects, committees and recipients", func(t *testing.T) {
+		svc := newServiceWith(client, prefixMapper("c-bad", "p-bad"))
+		got, err := svc.PreviewSendSurvey(context.Background(), &survey.PreviewSendSurveyPayload{SurveyUID: "s-1", CommitteeUID: strPtr("c-uid")})
+		require.NoError(t, err)
+
+		assert.Equal(t, "s-1", gotID)
+		require.NotNil(t, gotCommittee)
+		assert.Equal(t, "v1-c-uid", *gotCommittee, "committee filter is mapped v2 to v1")
+
+		require.Len(t, got.AffectedProjects, 3)
+		assert.Equal(t, &survey.LFXProject{ID: "v2-p1", Name: "Project One", Slug: "project-one", Status: "Active", LogoURL: strPtr("https://example.com/logo.png")}, got.AffectedProjects[0])
+		assert.Equal(t, "p-bad", got.AffectedProjects[1].ID, "falls back to the v1 id when mapping fails")
+		assert.Equal(t, "", got.AffectedProjects[2].ID, "an empty id is not mapped")
+
+		require.Len(t, got.AffectedCommittees, 2)
+		assert.Equal(t, &survey.ExcludedCommittee{ProjectUID: "v2-p1", ProjectName: "Project One", CommitteeUID: "v2-c1", CommitteeName: "TSC", CommitteeCategory: "Technical"}, got.AffectedCommittees[0])
+		assert.Equal(t, "p-bad", got.AffectedCommittees[1].ProjectUID)
+		assert.Equal(t, "v2-c-bad", got.AffectedCommittees[1].CommitteeUID)
+
+		require.Len(t, got.AffectedRecipients, 2)
+		assert.Equal(t, &survey.ITXPreviewRecipient{UserID: "u1", Name: strPtr("Alice Example"), FirstName: strPtr("Alice"), LastName: strPtr("Example"), Username: strPtr("alice"), Email: "alice@example.com", Role: strPtr("Chair")}, got.AffectedRecipients[0])
+		assert.Equal(t, &survey.ITXPreviewRecipient{UserID: "u2", Email: "bob@example.com"}, got.AffectedRecipients[1])
+	})
+
+	t.Run("no committee filter sends none", func(t *testing.T) {
+		svc := newServiceWith(client, prefixMapper("", ""))
+		_, err := svc.PreviewSendSurvey(context.Background(), &survey.PreviewSendSurveyPayload{SurveyUID: "s-1"})
+		require.NoError(t, err)
+		assert.Nil(t, gotCommittee)
+	})
+
+	t.Run("an empty ITX response yields empty non-nil lists", func(t *testing.T) {
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			PreviewSendFunc: func(context.Context, string, *string) (*itx.PreviewSendResponse, error) {
+				return &itx.PreviewSendResponse{}, nil
+			},
+		}, prefixMapper("", ""))
+
+		got, err := svc.PreviewSendSurvey(context.Background(), &survey.PreviewSendSurveyPayload{SurveyUID: "s-1"})
+		require.NoError(t, err)
+		// The JSON contract needs [] rather than null.
+		assert.NotNil(t, got.AffectedProjects)
+		assert.Empty(t, got.AffectedProjects)
+		assert.NotNil(t, got.AffectedCommittees)
+		assert.Empty(t, got.AffectedCommittees)
+		assert.NotNil(t, got.AffectedRecipients)
+		assert.Empty(t, got.AffectedRecipients)
+	})
+
+	t.Run("committee mapping failure is returned and ITX is not called", func(t *testing.T) {
+		svc := newServiceWith(&mocks.MockSurveyClient{}, prefixMapper("c-bad", ""))
+		_, err := svc.PreviewSendSurvey(context.Background(), &survey.PreviewSendSurveyPayload{SurveyUID: "s-1", CommitteeUID: strPtr("c-bad")})
+		assert.ErrorIs(t, err, errMapper)
+	})
+
+	t.Run("ITX error is returned unchanged", func(t *testing.T) {
+		itxErr := domain.NewUnavailableError("itx down")
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			PreviewSendFunc: func(context.Context, string, *string) (*itx.PreviewSendResponse, error) { return nil, itxErr },
+		}, prefixMapper("", ""))
+
+		_, err := svc.PreviewSendSurvey(context.Background(), &survey.PreviewSendSurveyPayload{SurveyUID: "s-1"})
+		assert.Same(t, itxErr, err)
+	})
+}
+
+func TestSendMissingRecipients(t *testing.T) {
+	var gotID string
+	var gotCommittee *string
+	client := &mocks.MockSurveyClient{
+		SendMissingRecipientsFunc: func(_ context.Context, id string, committee *string) error {
+			gotID, gotCommittee = id, committee
+			return nil
+		},
+	}
+	svc := newServiceWith(client, prefixMapper("c-bad", ""))
+
+	t.Run("maps the committee filter v2 to v1", func(t *testing.T) {
+		require.NoError(t, svc.SendMissingRecipients(context.Background(), &survey.SendMissingRecipientsPayload{SurveyUID: "s-1", CommitteeUID: strPtr("c-uid")}))
+		assert.Equal(t, "s-1", gotID)
+		require.NotNil(t, gotCommittee)
+		assert.Equal(t, "v1-c-uid", *gotCommittee)
+	})
+
+	t.Run("no committee filter sends none", func(t *testing.T) {
+		gotCommittee = strPtr("stale")
+		require.NoError(t, svc.SendMissingRecipients(context.Background(), &survey.SendMissingRecipientsPayload{SurveyUID: "s-1"}))
+		assert.Nil(t, gotCommittee)
+	})
+
+	t.Run("committee mapping failure is returned and ITX is not called", func(t *testing.T) {
+		gotID = ""
+		err := svc.SendMissingRecipients(context.Background(), &survey.SendMissingRecipientsPayload{SurveyUID: "s-1", CommitteeUID: strPtr("c-bad")})
+		assert.ErrorIs(t, err, errMapper)
+		assert.Empty(t, gotID)
+	})
+
+	t.Run("ITX error is returned unchanged", func(t *testing.T) {
+		itxErr := domain.NewUnavailableError("itx down")
+		failing := newServiceWith(&mocks.MockSurveyClient{
+			SendMissingRecipientsFunc: func(context.Context, string, *string) error { return itxErr },
+		}, prefixMapper("", ""))
+
+		assert.Same(t, itxErr, failing.SendMissingRecipients(context.Background(), &survey.SendMissingRecipientsPayload{SurveyUID: "s-1"}))
+	})
+}
+
+func TestValidateEmail(t *testing.T) {
+	t.Run("forwards body and subject and returns the validated result", func(t *testing.T) {
+		var sent *itx.ValidateEmailRequest
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			ValidateEmailFunc: func(_ context.Context, req *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error) {
+				sent = req
+				return &itx.ValidateEmailResponse{Body: "<p>Validated</p>", Subject: "Validated subject"}, nil
+			},
+		}, prefixMapper("", ""))
+
+		got, err := svc.ValidateEmail(context.Background(), &survey.ValidateEmailPayload{Body: strPtr("<p>Hi</p>"), Subject: strPtr("Hi")})
+
+		require.NoError(t, err)
+		require.NotNil(t, sent)
+		assert.Equal(t, strPtr("<p>Hi</p>"), sent.Body)
+		assert.Equal(t, strPtr("Hi"), sent.Subject)
+		assert.Equal(t, "<p>Validated</p>", got.Body)
+		assert.Equal(t, "Validated subject", got.Subject)
+	})
+
+	t.Run("ITX error is returned unchanged", func(t *testing.T) {
+		itxErr := domain.NewValidationError("bad template")
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			ValidateEmailFunc: func(context.Context, *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error) {
+				return nil, itxErr
+			},
+		}, prefixMapper("", ""))
+
+		got, err := svc.ValidateEmail(context.Background(), &survey.ValidateEmailPayload{})
+
+		assert.Nil(t, got)
+		assert.Same(t, itxErr, err)
+	})
 }

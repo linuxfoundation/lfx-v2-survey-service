@@ -73,4 +73,6 @@ pkg/                    ← Shared utilities and ITX API models
 
 **Creator identity**: `ScheduleSurvey` and `UpdateSurvey` never trust `creator_*` values from the request body. The creator is the JWT principal (LFID username); the display name comes from the auth service (`lfx.auth-service.user_metadata.read`) through the optional `UserNameReader`, falling back to the username. ITX stores the name as sent and does not look it up.
 
+**Test file naming**: a `_test.go` file must match an implementation file in the same directory (`foo_test.go` tests `foo.go`). Never add themed or suffixed test files such as `foo_gaps_test.go` or `foo_coverage_test.go`; put tests in the `_test.go` of the file that defines the code under test. Only shared fakes/helpers (`mock_*_test.go`, `helpers_test.go`) may lack a counterpart. Find violations with: `find . -name '*_test.go' ! -path './gen/*' | while read f; do [ -f "${f%_test.go}.go" ] || echo "$f"; done`.
+
 **Structured logging**: Uses `slog` throughout. The `internal/logging/` package sets up OpenTelemetry-aware structured logging. Pass the logger via context or direct injection — avoid `log.Print*`.
