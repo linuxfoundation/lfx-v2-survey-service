@@ -381,8 +381,8 @@ func TestDeleteRecipientGroup(t *testing.T) {
 			SurveyUID: "s-1", CommitteeUID: strPtr("c-uid"), ProjectUID: strPtr("p-uid"), FoundationID: strPtr("f-1"),
 		}))
 		assert.Equal(t, "s-1", gotSurvey)
-		assert.Equal(t, strPtr("v1-c-uid"), gotCommittee)
-		assert.Equal(t, strPtr("v1-p-uid"), gotProject)
+		assert.Equal(t, strPtr("v1-committee-c-uid"), gotCommittee)
+		assert.Equal(t, strPtr("v1-project-p-uid"), gotProject)
 		assert.Equal(t, strPtr("f-1"), gotFoundation)
 	})
 
@@ -449,10 +449,10 @@ func TestListSurveyResponses_MapsEveryField(t *testing.T) {
 	require.Len(t, got.Data, 1)
 	assert.Equal(t, &survey.SurveyResponseItem{
 		ID: "r-1", SurveyUID: "s-1", SurveyLink: strPtr("https://example.com/r-1"),
-		CommitteeUID: strPtr("v2-c1"), Email: strPtr("alice@example.com"), FirstName: strPtr("Alice"), LastName: strPtr("Example"),
+		CommitteeUID: strPtr("v2-committee-c1"), Email: strPtr("alice@example.com"), FirstName: strPtr("Alice"), LastName: strPtr("Example"),
 		Username: strPtr("alice"), Role: strPtr("Chair"), JobTitle: strPtr("Engineer"), MembershipTier: strPtr("Gold"), VotingStatus: strPtr("Voting Rep"),
 		Organization:   &survey.SurveyResponseOrg{ID: strPtr("org-1"), Name: strPtr("Test Org")},
-		Project:        &survey.SurveyResponseProj{UID: strPtr("v2-p1"), Name: strPtr("Project One")},
+		Project:        &survey.SurveyResponseProj{UID: strPtr("v2-project-p1"), Name: strPtr("Project One")},
 		ResponseStatus: strPtr("Responded"), CreatedAt: strPtr("2026-01-01T00:00:00Z"), ResponseDatetime: strPtr("2026-01-02T00:00:00Z"),
 		LastReceivedTime: strPtr("2026-01-03T00:00:00Z"), NumAutomatedRemindersReceived: intPtr(2), NpsValue: f64Ptr(9),
 		SurveyMonkeyRespondentID: strPtr("resp-1"),
@@ -532,8 +532,8 @@ func TestListSurveyResponses_IDMapping(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Len(t, got.Data, 3)
-		assert.Equal(t, "v2-c1", *got.Data[0].CommitteeUID)
+		assert.Equal(t, "v2-committee-c1", *got.Data[0].CommitteeUID)
 		assert.Equal(t, "c-bad", *got.Data[1].CommitteeUID)
-		assert.Equal(t, "v2-c3", *got.Data[2].CommitteeUID)
+		assert.Equal(t, "v2-committee-c3", *got.Data[2].CommitteeUID)
 	})
 }

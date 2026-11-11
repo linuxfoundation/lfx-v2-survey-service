@@ -299,29 +299,27 @@ func intPtr(i int) *int { return &i }
 
 func boolPtr(b bool) *bool { return &b }
 
-// prefixMapper maps v2 IDs to "v1-<id>" and v1 IDs to "v2-<id>" for both projects and
-// committees, so a test can tell from the value alone which direction was applied.
+// prefixMapper returns an ID mapper whose project and committee methods produce distinct,
+// direction-tagged values ("v1-project-<id>", "v1-committee-<id>", "v2-project-<id>",
+// "v2-committee-<id>"). A test can therefore tell from the value alone which mapper method
+// the service called, so swapping the project and committee calls fails the suite.
 // failV2/failV1 name IDs whose mapping returns errMapper.
 var errMapper = errors.New("mapper unavailable")
 
 func prefixMapper(failV2, failV1 string) *mocks.MockIDMapper {
-	v2ToV1 := func(_ context.Context, id string) (string, error) {
-		if id == failV2 {
-			return "", errMapper
+	mapper := func(prefix, failID string) func(context.Context, string) (string, error) {
+		return func(_ context.Context, id string) (string, error) {
+			if id == failID {
+				return "", errMapper
+			}
+			return prefix + id, nil
 		}
-		return "v1-" + id, nil
-	}
-	v1ToV2 := func(_ context.Context, id string) (string, error) {
-		if id == failV1 {
-			return "", errMapper
-		}
-		return "v2-" + id, nil
 	}
 	return &mocks.MockIDMapper{
-		MapProjectV2ToV1Func:   v2ToV1,
-		MapCommitteeV2ToV1Func: v2ToV1,
-		MapProjectV1ToV2Func:   v1ToV2,
-		MapCommitteeV1ToV2Func: v1ToV2,
+		MapProjectV2ToV1Func:   mapper("v1-project-", failV2),
+		MapCommitteeV2ToV1Func: mapper("v1-committee-", failV2),
+		MapProjectV1ToV2Func:   mapper("v2-project-", failV1),
+		MapCommitteeV1ToV2Func: mapper("v2-committee-", failV1),
 	}
 }
 
@@ -431,7 +429,7 @@ func TestScheduleSurvey_MapsRequestAndResponse(t *testing.T) {
 
 	t.Run("request: committee is mapped v2 to v1 and wrapped in a list, other fields forwarded", func(t *testing.T) {
 		require.NotNil(t, sent)
-		assert.Equal(t, []string{"v1-c-uid"}, sent.Committees)
+		assert.Equal(t, []string{"v1-committee-c-uid"}, sent.Committees)
 		assert.Equal(t, boolPtr(true), sent.IsProjectSurvey)
 		assert.Equal(t, strPtr("Active"), sent.StageFilter)
 		assert.Equal(t, strPtr("sm-1"), sent.SurveyMonkeyID)
@@ -469,7 +467,7 @@ func TestScheduleSurvey_MapsRequestAndResponse(t *testing.T) {
 			EmailBodyText:          strPtr("Body"),
 			CommitteeCategory:      strPtr("Board"),
 			Committees: []*survey.SurveyCommittee{{
-				CommitteeName: strPtr("TSC"), CommitteeUID: strPtr("v2-c1"), ProjectUID: strPtr("v2-p1"),
+				CommitteeName: strPtr("TSC"), CommitteeUID: strPtr("v2-committee-c1"), ProjectUID: strPtr("v2-project-p1"),
 				ProjectName: strPtr("Project One"), SurveyURL: strPtr("https://example.com/s"),
 				TotalRecipients: intPtr(10), TotalResponses: intPtr(4), NpsValue: f64Ptr(42.5),
 			}},
@@ -541,13 +539,13 @@ func TestScheduleSurvey_ResponseCommitteeMapping(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, got.Committees, 1)
 		assert.Equal(t, "c-bad", *got.Committees[0].CommitteeUID, "committee falls back to the v1 id")
-		assert.Equal(t, "v2-p-bad", *got.Committees[0].ProjectUID, "project still maps")
+		assert.Equal(t, "v2-project-p-bad", *got.Committees[0].ProjectUID, "project still maps")
 	})
 
 	t.Run("project v1 id is kept when its mapping fails", func(t *testing.T) {
 		got, err := schedule(respond([]itx.SurveyCommittee{{CommitteeID: strPtr("c1"), ProjectID: strPtr("p-bad")}}), prefixMapper("", "p-bad"))
 		require.NoError(t, err)
-		assert.Equal(t, "v2-c1", *got.Committees[0].CommitteeUID)
+		assert.Equal(t, "v2-committee-c1", *got.Committees[0].CommitteeUID)
 		assert.Equal(t, "p-bad", *got.Committees[0].ProjectUID)
 	})
 
@@ -565,9 +563,9 @@ func TestScheduleSurvey_ResponseCommitteeMapping(t *testing.T) {
 		got, err := schedule(respond([]itx.SurveyCommittee{{CommitteeID: strPtr("a")}, {CommitteeID: strPtr("b")}, {CommitteeID: strPtr("c")}}), prefixMapper("", ""))
 		require.NoError(t, err)
 		require.Len(t, got.Committees, 3)
-		assert.Equal(t, "v2-a", *got.Committees[0].CommitteeUID)
-		assert.Equal(t, "v2-b", *got.Committees[1].CommitteeUID)
-		assert.Equal(t, "v2-c", *got.Committees[2].CommitteeUID)
+		assert.Equal(t, "v2-committee-a", *got.Committees[0].CommitteeUID)
+		assert.Equal(t, "v2-committee-b", *got.Committees[1].CommitteeUID)
+		assert.Equal(t, "v2-committee-c", *got.Committees[2].CommitteeUID)
 	})
 }
 
@@ -598,7 +596,7 @@ func TestGetSurvey(t *testing.T) {
 		_, err := get(&survey.GetSurveyPayload{SurveyUID: "s-1", ProjectUID: strPtr("p1")})
 		require.NoError(t, err)
 		require.NotNil(t, gotParams)
-		assert.Equal(t, "v1-p1", *gotParams.ProjectID)
+		assert.Equal(t, "v1-project-p1", *gotParams.ProjectID)
 		assert.Nil(t, gotParams.ProjectIDs)
 	})
 
@@ -606,7 +604,7 @@ func TestGetSurvey(t *testing.T) {
 		_, err := get(&survey.GetSurveyPayload{SurveyUID: "s-1", ProjectUids: strPtr(" p1, p2 ,,p3 ")})
 		require.NoError(t, err)
 		require.NotNil(t, gotParams)
-		assert.Equal(t, "v1-p1,v1-p2,v1-p3", *gotParams.ProjectIDs)
+		assert.Equal(t, "v1-project-p1,v1-project-p2,v1-project-p3", *gotParams.ProjectIDs)
 		assert.Nil(t, gotParams.ProjectID)
 	})
 
@@ -680,7 +678,7 @@ func TestUpdateSurvey_MapsRequestAndResponse(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, sent)
 		assert.Equal(t, "s-1", gotID)
-		assert.Equal(t, []string{"v1-c-uid"}, sent.Committees)
+		assert.Equal(t, []string{"v1-committee-c-uid"}, sent.Committees)
 		assert.Equal(t, strPtr("New title"), sent.SurveyTitle)
 		assert.Equal(t, strPtr("2026-02-01T00:00:00Z"), sent.SurveySendDate)
 		assert.Equal(t, strPtr("2026-03-01T00:00:00Z"), sent.SurveyCutoffDate)
@@ -692,7 +690,7 @@ func TestUpdateSurvey_MapsRequestAndResponse(t *testing.T) {
 
 		assert.Equal(t, "s-1", got.UID)
 		require.Len(t, got.Committees, 1)
-		assert.Equal(t, "v2-c1", *got.Committees[0].CommitteeUID, "response committee ids are mapped v1 to v2")
+		assert.Equal(t, "v2-committee-c1", *got.Committees[0].CommitteeUID, "response committee ids are mapped v1 to v2")
 	})
 
 	t.Run("omitted or empty committee sends no committees", func(t *testing.T) {
@@ -802,17 +800,17 @@ func TestPreviewSendSurvey(t *testing.T) {
 
 		assert.Equal(t, "s-1", gotID)
 		require.NotNil(t, gotCommittee)
-		assert.Equal(t, "v1-c-uid", *gotCommittee, "committee filter is mapped v2 to v1")
+		assert.Equal(t, "v1-committee-c-uid", *gotCommittee, "committee filter is mapped v2 to v1")
 
 		require.Len(t, got.AffectedProjects, 3)
-		assert.Equal(t, &survey.LFXProject{ID: "v2-p1", Name: "Project One", Slug: "project-one", Status: "Active", LogoURL: strPtr("https://example.com/logo.png")}, got.AffectedProjects[0])
+		assert.Equal(t, &survey.LFXProject{ID: "v2-project-p1", Name: "Project One", Slug: "project-one", Status: "Active", LogoURL: strPtr("https://example.com/logo.png")}, got.AffectedProjects[0])
 		assert.Equal(t, "p-bad", got.AffectedProjects[1].ID, "falls back to the v1 id when mapping fails")
 		assert.Equal(t, "", got.AffectedProjects[2].ID, "an empty id is not mapped")
 
 		require.Len(t, got.AffectedCommittees, 2)
-		assert.Equal(t, &survey.ExcludedCommittee{ProjectUID: "v2-p1", ProjectName: "Project One", CommitteeUID: "v2-c1", CommitteeName: "TSC", CommitteeCategory: "Technical"}, got.AffectedCommittees[0])
+		assert.Equal(t, &survey.ExcludedCommittee{ProjectUID: "v2-project-p1", ProjectName: "Project One", CommitteeUID: "v2-committee-c1", CommitteeName: "TSC", CommitteeCategory: "Technical"}, got.AffectedCommittees[0])
 		assert.Equal(t, "p-bad", got.AffectedCommittees[1].ProjectUID)
-		assert.Equal(t, "v2-c-bad", got.AffectedCommittees[1].CommitteeUID)
+		assert.Equal(t, "v2-committee-c-bad", got.AffectedCommittees[1].CommitteeUID)
 
 		require.Len(t, got.AffectedRecipients, 2)
 		assert.Equal(t, &survey.ITXPreviewRecipient{UserID: "u1", Name: strPtr("Alice Example"), FirstName: strPtr("Alice"), LastName: strPtr("Example"), Username: strPtr("alice"), Email: "alice@example.com", Role: strPtr("Chair")}, got.AffectedRecipients[0])
@@ -876,7 +874,7 @@ func TestSendMissingRecipients(t *testing.T) {
 		require.NoError(t, svc.SendMissingRecipients(context.Background(), &survey.SendMissingRecipientsPayload{SurveyUID: "s-1", CommitteeUID: strPtr("c-uid")}))
 		assert.Equal(t, "s-1", gotID)
 		require.NotNil(t, gotCommittee)
-		assert.Equal(t, "v1-c-uid", *gotCommittee)
+		assert.Equal(t, "v1-committee-c-uid", *gotCommittee)
 	})
 
 	t.Run("no committee filter sends none", func(t *testing.T) {

@@ -51,11 +51,11 @@ func TestCreateExclusion(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, &itx.ExclusionRequest{
 			Email: strPtr("carol@example.com"), UserID: strPtr("u-1"), SurveyID: strPtr("s-1"),
-			CommitteeID: strPtr("v1-c-uid"), GlobalExclusion: strPtr("false"),
+			CommitteeID: strPtr("v1-committee-c-uid"), GlobalExclusion: strPtr("false"),
 		}, sent)
 		assert.Equal(t, &survey.ExclusionResult{
 			UID: "ex-1", Email: strPtr("carol@example.com"), SurveyUID: strPtr("s-1"),
-			CommitteeUID: strPtr("v2-c1"), GlobalExclusion: strPtr("false"), UserID: strPtr("u-1"),
+			CommitteeUID: strPtr("v2-committee-c1"), GlobalExclusion: strPtr("false"), UserID: strPtr("u-1"),
 		}, got)
 	})
 
@@ -118,7 +118,7 @@ func TestDeleteExclusion(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, &itx.ExclusionRequest{
 			Email: strPtr("carol@example.com"), UserID: strPtr("u-1"), SurveyID: strPtr("s-1"),
-			CommitteeID: strPtr("v1-c-uid"), GlobalExclusion: strPtr("false"),
+			CommitteeID: strPtr("v1-committee-c-uid"), GlobalExclusion: strPtr("false"),
 		}, sent)
 	})
 
@@ -180,7 +180,7 @@ func TestGetExclusion(t *testing.T) {
 		assert.Equal(t, "ex-1", gotID)
 		assert.Equal(t, &survey.ExtendedExclusionResult{
 			UID: "ex-1", Email: strPtr("carol@example.com"), SurveyUID: strPtr("s-1"),
-			CommitteeUID: strPtr("v2-c1"), GlobalExclusion: strPtr("false"), UserID: strPtr("u-1"),
+			CommitteeUID: strPtr("v2-committee-c1"), GlobalExclusion: strPtr("false"), UserID: strPtr("u-1"),
 			User: &survey.ExclusionUser{
 				ID: strPtr("u-1"), Username: strPtr("carol"),
 				Emails: []*survey.UserEmail{
