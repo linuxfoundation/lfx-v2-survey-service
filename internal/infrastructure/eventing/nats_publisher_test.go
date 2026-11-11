@@ -346,7 +346,9 @@ func TestPublishSurveyEvent(t *testing.T) {
 	t.Run("deleted sends only the uid to the indexer and a delete_access message", func(t *testing.T) {
 		h := newPublisherHarness(t)
 
-		require.NoError(t, h.pub.PublishSurveyEvent(ctx, "deleted", survey()))
+		s := survey()
+		s.ID = "v1-survey-1" // differs from UID so using the wrong one is caught
+		require.NoError(t, h.pub.PublishSurveyEvent(ctx, "deleted", s))
 
 		env := decodeIndexerMsg(t, h.next(IndexSurveySubject))
 		assert.Equal(t, "deleted", env.Action)
@@ -436,7 +438,8 @@ func TestPublishSurveyResponseEvent(t *testing.T) {
 	t.Run("deleted sends only the uid to the indexer and a delete_access message", func(t *testing.T) {
 		h := newPublisherHarness(t)
 
-		require.NoError(t, h.pub.PublishSurveyResponseEvent(ctx, "deleted", &domain.SurveyResponseData{UID: "resp-1", ID: "resp-1"}))
+		// ID (v1) and UID (v2) differ so using the wrong one is caught.
+		require.NoError(t, h.pub.PublishSurveyResponseEvent(ctx, "deleted", &domain.SurveyResponseData{UID: "resp-1", ID: "v1-resp-1"}))
 
 		env := decodeIndexerMsg(t, h.next(IndexSurveyResponseSubject))
 		assert.Equal(t, "deleted", env.Action)
@@ -448,6 +451,9 @@ func TestPublishSurveyResponseEvent(t *testing.T) {
 		require.NoError(t, json.Unmarshal(h.next(fgaconstants.GenericDeleteAccessSubject).Data, &del))
 		assert.Equal(t, "survey_response", del.ObjectType)
 		assert.Equal(t, "delete_access", del.Operation)
+		var data fgatypes.GenericDeleteData
+		require.NoError(t, del.UnmarshalData(&data))
+		assert.Equal(t, "resp-1", data.UID)
 		h.expectNone(fgaconstants.GenericUpdateAccessSubject)
 	})
 
@@ -471,7 +477,10 @@ func TestPublishSurveyTemplateEvent(t *testing.T) {
 
 	t.Run("created indexes the template for platform admins only", func(t *testing.T) {
 		h := newPublisherHarness(t)
-		tpl := &domain.SurveyTemplateData{ID: "tpl-1", Title: "Board NPS", Nickname: "Board"}
+		tpl := &domain.SurveyTemplateData{
+			ID: "tpl-1", Title: "Board NPS", Nickname: "Board", Href: "https://example.com/t/1",
+			QuestionCount: 12, Language: "en", Category: "nps", FolderID: "folder-1", PageCount: 3,
+		}
 
 		require.NoError(t, h.pub.PublishSurveyTemplateEvent(ctx, "created", tpl))
 
@@ -479,7 +488,7 @@ func TestPublishSurveyTemplateEvent(t *testing.T) {
 		assert.Equal(t, "created", env.Action)
 		var doc domain.SurveyTemplateData
 		require.NoError(t, json.Unmarshal(env.Data, &doc))
-		assert.Equal(t, "tpl-1", doc.ID)
+		assert.Equal(t, *tpl, doc, "the full template is the document body")
 		assert.Equal(t, &indexerTypes.IndexingConfig{
 			ObjectID:             "tpl-1",
 			Public:               boolPtr(false),
