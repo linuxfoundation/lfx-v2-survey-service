@@ -102,3 +102,10 @@ func TestNatsHeaderCarrier_TextMapCarrier(t *testing.T) {
 		assert.Len(t, header, 2)
 	})
 }
+
+func TestNatsHeaderCarrier_SetOnNilCarrierIsANoOp(t *testing.T) {
+	var carrier NatsHeaderCarrier
+
+	assert.NotPanics(t, func() { carrier.Set("traceparent", "00-abc") })
+	assert.Empty(t, carrier.Get("traceparent"))
+}
