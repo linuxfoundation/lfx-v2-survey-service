@@ -175,6 +175,19 @@ func TestHandleKVPut(t *testing.T) {
 		assert.Equal(t, "survey-1", (*events)[0].Survey.UID)
 	})
 
+	t.Run("itx-survey-responses routes to the survey response handler", func(t *testing.T) {
+		pub, events := newRecordingPublisher(nil)
+
+		retry := handleKVPut(ctx, put("itx-survey-responses.resp-1", mustJSON(t, responseV1Data())), pub,
+			v1IDMapper(), parentMappingKV(), parentSurveyKV(t), nil, discardLogger())
+
+		assert.False(t, retry)
+		require.Len(t, *events, 1)
+		require.NotNil(t, (*events)[0].Response)
+		assert.Equal(t, "resp-1", (*events)[0].Response.UID)
+		assert.Equal(t, "Q4 NPS", (*events)[0].Response.SurveyTitle, "the parent survey bucket is passed through")
+	})
+
 	t.Run("surveymonkey-surveys routes to the template handler", func(t *testing.T) {
 		pub, events := newRecordingPublisher(nil)
 
@@ -274,6 +287,18 @@ func TestHandleKVDelete(t *testing.T) {
 		require.Len(t, *events, 1)
 		assert.Equal(t, "deleted", (*events)[0].Action)
 		assert.Equal(t, "survey-1", (*events)[0].Survey.UID)
+	})
+
+	t.Run("itx-survey-responses deletes publish a response deleted event", func(t *testing.T) {
+		pub, events := newRecordingPublisher(nil)
+		kv := newFakeKV(nil)
+
+		assert.False(t, handleKVDelete(ctx, del("itx-survey-responses.resp-1"), pub, kv, discardLogger()))
+
+		require.Len(t, *events, 1)
+		assert.Equal(t, "deleted", (*events)[0].Action)
+		assert.Equal(t, "resp-1", (*events)[0].Response.UID)
+		assert.Equal(t, tombstoneMarker, kv.value("survey_response.resp-1"))
 	})
 
 	t.Run("surveymonkey-surveys deletes publish a template deleted event", func(t *testing.T) {
