@@ -9,3 +9,6 @@ f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi3.yaml:generic-api-key:
 f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi3.yaml:generic-api-key:2736
 f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi.json:generic-api-key:1
 f0017d22a4aa7f4ec9f5ba71f82f0b3c07cfc87d:gen/http/openapi3.json:generic-api-key:1
+# Example log line in docs/event-processing.md ("processing survey update key=itx-surveys:survey-123");
+# the key is a KV key name, not a secret.
+51d734712a22bb683812ebe7c506cdf8a59347e2:docs/event-processing.md:generic-api-key:204
