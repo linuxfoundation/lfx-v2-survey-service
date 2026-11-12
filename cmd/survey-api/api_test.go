@@ -25,6 +25,7 @@ import (
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/models/itx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	goahttp "goa.design/goa/v3/http"
 	"goa.design/goa/v3/security"
 	"gopkg.in/yaml.v3"
@@ -349,4 +350,306 @@ func TestJWTAuth(t *testing.T) {
 		}
 		assert.Nil(t, ctx.Value(constants.PrincipalContextID), "principal must not be set on failure")
 	})
+}
+
+// handlerClients holds the mocked ITX clients behind a SurveyAPI under test.
+type handlerClients struct {
+	survey    *mocks.MockSurveyClient
+	exclusion *mocks.MockExclusionClient
+	response  *mocks.MockSurveyResponseClient
+}
+
+// TestSurveyAPI_Handlers verifies that every Goa handler adapter forwards to the
+// service, returns the service result untouched on success, and translates a
+// domain error into the matching Goa transport error.
+func TestSurveyAPI_Handlers(t *testing.T) {
+	sp := func(s string) *string { return &s }
+	notFound := &domain.DomainError{Type: domain.ErrorTypeNotFound, Message: "itx says missing"}
+
+	// Each case wires one client method to return err (nil means success) and
+	// calls one handler. check inspects the success result; void handlers leave
+	// it nil and are expected to return a nil result.
+	tests := []struct {
+		name  string
+		wire  func(c *handlerClients, err error)
+		call  func(ctx context.Context, api *SurveyAPI) (any, error)
+		check func(t *testing.T, got any)
+	}{
+		{
+			name: "ScheduleSurvey",
+			wire: func(c *handlerClients, err error) {
+				c.survey.ScheduleSurveyFunc = func(context.Context, *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+					if err != nil {
+						return nil, err
+					}
+					return &itx.SurveyScheduleResponse{ID: "survey-schedule-1", SurveyTitle: sp("Q4 Survey")}, nil
+				}
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return api.ScheduleSurvey(ctx, &survey.ScheduleSurveyPayload{CommitteeUID: "committee-1"})
+			},
+			check: func(t *testing.T, got any) {
+				res := got.(*survey.SurveyScheduleResult)
+				assert.Equal(t, "survey-schedule-1", res.UID)
+				assert.Equal(t, "Q4 Survey", *res.SurveyTitle)
+			},
+		},
+		{
+			name: "GetSurvey",
+			wire: func(c *handlerClients, err error) {
+				c.survey.GetSurveyFunc = func(context.Context, string, *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error) {
+					if err != nil {
+						return nil, err
+					}
+					return &itx.SurveyScheduleResponse{ID: "survey-get-1"}, nil
+				}
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return api.GetSurvey(ctx, &survey.GetSurveyPayload{SurveyUID: "survey-get-1"})
+			},
+			check: func(t *testing.T, got any) {
+				assert.Equal(t, "survey-get-1", got.(*survey.SurveyScheduleResult).UID)
+			},
+		},
+		{
+			name: "UpdateSurvey",
+			wire: func(c *handlerClients, err error) {
+				c.survey.UpdateSurveyFunc = func(context.Context, string, *itx.UpdateSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+					if err != nil {
+						return nil, err
+					}
+					return &itx.SurveyScheduleResponse{ID: "survey-update-1"}, nil
+				}
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return api.UpdateSurvey(ctx, &survey.UpdateSurveyPayload{SurveyUID: "survey-update-1"})
+			},
+			check: func(t *testing.T, got any) {
+				assert.Equal(t, "survey-update-1", got.(*survey.SurveyScheduleResult).UID)
+			},
+		},
+		{
+			name: "DeleteSurvey",
+			wire: func(c *handlerClients, err error) {
+				c.survey.DeleteSurveyFunc = func(context.Context, string) error { return err }
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return nil, api.DeleteSurvey(ctx, &survey.DeleteSurveyPayload{SurveyUID: "survey-1"})
+			},
+		},
+		{
+			name: "BulkResendSurvey",
+			wire: func(c *handlerClients, err error) {
+				c.survey.BulkResendSurveyFunc = func(context.Context, string, *itx.BulkResendRequest) error { return err }
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return nil, api.BulkResendSurvey(ctx, &survey.BulkResendSurveyPayload{SurveyUID: "survey-1", RecipientIds: []string{"recipient-1"}})
+			},
+		},
+		{
+			name: "PreviewSendSurvey",
+			wire: func(c *handlerClients, err error) {
+				c.survey.PreviewSendFunc = func(context.Context, string, *string) (*itx.PreviewSendResponse, error) {
+					if err != nil {
+						return nil, err
+					}
+					return &itx.PreviewSendResponse{AffectedProjects: []itx.LFXProject{{ID: "project-1", Name: "Test Project"}}}, nil
+				}
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return api.PreviewSendSurvey(ctx, &survey.PreviewSendSurveyPayload{SurveyUID: "survey-1"})
+			},
+			check: func(t *testing.T, got any) {
+				res := got.(*survey.PreviewSendResult)
+				require.Len(t, res.AffectedProjects, 1)
+				assert.Equal(t, "project-1", res.AffectedProjects[0].ID)
+			},
+		},
+		{
+			name: "SendMissingRecipients",
+			wire: func(c *handlerClients, err error) {
+				c.survey.SendMissingRecipientsFunc = func(context.Context, string, *string) error { return err }
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return nil, api.SendMissingRecipients(ctx, &survey.SendMissingRecipientsPayload{SurveyUID: "survey-1"})
+			},
+		},
+		{
+			name: "DeleteSurveyResponse",
+			wire: func(c *handlerClients, err error) {
+				c.response.DeleteResponseFunc = func(context.Context, string, string) error { return err }
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return nil, api.DeleteSurveyResponse(ctx, &survey.DeleteSurveyResponsePayload{SurveyUID: "survey-1", ResponseID: "response-1"})
+			},
+		},
+		{
+			name: "ResendSurveyResponse",
+			wire: func(c *handlerClients, err error) {
+				c.response.ResendResponseFunc = func(context.Context, string, string) error { return err }
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return nil, api.ResendSurveyResponse(ctx, &survey.ResendSurveyResponsePayload{SurveyUID: "survey-1", ResponseID: "response-1"})
+			},
+		},
+		{
+			name: "DeleteRecipientGroup",
+			wire: func(c *handlerClients, err error) {
+				c.survey.DeleteRecipientGroupFunc = func(context.Context, string, *string, *string, *string) error { return err }
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return nil, api.DeleteRecipientGroup(ctx, &survey.DeleteRecipientGroupPayload{SurveyUID: "survey-1", CommitteeUID: sp("committee-1")})
+			},
+		},
+		{
+			name: "CreateExclusion",
+			wire: func(c *handlerClients, err error) {
+				c.exclusion.CreateExclusionFunc = func(context.Context, *itx.ExclusionRequest) (*itx.Exclusion, error) {
+					if err != nil {
+						return nil, err
+					}
+					return &itx.Exclusion{ID: "exclusion-create-1", Email: sp("alice@example.com")}, nil
+				}
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return api.CreateExclusion(ctx, &survey.CreateExclusionPayload{Email: sp("alice@example.com")})
+			},
+			check: func(t *testing.T, got any) {
+				res := got.(*survey.ExclusionResult)
+				assert.Equal(t, "exclusion-create-1", res.UID)
+				assert.Equal(t, "alice@example.com", *res.Email)
+			},
+		},
+		{
+			name: "DeleteExclusion",
+			wire: func(c *handlerClients, err error) {
+				c.exclusion.DeleteExclusionFunc = func(context.Context, *itx.ExclusionRequest) error { return err }
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return nil, api.DeleteExclusion(ctx, &survey.DeleteExclusionPayload{Email: sp("bob@example.com")})
+			},
+		},
+		{
+			name: "GetExclusion",
+			wire: func(c *handlerClients, err error) {
+				c.exclusion.GetExclusionFunc = func(context.Context, string) (*itx.ExtendedExclusion, error) {
+					if err != nil {
+						return nil, err
+					}
+					return &itx.ExtendedExclusion{Exclusion: itx.Exclusion{ID: "exclusion-get-1"}}, nil
+				}
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return api.GetExclusion(ctx, &survey.GetExclusionPayload{ExclusionID: "exclusion-get-1"})
+			},
+			check: func(t *testing.T, got any) {
+				assert.Equal(t, "exclusion-get-1", got.(*survey.ExtendedExclusionResult).UID)
+			},
+		},
+		{
+			name: "DeleteExclusionByID",
+			wire: func(c *handlerClients, err error) {
+				c.exclusion.DeleteExclusionByIDFunc = func(context.Context, string) error { return err }
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return nil, api.DeleteExclusionByID(ctx, &survey.DeleteExclusionByIDPayload{ExclusionID: "exclusion-1"})
+			},
+		},
+		{
+			name: "ListSurveyResponses",
+			wire: func(c *handlerClients, err error) {
+				c.response.ListResponsesFunc = func(context.Context, string, *itx.ListResponsesParams) (*itx.PaginatedSurveyResponses, error) {
+					if err != nil {
+						return nil, err
+					}
+					return &itx.PaginatedSurveyResponses{Meta: itx.PageMetadata{PageToken: "page-token-1"}}, nil
+				}
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return api.ListSurveyResponses(ctx, &survey.ListSurveyResponsesPayload{SurveyUID: "survey-1"})
+			},
+			check: func(t *testing.T, got any) {
+				assert.Equal(t, "page-token-1", *got.(*survey.SurveyResponsesPage).Meta.PageToken)
+			},
+		},
+		{
+			name: "ListSurveyTemplates",
+			wire: func(c *handlerClients, err error) {
+				c.survey.ListSurveyTemplatesFunc = func(context.Context) ([]itx.SurveyTemplate, error) {
+					if err != nil {
+						return nil, err
+					}
+					return []itx.SurveyTemplate{{ID: "template-1"}}, nil
+				}
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return api.ListSurveyTemplates(ctx, &survey.ListSurveyTemplatesPayload{})
+			},
+			check: func(t *testing.T, got any) {
+				res := got.([]*survey.SurveyTemplate)
+				require.Len(t, res, 1)
+				assert.Equal(t, "template-1", res[0].ID)
+			},
+		},
+		{
+			name: "ValidateEmail",
+			wire: func(c *handlerClients, err error) {
+				c.survey.ValidateEmailFunc = func(context.Context, *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error) {
+					if err != nil {
+						return nil, err
+					}
+					return &itx.ValidateEmailResponse{Body: "validated body", Subject: "validated subject"}, nil
+				}
+			},
+			call: func(ctx context.Context, api *SurveyAPI) (any, error) {
+				return api.ValidateEmail(ctx, &survey.ValidateEmailPayload{Body: sp("body"), Subject: sp("subject")})
+			},
+			check: func(t *testing.T, got any) {
+				res := got.(*survey.ValidateEmailResult)
+				assert.Equal(t, "validated body", res.Body)
+				assert.Equal(t, "validated subject", res.Subject)
+			},
+		},
+	}
+
+	newAPI := func(wire func(c *handlerClients)) *SurveyAPI {
+		c := &handlerClients{
+			survey:    &mocks.MockSurveyClient{},
+			exclusion: &mocks.MockExclusionClient{},
+			response:  &mocks.MockSurveyResponseClient{},
+		}
+		wire(c)
+		logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
+		svc := service.NewSurveyService(c.survey, c.exclusion, c.response, idmapper.NewNoOpMapper(), logger)
+		return NewSurveyAPI(svc, &mocks.MockAuthenticator{Principal: "alice"})
+	}
+	ctx := context.WithValue(context.Background(), constants.PrincipalContextID, "alice")
+
+	for _, tt := range tests {
+		t.Run(tt.name+"/returns service result", func(t *testing.T) {
+			api := newAPI(func(c *handlerClients) { tt.wire(c, nil) })
+
+			got, err := tt.call(ctx, api)
+
+			require.NoError(t, err)
+			if tt.check == nil {
+				assert.Nil(t, got)
+				return
+			}
+			require.NotNil(t, got)
+			tt.check(t, got)
+		})
+
+		t.Run(tt.name+"/maps domain error", func(t *testing.T) {
+			api := newAPI(func(c *handlerClients) { tt.wire(c, notFound) })
+
+			got, err := tt.call(ctx, api)
+
+			var nf *survey.NotFoundError
+			require.ErrorAs(t, err, &nf, "expected the domain error to be mapped, got %T", err)
+			assert.Equal(t, "404", nf.Code)
+			assert.Equal(t, "itx says missing", nf.Message)
+			assert.Nil(t, got)
+		})
+	}
 }
