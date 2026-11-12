@@ -817,6 +817,22 @@ func TestPreviewSendSurvey(t *testing.T) {
 		assert.Equal(t, &survey.ITXPreviewRecipient{UserID: "u2", Email: "bob@example.com"}, got.AffectedRecipients[1])
 	})
 
+	t.Run("committee v1 id is kept when its mapping fails", func(t *testing.T) {
+		svc := newServiceWith(&mocks.MockSurveyClient{
+			PreviewSendFunc: func(context.Context, string, *string) (*itx.PreviewSendResponse, error) {
+				return &itx.PreviewSendResponse{
+					AffectedCommittees: []itx.ExcludedCommittee{{ProjectID: "p1", CommitteeID: "c-bad", CommitteeName: "Unmapped"}},
+				}, nil
+			},
+		}, prefixMapper("", "c-bad"))
+
+		got, err := svc.PreviewSendSurvey(context.Background(), &survey.PreviewSendSurveyPayload{SurveyUID: "s-1"})
+		require.NoError(t, err)
+		require.Len(t, got.AffectedCommittees, 1)
+		assert.Equal(t, "c-bad", got.AffectedCommittees[0].CommitteeUID, "committee falls back to the v1 id")
+		assert.Equal(t, "v2-project-p1", got.AffectedCommittees[0].ProjectUID, "project still maps")
+	})
+
 	t.Run("no committee filter sends none", func(t *testing.T) {
 		svc := newServiceWith(client, prefixMapper("", ""))
 		_, err := svc.PreviewSendSurvey(context.Background(), &survey.PreviewSendSurveyPayload{SurveyUID: "s-1"})
@@ -856,6 +872,72 @@ func TestPreviewSendSurvey(t *testing.T) {
 
 		_, err := svc.PreviewSendSurvey(context.Background(), &survey.PreviewSendSurveyPayload{SurveyUID: "s-1"})
 		assert.Same(t, itxErr, err)
+	})
+}
+
+// TestSurveyService_ResponseMappingFailure verifies that a failure while mapping
+// the ITX response back to the Goa result is returned and no partial result leaks.
+// The mappers fan out through BatchMap, which fails fast on a cancelled context.
+func TestSurveyService_ResponseMappingFailure(t *testing.T) {
+	cancelledCtx := func() context.Context {
+		ctx, cancel := context.WithCancel(ctxWithPrincipal("alice"))
+		cancel()
+		return ctx
+	}
+	scheduleResponse := &itx.SurveyScheduleResponse{
+		ID:         "survey-1",
+		Committees: []itx.SurveyCommittee{{CommitteeID: strPtr("c1")}},
+	}
+	client := &mocks.MockSurveyClient{
+		ScheduleSurveyFunc: func(context.Context, *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+			return scheduleResponse, nil
+		},
+		GetSurveyFunc: func(context.Context, string, *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error) {
+			return scheduleResponse, nil
+		},
+		UpdateSurveyFunc: func(context.Context, string, *itx.UpdateSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+			return scheduleResponse, nil
+		},
+	}
+	svc := newServiceWith(client, prefixMapper("", ""))
+
+	t.Run("ScheduleSurvey", func(t *testing.T) {
+		got, err := svc.ScheduleSurvey(cancelledCtx(), &survey.ScheduleSurveyPayload{CommitteeUID: "c"})
+		assert.ErrorIs(t, err, context.Canceled)
+		assert.Nil(t, got)
+	})
+
+	t.Run("GetSurvey", func(t *testing.T) {
+		got, err := svc.GetSurvey(cancelledCtx(), &survey.GetSurveyPayload{SurveyUID: "survey-1"})
+		assert.ErrorIs(t, err, context.Canceled)
+		assert.Nil(t, got)
+	})
+
+	t.Run("UpdateSurvey", func(t *testing.T) {
+		got, err := svc.UpdateSurvey(cancelledCtx(), &survey.UpdateSurveyPayload{SurveyUID: "survey-1"})
+		assert.ErrorIs(t, err, context.Canceled)
+		assert.Nil(t, got)
+	})
+
+	previewWith := func(resp *itx.PreviewSendResponse) *service.SurveyService {
+		return newServiceWith(&mocks.MockSurveyClient{
+			PreviewSendFunc: func(context.Context, string, *string) (*itx.PreviewSendResponse, error) { return resp, nil },
+		}, prefixMapper("", ""))
+	}
+
+	t.Run("PreviewSendSurvey projects", func(t *testing.T) {
+		svc := previewWith(&itx.PreviewSendResponse{AffectedProjects: []itx.LFXProject{{ID: "p1"}}})
+		got, err := svc.PreviewSendSurvey(cancelledCtx(), &survey.PreviewSendSurveyPayload{SurveyUID: "survey-1"})
+		assert.ErrorIs(t, err, context.Canceled)
+		assert.Nil(t, got)
+	})
+
+	t.Run("PreviewSendSurvey committees", func(t *testing.T) {
+		// No projects, so the project fan-out is skipped and the committee one fails.
+		svc := previewWith(&itx.PreviewSendResponse{AffectedCommittees: []itx.ExcludedCommittee{{CommitteeID: "c1"}}})
+		got, err := svc.PreviewSendSurvey(cancelledCtx(), &survey.PreviewSendSurveyPayload{SurveyUID: "survey-1"})
+		assert.ErrorIs(t, err, context.Canceled)
+		assert.Nil(t, got)
 	})
 }
 

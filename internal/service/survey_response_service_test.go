@@ -537,3 +537,49 @@ func TestListSurveyResponses_IDMapping(t *testing.T) {
 		assert.Equal(t, "v2-committee-c3", *got.Data[2].CommitteeUID)
 	})
 }
+
+func TestListSurveyResponses_ResponseMappingFailure(t *testing.T) {
+	proxy := &mocks.MockSurveyResponseClient{
+		ListResponsesResult: &itx.PaginatedSurveyResponses{Data: []itx.SurveyRecipientResponse{{}}},
+	}
+	svc := newTestService(proxy)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	got, err := svc.ListSurveyResponses(ctx, &survey.ListSurveyResponsesPayload{SurveyUID: "survey-1"})
+
+	assert.ErrorIs(t, err, context.Canceled)
+	assert.Nil(t, got)
+}
+
+func TestListSurveyResponses_ProjectUIDsTokens(t *testing.T) {
+	list := func(t *testing.T, mapper *mocks.MockIDMapper, projectUIDs string) *itx.ListResponsesParams {
+		t.Helper()
+		proxy := &mocks.MockSurveyResponseClient{
+			ListResponsesResult: &itx.PaginatedSurveyResponses{Data: []itx.SurveyRecipientResponse{}},
+		}
+		svc := newResponseService(&mocks.MockSurveyClient{}, proxy, mapper)
+		_, err := svc.ListSurveyResponses(context.Background(), &survey.ListSurveyResponsesPayload{
+			SurveyUID:   "survey-1",
+			ProjectUids: &projectUIDs,
+		})
+		require.NoError(t, err)
+		require.NotNil(t, proxy.CapturedParams)
+		return proxy.CapturedParams
+	}
+
+	t.Run("whitespace is trimmed and blank tokens are dropped before mapping", func(t *testing.T) {
+		params := list(t, prefixMapper("", ""), " uid-one , ,uid-two,")
+
+		require.NotNil(t, params.ProjectIDs)
+		assert.Equal(t, "v1-project-uid-one,v1-project-uid-two", *params.ProjectIDs)
+	})
+
+	t.Run("only blank tokens map nothing", func(t *testing.T) {
+		// An unconfigured MockIDMapper panics, so this also proves the mapper is not called.
+		params := list(t, &mocks.MockIDMapper{}, " , ,")
+
+		require.NotNil(t, params.ProjectIDs)
+		assert.Empty(t, *params.ProjectIDs)
+	})
+}
