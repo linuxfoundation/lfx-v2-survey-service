@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -32,7 +33,7 @@ import (
 )
 
 func TestMapDomainError_NonDomainError(t *testing.T) {
-	err := mapDomainError(errors.New("plain error"))
+	err := mapDomainError(context.Background(), errors.New("plain error"))
 	if _, ok := err.(*survey.InternalServerError); !ok {
 		t.Errorf("expected *survey.InternalServerError, got %T", err)
 	}
@@ -81,7 +82,7 @@ func TestMapDomainError_EachErrorType(t *testing.T) {
 		tt := tt
 		t.Run(tt.msg, func(t *testing.T) {
 			domErr := &domain.DomainError{Type: tt.errType, Message: tt.msg}
-			got := mapDomainError(domErr)
+			got := mapDomainError(context.Background(), domErr)
 
 			// Verify correct Goa type
 			switch tt.wantType.(type) {
@@ -131,6 +132,87 @@ func TestMapDomainError_EachErrorType(t *testing.T) {
 			}
 		})
 	}
+}
+
+// captureDefaultLogger routes the default slog logger into a buffer at Debug
+// level for the duration of the test. Tests using it must not run in parallel.
+func captureDefaultLogger(t *testing.T) *bytes.Buffer {
+	t.Helper()
+	var buf bytes.Buffer
+	prev := slog.Default()
+	slog.SetDefault(slog.New(slog.NewJSONHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug})))
+	t.Cleanup(func() { slog.SetDefault(prev) })
+	return &buf
+}
+
+func decodeLogRecords(t *testing.T, buf *bytes.Buffer) []map[string]any {
+	t.Helper()
+	var records []map[string]any
+	dec := json.NewDecoder(buf)
+	for dec.More() {
+		var rec map[string]any
+		require.NoError(t, dec.Decode(&rec))
+		records = append(records, rec)
+	}
+	return records
+}
+
+// TestMapDomainError_LogsOnce verifies the boundary is the one place a failed
+// request is logged: exactly one record, at Error for server-side failures and
+// Debug for client-side ones, carrying the full error chain that the client
+// response deliberately leaves out.
+func TestMapDomainError_LogsOnce(t *testing.T) {
+	cause := errors.New("dial tcp 10.0.0.1:4222: i/o timeout")
+
+	tests := []struct {
+		name        string
+		err         error
+		wantLevel   string
+		wantStatus  float64
+		wantInError []string
+	}{
+		{"plain error is a 500", errors.New("itx exploded"), "ERROR", 500, []string{"itx exploded"}},
+		{"validation is a 400", domain.NewValidationError("bad uid"), "DEBUG", 400, []string{"bad uid"}},
+		{"not found is a 404", domain.NewNotFoundError("no such survey"), "DEBUG", 404, []string{"no such survey"}},
+		{"conflict is a 409", domain.NewConflictError("already exists"), "DEBUG", 409, []string{"already exists"}},
+		{"unavailable is a 503", domain.NewUnavailableError("itx down", cause), "ERROR", 503, []string{"itx down", "i/o timeout"}},
+		{"internal is a 500", domain.NewInternalError("boom", cause), "ERROR", 500, []string{"boom", "i/o timeout"}},
+		{
+			"context added by the service survives the wrap",
+			fmt.Errorf("map committee_uid %q to v1: %w", "committee-1", domain.NewUnavailableError("lookup timed out", cause)),
+			"ERROR", 503,
+			[]string{`map committee_uid "committee-1" to v1`, "lookup timed out", "i/o timeout"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf := captureDefaultLogger(t)
+
+			got := mapDomainError(context.Background(), tt.err)
+
+			assert.Error(t, got, "the failure must still reach the client")
+			records := decodeLogRecords(t, buf)
+			require.Len(t, records, 1, "a failed request must be logged exactly once")
+			assert.Equal(t, "request failed", records[0]["msg"])
+			assert.Equal(t, tt.wantLevel, records[0]["level"])
+			assert.Equal(t, tt.wantStatus, records[0]["status"])
+			for _, want := range tt.wantInError {
+				assert.Contains(t, records[0]["error"], want)
+			}
+		})
+	}
+
+	t.Run("the client response omits the wrapped cause", func(t *testing.T) {
+		captureDefaultLogger(t)
+
+		got := mapDomainError(context.Background(), domain.NewUnavailableError("itx down", cause))
+
+		var unavailable *survey.ServiceUnavailableError
+		require.ErrorAs(t, got, &unavailable)
+		assert.Equal(t, "itx down", unavailable.Message)
+		assert.NotContains(t, unavailable.Message, "i/o timeout")
+	})
 }
 
 // newRoutingTestHandler mounts the generated survey HTTP server the same way

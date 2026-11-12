@@ -5,6 +5,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
@@ -125,11 +126,7 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 	if p.ProjectUID != nil && *p.ProjectUID != "" {
 		projectV1, err := s.idMapper.MapProjectV2ToV1(ctx, *p.ProjectUID)
 		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map project_uid to V1",
-				"project_uid", *p.ProjectUID,
-				"error", err,
-			)
-			return nil, err
+			return nil, fmt.Errorf("map project_uid %q to v1: %w", *p.ProjectUID, err)
 		}
 		params.ProjectID = &projectV1
 		s.logger.DebugContext(ctx, "mapped project_uid for responses filter",
@@ -141,10 +138,6 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 	if p.ProjectUids != nil && *p.ProjectUids != "" {
 		projectV1IDs, err := s.mapProjectUIDsV2ToV1(ctx, *p.ProjectUids)
 		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map project_uids to V1",
-				"project_uids", *p.ProjectUids,
-				"error", err,
-			)
 			return nil, err
 		}
 		params.ProjectIDs = &projectV1IDs
@@ -163,10 +156,7 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 	// Map response back to Goa result (V1→V2 ID mapping per response)
 	result, err := s.mapITXResponsesToPage(ctx, itxResponse)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map ITX responses",
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map ITX survey responses: %w", err)
 	}
 
 	s.logger.InfoContext(ctx, "survey responses listed successfully",

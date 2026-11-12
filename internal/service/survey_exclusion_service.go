@@ -5,6 +5,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/models/itx"
@@ -44,10 +45,7 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 	// Map response back to goa result (including V1 to V2 ID mapping)
 	result, err := s.mapExclusionToResult(ctx, itxResponse)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map exclusion response",
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map exclusion response: %w", err)
 	}
 
 	s.logger.InfoContext(ctx, "exclusion created successfully",
@@ -111,10 +109,7 @@ func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusion
 	// Map response back to goa result (including V1 to V2 ID mapping)
 	result, err := s.mapExtendedExclusionToResult(ctx, itxResponse)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map extended exclusion response",
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map extended exclusion response: %w", err)
 	}
 
 	s.logger.InfoContext(ctx, "exclusion retrieved successfully",

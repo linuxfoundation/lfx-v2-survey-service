@@ -501,6 +501,20 @@ func TestScheduleSurvey_Errors(t *testing.T) {
 		assert.ErrorIs(t, err, errMapper)
 	})
 
+	t.Run("mapping failure is returned with context and not logged", func(t *testing.T) {
+		// The service returns errors; the HTTP boundary logs them once.
+		var logs bytes.Buffer
+		logger := slog.New(slog.NewJSONHandler(&logs, nil))
+		svc := service.NewSurveyService(&mocks.MockSurveyClient{}, &mocks.MockExclusionClient{}, &mocks.MockSurveyResponseClient{}, prefixMapper("bad-committee", ""), logger)
+
+		_, err := svc.ScheduleSurvey(ctxWithPrincipal("alice"), &survey.ScheduleSurveyPayload{CommitteeUID: "bad-committee"})
+
+		assert.ErrorIs(t, err, errMapper)
+		assert.ErrorContains(t, err, `map committee_uid "bad-committee" to v1`)
+		assert.NotContains(t, logs.String(), `"level":"ERROR"`)
+		assert.NotContains(t, logs.String(), `"level":"WARN"`)
+	})
+
 	t.Run("ITX error is returned unchanged", func(t *testing.T) {
 		itxErr := domain.NewUnavailableError("itx down")
 		client := &mocks.MockSurveyClient{
