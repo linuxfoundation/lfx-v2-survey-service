@@ -64,7 +64,10 @@ func mapDomainError(ctx context.Context, err error) error {
 			status = http.StatusNotFound
 		case domain.ErrorTypeConflict:
 			mapped = &survey.ConflictError{Code: "409", Message: domainErr.Message}
-			status = http.StatusConflict
+			// No endpoint declares a Conflict response in the Goa design, so the
+			// generated encoders send this as a 500. Log the status the client
+			// actually receives; use http.StatusConflict once the design declares it.
+			status = http.StatusInternalServerError
 		case domain.ErrorTypeUnavailable:
 			mapped = &survey.ServiceUnavailableError{Code: "503", Message: domainErr.Message}
 			status = http.StatusServiceUnavailable

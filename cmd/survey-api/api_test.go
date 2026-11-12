@@ -174,7 +174,8 @@ func TestMapDomainError_LogsOnce(t *testing.T) {
 		{"plain error is a 500", errors.New("itx exploded"), "ERROR", 500, []string{"itx exploded"}},
 		{"validation is a 400", domain.NewValidationError("bad uid"), "DEBUG", 400, []string{"bad uid"}},
 		{"not found is a 404", domain.NewNotFoundError("no such survey"), "DEBUG", 404, []string{"no such survey"}},
-		{"conflict is a 409", domain.NewConflictError("already exists"), "DEBUG", 409, []string{"already exists"}},
+		// Undeclared in the design, so Goa sends a 500; the log must match what is sent.
+		{"conflict is sent as a 500", domain.NewConflictError("already exists"), "ERROR", 500, []string{"already exists"}},
 		{"unavailable is a 503", domain.NewUnavailableError("itx down", cause), "ERROR", 503, []string{"itx down", "i/o timeout"}},
 		{"internal is a 500", domain.NewInternalError("boom", cause), "ERROR", 500, []string{"boom", "i/o timeout"}},
 		{
@@ -213,6 +214,46 @@ func TestMapDomainError_LogsOnce(t *testing.T) {
 		assert.Equal(t, "itx down", unavailable.Message)
 		assert.NotContains(t, unavailable.Message, "i/o timeout")
 	})
+}
+
+// TestRequestFailureLog_MatchesWireStatus drives each error type through the
+// generated HTTP stack and checks that the status the boundary logs is the one
+// the client receives, so the log level reflects what was actually sent.
+func TestRequestFailureLog_MatchesWireStatus(t *testing.T) {
+	tests := []struct {
+		name      string
+		err       error
+		wantCode  int
+		wantLevel string
+	}{
+		{"plain error", errors.New("itx exploded"), http.StatusInternalServerError, "ERROR"},
+		{"validation", domain.NewValidationError("bad uid"), http.StatusBadRequest, "DEBUG"},
+		{"not found", domain.NewNotFoundError("no such survey"), http.StatusNotFound, "DEBUG"},
+		{"unavailable", domain.NewUnavailableError("itx down"), http.StatusServiceUnavailable, "ERROR"},
+		{"internal", domain.NewInternalError("boom"), http.StatusInternalServerError, "ERROR"},
+		// Conflict is not declared on any endpoint in the Goa design, so it is
+		// sent as a 500 and must be logged as one.
+		{"conflict", domain.NewConflictError("already exists"), http.StatusInternalServerError, "ERROR"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf := captureDefaultLogger(t)
+			h := newRoutingTestHandler(&mocks.MockSurveyClient{
+				GetSurveyFunc: func(context.Context, string, *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error) {
+					return nil, tt.err
+				},
+			})
+
+			rec := serveRoutingRequest(t, h, "/surveys/b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
+
+			assert.Equal(t, tt.wantCode, rec.Code)
+			records := decodeLogRecords(t, buf)
+			require.Len(t, records, 1)
+			assert.Equal(t, float64(rec.Code), records[0]["status"], "logged status must equal the status sent")
+			assert.Equal(t, tt.wantLevel, records[0]["level"])
+		})
+	}
 }
 
 // newRoutingTestHandler mounts the generated survey HTTP server the same way
