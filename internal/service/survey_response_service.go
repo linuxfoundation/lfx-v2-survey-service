@@ -17,7 +17,7 @@ import (
 func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.DeleteSurveyResponsePayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "deleting survey response",
+	s.logger.DebugContext(ctx, "deleting survey response",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"response_id", p.ResponseID,
@@ -41,7 +41,7 @@ func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.Dele
 func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.ResendSurveyResponsePayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "resending survey response",
+	s.logger.DebugContext(ctx, "resending survey response",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"response_id", p.ResponseID,
@@ -65,7 +65,7 @@ func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.Rese
 func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.DeleteRecipientGroupPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "deleting recipient group from survey",
+	s.logger.DebugContext(ctx, "deleting recipient group from survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"committee_uid", p.CommitteeUID,
@@ -102,7 +102,7 @@ func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.Dele
 func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListSurveyResponsesPayload) (*survey.SurveyResponsesPage, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "listing survey responses",
+	s.logger.DebugContext(ctx, "listing survey responses",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"project_uid", p.ProjectUID,

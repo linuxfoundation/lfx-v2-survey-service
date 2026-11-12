@@ -15,7 +15,7 @@ import (
 func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExclusionPayload) (*survey.ExclusionResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "creating exclusion",
+	s.logger.DebugContext(ctx, "creating exclusion",
 		"principal", principal,
 		"email", p.Email,
 		"user_id", p.UserID,
@@ -59,7 +59,7 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExclusionPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "deleting exclusion",
+	s.logger.DebugContext(ctx, "deleting exclusion",
 		"principal", principal,
 		"email", p.Email,
 		"user_id", p.UserID,
@@ -95,7 +95,7 @@ func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExc
 func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusionPayload) (*survey.ExtendedExclusionResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "getting exclusion",
+	s.logger.DebugContext(ctx, "getting exclusion",
 		"principal", principal,
 		"exclusion_id", p.ExclusionID,
 	)
@@ -123,7 +123,7 @@ func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusion
 func (s *SurveyService) DeleteExclusionByID(ctx context.Context, p *survey.DeleteExclusionByIDPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "deleting exclusion by ID",
+	s.logger.DebugContext(ctx, "deleting exclusion by ID",
 		"principal", principal,
 		"exclusion_id", p.ExclusionID,
 	)

@@ -4,6 +4,7 @@
 package service_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"io"
@@ -331,6 +332,32 @@ func TestDeleteSurveyResponse(t *testing.T) {
 		}, prefixMapper("", ""))
 
 		assert.Same(t, itxErr, svc.DeleteSurveyResponse(ctxWithPrincipal("alice"), &survey.DeleteSurveyResponsePayload{SurveyUID: "s-1", ResponseID: "r-1"}))
+	})
+}
+
+func TestDeleteSurveyResponse_Logging(t *testing.T) {
+	deleteWith := func(level slog.Level) []map[string]any {
+		var logs bytes.Buffer
+		logger := slog.New(slog.NewJSONHandler(&logs, &slog.HandlerOptions{Level: level}))
+		svc := service.NewSurveyService(&mocks.MockSurveyClient{}, &mocks.MockExclusionClient{}, &mocks.MockSurveyResponseClient{
+			DeleteResponseFunc: func(context.Context, string, string) error { return nil },
+		}, prefixMapper("", ""), logger)
+
+		require.NoError(t, svc.DeleteSurveyResponse(ctxWithPrincipal("alice"), &survey.DeleteSurveyResponsePayload{SurveyUID: "s-1", ResponseID: "r-1"}))
+		return decodeLogRecords(t, &logs)
+	}
+
+	t.Run("one Info line when it succeeds", func(t *testing.T) {
+		records := deleteWith(slog.LevelInfo)
+		require.Len(t, records, 1)
+		assert.Equal(t, "survey response deleted successfully", records[0]["msg"])
+	})
+
+	t.Run("the request line is Debug", func(t *testing.T) {
+		records := deleteWith(slog.LevelDebug)
+		require.Len(t, records, 2)
+		assert.Equal(t, "deleting survey response", records[0]["msg"])
+		assert.Equal(t, "DEBUG", records[0]["level"])
 	})
 }
 

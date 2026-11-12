@@ -84,7 +84,7 @@ func (s *SurveyService) ServiceReady() error {
 func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSurveyPayload) (*survey.SurveyScheduleResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "scheduling survey",
+	s.logger.DebugContext(ctx, "scheduling survey",
 		"principal", principal,
 		"survey_title", p.SurveyTitle,
 		"survey_monkey_id", p.SurveyMonkeyID,
@@ -161,7 +161,7 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayload) (*survey.SurveyScheduleResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "getting survey",
+	s.logger.DebugContext(ctx, "getting survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"project_uid", p.ProjectUID,
@@ -230,7 +230,7 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurveyPayload) (*survey.SurveyScheduleResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "updating survey",
+	s.logger.DebugContext(ctx, "updating survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"survey_title", p.SurveyTitle,
@@ -299,7 +299,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurveyPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "deleting survey",
+	s.logger.DebugContext(ctx, "deleting survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 	)
@@ -321,7 +321,7 @@ func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurvey
 func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkResendSurveyPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "bulk resending survey",
+	s.logger.DebugContext(ctx, "bulk resending survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"recipient_count", len(p.RecipientIds),
@@ -349,7 +349,7 @@ func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkRese
 func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.PreviewSendSurveyPayload) (*survey.PreviewSendResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "previewing survey send",
+	s.logger.DebugContext(ctx, "previewing survey send",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"committee_uid", p.CommitteeUID,
@@ -385,7 +385,7 @@ func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.Preview
 func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.SendMissingRecipientsPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "sending survey to missing recipients",
+	s.logger.DebugContext(ctx, "sending survey to missing recipients",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"committee_uid", p.CommitteeUID,
@@ -414,7 +414,7 @@ func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.Sen
 func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEmailPayload) (*survey.ValidateEmailResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "validating email template",
+	s.logger.DebugContext(ctx, "validating email template",
 		"principal", principal,
 	)
 
@@ -445,7 +445,7 @@ func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEma
 // scheduling. project_uid and committee_uid are used only by the Heimdall
 // writer check; templates are global in ITX, so neither is forwarded.
 func (s *SurveyService) ListSurveyTemplates(ctx context.Context, p *survey.ListSurveyTemplatesPayload) ([]*survey.SurveyTemplate, error) {
-	s.logger.InfoContext(ctx, "listing survey templates",
+	s.logger.DebugContext(ctx, "listing survey templates",
 		"project_uid", p.ProjectUID,
 		"committee_uid", p.CommitteeUID,
 	)
