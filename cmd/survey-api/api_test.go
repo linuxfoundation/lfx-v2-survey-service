@@ -14,6 +14,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 	"text/template"
 
@@ -22,6 +23,7 @@ import (
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain/mocks"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/infrastructure/idmapper"
+	"github.com/linuxfoundation/lfx-v2-survey-service/internal/middleware"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/service"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/models/itx"
@@ -157,10 +159,10 @@ func decodeLogRecords(t *testing.T, buf *bytes.Buffer) []map[string]any {
 	return records
 }
 
-// TestMapDomainError_LogsOnce verifies the boundary is the one place a failed
-// request is logged: exactly one record, at Error for server-side failures and
-// Debug for client-side ones, carrying the full error chain that the client
-// response deliberately leaves out.
+// TestMapDomainError_LogsOnce covers mapDomainError when nothing tracks the request
+// (a handler called directly): it logs the failure itself, once, using the status the
+// error type maps to. Under RequestLoggerMiddleware the middleware logs instead, with
+// the status actually sent; see TestRequestFailureLog_MatchesWireStatus.
 func TestMapDomainError_LogsOnce(t *testing.T) {
 	cause := errors.New("dial tcp 10.0.0.1:4222: i/o timeout")
 
@@ -174,8 +176,7 @@ func TestMapDomainError_LogsOnce(t *testing.T) {
 		{"plain error is a 500", errors.New("itx exploded"), "ERROR", 500, []string{"itx exploded"}},
 		{"validation is a 400", domain.NewValidationError("bad uid"), "DEBUG", 400, []string{"bad uid"}},
 		{"not found is a 404", domain.NewNotFoundError("no such survey"), "DEBUG", 404, []string{"no such survey"}},
-		// Undeclared in the design, so Goa sends a 500; the log must match what is sent.
-		{"conflict is sent as a 500", domain.NewConflictError("already exists"), "ERROR", 500, []string{"already exists"}},
+		{"conflict is a 409", domain.NewConflictError("already exists"), "DEBUG", 409, []string{"already exists"}},
 		{"unavailable is a 503", domain.NewUnavailableError("itx down", cause), "ERROR", 503, []string{"itx down", "i/o timeout"}},
 		{"internal is a 500", domain.NewInternalError("boom", cause), "ERROR", 500, []string{"boom", "i/o timeout"}},
 		{
@@ -216,51 +217,178 @@ func TestMapDomainError_LogsOnce(t *testing.T) {
 	})
 }
 
-// TestRequestFailureLog_MatchesWireStatus drives each error type through the
-// generated HTTP stack and checks that the status the boundary logs is the one
-// the client receives, so the log level reflects what was actually sent.
+// TestMapDomainError_RecordsForRequestLogger checks that under RequestLoggerMiddleware
+// mapDomainError records the failure instead of logging it, so the failure is logged once,
+// by the middleware, with the status the response actually carries.
+func TestMapDomainError_RecordsForRequestLogger(t *testing.T) {
+	buf := captureDefaultLogger(t)
+	handler := middleware.RequestLoggerMiddleware()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Error(t, mapDomainError(r.Context(), domain.NewNotFoundError("no such survey")), "the client still gets an error")
+		// The transport decides the status; it need not match the error type's own.
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+
+	handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/surveys/s-1", nil))
+
+	failures := requestFailureRecords(decodeLogRecords(t, buf))
+	require.Len(t, failures, 1)
+	assert.Equal(t, float64(http.StatusInternalServerError), failures[0]["status"], "the sent status, not the mapped 404")
+	assert.Equal(t, "ERROR", failures[0]["level"])
+}
+
+func requestFailureRecords(records []map[string]any) []map[string]any {
+	var out []map[string]any
+	for _, r := range records {
+		if r["msg"] == "request failed" {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// serveRoutingJSON sends a request with an optional JSON body through h.
+func serveRoutingJSON(t *testing.T, h http.Handler, method, target, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	req := httptest.NewRequest(method, target, strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer test-token")
+	if body != "" {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec
+}
+
+// TestRequestFailureLog_MatchesWireStatus drives every endpoint with every kind of error
+// through RequestLoggerMiddleware and the generated HTTP stack, and checks that the
+// failure is logged exactly once, with the status the client actually receives and the
+// level that status calls for. The design declares a different set of error responses on
+// each endpoint, and a generated encoder sends one it does not declare as a generic 500,
+// so the status cannot be derived from the error type.
 func TestRequestFailureLog_MatchesWireStatus(t *testing.T) {
-	tests := []struct {
-		name      string
-		err       error
-		wantCode  int
-		wantLevel string
+	const (
+		surveyUID   = "b03cdbaf-53b1-4d47-bc04-dd7e459dd309"
+		responseID  = "r-1"
+		exclusionID = "e-1"
+		projectUID  = "7cad5a8d-19d0-41a4-81a6-043453daf9ee"
+	)
+	endpoints := []struct {
+		name, method, path, body string
+		wire                     func(c *handlerClients, err error)
 	}{
-		{"plain error", errors.New("itx exploded"), http.StatusInternalServerError, "ERROR"},
-		{"validation", domain.NewValidationError("bad uid"), http.StatusBadRequest, "DEBUG"},
-		{"not found", domain.NewNotFoundError("no such survey"), http.StatusNotFound, "DEBUG"},
-		{"unavailable", domain.NewUnavailableError("itx down"), http.StatusServiceUnavailable, "ERROR"},
-		{"internal", domain.NewInternalError("boom"), http.StatusInternalServerError, "ERROR"},
-		// Conflict is not declared on any endpoint in the Goa design, so it is
-		// sent as a 500 and must be logged as one.
-		{"conflict", domain.NewConflictError("already exists"), http.StatusInternalServerError, "ERROR"},
+		{"ScheduleSurvey", "POST", "/surveys", `{"committee_uid":"c-1"}`, func(c *handlerClients, err error) {
+			c.survey.ScheduleSurveyFunc = func(context.Context, *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+				return nil, err
+			}
+		}},
+		{"GetSurvey", "GET", "/surveys/" + surveyUID, "", func(c *handlerClients, err error) {
+			c.survey.GetSurveyFunc = func(context.Context, string, *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error) {
+				return nil, err
+			}
+		}},
+		{"UpdateSurvey", "PUT", "/surveys/" + surveyUID, `{}`, func(c *handlerClients, err error) {
+			c.survey.UpdateSurveyFunc = func(context.Context, string, *itx.UpdateSurveyRequest) (*itx.SurveyScheduleResponse, error) {
+				return nil, err
+			}
+		}},
+		{"DeleteSurvey", "DELETE", "/surveys/" + surveyUID, "", func(c *handlerClients, err error) {
+			c.survey.DeleteSurveyFunc = func(context.Context, string) error { return err }
+		}},
+		{"BulkResendSurvey", "POST", "/surveys/" + surveyUID + "/bulk_resend", `{"recipient_ids":["r-1"]}`, func(c *handlerClients, err error) {
+			c.survey.BulkResendSurveyFunc = func(context.Context, string, *itx.BulkResendRequest) error { return err }
+		}},
+		{"PreviewSendSurvey", "GET", "/surveys/" + surveyUID + "/preview_send", "", func(c *handlerClients, err error) {
+			c.survey.PreviewSendFunc = func(context.Context, string, *string) (*itx.PreviewSendResponse, error) { return nil, err }
+		}},
+		{"SendMissingRecipients", "POST", "/surveys/" + surveyUID + "/send_missing_recipients", "", func(c *handlerClients, err error) {
+			c.survey.SendMissingRecipientsFunc = func(context.Context, string, *string) error { return err }
+		}},
+		{"DeleteSurveyResponse", "DELETE", "/surveys/" + surveyUID + "/responses/" + responseID, "", func(c *handlerClients, err error) {
+			c.response.DeleteResponseFunc = func(context.Context, string, string) error { return err }
+		}},
+		{"ResendSurveyResponse", "POST", "/surveys/" + surveyUID + "/responses/" + responseID + "/resend", "", func(c *handlerClients, err error) {
+			c.response.ResendResponseFunc = func(context.Context, string, string) error { return err }
+		}},
+		{"DeleteRecipientGroup", "DELETE", "/surveys/" + surveyUID + "/recipient_group", "", func(c *handlerClients, err error) {
+			c.survey.DeleteRecipientGroupFunc = func(context.Context, string, *string, *string, *string) error { return err }
+		}},
+		{"CreateExclusion", "POST", "/surveys/exclusion", `{"email":"alice@example.com"}`, func(c *handlerClients, err error) {
+			c.exclusion.CreateExclusionFunc = func(context.Context, *itx.ExclusionRequest) (*itx.Exclusion, error) { return nil, err }
+		}},
+		{"DeleteExclusion", "DELETE", "/surveys/exclusion", `{"email":"alice@example.com"}`, func(c *handlerClients, err error) {
+			c.exclusion.DeleteExclusionFunc = func(context.Context, *itx.ExclusionRequest) error { return err }
+		}},
+		{"GetExclusion", "GET", "/surveys/exclusion/" + exclusionID, "", func(c *handlerClients, err error) {
+			c.exclusion.GetExclusionFunc = func(context.Context, string) (*itx.ExtendedExclusion, error) { return nil, err }
+		}},
+		{"DeleteExclusionByID", "DELETE", "/surveys/exclusion/" + exclusionID, "", func(c *handlerClients, err error) {
+			c.exclusion.DeleteExclusionByIDFunc = func(context.Context, string) error { return err }
+		}},
+		{"ListSurveyResponses", "GET", "/surveys/" + surveyUID + "/responses", "", func(c *handlerClients, err error) {
+			c.response.ListResponsesFunc = func(context.Context, string, *itx.ListResponsesParams) (*itx.PaginatedSurveyResponses, error) {
+				return nil, err
+			}
+		}},
+		{"ListSurveyTemplates", "GET", "/surveys/templates?project_uid=" + projectUID + "&committee_uid=" + surveyUID, "", func(c *handlerClients, err error) {
+			c.survey.ListSurveyTemplatesFunc = func(context.Context) ([]itx.SurveyTemplate, error) { return nil, err }
+		}},
+		{"ValidateEmail", "POST", "/surveys/validate_email", `{"body":"b","subject":"s"}`, func(c *handlerClients, err error) {
+			c.survey.ValidateEmailFunc = func(context.Context, *itx.ValidateEmailRequest) (*itx.ValidateEmailResponse, error) {
+				return nil, err
+			}
+		}},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			buf := captureDefaultLogger(t)
-			h := newRoutingTestHandler(&mocks.MockSurveyClient{
-				GetSurveyFunc: func(context.Context, string, *itx.GetSurveyParams) (*itx.SurveyScheduleResponse, error) {
-					return nil, tt.err
-				},
+	failures := []struct {
+		name string
+		err  error
+	}{
+		{"validation", domain.NewValidationError("bad input")},
+		{"not found", domain.NewNotFoundError("no such thing")},
+		{"conflict", domain.NewConflictError("already exists")},
+		{"unavailable", domain.NewUnavailableError("itx down")},
+		{"internal", domain.NewInternalError("boom")},
+		{"plain error", errors.New("itx exploded")},
+	}
+
+	for _, ep := range endpoints {
+		for _, f := range failures {
+			t.Run(ep.name+"/"+f.name, func(t *testing.T) {
+				buf := captureDefaultLogger(t)
+				c := &handlerClients{
+					survey:    &mocks.MockSurveyClient{},
+					exclusion: &mocks.MockExclusionClient{},
+					response:  &mocks.MockSurveyResponseClient{},
+				}
+				ep.wire(c, f.err)
+				h := middleware.RequestLoggerMiddleware()(newRoutingTestHandlerWith(c.survey, c.exclusion, c.response))
+
+				rec := serveRoutingJSON(t, h, ep.method, ep.path, ep.body)
+
+				require.GreaterOrEqual(t, rec.Code, 400, "expected a failure response, got %d: %s", rec.Code, rec.Body.String())
+				records := requestFailureRecords(decodeLogRecords(t, buf))
+				require.Len(t, records, 1, "the failure must be logged exactly once (response %d: %s)", rec.Code, rec.Body.String())
+				assert.Equal(t, float64(rec.Code), records[0]["status"], "logged status must equal the status sent")
+				wantLevel := "DEBUG"
+				if rec.Code >= http.StatusInternalServerError {
+					wantLevel = "ERROR"
+				}
+				assert.Equal(t, wantLevel, records[0]["level"])
 			})
-
-			rec := serveRoutingRequest(t, h, "/surveys/b03cdbaf-53b1-4d47-bc04-dd7e459dd309")
-
-			assert.Equal(t, tt.wantCode, rec.Code)
-			records := decodeLogRecords(t, buf)
-			require.Len(t, records, 1)
-			assert.Equal(t, float64(rec.Code), records[0]["status"], "logged status must equal the status sent")
-			assert.Equal(t, tt.wantLevel, records[0]["level"])
-		})
+		}
 	}
 }
 
 // newRoutingTestHandler mounts the generated survey HTTP server the same way
 // main.go does, backed by the given survey client mock.
 func newRoutingTestHandler(client *mocks.MockSurveyClient) http.Handler {
+	return newRoutingTestHandlerWith(client, &mocks.MockExclusionClient{}, &mocks.MockSurveyResponseClient{})
+}
+
+// newRoutingTestHandlerWith is newRoutingTestHandler with every ITX client mock supplied.
+func newRoutingTestHandlerWith(client *mocks.MockSurveyClient, exclusion *mocks.MockExclusionClient, response *mocks.MockSurveyResponseClient) http.Handler {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}))
-	surveyService := service.NewSurveyService(client, &mocks.MockExclusionClient{}, &mocks.MockSurveyResponseClient{}, idmapper.NewNoOpMapper(), logger)
+	surveyService := service.NewSurveyService(client, exclusion, response, idmapper.NewNoOpMapper(), logger)
 	surveyAPI := NewSurveyAPI(surveyService, &mocks.MockAuthenticator{Principal: "test-user"})
 
 	mux := goahttp.NewMuxer()

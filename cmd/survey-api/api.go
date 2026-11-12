@@ -6,11 +6,11 @@ package main
 import (
 	"context"
 	"errors"
-	"log/slog"
 	"net/http"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
+	"github.com/linuxfoundation/lfx-v2-survey-service/internal/middleware"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/service"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/constants"
 	"goa.design/goa/v3/security"
@@ -34,13 +34,15 @@ func NewSurveyAPI(surveyService *service.SurveyService, auth domain.Authenticato
 }
 
 // mapDomainError translates a domain error into the appropriate Goa transport
-// error type and logs the failure once. It lives here — at the outermost adapter
-// layer — because Goa error types are a transport concern; the service layer must
-// not import them.
+// error type and records the failure for the request logger. It lives here — at the
+// outermost adapter layer — because Goa error types are a transport concern; the service
+// layer must not import them.
 //
-// This is the only place a failed request's cause is logged: the service layer
-// returns errors rather than logging them, and the Goa error sent to the client
-// carries only the domain message, never the wrapped cause.
+// The failure is logged once, by RequestLoggerMiddleware after the response is written, so
+// the logged status and level are those of the response actually sent. A handler cannot
+// know that: a generated encoder sends an error type its endpoint does not declare as a
+// generic 500. The service layer returns errors rather than logging them, and the Goa error
+// sent to the client carries only the domain message, never the wrapped cause.
 func mapDomainError(ctx context.Context, err error) error {
 	var (
 		mapped error
@@ -64,10 +66,7 @@ func mapDomainError(ctx context.Context, err error) error {
 			status = http.StatusNotFound
 		case domain.ErrorTypeConflict:
 			mapped = &survey.ConflictError{Code: "409", Message: domainErr.Message}
-			// No endpoint declares a Conflict response in the Goa design, so the
-			// generated encoders send this as a 500. Log the status the client
-			// actually receives; use http.StatusConflict once the design declares it.
-			status = http.StatusInternalServerError
+			status = http.StatusConflict
 		case domain.ErrorTypeUnavailable:
 			mapped = &survey.ServiceUnavailableError{Code: "503", Message: domainErr.Message}
 			status = http.StatusServiceUnavailable
@@ -77,19 +76,12 @@ func mapDomainError(ctx context.Context, err error) error {
 		}
 	}
 
-	logRequestError(ctx, status, err)
-	return mapped
-}
-
-// logRequestError records why a request failed. Server-side failures (5xx) are
-// Error; client-side failures (4xx) are expected outcomes and stay at Debug so
-// they do not show up as errors in dashboards or alerting.
-func logRequestError(ctx context.Context, status int, err error) {
-	level := slog.LevelDebug
-	if status >= http.StatusInternalServerError {
-		level = slog.LevelError
+	// Outside RequestLoggerMiddleware nothing will log this later, so log it here with the
+	// status the error type maps to.
+	if !middleware.RecordRequestFailure(ctx, err) {
+		middleware.LogRequestFailure(ctx, status, err)
 	}
-	slog.Log(ctx, level, "request failed", "status", status, "error", err)
+	return mapped
 }
 
 // ScheduleSurvey implements survey.Service.ScheduleSurvey

@@ -4,6 +4,8 @@
 package middleware
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -111,5 +113,88 @@ func TestRequestLoggerMiddleware(t *testing.T) {
 
 		assert.True(t, called)
 		assert.Equal(t, http.StatusCreated, rec.Code)
+	})
+}
+
+func TestRecordRequestFailure(t *testing.T) {
+	t.Run("reports false when the request is not tracked", func(t *testing.T) {
+		assert.False(t, RecordRequestFailure(context.Background(), errors.New("boom")))
+	})
+
+	t.Run("reports true inside RequestLoggerMiddleware", func(t *testing.T) {
+		captureLogs(t)
+		var recorded bool
+		next := http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+			recorded = RecordRequestFailure(r.Context(), errors.New("boom"))
+		})
+
+		RequestLoggerMiddleware()(next).ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/surveys", nil))
+
+		assert.True(t, recorded)
+	})
+}
+
+func TestRequestLoggerMiddleware_LogsRecordedFailure(t *testing.T) {
+	failWith := func(status int, err error) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			RecordRequestFailure(r.Context(), err)
+			w.WriteHeader(status)
+		})
+	}
+
+	t.Run("logs the cause once, between the request and response lines, with request attributes", func(t *testing.T) {
+		logs := captureLogs(t)
+		cause := errors.New("lookup: connection refused")
+
+		RequestLoggerMiddleware()(failWith(http.StatusInternalServerError, cause)).
+			ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/surveys/s-1?x=1", nil))
+
+		entries := logs()
+		require.Len(t, entries, 4) // "log config", request, failure, response
+		failure := entries[2]
+		assert.Equal(t, "HTTP request", entries[1]["msg"])
+		assert.Equal(t, "request failed", failure["msg"])
+		assert.Equal(t, "ERROR", failure["level"])
+		assert.EqualValues(t, http.StatusInternalServerError, failure["status"])
+		assert.Equal(t, "lookup: connection refused", failure["error"])
+		assert.Equal(t, "/surveys/s-1", failure["path"], "request attributes reach the failure log")
+		assert.Equal(t, "HTTP response", entries[3]["msg"])
+	})
+
+	t.Run("the level follows the status that was sent, not the error", func(t *testing.T) {
+		tests := []struct {
+			status    int
+			wantLevel string
+		}{
+			{http.StatusBadRequest, "DEBUG"},
+			{http.StatusNotFound, "DEBUG"},
+			{http.StatusConflict, "DEBUG"},
+			{http.StatusInternalServerError, "ERROR"},
+			{http.StatusServiceUnavailable, "ERROR"},
+		}
+		for _, tt := range tests {
+			t.Run(http.StatusText(tt.status), func(t *testing.T) {
+				logs := captureLogs(t)
+
+				RequestLoggerMiddleware()(failWith(tt.status, errors.New("any cause"))).
+					ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/surveys", nil))
+
+				entries := logs()
+				require.Len(t, entries, 4)
+				assert.Equal(t, tt.wantLevel, entries[2]["level"])
+				assert.EqualValues(t, tt.status, entries[2]["status"])
+			})
+		}
+	})
+
+	t.Run("a request that records nothing logs no failure", func(t *testing.T) {
+		logs := captureLogs(t)
+		next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNotFound) })
+
+		RequestLoggerMiddleware()(next).ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/surveys", nil))
+
+		for _, e := range logs() {
+			assert.NotEqual(t, "request failed", e["msg"])
+		}
 	})
 }
