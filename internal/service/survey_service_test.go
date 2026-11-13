@@ -49,7 +49,7 @@ func newTemplatesTestService(fn func(ctx context.Context) ([]itx.SurveyTemplate,
 
 func TestListSurveyTemplates_DoesNotLogPrincipal(t *testing.T) {
 	var logs bytes.Buffer
-	logger := slog.New(slog.NewJSONHandler(&logs, nil))
+	logger := slog.New(slog.NewJSONHandler(&logs, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	svc := service.NewSurveyService(
 		&mocks.MockSurveyClient{ListSurveyTemplatesFunc: func(context.Context) ([]itx.SurveyTemplate, error) {
 			return []itx.SurveyTemplate{}, nil
@@ -501,6 +501,20 @@ func TestScheduleSurvey_Errors(t *testing.T) {
 		assert.ErrorIs(t, err, errMapper)
 	})
 
+	t.Run("mapping failure is returned with context and not logged", func(t *testing.T) {
+		// The service returns errors; the HTTP boundary logs them once.
+		var logs bytes.Buffer
+		logger := slog.New(slog.NewJSONHandler(&logs, nil))
+		svc := service.NewSurveyService(&mocks.MockSurveyClient{}, &mocks.MockExclusionClient{}, &mocks.MockSurveyResponseClient{}, prefixMapper("bad-committee", ""), logger)
+
+		_, err := svc.ScheduleSurvey(ctxWithPrincipal("alice"), &survey.ScheduleSurveyPayload{CommitteeUID: "bad-committee"})
+
+		assert.ErrorIs(t, err, errMapper)
+		assert.ErrorContains(t, err, `map committee_uid "bad-committee" to v1`)
+		assert.NotContains(t, logs.String(), `"level":"ERROR"`)
+		assert.NotContains(t, logs.String(), `"level":"WARN"`)
+	})
+
 	t.Run("ITX error is returned unchanged", func(t *testing.T) {
 		itxErr := domain.NewUnavailableError("itx down")
 		client := &mocks.MockSurveyClient{
@@ -739,6 +753,48 @@ func TestDeleteSurvey(t *testing.T) {
 		}, prefixMapper("", ""))
 
 		assert.Same(t, itxErr, svc.DeleteSurvey(context.Background(), &survey.DeleteSurveyPayload{SurveyUID: "s-1"}))
+	})
+}
+
+// decodeLogRecords parses the JSON log lines written to buf.
+func decodeLogRecords(t *testing.T, buf *bytes.Buffer) []map[string]any {
+	t.Helper()
+	var records []map[string]any
+	dec := json.NewDecoder(buf)
+	for dec.More() {
+		var rec map[string]any
+		require.NoError(t, dec.Decode(&rec))
+		records = append(records, rec)
+	}
+	return records
+}
+
+// TestDeleteSurvey_Logging pins the logging volume of a routine call: one Info
+// line when it succeeds, with the request line kept at Debug.
+func TestDeleteSurvey_Logging(t *testing.T) {
+	deleteWith := func(level slog.Level) []map[string]any {
+		var logs bytes.Buffer
+		logger := slog.New(slog.NewJSONHandler(&logs, &slog.HandlerOptions{Level: level}))
+		svc := service.NewSurveyService(&mocks.MockSurveyClient{
+			DeleteSurveyFunc: func(context.Context, string) error { return nil },
+		}, &mocks.MockExclusionClient{}, &mocks.MockSurveyResponseClient{}, prefixMapper("", ""), logger)
+
+		require.NoError(t, svc.DeleteSurvey(ctxWithPrincipal("alice"), &survey.DeleteSurveyPayload{SurveyUID: "s-1"}))
+		return decodeLogRecords(t, &logs)
+	}
+
+	t.Run("one Info line when it succeeds", func(t *testing.T) {
+		records := deleteWith(slog.LevelInfo)
+		require.Len(t, records, 1)
+		assert.Equal(t, "survey deleted successfully", records[0]["msg"])
+		assert.Equal(t, "INFO", records[0]["level"])
+	})
+
+	t.Run("the request line is Debug", func(t *testing.T) {
+		records := deleteWith(slog.LevelDebug)
+		require.Len(t, records, 2)
+		assert.Equal(t, "deleting survey", records[0]["msg"])
+		assert.Equal(t, "DEBUG", records[0]["level"])
 	})
 }
 

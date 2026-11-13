@@ -4,10 +4,12 @@
 package auth
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -94,10 +96,18 @@ func TestNewJWTAuth(t *testing.T) {
 		assert.Equal(t, cfg, j.config)
 	})
 
-	t.Run("invalid JWKS URL is rejected", func(t *testing.T) {
+	t.Run("invalid JWKS URL is rejected with context and not logged", func(t *testing.T) {
+		var logs bytes.Buffer
+		prev := slog.Default()
+		slog.SetDefault(slog.New(slog.NewJSONHandler(&logs, nil)))
+		t.Cleanup(func() { slog.SetDefault(prev) })
+
 		j, err := NewJWTAuth(Config{JWKSURL: "://not a url"})
+
 		require.Error(t, err)
 		assert.Nil(t, j)
+		assert.ErrorContains(t, err, `invalid JWKS_URL "://not a url"`)
+		assert.Empty(t, logs.String(), "the caller logs the returned error")
 	})
 }
 

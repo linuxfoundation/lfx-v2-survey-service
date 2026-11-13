@@ -6,6 +6,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -80,15 +81,13 @@ func NewJWTAuth(config Config) (*JWTAuth, error) {
 	// Set up Heimdall JWKS key provider.
 	jwksURL, err := url.Parse(jwksURLStr)
 	if err != nil {
-		slog.Error("invalid JWKS_URL", "error", err)
-		return nil, err
+		return nil, fmt.Errorf("invalid JWKS_URL %q: %w", jwksURLStr, err)
 	}
 	var issuer *url.URL
 	issuer, err = url.Parse(defaultIssuer)
 	if err != nil {
 		// This shouldn't happen; a bare hostname is a valid URL.
-		slog.Error("unexpected URL parsing of default issuer", "error", err)
-		return nil, err
+		return nil, fmt.Errorf("unexpected URL parsing of default issuer: %w", err)
 	}
 	otelClient := &http.Client{
 		Transport: otelhttp.NewTransport(http.DefaultTransport),
@@ -106,8 +105,7 @@ func NewJWTAuth(config Config) (*JWTAuth, error) {
 		validator.WithAllowedClockSkew(5*time.Second),
 	)
 	if err != nil {
-		slog.Error("failed to set up the Heimdall JWT validator", "error", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to set up the Heimdall JWT validator: %w", err)
 	}
 
 	return &JWTAuth{

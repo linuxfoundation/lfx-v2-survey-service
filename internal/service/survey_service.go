@@ -84,7 +84,7 @@ func (s *SurveyService) ServiceReady() error {
 func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSurveyPayload) (*survey.SurveyScheduleResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "scheduling survey",
+	s.logger.DebugContext(ctx, "scheduling survey",
 		"principal", principal,
 		"survey_title", p.SurveyTitle,
 		"survey_monkey_id", p.SurveyMonkeyID,
@@ -95,11 +95,7 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 	// Map committee UID from V2 to V1 (ITX expects V1 SFID)
 	committeeV1, err := s.idMapper.MapCommitteeV2ToV1(ctx, p.CommitteeUID)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map committee UID to V1",
-			"committee_uid", p.CommitteeUID,
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map committee_uid %q to v1: %w", p.CommitteeUID, err)
 	}
 
 	s.logger.DebugContext(ctx, "mapped committee ID",
@@ -150,10 +146,7 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 	// Map response back to goa result (including V1 to V2 ID mapping)
 	result, err := s.mapITXResponseToResult(ctx, itxResponse)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map ITX response",
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map ITX survey response: %w", err)
 	}
 
 	s.logger.InfoContext(ctx, "survey scheduled successfully",
@@ -168,7 +161,7 @@ func (s *SurveyService) ScheduleSurvey(ctx context.Context, p *survey.ScheduleSu
 func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayload) (*survey.SurveyScheduleResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "getting survey",
+	s.logger.DebugContext(ctx, "getting survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"project_uid", p.ProjectUID,
@@ -191,11 +184,7 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 		if p.ProjectUID != nil && *p.ProjectUID != "" {
 			projectV1, err := s.idMapper.MapProjectV2ToV1(ctx, *p.ProjectUID)
 			if err != nil {
-				s.logger.ErrorContext(ctx, "failed to map project_uid to V1",
-					"project_uid", *p.ProjectUID,
-					"error", err,
-				)
-				return nil, err
+				return nil, fmt.Errorf("map project_uid %q to v1: %w", *p.ProjectUID, err)
 			}
 			queryParams.ProjectID = &projectV1
 			s.logger.DebugContext(ctx, "mapped project_uid",
@@ -208,10 +197,6 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 		if p.ProjectUids != nil && *p.ProjectUids != "" {
 			projectV1IDs, err := s.mapProjectUIDsV2ToV1(ctx, *p.ProjectUids)
 			if err != nil {
-				s.logger.ErrorContext(ctx, "failed to map project_uids to V1",
-					"project_uids", *p.ProjectUids,
-					"error", err,
-				)
 				return nil, err
 			}
 			queryParams.ProjectIDs = &projectV1IDs
@@ -231,10 +216,7 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 	// Map response back to goa result (including V1 to V2 ID mapping)
 	result, err := s.mapITXResponseToResult(ctx, itxResponse)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map ITX response",
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map ITX survey response: %w", err)
 	}
 
 	s.logger.InfoContext(ctx, "survey retrieved successfully",
@@ -248,7 +230,7 @@ func (s *SurveyService) GetSurvey(ctx context.Context, p *survey.GetSurveyPayloa
 func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurveyPayload) (*survey.SurveyScheduleResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "updating survey",
+	s.logger.DebugContext(ctx, "updating survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"survey_title", p.SurveyTitle,
@@ -303,10 +285,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 	// Map response back to goa result (including V1 to V2 ID mapping)
 	result, err := s.mapITXResponseToResult(ctx, itxResponse)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map ITX response",
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map ITX survey response: %w", err)
 	}
 
 	s.logger.InfoContext(ctx, "survey updated successfully",
@@ -320,7 +299,7 @@ func (s *SurveyService) UpdateSurvey(ctx context.Context, p *survey.UpdateSurvey
 func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurveyPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "deleting survey",
+	s.logger.DebugContext(ctx, "deleting survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 	)
@@ -342,7 +321,7 @@ func (s *SurveyService) DeleteSurvey(ctx context.Context, p *survey.DeleteSurvey
 func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkResendSurveyPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "bulk resending survey",
+	s.logger.DebugContext(ctx, "bulk resending survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"recipient_count", len(p.RecipientIds),
@@ -370,7 +349,7 @@ func (s *SurveyService) BulkResendSurvey(ctx context.Context, p *survey.BulkRese
 func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.PreviewSendSurveyPayload) (*survey.PreviewSendResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "previewing survey send",
+	s.logger.DebugContext(ctx, "previewing survey send",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"committee_uid", p.CommitteeUID,
@@ -391,10 +370,7 @@ func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.Preview
 	// Map response back to goa result (including V1 to V2 ID mapping)
 	result, err := s.mapPreviewSendResponseToResult(ctx, itxResponse)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map preview send response",
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map preview send response: %w", err)
 	}
 
 	s.logger.InfoContext(ctx, "survey preview send retrieved successfully",
@@ -409,7 +385,7 @@ func (s *SurveyService) PreviewSendSurvey(ctx context.Context, p *survey.Preview
 func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.SendMissingRecipientsPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "sending survey to missing recipients",
+	s.logger.DebugContext(ctx, "sending survey to missing recipients",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"committee_uid", p.CommitteeUID,
@@ -438,7 +414,7 @@ func (s *SurveyService) SendMissingRecipients(ctx context.Context, p *survey.Sen
 func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEmailPayload) (*survey.ValidateEmailResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "validating email template",
+	s.logger.DebugContext(ctx, "validating email template",
 		"principal", principal,
 	)
 
@@ -469,7 +445,7 @@ func (s *SurveyService) ValidateEmail(ctx context.Context, p *survey.ValidateEma
 // scheduling. project_uid and committee_uid are used only by the Heimdall
 // writer check; templates are global in ITX, so neither is forwarded.
 func (s *SurveyService) ListSurveyTemplates(ctx context.Context, p *survey.ListSurveyTemplatesPayload) ([]*survey.SurveyTemplate, error) {
-	s.logger.InfoContext(ctx, "listing survey templates",
+	s.logger.DebugContext(ctx, "listing survey templates",
 		"project_uid", p.ProjectUID,
 		"committee_uid", p.CommitteeUID,
 	)
@@ -569,11 +545,7 @@ func (s *SurveyService) mapOptionalCommitteeV2ToV1(ctx context.Context, committe
 
 	mapped, err := s.idMapper.MapCommitteeV2ToV1(ctx, *committeeUID)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map committee UID to V1",
-			"committee_uid", *committeeUID,
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map committee_uid %q to v1: %w", *committeeUID, err)
 	}
 
 	s.logger.DebugContext(ctx, "mapped committee ID",
@@ -592,11 +564,7 @@ func (s *SurveyService) mapOptionalProjectV2ToV1(ctx context.Context, projectUID
 
 	mapped, err := s.idMapper.MapProjectV2ToV1(ctx, *projectUID)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map project UID to V1",
-			"project_uid", *projectUID,
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map project_uid %q to v1: %w", *projectUID, err)
 	}
 
 	s.logger.DebugContext(ctx, "mapped project ID",
@@ -629,11 +597,7 @@ func (s *SurveyService) mapProjectUIDsV2ToV1(ctx context.Context, projectUIDs st
 	v1IDs, err := concurrent.BatchMap(ctx, validUIDs, func(uid string) (string, error) {
 		mapped, err := s.idMapper.MapProjectV2ToV1(ctx, uid)
 		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map project UID to V1",
-				"project_v2_uid", uid,
-				"error", err,
-			)
-			return "", err
+			return "", fmt.Errorf("map project uid %q to v1: %w", uid, err)
 		}
 		return mapped, nil
 	})

@@ -5,6 +5,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/pkg/models/itx"
@@ -14,7 +15,7 @@ import (
 func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExclusionPayload) (*survey.ExclusionResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "creating exclusion",
+	s.logger.DebugContext(ctx, "creating exclusion",
 		"principal", principal,
 		"email", p.Email,
 		"user_id", p.UserID,
@@ -44,10 +45,7 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 	// Map response back to goa result (including V1 to V2 ID mapping)
 	result, err := s.mapExclusionToResult(ctx, itxResponse)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map exclusion response",
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map exclusion response: %w", err)
 	}
 
 	s.logger.InfoContext(ctx, "exclusion created successfully",
@@ -61,7 +59,7 @@ func (s *SurveyService) CreateExclusion(ctx context.Context, p *survey.CreateExc
 func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExclusionPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "deleting exclusion",
+	s.logger.DebugContext(ctx, "deleting exclusion",
 		"principal", principal,
 		"email", p.Email,
 		"user_id", p.UserID,
@@ -97,7 +95,7 @@ func (s *SurveyService) DeleteExclusion(ctx context.Context, p *survey.DeleteExc
 func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusionPayload) (*survey.ExtendedExclusionResult, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "getting exclusion",
+	s.logger.DebugContext(ctx, "getting exclusion",
 		"principal", principal,
 		"exclusion_id", p.ExclusionID,
 	)
@@ -111,10 +109,7 @@ func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusion
 	// Map response back to goa result (including V1 to V2 ID mapping)
 	result, err := s.mapExtendedExclusionToResult(ctx, itxResponse)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map extended exclusion response",
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map extended exclusion response: %w", err)
 	}
 
 	s.logger.InfoContext(ctx, "exclusion retrieved successfully",
@@ -128,7 +123,7 @@ func (s *SurveyService) GetExclusion(ctx context.Context, p *survey.GetExclusion
 func (s *SurveyService) DeleteExclusionByID(ctx context.Context, p *survey.DeleteExclusionByIDPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "deleting exclusion by ID",
+	s.logger.DebugContext(ctx, "deleting exclusion by ID",
 		"principal", principal,
 		"exclusion_id", p.ExclusionID,
 	)
