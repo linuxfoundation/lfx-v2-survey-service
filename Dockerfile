@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 # Build stage
-FROM cgr.dev/chainguard/go:latest@sha256:06aa40c98b7ffbed72dd010470c2f6fa9b44f2e8d249eb3d53b8893b9d1a8ee7 AS builder
+FROM cgr.dev/chainguard/go:latest@sha256:163bd5500337364ac58a4c321836e748104dbb4e6951fb2e14b3949b6dca6a5f AS builder
 
 ARG TARGETARCH
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH
