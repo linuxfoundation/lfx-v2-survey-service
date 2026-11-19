@@ -30,6 +30,27 @@ make run
 
 **Required env vars** (no defaults): `ITX_CLIENT_ID`, `ITX_CLIENT_PRIVATE_KEY` (RSA PEM)
 
+## Go version
+
+This repo targets Go 1.27.x (currently 1.27.4, the latest patch). This
+supersedes the Go version policy in the `lfx-megalinter` skill, which targets
+the latest stable minor minus one: don't move `go.mod` back to Go 1.26. Take
+every 1.27.x patch release, and update `go.mod`, this file, `README.md` and
+`CONTRIBUTING.md` together. Release builds use the `go` directive in `go.mod`
+(`setup-go` reads it), and the `Dockerfile` builder image is pinned by digest,
+so re-pin it to a Chainguard Go image that ships the new patch.
+
+MegaLinter (v10.2.0) runs Go 1.26.10 in its image, so
+`.github/workflows/mega-linter.yaml` sets `GOTOOLCHAIN: auto` to let its Go
+linters download the `go.mod` toolchain. Its bundled golangci-lint 2.15.0 is
+built with Go 1.27.0 and lints this module. osv-scanner's govulncheck call
+analysis is built with Go 1.26 and cannot load it, and fails osv-scanner
+whenever a dependency version matches a vulnerability, so `.mega-linter.yml`
+turns Go call analysis off. osv-scanner then matches by version: any known
+vulnerability in a dependency version fails the check, reachable or not.
+Accept one only with an ID-scoped entry in `osv-scanner.toml` that names its
+removal condition.
+
 ## Architecture
 
 This service is a **stateless HTTP proxy** between LFX Platform V2 clients and the ITX (Linux Foundation IT) survey backend ([itx-service-survey-monkey](https://github.com/linuxfoundation-it/itx-service-survey-monkey)). Its core job is:

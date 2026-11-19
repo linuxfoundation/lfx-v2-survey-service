@@ -28,8 +28,9 @@ RUN go build -o /go/bin/survey-api -trimpath \
 # Final stage
 FROM cgr.dev/chainguard/static:latest@sha256:d6a97eb401cbc7c6d48be76ad81d7899b94303580859d396b52b67bc84ea7345
 
-# Use non-root user
-USER nonroot
+# Use non-root user. Numeric UID of the Chainguard nonroot user, matching the
+# chart's runAsUser.
+USER 65532
 
 # Copy binary from builder
 COPY --from=builder /go/bin/survey-api /cmd/survey-api
