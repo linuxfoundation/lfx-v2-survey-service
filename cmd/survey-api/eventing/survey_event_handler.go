@@ -299,7 +299,7 @@ func handleSurveyUpdate(
 	v1Data map[string]interface{},
 	publisher domain.EventPublisher,
 	idMapper domain.IDMapper,
-	mappingsKV jetstream.KeyValue,
+	mappingsKV domain.EventState,
 	logger *slog.Logger,
 ) bool {
 	funcLogger := logger.With("key", key, "handler", "survey")
@@ -339,9 +339,15 @@ func handleSurveyUpdate(
 	indexerAction := indexerConstants.ActionCreated
 	if _, err := mappingsKV.Get(ctx, mappingKey); err == nil {
 		indexerAction = indexerConstants.ActionUpdated
+	} else if !errors.Is(err, jetstream.ErrKeyNotFound) {
+		funcLogger.With(errKey, err, "key", mappingKey).WarnContext(ctx, "failed to read survey processing state; retrying")
+		return true
 	}
 
 	// Publish to indexer and FGA-sync
+	if proceed, retry := sourceCurrent(ctx, funcLogger.With("key", key)); !proceed {
+		return retry
+	}
 	if err := publisher.PublishSurveyEvent(ctx, string(indexerAction), surveyData); err != nil {
 		funcLogger.With(errKey, err).ErrorContext(ctx, "failed to publish survey event")
 		// Check if this is a transient error that should be retried
@@ -354,6 +360,7 @@ func handleSurveyUpdate(
 	// Store mapping to track that we've seen this survey
 	if _, err := mappingsKV.Put(ctx, mappingKey, []byte("1")); err != nil {
 		funcLogger.With(errKey, err).WarnContext(ctx, "failed to store survey mapping")
+		return true
 		// Don't retry on mapping storage failures
 	}
 
@@ -474,7 +481,7 @@ func handleSurveyDelete(
 	ctx context.Context,
 	uid string,
 	publisher domain.EventPublisher,
-	mappingsKV jetstream.KeyValue,
+	mappingsKV domain.EventState,
 	logger *slog.Logger,
 ) bool {
 	funcLogger := logger.With("survey_uid", uid, "handler", "survey_delete")
@@ -486,6 +493,9 @@ func handleSurveyDelete(
 	if entry, err := mappingsKV.Get(ctx, mappingKey); err == nil && isTombstonedMapping(entry.Value()) {
 		funcLogger.DebugContext(ctx, "survey delete already processed, skipping")
 		return false
+	} else if err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+		funcLogger.With(errKey, err, "key", mappingKey).WarnContext(ctx, "failed to read survey deletion state; retrying")
+		return true
 	}
 
 	// Create minimal survey data for delete event
@@ -495,6 +505,9 @@ func handleSurveyDelete(
 	}
 
 	// Publish delete event to indexer and FGA-sync
+	if proceed, retry := sourceCurrent(ctx, funcLogger.With("key", mappingKey)); !proceed {
+		return retry
+	}
 	if err := publisher.PublishSurveyEvent(ctx, string(indexerConstants.ActionDeleted), surveyData); err != nil {
 		funcLogger.With(errKey, err).ErrorContext(ctx, "failed to publish survey delete event")
 		// Check if this is a transient error that should be retried
@@ -507,7 +520,7 @@ func handleSurveyDelete(
 	// Tombstone mapping instead of hard-deleting, so redelivery is safely skipped
 	if _, err := mappingsKV.Put(ctx, mappingKey, []byte(tombstoneMarker)); err != nil {
 		funcLogger.With(errKey, err).WarnContext(ctx, "failed to tombstone survey mapping")
-		// Don't retry on mapping failures
+		return true
 	}
 
 	funcLogger.InfoContext(ctx, "successfully sent survey delete indexer and access messages")
@@ -516,6 +529,9 @@ func handleSurveyDelete(
 
 // isTransientError determines if an error is transient and should be retried
 func isTransientError(err error) bool {
+	if errors.Is(err, domain.ErrEventStateUnavailable) {
+		return true
+	}
 	if err == nil {
 		return false
 	}

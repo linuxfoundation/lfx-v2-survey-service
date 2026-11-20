@@ -189,12 +189,12 @@ func TestHandleSurveyTemplateUpdate(t *testing.T) {
 		assert.Empty(t, kv.data)
 	})
 
-	t.Run("a mapping store failure after publish is still acknowledged", func(t *testing.T) {
+	t.Run("a mapping store failure after publish retries", func(t *testing.T) {
 		pub, events := newRecordingPublisher(nil)
 		kv := newFakeKV(nil)
 		kv.putErr = errors.New("kv down")
 
-		assert.False(t, handleSurveyTemplateUpdate(ctx, key, templateV1Data(), pub, kv, discardLogger()))
+		assert.True(t, handleSurveyTemplateUpdate(ctx, key, templateV1Data(), pub, kv, discardLogger()))
 		assert.Len(t, *events, 1)
 	})
 }
@@ -248,12 +248,12 @@ func TestHandleSurveyTemplateDelete(t *testing.T) {
 		assert.Equal(t, "1", kv.value("survey_template.t1"))
 	})
 
-	t.Run("a tombstone store failure is still acknowledged", func(t *testing.T) {
+	t.Run("a tombstone store failure retries", func(t *testing.T) {
 		pub, events := newRecordingPublisher(nil)
 		kv := newFakeKV(nil)
 		kv.putErr = errors.New("kv down")
 
-		assert.False(t, handleSurveyTemplateDelete(ctx, "t1", pub, kv, discardLogger()))
+		assert.True(t, handleSurveyTemplateDelete(ctx, "t1", pub, kv, discardLogger()))
 		assert.Len(t, *events, 1)
 	})
 }

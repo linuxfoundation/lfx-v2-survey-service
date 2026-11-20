@@ -181,9 +181,10 @@ func run() int {
 				"$KV.v1-objects.itx-survey-responses.>",
 				"$KV.v1-objects.surveymonkey-surveys.>",
 			},
-			MaxDeliver:    3,
-			AckWait:       30 * time.Second,
-			MaxAckPending: 1000,
+			MaxDeliver:       -1, // Retain recoverable transient work through outages/restarts.
+			AckWait:          30 * time.Second,
+			MaxAckPending:    1000,
+			StateDatabaseURL: os.Getenv("SURVEY_STATE_DATABASE_URL"),
 		}, idMapper, inviteCfg, inviteSender, userReader, logger)
 		if err != nil {
 			logger.Error("Failed to initialize event processor", "error", err)
