@@ -1,0 +1,20 @@
+# Copyright The Linux Foundation and each contributor to LFX.
+# SPDX-License-Identifier: MIT
+
+# osv-scanner configuration: https://google.github.io/osv-scanner/configuration/
+#
+# Only list vulnerabilities that are consciously accepted, each with a
+# removal condition. MegaLinter runs osv-scanner without Go call analysis
+# (see .mega-linter.yml), so it matches by version and reports these whether
+# or not the vulnerable code is reachable.
+
+# github.com/klauspost/compress is an indirect dependency through nats.go.
+[[IgnoredVulns]]
+id = "GO-2026-6865"
+reason = "Fixed in github.com/klauspost/compress v1.20.2. Remove once go.mod requires v1.20.2 or later."
+
+# Covers go.opentelemetry.io/otel/sdk, otel/sdk/log and otel/trace. The fix
+# needs the otel modules and their contrib/exporter modules upgraded together.
+[[IgnoredVulns]]
+id = "GHSA-q7gw-24fr-5p69"
+reason = "Fixed in go.opentelemetry.io/otel/sdk, otel/sdk/log and otel/trace v1.47.0. Remove once go.mod requires v1.47.0 or later of all three."

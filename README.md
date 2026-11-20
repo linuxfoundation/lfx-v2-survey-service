@@ -102,7 +102,7 @@ For detailed API contracts showing request/response schemas and differences betw
 
 ## Prerequisites
 
-- Go 1.25.4 or later
+- Go 1.27.4 or later
 - Docker (for containerization)
 - Kubernetes cluster (for deployment)
 - Helm 3 (for deployment)

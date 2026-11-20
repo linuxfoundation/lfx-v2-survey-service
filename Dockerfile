@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 # Build stage
-FROM cgr.dev/chainguard/go:latest@sha256:06aa40c98b7ffbed72dd010470c2f6fa9b44f2e8d249eb3d53b8893b9d1a8ee7 AS builder
+FROM cgr.dev/chainguard/go:latest@sha256:163bd5500337364ac58a4c321836e748104dbb4e6951fb2e14b3949b6dca6a5f AS builder
 
 ARG TARGETARCH
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH
@@ -28,8 +28,9 @@ RUN go build -o /go/bin/survey-api -trimpath \
 # Final stage
 FROM cgr.dev/chainguard/static:latest@sha256:d6a97eb401cbc7c6d48be76ad81d7899b94303580859d396b52b67bc84ea7345
 
-# Use non-root user
-USER nonroot
+# Use non-root user. Numeric UID of the Chainguard nonroot user, matching the
+# chart's runAsUser.
+USER 65532
 
 # Copy binary from builder
 COPY --from=builder /go/bin/survey-api /cmd/survey-api

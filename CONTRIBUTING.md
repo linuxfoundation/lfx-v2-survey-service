@@ -39,7 +39,7 @@ Please refer to the [README.md](README.md) for detailed setup instructions, incl
 ### Quick Start
 
 ```bash
-# Install dependencies (Go 1.25+ required)
+# Install dependencies (Go 1.27+ required)
 make deps
 
 # Generate API code from Goa design
