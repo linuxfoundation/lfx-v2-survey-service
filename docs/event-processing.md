@@ -4,6 +4,11 @@
 
 The survey service implements NATS KV bucket event processing to automatically sync survey and survey response data from the v1 system to the v2 system. This enables real-time data synchronization, search indexing, and access control updates without manual intervention.
 
+Processed/deleted state and invitation guards now live in service-owned Postgres
+tables, not the helper's `v1_mappings` table. Legacy key names below describe
+the handler boundary encoding, not runtime access to the shared KV bucket.
+See [Postgres state and cutover](event-state-postgres.md).
+
 ## Architecture
 
 ### Components
@@ -67,7 +72,7 @@ The survey service implements NATS KV bucket event processing to automatically s
      - Grants survey response `owner` to the respondent's LFX username
      - Links surveys to committees and projects
 
-4. **Track**: Records processed events in `v1-mappings` KV bucket for deduplication
+4. **Track**: Records processed/deleted state in survey-owned Postgres tables.
 
 ## Configuration
 
@@ -79,12 +84,13 @@ The survey service implements NATS KV bucket event processing to automatically s
 | `EVENT_CONSUMER_NAME` | `survey-service-kv-consumer` | JetStream consumer name |
 | `EVENT_STREAM_NAME` | `KV_v1-objects` | JetStream stream name |
 | `NATS_URL` | `nats://nats:4222` | NATS server URL |
+| `SURVEY_STATE_DATABASE_URL` | Required when event processing is enabled | Secret-loaded survey-owned Postgres DSN; requires a verified offline cutover |
 
 ### Consumer Configuration
 
 - **Delivery Policy**: `DeliverLastPerSubjectPolicy` - Processes the latest version of each key
 - **Ack Policy**: `AckExplicitPolicy` - Requires explicit acknowledgment
-- **Max Deliver**: `3` - Retries transient failures up to 3 times
+- **Max Deliver**: `-1` - No finite ceiling for recoverable failures; retries survive dependency outages and restarts while source messages remain retained
 - **Ack Wait**: `30s` - Timeout before message redelivery
 - **Max Ack Pending**: `1000` - Maximum unacknowledged messages
 
@@ -155,7 +161,11 @@ These errors trigger NAK (negative acknowledgment) for automatic retry:
 - Network failures
 - Temporary downstream service outages
 
-**Action**: Message redelivered up to `MaxDeliver` times (3 attempts)
+**Action**: Retry with capped delays (2s, 10s, then 20s). Warn-level logs include
+the resource key and failure category. Postgres/source-read failures retry rather
+than being treated as missing state. Monitor consumer backlog and stream retention;
+unlimited deliveries cannot recover messages removed by retention or administrative
+purges. Active handlers extend their acknowledgment deadline.
 
 ### Permanent Errors (Skip)
 
@@ -217,9 +227,10 @@ nats consumer info KV_v1-objects survey-service-kv-consumer
 1. **Startup**: Event processor initializes after IDMapper
 2. **Running**: Processes events in background goroutine
 3. **Shutdown**: Graceful shutdown sequence:
-   - Context cancellation stops the consumer
-   - Consumer drains pending messages
-   - NATS connection closed
+   - Stop callback admission and stop SDK consumption
+   - Preserve active processing contexts/resources during a 30-second grace window
+   - Wait for SDK completion and active callbacks; cancel overdue work before waiting for its completion
+   - Close publisher, NATS connection and Postgres only after callbacks finish
    - HTTP server shutdown
 
 ### Troubleshooting
@@ -229,6 +240,8 @@ nats consumer info KV_v1-objects survey-service-kv-consumer
 - Check `EVENT_PROCESSING_ENABLED=true`
 - Verify NATS connection: `NATS_URL`
 - Check consumer exists: `nats consumer ls KV_v1-objects`
+- Verify the PG Secret, database access and `survey_state_cutover` checkpoint;
+  do not seed empty state or delete the checkpoint to force startup.
 
 **Events failing repeatedly**:
 
@@ -238,8 +251,8 @@ nats consumer info KV_v1-objects survey-service-kv-consumer
 
 **Duplicate processing**:
 
-- Check `v1-mappings` KV bucket for tracking entries (live = `1`, deleted = `!del`)
-- Verify consumer name is unique per instance
+- Inspect `survey_processed_resources` by `resource_kind`/`source_id` (processed/deleted state), and `survey_invitation_guards` by `response_id`.
+- Use the shared durable consumer name across replicas; do not create per-instance replay consumers.
 
 **ID mapping failures**:
 
@@ -248,12 +261,15 @@ nats consumer info KV_v1-objects survey-service-kv-consumer
 
 ## Deduplication
 
-The service uses the `v1-mappings` KV bucket to track processed events:
+The service uses `survey_processed_resources` in its own Postgres schema to
+track surveys, responses and templates. Legacy key/value names below are only
+the handler-adapter encoding, not runtime KV storage:
 
 **Key Pattern**:
 
 - Surveys: `survey.<uid>`
 - Responses: `survey_response.<uid>`
+- Templates: `survey_template.<uid>`
 
 **Value**:
 
@@ -271,6 +287,11 @@ The service uses the `v1-mappings` KV bucket to track processed events:
 
 When a delete event is processed, the mapping key is set to `!del` rather than being removed. On any redelivery of the same delete message, the tombstone is detected and the event is safely skipped without re-publishing a delete to downstream services.
 
+Runtime retains actual source stream revisions, uses leader-served current-source
+reads and a PG advisory lock per source key across replicas. Superseded deliveries
+are ACKed without publishing; current deliveries check freshness before effects
+and state writes. See [ordering limitations and recovery](event-state-postgres.md#concurrency-and-rollback).
+
 **Soft delete support**:
 
 KV PUT operations that include a non-empty `_sdc_deleted_at` field are treated as soft deletes and follow the same delete path as hard KV DEL/PURGE operations.
@@ -283,7 +304,7 @@ When processing a survey response, the handler checks that the parent survey map
 
 **Concurrency**:
 
-- Single consumer per service instance
+- Shared durable consumer across service replicas
 - Messages processed sequentially per consumer
 - Multiple service instances = parallel processing
 
@@ -300,7 +321,7 @@ When processing a survey response, the handler checks that the parent survey map
 **Resource Usage**:
 
 - Event processor runs in background goroutine (low overhead)
-- NATS connection shared with IDMapper
+- Event processor and publisher own their NATS connections separately from IDMapper
 - Memory footprint minimal (streaming model)
 
 ## Related Services

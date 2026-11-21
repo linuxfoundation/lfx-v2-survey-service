@@ -6,6 +6,7 @@ package eventing
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -115,7 +116,7 @@ func handleSurveyTemplateUpdate(
 	key string,
 	v1Data map[string]interface{},
 	publisher domain.EventPublisher,
-	mappingsKV jetstream.KeyValue,
+	mappingsKV domain.EventState,
 	logger *slog.Logger,
 ) bool {
 	funcLogger := logger.With("key", key, "handler", "survey_template")
@@ -139,8 +140,14 @@ func handleSurveyTemplateUpdate(
 	indexerAction := indexerConstants.ActionCreated
 	if _, err := mappingsKV.Get(ctx, mappingKey); err == nil {
 		indexerAction = indexerConstants.ActionUpdated
+	} else if !errors.Is(err, jetstream.ErrKeyNotFound) {
+		funcLogger.With(errKey, err, "key", mappingKey).WarnContext(ctx, "failed to read template processing state; retrying")
+		return true
 	}
 
+	if proceed, retry := sourceCurrent(ctx, funcLogger.With("key", key)); !proceed {
+		return retry
+	}
 	if err := publisher.PublishSurveyTemplateEvent(ctx, string(indexerAction), templateData); err != nil {
 		funcLogger.With(errKey, err).ErrorContext(ctx, "failed to publish survey template event")
 		if isTransientError(err) {
@@ -151,6 +158,7 @@ func handleSurveyTemplateUpdate(
 
 	if _, err := mappingsKV.Put(ctx, mappingKey, []byte("1")); err != nil {
 		funcLogger.With(errKey, err).WarnContext(ctx, "failed to store survey template mapping")
+		return true
 	}
 
 	funcLogger.InfoContext(ctx, "successfully sent survey template indexer message")
@@ -196,7 +204,7 @@ func handleSurveyTemplateDelete(
 	ctx context.Context,
 	uid string,
 	publisher domain.EventPublisher,
-	mappingsKV jetstream.KeyValue,
+	mappingsKV domain.EventState,
 	logger *slog.Logger,
 ) bool {
 	funcLogger := logger.With("template_id", uid, "handler", "survey_template_delete")
@@ -207,10 +215,16 @@ func handleSurveyTemplateDelete(
 	if entry, err := mappingsKV.Get(ctx, mappingKey); err == nil && isTombstonedMapping(entry.Value()) {
 		funcLogger.DebugContext(ctx, "survey template delete already processed, skipping")
 		return false
+	} else if err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+		funcLogger.With(errKey, err, "key", mappingKey).WarnContext(ctx, "failed to read template deletion state; retrying")
+		return true
 	}
 
 	templateData := &domain.SurveyTemplateData{ID: uid}
 
+	if proceed, retry := sourceCurrent(ctx, funcLogger.With("key", mappingKey)); !proceed {
+		return retry
+	}
 	if err := publisher.PublishSurveyTemplateEvent(ctx, string(indexerConstants.ActionDeleted), templateData); err != nil {
 		funcLogger.With(errKey, err).ErrorContext(ctx, "failed to publish survey template delete event")
 		if isTransientError(err) {
@@ -221,6 +235,7 @@ func handleSurveyTemplateDelete(
 
 	if _, err := mappingsKV.Put(ctx, mappingKey, []byte(tombstoneMarker)); err != nil {
 		funcLogger.With(errKey, err).WarnContext(ctx, "failed to tombstone survey template mapping")
+		return true
 	}
 
 	funcLogger.InfoContext(ctx, "successfully sent survey template delete indexer message")

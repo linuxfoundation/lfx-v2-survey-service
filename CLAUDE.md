@@ -58,6 +58,7 @@ This service is a **stateless HTTP proxy** between LFX Platform V2 clients and t
 1. **Auth translation**: Accepts Heimdall-issued JWTs (PS256) from v2 clients; issues OAuth2 M2M tokens (RSA private key) to ITX
 2. **ID translation**: v2 UUIDs ↔ v1 Salesforce IDs via NATS request/reply (`lfx.lookup_v1_mapping`)
 3. **Event processing**: Consumes NATS JetStream KV bucket changes to sync v1 survey data into the v2 indexer
+4. **Processing state**: Survey/response/template processed/deleted state and invitation guards live in service-owned Postgres tables. `SURVEY_STATE_DATABASE_URL` and a verified offline cutover are required before event processing starts; see `docs/event-state-postgres.md`. Source records remain in `v1-objects`; canonical project/committee mapping RPCs are unchanged.
 
 ### Layered Structure
 
@@ -90,7 +91,7 @@ pkg/                    ← Shared utilities and ITX API models
 
 **ID mapping**: A v2 `committee_uid` maps to a v1 compound ID `{project_sfid}:{committee_sfid}`. The mapper first resolves the project UID to a Salesforce ID via NATS, then constructs the compound format. Set `ID_MAPPING_DISABLED=true` to skip mapping (uses noop mapper).
 
-**Event processing**: The `eventing/event_processor.go` watches NATS JetStream KV buckets for keys matching `$KV.v1-objects.itx-surveys.>` and `$KV.v1-objects.itx-survey-responses.>`. Handlers transform v1 payloads to v2 `SurveyData`/`SurveyResponseData` and publish to the v2 indexer via NATS. Durable consumer: `survey-service-kv-consumer`, max 3 redeliveries.
+**Event processing**: The `eventing/event_processor.go` watches NATS JetStream KV buckets for keys matching `$KV.v1-objects.itx-surveys.>` and `$KV.v1-objects.itx-survey-responses.>`. Handlers transform v1 payloads to v2 `SurveyData`/`SurveyResponseData` and publish to the v2 indexer via NATS. Durable consumer: `survey-service-kv-consumer`, unlimited recoverable redeliveries with capped backoff. Runtime preserves source revisions, checks leader-served current source before effects/state writes and serializes the same source key using PG advisory locks; downstream effects are not an atomic transaction. Shutdown waits for active callbacks before closing resources.
 
 **Creator identity**: `ScheduleSurvey` and `UpdateSurvey` never trust `creator_*` values from the request body. The creator is the JWT principal (LFID username); the display name comes from the auth service (`lfx.auth-service.user_metadata.read`) through the optional `UserNameReader`, falling back to the username. ITX stores the name as sent and does not look it up.
 

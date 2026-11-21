@@ -6,6 +6,7 @@ package eventing
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -184,7 +185,7 @@ func handleSurveyResponseUpdate(
 	v1Data map[string]interface{},
 	publisher domain.EventPublisher,
 	idMapper domain.IDMapper,
-	mappingsKV jetstream.KeyValue,
+	mappingsKV domain.EventState,
 	v1ObjectsKV jetstream.KeyValue,
 	inviteHandler *SurveyResponseInviteHandler,
 	logger *slog.Logger,
@@ -251,9 +252,15 @@ func handleSurveyResponseUpdate(
 	indexerAction := indexerConstants.ActionCreated
 	if _, err := mappingsKV.Get(ctx, mappingKey); err == nil {
 		indexerAction = indexerConstants.ActionUpdated
+	} else if !errors.Is(err, jetstream.ErrKeyNotFound) {
+		funcLogger.With(errKey, err, "key", mappingKey).WarnContext(ctx, "failed to read response processing state; retrying")
+		return true
 	}
 
 	// Publish to indexer and FGA-sync
+	if proceed, retry := sourceCurrent(ctx, funcLogger.With("key", key)); !proceed {
+		return retry
+	}
 	if err := publisher.PublishSurveyResponseEvent(ctx, string(indexerAction), responseData); err != nil {
 		funcLogger.With(errKey, err).ErrorContext(ctx, "failed to publish survey response event")
 		// Check if this is a transient error that should be retried
@@ -263,16 +270,44 @@ func handleSurveyResponseUpdate(
 		return false // Permanent error, ACK and skip
 	}
 
+	// Persist new-response eligibility before processed state. A failed guard read
+	// or claim can then retry independently of the next delivery's index action.
+	invitePrepared := false
+	if inviteHandler.inviteEnabled() && strings.TrimSpace(responseData.Username) == "" && strings.TrimSpace(responseData.Email) != "" {
+		intents, ok := mappingsKV.(domain.InvitationIntentState)
+		if !ok {
+			funcLogger.WarnContext(ctx, "invitation intent state unavailable; retrying")
+			return true
+		}
+		if shouldSendSurveyResponseInvite(indexerAction, responseData.Username, responseData.Email) {
+			if err := intents.PrepareInvitation(ctx, responseData.UID); err != nil {
+				funcLogger.With(errKey, err).WarnContext(ctx, "failed to prepare invitation intent; retrying")
+				return true
+			}
+		}
+		var err error
+		invitePrepared, err = intents.InvitationPrepared(ctx, responseData.UID)
+		if err != nil {
+			funcLogger.With(errKey, err).WarnContext(ctx, "failed to read invitation intent; retrying")
+			return true
+		}
+	} else if inviteHandler.inviteEnabled() {
+		if inviteHandler.resolveIntent(ctx, funcLogger, responseData.UID) {
+			return true
+		}
+	}
+
 	// Store mapping to track that we've seen this survey response
 	if _, err := mappingsKV.Put(ctx, mappingKey, []byte("1")); err != nil {
 		funcLogger.With(errKey, err).WarnContext(ctx, "failed to store survey response mapping")
-		// Don't retry on mapping storage failures
+		return true
 	}
 
-	// Best-effort: send an LFID invite to new participants who have no username yet.
-	if shouldSendSurveyResponseInvite(indexerAction, responseData.Username, responseData.Email) {
+	if invitePrepared {
 		displayName := strings.TrimSpace(responseData.FirstName + " " + responseData.LastName)
-		inviteHandler.maybeSendInvite(ctx, funcLogger, responseData.UID, responseData.Email, displayName, responseData.SurveyID)
+		if inviteHandler.maybeSendInvite(ctx, funcLogger, responseData.UID, responseData.Email, displayName, responseData.SurveyID) {
+			return true
+		}
 	}
 
 	funcLogger.InfoContext(ctx, "successfully sent survey response indexer and access messages")
@@ -441,7 +476,7 @@ func handleSurveyResponseDelete(
 	ctx context.Context,
 	uid string,
 	publisher domain.EventPublisher,
-	mappingsKV jetstream.KeyValue,
+	mappingsKV domain.EventState,
 	logger *slog.Logger,
 ) bool {
 	funcLogger := logger.With("survey_response_uid", uid, "handler", "survey_response_delete")
@@ -453,6 +488,9 @@ func handleSurveyResponseDelete(
 	if entry, err := mappingsKV.Get(ctx, mappingKey); err == nil && isTombstonedMapping(entry.Value()) {
 		funcLogger.DebugContext(ctx, "survey response delete already processed, skipping")
 		return false
+	} else if err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+		funcLogger.With(errKey, err, "key", mappingKey).WarnContext(ctx, "failed to read response deletion state; retrying")
+		return true
 	}
 
 	// Create minimal survey response data for delete event
@@ -462,6 +500,9 @@ func handleSurveyResponseDelete(
 	}
 
 	// Publish delete event to indexer and FGA-sync
+	if proceed, retry := sourceCurrent(ctx, funcLogger.With("key", mappingKey)); !proceed {
+		return retry
+	}
 	if err := publisher.PublishSurveyResponseEvent(ctx, string(indexerConstants.ActionDeleted), responseData); err != nil {
 		funcLogger.With(errKey, err).ErrorContext(ctx, "failed to publish survey response delete event")
 		// Check if this is a transient error that should be retried
@@ -474,6 +515,7 @@ func handleSurveyResponseDelete(
 	// Tombstone mapping instead of hard-deleting, so redelivery is safely skipped
 	if _, err := mappingsKV.Put(ctx, mappingKey, []byte(tombstoneMarker)); err != nil {
 		funcLogger.With(errKey, err).WarnContext(ctx, "failed to tombstone survey response mapping")
+		return true
 		// Don't retry on mapping failures
 	}
 

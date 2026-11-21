@@ -22,7 +22,7 @@ type SurveyResponseInviteHandler struct {
 	inviteSender     domain.InviteSender
 	userReader       domain.UserReader
 	v1ObjectsKV      jetstream.KeyValue
-	v1MappingsKV     jetstream.KeyValue
+	v1MappingsKV     domain.EventState
 	selfServeBaseURL string
 }
 
@@ -41,34 +41,35 @@ func surveyResponseLFIDInviteSentKey(surveyResponseUID string) string {
 }
 
 // maybeSendInvite performs a best-effort LFID invite for a new survey-response participant
-// who has no username. All errors are logged and swallowed.
+// who has no username. Only pre-dispatch guard storage failures request retry;
+// ambiguous post-dispatch outcomes retain their claim for reconciliation.
 func (h *SurveyResponseInviteHandler) maybeSendInvite(
 	ctx context.Context,
 	logger *slog.Logger,
 	surveyResponseUID, email, displayName, surveyID string,
-) {
+) (retry bool) {
 	if !h.inviteEnabled() {
-		return
+		return false
 	}
 
 	email = strings.TrimSpace(email)
 	if email == "" {
-		return
+		return h.resolveIntent(ctx, logger, surveyResponseUID)
 	}
 
 	inviteSentKey := surveyResponseLFIDInviteSentKey(surveyResponseUID)
 	if _, err := h.v1MappingsKV.Get(ctx, inviteSentKey); err == nil {
 		logger.DebugContext(ctx, "LFID invite already sent for survey response, skipping")
-		return
+		return false
 	} else if !errors.Is(err, jetstream.ErrKeyNotFound) {
 		logger.With(errKey, err).WarnContext(ctx, "failed to check LFID invite sent marker; skipping invite")
-		return
+		return true
 	}
 
 	username, err := h.userReader.UsernameByEmail(ctx, email)
 	if err == nil && username != "" {
 		logger.DebugContext(ctx, "survey response participant already has LFID, skipping invite")
-		return
+		return h.resolveIntent(ctx, logger, surveyResponseUID)
 	}
 	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
 		// Transient auth-service error: fall through and attempt the invite anyway.
@@ -89,7 +90,7 @@ func (h *SurveyResponseInviteHandler) maybeSendInvite(
 	}
 	if surveyName == "" {
 		logger.WarnContext(ctx, "could not resolve survey name; skipping invite to avoid confusing email")
-		return
+		return false
 	}
 
 	returnURL := fmt.Sprintf("%s/surveys/%s", strings.TrimRight(h.selfServeBaseURL, "/"), url.PathEscape(surveyID))
@@ -112,23 +113,47 @@ func (h *SurveyResponseInviteHandler) maybeSendInvite(
 	// Write a "pending" marker before calling SendInvite to close the duplicate-invite
 	// window: a concurrent redelivery that passes the Get check above would also see
 	// this marker and skip, preventing two goroutines from both calling SendInvite.
-	if _, err := h.v1MappingsKV.Put(ctx, inviteSentKey, []byte("pending")); err != nil {
+	claimRevision, err := h.v1MappingsKV.Create(ctx, inviteSentKey, []byte("pending"))
+	if err != nil {
 		logger.With(errKey, err).WarnContext(ctx, "failed to store pending invite marker; skipping to avoid duplicate")
-		return
+		return !errors.Is(err, jetstream.ErrKeyExists)
 	}
 
+	if proceed, retry := sourceCurrent(ctx, logger); !proceed {
+		// Retain the claim: do not risk a duplicate dispatch after an ambiguous
+		// source change or verification failure. Reconcile it manually.
+		return retry
+	}
 	result, sendErr := h.inviteSender.SendInvite(ctx, req)
 	if sendErr != nil {
 		logger.With(errKey, sendErr).WarnContext(ctx, "failed to send LFID invite for survey response; continuing")
-		return
+		return false
 	}
-	if _, err := h.v1MappingsKV.Put(ctx, inviteSentKey, []byte(result.InviteUID)); err != nil {
+	if result == nil || result.InviteUID == "" {
+		logger.WarnContext(ctx, "LFID invite result unresolved; retaining dispatch claim")
+		return false
+	}
+	if _, err := h.v1MappingsKV.Update(ctx, inviteSentKey, []byte(result.InviteUID), claimRevision); err != nil {
 		logger.With(errKey, err).WarnContext(ctx, "failed to update survey response LFID invite sent marker")
 	}
 	logger.InfoContext(ctx, "sent LFID invite for survey response",
 		"invite_uid", result.InviteUID,
 		"expires_at", result.ExpiresAt,
 	)
+	return false
+}
+
+func (h *SurveyResponseInviteHandler) resolveIntent(ctx context.Context, logger *slog.Logger, id string) bool {
+	intents, ok := h.v1MappingsKV.(domain.InvitationIntentState)
+	if !ok {
+		logger.WarnContext(ctx, "invitation intent resolution unavailable; retrying")
+		return true
+	}
+	if err := intents.ResolveInvitation(ctx, id); err != nil {
+		logger.With(errKey, err).WarnContext(ctx, "failed to resolve terminal invitation intent; retrying")
+		return true
+	}
+	return false
 }
 
 // shouldSendSurveyResponseInvite reports whether a new no-LFID survey response should trigger an invite.
