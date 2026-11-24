@@ -98,7 +98,7 @@ func BuildUpdateSurveyPayload(surveyUpdateSurveyBody string, surveyUpdateSurveyS
 	{
 		err = json.Unmarshal([]byte(surveyUpdateSurveyBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_uid\": \"qa1e8536-a985-4cf5-b981-a170927a1d11\",\n      \"committee_voting_enabled\": true,\n      \"creator_id\": \"Qui distinctio dolorum quia non quaerat nostrum.\",\n      \"email_body\": \"Veniam consequuntur sed praesentium.\",\n      \"email_body_text\": \"Similique et sapiente sunt sit.\",\n      \"email_subject\": \"Quo omnis maiores impedit.\",\n      \"survey_cutoff_date\": \"Consequatur rem et voluptatem et.\",\n      \"survey_reminder_rate_days\": 464515454408226755,\n      \"survey_send_date\": \"Sed in perspiciatis odit nesciunt.\",\n      \"survey_title\": \"Ut dicta eum ut vero animi.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_uid\": \"qa1e8536-a985-4cf5-b981-a170927a1d11\",\n      \"committee_voting_enabled\": true,\n      \"creator_id\": \"Omnis quo.\",\n      \"email_body\": \"Quo qui sint.\",\n      \"email_body_text\": \"Explicabo autem sit id modi corporis.\",\n      \"email_subject\": \"Et sed.\",\n      \"survey_cutoff_date\": \"Sapiente sunt.\",\n      \"survey_reminder_rate_days\": 5570276177094928842,\n      \"survey_send_date\": \"Aliquid similique.\",\n      \"survey_title\": \"Maiores impedit omnis veniam consequuntur sed.\"\n   }'")
 		}
 	}
 	var surveyUID string
@@ -344,7 +344,7 @@ func BuildCreateExclusionPayload(surveyCreateExclusionBody string, surveyCreateE
 	{
 		err = json.Unmarshal([]byte(surveyCreateExclusionBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_uid\": \"Tenetur omnis.\",\n      \"email\": \"Vel ipsam laborum quos provident ad.\",\n      \"global_exclusion\": \"Amet deleniti aut.\",\n      \"survey_uid\": \"Nihil eos molestiae numquam.\",\n      \"user_id\": \"Id minima id.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_uid\": \"Asperiores at dicta iusto adipisci est est.\",\n      \"email\": \"Repellendus modi illo voluptatem ab possimus.\",\n      \"global_exclusion\": \"Soluta facilis rerum exercitationem.\",\n      \"survey_uid\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"user_id\": \"Dolorem voluptatum ab accusantium magni nesciunt deleniti.\"\n   }'")
 		}
 	}
 	var token *string
@@ -373,7 +373,7 @@ func BuildDeleteExclusionPayload(surveyDeleteExclusionBody string, surveyDeleteE
 	{
 		err = json.Unmarshal([]byte(surveyDeleteExclusionBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_uid\": \"Asperiores at dicta iusto adipisci est est.\",\n      \"email\": \"Repellendus modi illo voluptatem ab possimus.\",\n      \"global_exclusion\": \"Soluta facilis rerum exercitationem.\",\n      \"survey_uid\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"user_id\": \"Dolorem voluptatum ab accusantium magni nesciunt deleniti.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"committee_uid\": \"Reprehenderit et iure architecto numquam rerum.\",\n      \"email\": \"Aut autem omnis.\",\n      \"global_exclusion\": \"Quis quis quos.\",\n      \"survey_uid\": \"Harum error quis ea quos dicta odio.\",\n      \"user_id\": \"Distinctio id nihil dolores laboriosam.\"\n   }'")
 		}
 	}
 	var token *string
@@ -526,7 +526,7 @@ func BuildValidateEmailPayload(surveyValidateEmailBody string, surveyValidateEma
 	{
 		err = json.Unmarshal([]byte(surveyValidateEmailBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"body\": \"Rerum sunt non minus.\",\n      \"subject\": \"Et sunt itaque facilis aut doloribus perspiciatis.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"body\": \"Voluptatum et qui voluptatum eveniet ipsam corrupti.\",\n      \"subject\": \"Autem eum vero id quod.\"\n   }'")
 		}
 	}
 	var token *string

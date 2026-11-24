@@ -266,16 +266,62 @@ func serveRoutingJSON(t *testing.T, h http.Handler, method, target, body string)
 // each endpoint, and a generated encoder sends one it does not declare as a generic 500,
 // so the status cannot be derived from the error type.
 func TestRequestFailureLog_MatchesWireStatus(t *testing.T) {
+	failures := []struct {
+		name string
+		err  error
+	}{
+		{"validation", domain.NewValidationError("bad input")},
+		{"not found", domain.NewNotFoundError("no such thing")},
+		{"conflict", domain.NewConflictError("already exists")},
+		{"unavailable", domain.NewUnavailableError("itx down")},
+		{"internal", domain.NewInternalError("boom")},
+		{"plain error", errors.New("itx exploded")},
+	}
+
+	for _, ep := range routedEndpoints() {
+		for _, f := range failures {
+			t.Run(ep.name+"/"+f.name, func(t *testing.T) {
+				buf := captureDefaultLogger(t)
+				c := &handlerClients{
+					survey:    &mocks.MockSurveyClient{},
+					exclusion: &mocks.MockExclusionClient{},
+					response:  &mocks.MockSurveyResponseClient{},
+				}
+				ep.wire(c, f.err)
+				h := middleware.RequestLoggerMiddleware()(newRoutingTestHandlerWith(c.survey, c.exclusion, c.response))
+
+				rec := serveRoutingJSON(t, h, ep.method, ep.path, ep.body)
+
+				require.GreaterOrEqual(t, rec.Code, 400, "expected a failure response, got %d: %s", rec.Code, rec.Body.String())
+				records := requestFailureRecords(decodeLogRecords(t, buf))
+				require.Len(t, records, 1, "the failure must be logged exactly once (response %d: %s)", rec.Code, rec.Body.String())
+				assert.Equal(t, float64(rec.Code), records[0]["status"], "logged status must equal the status sent")
+				wantLevel := "DEBUG"
+				if rec.Code >= http.StatusInternalServerError {
+					wantLevel = "ERROR"
+				}
+				assert.Equal(t, wantLevel, records[0]["level"])
+			})
+		}
+	}
+}
+
+// routedEndpoint is a survey API endpoint reachable through the generated HTTP stack: the
+// request that reaches it and a way to make the ITX client behind it return an error.
+type routedEndpoint struct {
+	name, method, path, body string
+	wire                     func(c *handlerClients, err error)
+}
+
+// routedEndpoints lists every endpoint of the survey API.
+func routedEndpoints() []routedEndpoint {
 	const (
 		surveyUID   = "b03cdbaf-53b1-4d47-bc04-dd7e459dd309"
 		responseID  = "r-1"
 		exclusionID = "e-1"
 		projectUID  = "7cad5a8d-19d0-41a4-81a6-043453daf9ee"
 	)
-	endpoints := []struct {
-		name, method, path, body string
-		wire                     func(c *handlerClients, err error)
-	}{
+	return []routedEndpoint{
 		{"ScheduleSurvey", "POST", "/surveys", `{"committee_uid":"c-1"}`, func(c *handlerClients, err error) {
 			c.survey.ScheduleSurveyFunc = func(context.Context, *itx.ScheduleSurveyRequest) (*itx.SurveyScheduleResponse, error) {
 				return nil, err
@@ -339,43 +385,43 @@ func TestRequestFailureLog_MatchesWireStatus(t *testing.T) {
 		}},
 	}
 
-	failures := []struct {
-		name string
-		err  error
-	}{
-		{"validation", domain.NewValidationError("bad input")},
-		{"not found", domain.NewNotFoundError("no such thing")},
-		{"conflict", domain.NewConflictError("already exists")},
-		{"unavailable", domain.NewUnavailableError("itx down")},
-		{"internal", domain.NewInternalError("boom")},
-		{"plain error", errors.New("itx exploded")},
+}
+
+// TestConflictWireStatus checks that a conflict from ITX reaches the client as a 409 with the
+// conflict body on every endpoint that changes state. A generated encoder sends an error its
+// endpoint does not declare in the design as a generic 500, so each of these endpoints must
+// declare Conflict.
+func TestConflictWireStatus(t *testing.T) {
+	changesState := []string{
+		"ScheduleSurvey", "UpdateSurvey", "DeleteSurvey", "BulkResendSurvey", "SendMissingRecipients",
+		"DeleteSurveyResponse", "ResendSurveyResponse", "DeleteRecipientGroup",
+		"CreateExclusion", "DeleteExclusion", "DeleteExclusionByID",
+	}
+	byName := make(map[string]routedEndpoint)
+	for _, ep := range routedEndpoints() {
+		byName[ep.name] = ep
 	}
 
-	for _, ep := range endpoints {
-		for _, f := range failures {
-			t.Run(ep.name+"/"+f.name, func(t *testing.T) {
-				buf := captureDefaultLogger(t)
-				c := &handlerClients{
-					survey:    &mocks.MockSurveyClient{},
-					exclusion: &mocks.MockExclusionClient{},
-					response:  &mocks.MockSurveyResponseClient{},
-				}
-				ep.wire(c, f.err)
-				h := middleware.RequestLoggerMiddleware()(newRoutingTestHandlerWith(c.survey, c.exclusion, c.response))
+	for _, name := range changesState {
+		ep, ok := byName[name]
+		require.True(t, ok, "no endpoint named %s in routedEndpoints", name)
+		t.Run(name, func(t *testing.T) {
+			c := &handlerClients{
+				survey:    &mocks.MockSurveyClient{},
+				exclusion: &mocks.MockExclusionClient{},
+				response:  &mocks.MockSurveyResponseClient{},
+			}
+			ep.wire(c, domain.NewConflictError("already exists"))
+			h := newRoutingTestHandlerWith(c.survey, c.exclusion, c.response)
 
-				rec := serveRoutingJSON(t, h, ep.method, ep.path, ep.body)
+			rec := serveRoutingJSON(t, h, ep.method, ep.path, ep.body)
 
-				require.GreaterOrEqual(t, rec.Code, 400, "expected a failure response, got %d: %s", rec.Code, rec.Body.String())
-				records := requestFailureRecords(decodeLogRecords(t, buf))
-				require.Len(t, records, 1, "the failure must be logged exactly once (response %d: %s)", rec.Code, rec.Body.String())
-				assert.Equal(t, float64(rec.Code), records[0]["status"], "logged status must equal the status sent")
-				wantLevel := "DEBUG"
-				if rec.Code >= http.StatusInternalServerError {
-					wantLevel = "ERROR"
-				}
-				assert.Equal(t, wantLevel, records[0]["level"])
-			})
-		}
+			require.Equal(t, http.StatusConflict, rec.Code, "response body: %s", rec.Body.String())
+			var body map[string]any
+			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &body))
+			assert.Equal(t, "409", body["code"])
+			assert.Equal(t, "already exists", body["message"])
+		})
 	}
 }
 

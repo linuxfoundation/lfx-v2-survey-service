@@ -409,7 +409,7 @@ func surveyUpdateSurveyUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey update-survey --body '{\n      \"committee_uid\": \"qa1e8536-a985-4cf5-b981-a170927a1d11\",\n      \"committee_voting_enabled\": true,\n      \"creator_id\": \"Qui distinctio dolorum quia non quaerat nostrum.\",\n      \"email_body\": \"Veniam consequuntur sed praesentium.\",\n      \"email_body_text\": \"Similique et sapiente sunt sit.\",\n      \"email_subject\": \"Quo omnis maiores impedit.\",\n      \"survey_cutoff_date\": \"Consequatur rem et voluptatem et.\",\n      \"survey_reminder_rate_days\": 464515454408226755,\n      \"survey_send_date\": \"Sed in perspiciatis odit nesciunt.\",\n      \"survey_title\": \"Ut dicta eum ut vero animi.\"\n   }' --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey update-survey --body '{\n      \"committee_uid\": \"qa1e8536-a985-4cf5-b981-a170927a1d11\",\n      \"committee_voting_enabled\": true,\n      \"creator_id\": \"Omnis quo.\",\n      \"email_body\": \"Quo qui sint.\",\n      \"email_body_text\": \"Explicabo autem sit id modi corporis.\",\n      \"email_subject\": \"Et sed.\",\n      \"survey_cutoff_date\": \"Sapiente sunt.\",\n      \"survey_reminder_rate_days\": 5570276177094928842,\n      \"survey_send_date\": \"Aliquid similique.\",\n      \"survey_title\": \"Maiores impedit omnis veniam consequuntur sed.\"\n   }' --survey-uid \"b03cdbaf-53b1-4d47-bc04-dd7e459dd309\" --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyDeleteSurveyUsage() {
@@ -585,7 +585,7 @@ func surveyCreateExclusionUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey create-exclusion --body '{\n      \"committee_uid\": \"Tenetur omnis.\",\n      \"email\": \"Vel ipsam laborum quos provident ad.\",\n      \"global_exclusion\": \"Amet deleniti aut.\",\n      \"survey_uid\": \"Nihil eos molestiae numquam.\",\n      \"user_id\": \"Id minima id.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey create-exclusion --body '{\n      \"committee_uid\": \"Asperiores at dicta iusto adipisci est est.\",\n      \"email\": \"Repellendus modi illo voluptatem ab possimus.\",\n      \"global_exclusion\": \"Soluta facilis rerum exercitationem.\",\n      \"survey_uid\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"user_id\": \"Dolorem voluptatum ab accusantium magni nesciunt deleniti.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyDeleteExclusionUsage() {
@@ -605,7 +605,7 @@ func surveyDeleteExclusionUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-exclusion --body '{\n      \"committee_uid\": \"Asperiores at dicta iusto adipisci est est.\",\n      \"email\": \"Repellendus modi illo voluptatem ab possimus.\",\n      \"global_exclusion\": \"Soluta facilis rerum exercitationem.\",\n      \"survey_uid\": \"Incidunt libero quo voluptates accusamus omnis saepe.\",\n      \"user_id\": \"Dolorem voluptatum ab accusantium magni nesciunt deleniti.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey delete-exclusion --body '{\n      \"committee_uid\": \"Reprehenderit et iure architecto numquam rerum.\",\n      \"email\": \"Aut autem omnis.\",\n      \"global_exclusion\": \"Quis quis quos.\",\n      \"survey_uid\": \"Harum error quis ea quos dicta odio.\",\n      \"user_id\": \"Distinctio id nihil dolores laboriosam.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }
 
 func surveyGetExclusionUsage() {
@@ -715,5 +715,5 @@ func surveyValidateEmailUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey validate-email --body '{\n      \"body\": \"Rerum sunt non minus.\",\n      \"subject\": \"Et sunt itaque facilis aut doloribus perspiciatis.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "survey validate-email --body '{\n      \"body\": \"Voluptatum et qui voluptatum eveniet ipsam corrupti.\",\n      \"subject\": \"Autem eum vero id quod.\"\n   }' --token \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"")
 }

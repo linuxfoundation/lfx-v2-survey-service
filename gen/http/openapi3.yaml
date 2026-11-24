@@ -131,6 +131,15 @@ paths:
                             example:
                                 code: Blanditiis sed unde incidunt.
                                 message: Aliquam et odit voluptas culpa aliquam voluptatem.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Nostrum et.
+                                message: Mollitia corporis ea qui ea.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -138,8 +147,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Nostrum et.
-                                message: Mollitia corporis ea qui ea.
+                                code: Eum explicabo error.
+                                message: Perspiciatis iste aut sit fugit.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -147,8 +156,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Eum explicabo error.
-                                message: Perspiciatis iste aut sit fugit.
+                                code: Officiis ipsum maxime laborum fuga.
+                                message: Inventore sit.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -180,8 +189,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Sed laborum similique.
-                                message: Sunt voluptatem deserunt fugiat dicta.
+                                code: Id assumenda aliquid tenetur iste maxime.
+                                message: Ut nisi cupiditate quam.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -189,8 +198,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Et laudantium.
-                                message: Facilis impedit ea placeat maxime.
+                                code: Similique quibusdam voluptates quis.
+                                message: Consequuntur eum.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -198,8 +207,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Fuga corrupti nesciunt.
-                                message: Id assumenda aliquid tenetur iste maxime.
+                                code: Rerum voluptatem.
+                                message: Consectetur at est nemo.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -207,8 +216,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Ut nisi cupiditate quam.
-                                message: Similique quibusdam voluptates quis.
+                                code: Excepturi enim molestias reiciendis ut.
+                                message: Quo porro et quam molestias excepturi.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Fuga voluptatem aperiam ut delectus veritatis.
+                                message: Quasi molestias fugiat laudantium.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -216,8 +234,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Consequuntur eum.
-                                message: Rerum voluptatem.
+                                code: Et voluptatem est.
+                                message: Quia necessitatibus maxime aperiam voluptatum et.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -225,8 +243,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Consectetur at est nemo.
-                                message: Excepturi enim molestias reiciendis ut.
+                                code: Delectus totam et quaerat.
+                                message: Laudantium rerum inventore sed quis.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -273,7 +291,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/SurveyScheduleResult'
                             example:
-                                committee_category: Sed ut.
+                                committee_category: Dolorem officiis doloribus ea at aperiam illo.
                                 committee_voting_enabled: false
                                 committees:
                                     - committee_name: Technical Steering Committee
@@ -292,38 +310,38 @@ paths:
                                       survey_url: https://surveymonkey.com/r/abc123
                                       total_recipients: 4380493782318789385
                                       total_responses: 6703144626018872213
-                                created_at: "1998-09-29T12:13:15Z"
-                                creator_id: Est sed praesentium.
-                                creator_name: Maxime laborum fuga dolores inventore.
-                                creator_username: Autem provident blanditiis ab officiis.
-                                email_body: Quis mollitia ut minus.
-                                email_body_text: Sed ipsum nobis in aut similique.
-                                email_subject: Vitae unde.
-                                is_nps_survey: false
-                                is_project_survey: true
-                                last_modified_at: "2013-04-21T05:23:23Z"
-                                last_modified_by: Architecto sunt culpa.
-                                latest_automated_reminder_sent_at: "1979-03-13T23:58:59Z"
-                                next_automated_reminder_at: "1983-11-22T04:37:25Z"
-                                nps_value: 0.6379567056920531
-                                num_automated_reminders_sent: 5955312177100105707
-                                num_automated_reminders_to_send: 1501073311041553136
-                                num_detractors: 2100042836277055694
-                                num_passives: 4696138859968207767
-                                num_promoters: 8946836443250022414
+                                created_at: "1984-02-26T09:00:58Z"
+                                creator_id: Rerum quos.
+                                creator_name: Eos ad debitis.
+                                creator_username: Iure doloremque.
+                                email_body: Aut laborum.
+                                email_body_text: Esse qui quibusdam quis nihil vel.
+                                email_subject: Blanditiis aliquam.
+                                is_nps_survey: true
+                                is_project_survey: false
+                                last_modified_at: "2013-06-01T04:11:46Z"
+                                last_modified_by: Et sint beatae rerum eos sed.
+                                latest_automated_reminder_sent_at: "1976-06-24T16:50:46Z"
+                                next_automated_reminder_at: "2008-03-29T14:35:13Z"
+                                nps_value: 0.19048969737672106
+                                num_automated_reminders_sent: 2459154100409534659
+                                num_automated_reminders_to_send: 8754768500613715815
+                                num_detractors: 7486576485811695406
+                                num_passives: 1893820723293979608
+                                num_promoters: 3914002601540617440
                                 response_status: scheduled
                                 send_immediately: false
-                                stage_filter: Omnis ut.
-                                survey_cutoff_date: "1991-03-10T03:13:24Z"
-                                survey_monkey_id: Magni ab mollitia possimus et.
-                                survey_reminder_rate_days: 8773992317131132630
-                                survey_send_date: "2015-06-02T22:52:33Z"
+                                stage_filter: Impedit tempore alias reiciendis aspernatur.
+                                survey_cutoff_date: "2007-02-28T13:31:57Z"
+                                survey_monkey_id: Sed praesentium.
+                                survey_reminder_rate_days: 2299767256759712550
+                                survey_send_date: "1971-11-01T01:34:52Z"
                                 survey_status: scheduled
-                                survey_title: Aut doloremque quis distinctio quae recusandae.
-                                survey_url: Aliquam in aut laborum quod esse qui.
-                                total_bounced_emails: 7455921900934456301
-                                total_recipients: 5590032177824588820
-                                total_responses: 2896297817607758689
+                                survey_title: Ea eos ut praesentium est.
+                                survey_url: Atque tempore sint.
+                                total_bounced_emails: 2479933054842367174
+                                total_recipients: 2142328164292227416
+                                total_responses: 35129443957405016
                                 uid: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
                 "400":
                     description: 'BadRequest: Bad request'
@@ -332,8 +350,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Consequuntur inventore vel vel.
-                                message: Inventore quis voluptas dolore qui.
+                                code: Dolorem aut odit dolorem repudiandae est ut.
+                                message: Dolorem atque alias possimus eum qui et.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -341,8 +359,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Saepe sed temporibus et est.
-                                message: Maiores dolorem aut odit dolorem repudiandae est.
+                                code: Quaerat voluptas iure nemo.
+                                message: Dolor voluptatem.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -350,8 +368,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Hic dolorem atque alias possimus eum qui.
-                                message: Molestiae quaerat voluptas.
+                                code: Commodi quaerat doloribus dolor et vel et.
+                                message: Reprehenderit rerum ut suscipit assumenda neque inventore.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -359,8 +377,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Et dolorem reprehenderit.
-                                message: Ut suscipit assumenda.
+                                code: Laboriosam minus deserunt voluptatem nihil.
+                                message: Quisquam quas veniam sequi ea quia.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -368,8 +386,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Inventore a fuga ut aut nostrum.
-                                message: Cumque architecto laboriosam minus.
+                                code: Qui distinctio dolorum quia non quaerat nostrum.
+                                message: Ut dicta eum ut vero animi.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -377,8 +395,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Voluptatem nihil.
-                                message: Quisquam quas veniam sequi ea quia.
+                                code: Sed in perspiciatis odit nesciunt.
+                                message: Consequatur rem et voluptatem et.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -408,14 +426,14 @@ paths:
                         example:
                             committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                             committee_voting_enabled: true
-                            creator_id: Qui distinctio dolorum quia non quaerat nostrum.
-                            email_body: Veniam consequuntur sed praesentium.
-                            email_body_text: Similique et sapiente sunt sit.
-                            email_subject: Quo omnis maiores impedit.
-                            survey_cutoff_date: Consequatur rem et voluptatem et.
-                            survey_reminder_rate_days: 464515454408226755
-                            survey_send_date: Sed in perspiciatis odit nesciunt.
-                            survey_title: Ut dicta eum ut vero animi.
+                            creator_id: Omnis quo.
+                            email_body: Quo qui sint.
+                            email_body_text: Explicabo autem sit id modi corporis.
+                            email_subject: Et sed.
+                            survey_cutoff_date: Sapiente sunt.
+                            survey_reminder_rate_days: 5570276177094928842
+                            survey_send_date: Aliquid similique.
+                            survey_title: Maiores impedit omnis veniam consequuntur sed.
             responses:
                 "200":
                     description: OK response.
@@ -424,8 +442,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/SurveyScheduleResult'
                             example:
-                                committee_category: Veritatis nisi quasi totam nostrum.
-                                committee_voting_enabled: true
+                                committee_category: Repudiandae architecto reprehenderit.
+                                committee_voting_enabled: false
                                 committees:
                                     - committee_name: Technical Steering Committee
                                       committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
@@ -443,38 +461,38 @@ paths:
                                       survey_url: https://surveymonkey.com/r/abc123
                                       total_recipients: 4380493782318789385
                                       total_responses: 6703144626018872213
-                                created_at: "2012-11-29T16:25:11Z"
-                                creator_id: Eos autem aut cum nesciunt.
-                                creator_name: Dolores corporis debitis harum earum autem et.
-                                creator_username: Modi excepturi et quas.
-                                email_body: Vero impedit doloribus saepe.
-                                email_body_text: Perspiciatis saepe culpa in dolores quam.
-                                email_subject: Error quisquam qui veritatis temporibus sit illum.
-                                is_nps_survey: false
+                                created_at: "1993-12-25T23:00:09Z"
+                                creator_id: Animi qui.
+                                creator_name: Voluptatem voluptatum illo rerum maiores quibusdam.
+                                creator_username: Cum nesciunt reprehenderit amet atque ab eum.
+                                email_body: Saepe culpa in dolores quam.
+                                email_body_text: Veritatis nisi quasi totam nostrum.
+                                email_subject: Saepe ea.
+                                is_nps_survey: true
                                 is_project_survey: true
-                                last_modified_at: "2000-06-29T14:09:13Z"
-                                last_modified_by: Possimus iure sint et sunt amet aut.
-                                latest_automated_reminder_sent_at: "1999-02-24T22:35:21Z"
-                                next_automated_reminder_at: "2007-11-22T23:43:56Z"
-                                nps_value: 0.23141298976984814
-                                num_automated_reminders_sent: 8337289837672265763
-                                num_automated_reminders_to_send: 8107375938073788662
-                                num_detractors: 8419714383430859074
-                                num_passives: 3773156406319571058
-                                num_promoters: 7275587620146515160
+                                last_modified_at: "2008-07-18T01:38:08Z"
+                                last_modified_by: Cum ea eius illo.
+                                latest_automated_reminder_sent_at: "1989-12-25T03:32:00Z"
+                                next_automated_reminder_at: "1981-02-10T07:06:15Z"
+                                nps_value: 0.09975922125423879
+                                num_automated_reminders_sent: 6943555353515688972
+                                num_automated_reminders_to_send: 6364581784360344319
+                                num_detractors: 4722579926130280982
+                                num_passives: 8337289837672265763
+                                num_promoters: 8107375938073788662
                                 response_status: scheduled
                                 send_immediately: false
-                                stage_filter: Sit id modi corporis.
-                                survey_cutoff_date: "1981-11-20T11:20:01Z"
-                                survey_monkey_id: Sed eligendi quo qui sint doloremque.
-                                survey_reminder_rate_days: 3045289415844103173
-                                survey_send_date: "1976-11-13T06:51:25Z"
+                                stage_filter: Earum autem et dolores eos autem.
+                                survey_cutoff_date: "2001-12-06T01:05:21Z"
+                                survey_monkey_id: Excepturi et quas autem dolores corporis.
+                                survey_reminder_rate_days: 1662089076712299150
+                                survey_send_date: "1996-11-20T06:00:47Z"
                                 survey_status: scheduled
-                                survey_title: Quo tempore porro.
-                                survey_url: Reprehenderit qui.
-                                total_bounced_emails: 920116411734754744
-                                total_recipients: 7053772202910532748
-                                total_responses: 3641612096555752497
+                                survey_title: Aspernatur earum libero.
+                                survey_url: Aspernatur odit.
+                                total_bounced_emails: 8967912608538120821
+                                total_recipients: 7275587620146515160
+                                total_responses: 3773156406319571058
                                 uid: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
                 "400":
                     description: 'BadRequest: Bad request'
@@ -483,8 +501,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Voluptas sit ea.
-                                message: Est earum voluptatem eos corporis.
+                                code: Eos corporis sit sit veniam quia.
+                                message: Perferendis eos et eveniet reprehenderit atque.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -492,8 +510,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Sit veniam.
-                                message: Facere perferendis.
+                                code: Rerum quisquam in dolorem quidem repudiandae distinctio.
+                                message: Nam maiores omnis.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -501,8 +519,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Et eveniet reprehenderit.
-                                message: Inventore rerum quisquam in dolorem.
+                                code: Suscipit et et illum et.
+                                message: Laboriosam excepturi perferendis maiores ullam est.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -510,8 +528,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Repudiandae distinctio consequuntur nam maiores omnis perspiciatis.
-                                message: Et et illum et.
+                                code: Qui alias beatae libero totam.
+                                message: Est aut.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Placeat error dolore molestiae.
+                                message: Sed laborum similique.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -519,8 +546,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Laboriosam excepturi perferendis maiores ullam est.
-                                message: Qui alias beatae libero totam.
+                                code: Sunt voluptatem deserunt fugiat dicta.
+                                message: Et laudantium.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -528,8 +555,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Est aut.
-                                message: Placeat error dolore molestiae.
+                                code: Facilis impedit ea placeat maxime.
+                                message: Fuga corrupti nesciunt.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -571,8 +598,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Quo porro et quam molestias excepturi.
-                                message: Fuga voluptatem aperiam ut delectus veritatis.
+                                code: Mollitia explicabo inventore est dolorum omnis et.
+                                message: Velit velit a officiis voluptas porro.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -580,8 +607,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Quasi molestias fugiat laudantium.
-                                message: Et voluptatem est.
+                                code: Quas in illum qui at hic necessitatibus.
+                                message: Non ut.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -589,8 +616,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Quia necessitatibus maxime aperiam voluptatum et.
-                                message: Delectus totam et quaerat.
+                                code: Aut delectus.
+                                message: Eveniet earum nesciunt dicta quidem voluptatem aut.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -598,8 +625,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Laudantium rerum inventore sed quis.
-                                message: Mollitia explicabo inventore est dolorum omnis et.
+                                code: Sit sit voluptas quod illum.
+                                message: Aliquam harum.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Dolores maxime accusantium perferendis itaque omnis provident.
+                                message: Officiis hic quis.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -607,8 +643,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Velit velit a officiis voluptas porro.
-                                message: Quas in illum qui at hic necessitatibus.
+                                code: Enim omnis ad.
+                                message: Voluptas repellat hic atque aut.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -616,8 +652,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Non ut.
-                                message: Aut delectus.
+                                code: Beatae omnis explicabo sunt qui dolores laborum.
+                                message: Vero quia corporis ut.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -667,38 +703,25 @@ paths:
                                       committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                                       project_name: Kubernetes
                                       project_uid: 003170000123XHTAA2
-                                    - committee_category: Technical Steering Committee
-                                      committee_name: Technical Steering Committee
-                                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                                      project_name: Kubernetes
-                                      project_uid: 003170000123XHTAA2
-                                    - committee_category: Technical Steering Committee
-                                      committee_name: Technical Steering Committee
-                                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                                      project_name: Kubernetes
-                                      project_uid: 003170000123XHTAA2
                                 affected_projects:
                                     - id: 003170000123XHTAA2
-                                      logo_url: Eveniet earum nesciunt dicta quidem voluptatem aut.
+                                      logo_url: Aut id mollitia voluptas aut maiores.
                                       name: Express JS
                                       slug: express-gateway
                                       status: Active
                                     - id: 003170000123XHTAA2
-                                      logo_url: Eveniet earum nesciunt dicta quidem voluptatem aut.
-                                      name: Express JS
-                                      slug: express-gateway
-                                      status: Active
-                                    - id: 003170000123XHTAA2
-                                      logo_url: Eveniet earum nesciunt dicta quidem voluptatem aut.
-                                      name: Express JS
-                                      slug: express-gateway
-                                      status: Active
-                                    - id: 003170000123XHTAA2
-                                      logo_url: Eveniet earum nesciunt dicta quidem voluptatem aut.
+                                      logo_url: Aut id mollitia voluptas aut maiores.
                                       name: Express JS
                                       slug: express-gateway
                                       status: Active
                                 affected_recipients:
+                                    - email: john.doe@example.com
+                                      first_name: John
+                                      last_name: Doe
+                                      name: John Doe
+                                      role: Voting Rep
+                                      user_id: 005f1000009RbC4AAK
+                                      username: jdoe
                                     - email: john.doe@example.com
                                       first_name: John
                                       last_name: Doe
@@ -727,8 +750,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Quod illum.
-                                message: Aliquam harum.
+                                code: Quos est autem ut explicabo eius voluptates.
+                                message: Asperiores ducimus aut inventore.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -736,8 +759,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Dolores maxime accusantium perferendis itaque omnis provident.
-                                message: Officiis hic quis.
+                                code: Consequatur sapiente at sed accusamus.
+                                message: Nemo nulla ullam et quasi nam eveniet.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -745,8 +768,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Enim omnis ad.
-                                message: Voluptas repellat hic atque aut.
+                                code: Aspernatur doloremque odit suscipit.
+                                message: Perferendis nostrum.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -754,8 +777,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Beatae omnis explicabo sunt qui dolores laborum.
-                                message: Vero quia corporis ut.
+                                code: Quam repellendus.
+                                message: Temporibus nostrum qui labore.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -763,8 +786,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Aut id mollitia voluptas aut maiores.
-                                message: Libero dolore non quos est autem.
+                                code: Necessitatibus facere enim natus.
+                                message: Laborum doloribus maxime ullam voluptatum pariatur iure.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -772,8 +795,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Explicabo eius voluptates in asperiores ducimus aut.
-                                message: Adipisci consequatur sapiente at.
+                                code: Expedita ut.
+                                message: Nesciunt vel voluptatem cupiditate consectetur.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -832,8 +855,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Iusto voluptates est recusandae.
-                                message: Corrupti eos repudiandae.
+                                code: Tenetur omnis.
+                                message: Amet deleniti aut.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -841,8 +864,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Deserunt ex et esse aut quo corporis.
-                                message: Animi laboriosam.
+                                code: Blanditiis harum quis debitis voluptatem laborum.
+                                message: Laudantium aut consectetur pariatur omnis.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -850,8 +873,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Illum aspernatur animi maxime est et.
-                                message: Eius ratione nisi facere.
+                                code: Rerum natus placeat explicabo ut.
+                                message: Non eveniet esse consequatur omnis.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -859,8 +882,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Enim placeat harum voluptatem.
-                                message: Sed voluptatibus doloribus optio in sit reprehenderit.
+                                code: Distinctio impedit cumque.
+                                message: Sit numquam et reprehenderit blanditiis animi aut.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Quos consequatur voluptatum eius.
+                                message: Voluptatem ipsa quisquam vel velit.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -868,8 +900,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Iusto autem.
-                                message: Qui sequi repudiandae est alias nisi doloremque.
+                                code: Unde dolor veniam ut laborum quo eos.
+                                message: Magni optio.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -877,8 +909,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: In cum ipsa aliquam.
-                                message: Nisi qui repudiandae omnis molestiae assumenda.
+                                code: Dolorum excepturi.
+                                message: Dolores temporibus odio cupiditate quam.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -957,8 +989,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Mollitia vel maiores ut quis.
-                                message: Voluptatem voluptatem laboriosam illo provident illum deleniti.
+                                code: Sunt itaque.
+                                message: Aut doloribus perspiciatis.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -966,8 +998,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Repellendus eum non ut a qui maiores.
-                                message: Ratione natus facilis nostrum.
+                                code: Ipsam aut voluptatum ipsam et nulla.
+                                message: Voluptate eius nihil ut ut quos.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -975,8 +1007,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Neque eum natus similique sit impedit perspiciatis.
-                                message: Rem ut.
+                                code: Rerum nostrum provident nihil quam quaerat.
+                                message: Magni est dolor saepe voluptatem et eius.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -984,8 +1016,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Sit corporis facilis.
-                                message: In veniam nihil asperiores laboriosam modi est.
+                                code: Architecto autem corporis sit.
+                                message: Voluptas ut aut aut ducimus.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -993,8 +1025,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Consequatur suscipit sint fugiat.
-                                message: Est consequatur minima.
+                                code: Modi accusantium ad repellendus in quis saepe.
+                                message: Nulla veritatis ut harum possimus totam temporibus.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -1002,8 +1034,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Excepturi distinctio adipisci debitis.
-                                message: Ea qui occaecati.
+                                code: Ab consequatur voluptas quae fuga velit possimus.
+                                message: Aut dolores itaque explicabo.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -1044,8 +1076,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Consectetur modi quisquam non a omnis.
-                                message: Incidunt veritatis molestiae molestiae temporibus rerum.
+                                code: Est ducimus ut omnis et.
+                                message: Aliquam nobis.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -1053,8 +1085,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Laborum impedit sed minima molestiae.
-                                message: Non quisquam ea earum.
+                                code: Maiores id.
+                                message: Qui fugit laboriosam.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -1062,8 +1094,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Non ea necessitatibus ut.
-                                message: Possimus et aut repudiandae beatae autem repellendus.
+                                code: Error qui maiores.
+                                message: Officiis cum voluptatem error eum.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -1071,8 +1103,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Rerum dolores enim distinctio rerum eius earum.
-                                message: Assumenda enim culpa.
+                                code: Error provident quo hic asperiores sint.
+                                message: Aut eveniet harum quo aut.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Ut maiores.
+                                message: Id vel incidunt architecto inventore.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -1080,8 +1121,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Reiciendis facilis sunt.
-                                message: Eum possimus laudantium aut pariatur qui provident.
+                                code: At reiciendis non consequuntur.
+                                message: Vel quia quisquam inventore sit.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -1089,8 +1130,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Eligendi quasi doloremque quidem.
-                                message: Est ducimus ut omnis et.
+                                code: Est ad doloribus omnis sit.
+                                message: Iusto voluptates est recusandae.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -1131,8 +1172,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Aliquam nobis.
-                                message: Maiores id.
+                                code: Corrupti eos repudiandae.
+                                message: Deserunt ex et esse aut quo corporis.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -1140,8 +1181,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Qui fugit laboriosam.
-                                message: Error qui maiores.
+                                code: Animi laboriosam.
+                                message: Illum aspernatur animi maxime est et.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -1149,8 +1190,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Officiis cum voluptatem error eum.
-                                message: Error provident quo hic asperiores sint.
+                                code: Eius ratione nisi facere.
+                                message: Enim placeat harum voluptatem.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -1158,8 +1199,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Aut eveniet harum quo aut.
-                                message: Ut maiores.
+                                code: Sed voluptatibus doloribus optio in sit reprehenderit.
+                                message: Iusto autem.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Qui sequi repudiandae est alias nisi doloremque.
+                                message: In cum ipsa aliquam.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -1167,8 +1217,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Id vel incidunt architecto inventore.
-                                message: At reiciendis non consequuntur.
+                                code: Nisi qui repudiandae omnis molestiae assumenda.
+                                message: Vel ipsam laborum quos provident ad.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -1176,8 +1226,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Vel quia quisquam inventore sit.
-                                message: Est ad doloribus omnis sit.
+                                code: Id minima id.
+                                message: Nihil eos molestiae numquam.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -1218,8 +1268,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Accusamus tempore nemo nulla.
-                                message: Et quasi nam eveniet omnis aspernatur doloremque.
+                                code: Ut provident sed in qui.
+                                message: Nostrum voluptatem.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -1227,8 +1277,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Suscipit occaecati perferendis nostrum.
-                                message: Quam repellendus.
+                                code: At omnis.
+                                message: Consectetur modi quisquam non a omnis.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -1236,8 +1286,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Temporibus nostrum qui labore.
-                                message: Necessitatibus facere enim natus.
+                                code: Incidunt veritatis molestiae molestiae temporibus rerum.
+                                message: Laborum impedit sed minima molestiae.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -1245,8 +1295,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Laborum doloribus maxime ullam voluptatum pariatur iure.
-                                message: Expedita ut.
+                                code: Non quisquam ea earum.
+                                message: Non ea necessitatibus ut.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Possimus et aut repudiandae beatae autem repellendus.
+                                message: Rerum dolores enim distinctio rerum eius earum.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -1254,8 +1313,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Nesciunt vel voluptatem cupiditate consectetur.
-                                message: Ut provident sed in qui.
+                                code: Assumenda enim culpa.
+                                message: Reiciendis facilis sunt.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -1263,8 +1322,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Nostrum voluptatem.
-                                message: At omnis.
+                                code: Eum possimus laudantium aut pariatur qui provident.
+                                message: Eligendi quasi doloremque quidem.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -1283,11 +1342,11 @@ paths:
                         schema:
                             $ref: '#/components/schemas/CreateExclusionRequestBody'
                         example:
-                            committee_uid: Asperiores at dicta iusto adipisci est est.
-                            email: Repellendus modi illo voluptatem ab possimus.
-                            global_exclusion: Soluta facilis rerum exercitationem.
-                            survey_uid: Incidunt libero quo voluptates accusamus omnis saepe.
-                            user_id: Dolorem voluptatum ab accusantium magni nesciunt deleniti.
+                            committee_uid: Reprehenderit et iure architecto numquam rerum.
+                            email: Aut autem omnis.
+                            global_exclusion: Quis quis quos.
+                            survey_uid: Harum error quis ea quos dicta odio.
+                            user_id: Distinctio id nihil dolores laboriosam.
             responses:
                 "204":
                     description: No Content response.
@@ -1298,8 +1357,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Ut iusto eius qui.
-                                message: Recusandae itaque consequatur.
+                                code: Commodi soluta tempora molestiae error.
+                                message: Veniam assumenda et odit veritatis.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -1307,8 +1366,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Et mollitia aut provident sint voluptas.
-                                message: Sed similique blanditiis.
+                                code: Quis enim.
+                                message: Molestiae dolores laboriosam enim.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -1316,8 +1375,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Tenetur sit facere ab.
-                                message: Veniam maiores distinctio temporibus facilis.
+                                code: Dolores debitis expedita quam.
+                                message: Veniam aut molestiae.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Enim ducimus corrupti.
+                                message: Ut at ex quo.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -1325,8 +1393,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Velit quae dolor dolorem.
-                                message: Quo et eveniet repudiandae.
+                                code: Et aliquid et id perspiciatis.
+                                message: Excepturi tempore unde porro cum ipsum.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -1344,11 +1412,11 @@ paths:
                         schema:
                             $ref: '#/components/schemas/CreateExclusionRequestBody'
                         example:
-                            committee_uid: Tenetur omnis.
-                            email: Vel ipsam laborum quos provident ad.
-                            global_exclusion: Amet deleniti aut.
-                            survey_uid: Nihil eos molestiae numquam.
-                            user_id: Id minima id.
+                            committee_uid: Asperiores at dicta iusto adipisci est est.
+                            email: Repellendus modi illo voluptatem ab possimus.
+                            global_exclusion: Soluta facilis rerum exercitationem.
+                            survey_uid: Incidunt libero quo voluptates accusamus omnis saepe.
+                            user_id: Dolorem voluptatum ab accusantium magni nesciunt deleniti.
             responses:
                 "201":
                     description: Created response.
@@ -1357,12 +1425,12 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ExclusionResult'
                             example:
-                                committee_uid: Laudantium aut consectetur pariatur omnis.
+                                committee_uid: Recusandae itaque consequatur.
                                 email: test@email.com
-                                global_exclusion: Rerum natus placeat explicabo ut.
-                                survey_uid: Blanditiis harum quis debitis voluptatem laborum.
+                                global_exclusion: Et mollitia aut provident sint voluptas.
+                                survey_uid: Ut iusto eius qui.
                                 uid: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
-                                user_id: Non eveniet esse consequatur omnis.
+                                user_id: Sed similique blanditiis.
                 "400":
                     description: 'BadRequest: Bad request'
                     content:
@@ -1370,8 +1438,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Distinctio impedit cumque.
-                                message: Sit numquam et reprehenderit blanditiis animi aut.
+                                code: Tenetur sit facere ab.
+                                message: Veniam maiores distinctio temporibus facilis.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -1379,8 +1447,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Quos consequatur voluptatum eius.
-                                message: Voluptatem ipsa quisquam vel velit.
+                                code: Velit quae dolor dolorem.
+                                message: Quo et eveniet repudiandae.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -1388,8 +1456,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Unde dolor veniam ut laborum quo eos.
-                                message: Magni optio.
+                                code: Rerum autem molestias necessitatibus dolores fuga.
+                                message: Ab vitae qui ad tenetur vitae.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Sed officiis officiis quasi.
+                                message: Aut eum eum sint excepturi totam et.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -1397,8 +1474,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Dolorum excepturi.
-                                message: Dolores temporibus odio cupiditate quam.
+                                code: Vel alias natus doloremque quia occaecati sunt.
+                                message: Quis non quod pariatur.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -1430,8 +1507,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Ut at ex quo.
-                                message: Et aliquid et id perspiciatis.
+                                code: Saepe voluptatum omnis.
+                                message: Dolor nesciunt autem optio officia voluptate.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -1439,8 +1516,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Excepturi tempore unde porro cum ipsum.
-                                message: Est saepe numquam eum laudantium doloremque eum.
+                                code: Iste pariatur reprehenderit voluptatem.
+                                message: Harum eius consequatur sint.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -1448,8 +1525,17 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Id earum quod eum delectus autem et.
-                                message: Ad aut odio vero et.
+                                code: Voluptatibus natus qui.
+                                message: Cum dolore aut.
+                "409":
+                    description: 'Conflict: Conflict'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ConflictError'
+                            example:
+                                code: Earum praesentium nulla voluptates.
+                                message: Molestiae officia amet consequatur est cupiditate.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -1457,8 +1543,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Et aut et eum iste veritatis.
-                                message: Quisquam ipsam.
+                                code: Culpa minus consequuntur vitae.
+                                message: Et in possimus nihil et aut explicabo.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -1487,25 +1573,25 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ExtendedExclusionResult'
                             example:
-                                committee_uid: Quod pariatur.
+                                committee_uid: Ratione ut consequatur ullam.
                                 email: test@email.com
-                                global_exclusion: Aut autem omnis.
-                                survey_uid: Doloremque quia occaecati sunt hic quis.
+                                global_exclusion: Voluptatem maiores sunt quaerat praesentium reprehenderit eos.
+                                survey_uid: Vero in.
                                 uid: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
                                 user:
                                     emails:
-                                        - email_address: Excepturi totam et qui vel.
-                                          id: Officiis officiis quasi possimus aut eum eum.
-                                          is_primary: false
-                                        - email_address: Excepturi totam et qui vel.
-                                          id: Officiis officiis quasi possimus aut eum eum.
-                                          is_primary: false
-                                        - email_address: Excepturi totam et qui vel.
-                                          id: Officiis officiis quasi possimus aut eum eum.
-                                          is_primary: false
-                                    id: Rerum autem molestias necessitatibus dolores fuga.
-                                    username: Ab vitae qui ad tenetur vitae.
-                                user_id: Distinctio id nihil dolores laboriosam.
+                                        - email_address: Eum iste veritatis repellendus quisquam.
+                                          id: Aut odio vero et esse et aut.
+                                          is_primary: true
+                                        - email_address: Eum iste veritatis repellendus quisquam.
+                                          id: Aut odio vero et esse et aut.
+                                          is_primary: true
+                                        - email_address: Eum iste veritatis repellendus quisquam.
+                                          id: Aut odio vero et esse et aut.
+                                          is_primary: true
+                                    id: Est saepe numquam eum laudantium doloremque eum.
+                                    username: Id earum quod eum delectus autem et.
+                                user_id: Consequuntur veniam.
                 "400":
                     description: 'BadRequest: Bad request'
                     content:
@@ -1513,8 +1599,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Harum error quis ea quos dicta odio.
-                                message: Reprehenderit et iure architecto numquam rerum.
+                                code: Quos minima odio.
+                                message: Necessitatibus molestias aperiam ea illum delectus optio.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -1522,8 +1608,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Quis quis quos.
-                                message: Commodi soluta tempora molestiae error.
+                                code: Quod porro dignissimos qui sint quod.
+                                message: Sed in omnis ipsa fugit iusto.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -1531,8 +1617,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Veniam assumenda et odit veritatis.
-                                message: Quis enim.
+                                code: Facilis sint.
+                                message: Quo qui est maxime ut itaque.
                 "404":
                     description: 'NotFound: Not found'
                     content:
@@ -1540,8 +1626,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/NotFoundError'
                             example:
-                                code: Molestiae dolores laboriosam enim.
-                                message: Dolores debitis expedita quam.
+                                code: In porro aspernatur.
+                                message: Eius esse.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -1549,8 +1635,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Veniam aut molestiae.
-                                message: Enim ducimus corrupti.
+                                code: Et quisquam et qui consectetur.
+                                message: Reiciendis et quos.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -1602,6 +1688,10 @@ paths:
                                       id: "412349483"
                                       nickname: Board NPS
                                       title: Board Member NPS
+                                    - href: https://api.surveymonkey.com/v3/surveys/412349483
+                                      id: "412349483"
+                                      nickname: Board NPS
+                                      title: Board Member NPS
                             example:
                                 - href: https://api.surveymonkey.com/v3/surveys/412349483
                                   id: "412349483"
@@ -1618,8 +1708,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Adipisci quia nisi.
-                                message: Est sint occaecati voluptates esse consequatur.
+                                code: Ad explicabo.
+                                message: Et distinctio optio blanditiis id neque hic.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -1627,8 +1717,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Minus eveniet ratione.
-                                message: Aliquam consequatur iure sed veniam.
+                                code: Nihil numquam iure ut impedit fugiat.
+                                message: Maxime rerum a exercitationem molestias aliquam maiores.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -1636,8 +1726,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Omnis dolor quidem quam.
-                                message: Dolores in magnam incidunt.
+                                code: Possimus culpa.
+                                message: Et aut explicabo dolorem quis numquam.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -1645,8 +1735,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Veniam tempore dolorem maxime iste.
-                                message: Enim rerum.
+                                code: Ut ipsam laborum aut.
+                                message: Animi voluptas.
                 "503":
                     description: 'ServiceUnavailable: Service unavailable'
                     content:
@@ -1654,8 +1744,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ServiceUnavailableError'
                             example:
-                                code: Exercitationem natus impedit quas.
-                                message: Quisquam distinctio et.
+                                code: Nihil sit commodi.
+                                message: Atque voluptate accusamus non et.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -1674,8 +1764,8 @@ paths:
                         schema:
                             $ref: '#/components/schemas/ValidateEmailRequestBody'
                         example:
-                            body: Rerum sunt non minus.
-                            subject: Et sunt itaque facilis aut doloribus perspiciatis.
+                            body: Voluptatum et qui voluptatum eveniet ipsam corrupti.
+                            subject: Autem eum vero id quod.
             responses:
                 "200":
                     description: OK response.
@@ -1693,8 +1783,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/BadRequestError'
                             example:
-                                code: Ipsam aut voluptatum ipsam et nulla.
-                                message: Voluptate eius nihil ut ut quos.
+                                code: Ipsum fugiat.
+                                message: Vel consequatur sit rem quo.
                 "401":
                     description: 'Unauthorized: Unauthorized'
                     content:
@@ -1702,8 +1792,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/UnauthorizedError'
                             example:
-                                code: Rerum nostrum provident nihil quam quaerat.
-                                message: Magni est dolor saepe voluptatem et eius.
+                                code: Sunt quaerat quas tempora.
+                                message: Ea quis nostrum maxime minus libero aut.
                 "403":
                     description: 'Forbidden: Forbidden'
                     content:
@@ -1711,8 +1801,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ForbiddenError'
                             example:
-                                code: Architecto autem corporis sit.
-                                message: Voluptas ut aut aut ducimus.
+                                code: Nesciunt nemo commodi officia voluptate aperiam nihil.
+                                message: Dolorem dolorem ut iusto voluptatem incidunt.
                 "500":
                     description: 'InternalServerError: Internal server error'
                     content:
@@ -1720,8 +1810,8 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/InternalServerError'
                             example:
-                                code: Modi accusantium ad repellendus in quis saepe.
-                                message: Nulla veritatis ut harum possimus totam temporibus.
+                                code: Doloremque dolor soluta.
+                                message: Veritatis voluptatibus.
             security:
                 - jwt_header_Authorization:
                     - manage:projects
@@ -1734,15 +1824,15 @@ components:
                 code:
                     type: string
                     description: HTTP status code
-                    example: Tempora non aspernatur aut voluptas.
+                    example: Reiciendis vitae eum accusamus consectetur perspiciatis autem.
                 message:
                     type: string
                     description: Error message
-                    example: Nulla autem ipsum.
+                    example: Debitis eum error eos sed fugiat.
             description: Bad request error response
             example:
-                code: Assumenda in eos ex tenetur omnis.
-                message: Et nostrum.
+                code: Dolor vero iusto sit voluptatem labore.
+                message: Id voluptatem distinctio qui necessitatibus distinctio.
             required:
                 - code
                 - message
@@ -1753,7 +1843,7 @@ components:
                     type: array
                     items:
                         type: string
-                        example: Rerum asperiores sint eos sit ullam.
+                        example: Voluptates ipsa quidem modi fugit delectus accusamus.
                     description: Array of recipient IDs to resend survey emails to
                     example:
                         - cba14f40-1636-11ec-9621-0242ac130002
@@ -1770,15 +1860,15 @@ components:
                 code:
                     type: string
                     description: HTTP status code
-                    example: Quia in dolores.
+                    example: Id at commodi et omnis et voluptatem.
                 message:
                     type: string
                     description: Error message
-                    example: Temporibus est architecto.
+                    example: Et voluptas asperiores magni molestiae.
             description: Conflict error response
             example:
-                code: Temporibus eius sunt dolorum et suscipit consequuntur.
-                message: In mollitia fugiat voluptatem minus.
+                code: Omnis consequatur quia quaerat nobis delectus et.
+                message: Voluptatem voluptatem quasi aut.
             required:
                 - code
                 - message
@@ -1788,29 +1878,29 @@ components:
                 committee_uid:
                     type: string
                     description: Committee UID for survey-specific exclusion
-                    example: Fugit sequi.
+                    example: Cumque non dolor sed dignissimos.
                 email:
                     type: string
                     description: Survey responder's email
-                    example: Error asperiores.
+                    example: A cumque beatae minima expedita.
                 global_exclusion:
                     type: string
                     description: Global exclusion flag
-                    example: Dolorum quidem eum et et quasi quaerat.
+                    example: Et totam qui id.
                 survey_uid:
                     type: string
                     description: Survey UID for survey-specific exclusion
-                    example: Quod temporibus quos dolores libero magnam.
+                    example: Consequatur accusamus molestiae eos.
                 user_id:
                     type: string
                     description: Recipient's user ID
-                    example: Repellendus porro et rerum.
+                    example: Explicabo quos.
             example:
-                committee_uid: Laboriosam est.
-                email: Delectus consequuntur quia animi praesentium.
-                global_exclusion: Omnis tenetur perspiciatis.
-                survey_uid: Dolor perspiciatis est suscipit.
-                user_id: Consequatur possimus quis iusto tenetur atque provident.
+                committee_uid: Incidunt tenetur ea eligendi voluptatem quibusdam.
+                email: Nemo quisquam est maiores ratione consequatur saepe.
+                global_exclusion: Velit dignissimos a eum.
+                survey_uid: Harum nemo dicta numquam in ullam sed.
+                user_id: Ut consequatur.
         ExcludedCommittee:
             type: object
             properties:
@@ -1860,7 +1950,7 @@ components:
                 committee_uid:
                     type: string
                     description: Committee UID
-                    example: Ut natus.
+                    example: Minima vitae et autem quia facilis adipisci.
                 email:
                     type: string
                     description: Survey responder's email
@@ -1868,11 +1958,11 @@ components:
                 global_exclusion:
                     type: string
                     description: Global exclusion flag
-                    example: Numquam quos reiciendis vitae eum accusamus consectetur.
+                    example: Aut qui aut quibusdam eius sed ut.
                 survey_uid:
                     type: string
                     description: Survey UID
-                    example: Ea ratione molestiae.
+                    example: Odit esse.
                 uid:
                     type: string
                     description: Exclusion unique identifier
@@ -1880,15 +1970,15 @@ components:
                 user_id:
                     type: string
                     description: Recipient's user ID
-                    example: Autem velit.
+                    example: Maiores et voluptas ut qui.
             description: A survey or global exclusion
             example:
-                committee_uid: Iusto sit.
+                committee_uid: Perferendis est.
                 email: test@email.com
-                global_exclusion: Labore laudantium id voluptatem distinctio qui.
-                survey_uid: Eum error eos sed fugiat pariatur dolor.
+                global_exclusion: Neque hic veritatis cum dolorem id.
+                survey_uid: Qui inventore.
                 uid: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
-                user_id: Distinctio praesentium quas sunt possimus voluptatum laudantium.
+                user_id: Ipsam qui a et.
             required:
                 - uid
         ExclusionUser:
@@ -1915,11 +2005,11 @@ components:
                 id:
                     type: string
                     description: User ID
-                    example: At commodi et omnis et.
+                    example: Earum dolorem rerum molestiae aut.
                 username:
                     type: string
                     description: Username
-                    example: Incidunt et voluptas.
+                    example: Tenetur voluptas ut illo neque.
             description: User information for an exclusion
             example:
                 emails:
@@ -1929,18 +2019,15 @@ components:
                     - email_address: Saepe voluptas.
                       id: Laboriosam ipsam explicabo et consequuntur accusantium.
                       is_primary: true
-                    - email_address: Saepe voluptas.
-                      id: Laboriosam ipsam explicabo et consequuntur accusantium.
-                      is_primary: true
-                id: Molestiae necessitatibus omnis consequatur quia quaerat nobis.
-                username: Et est.
+                id: Dolorum explicabo est esse cumque sequi.
+                username: Id ipsum explicabo sed rerum alias.
         ExtendedExclusionResult:
             type: object
             properties:
                 committee_uid:
                     type: string
                     description: Committee UID
-                    example: Corporis et quia.
+                    example: Accusamus et ea natus aspernatur.
                 email:
                     type: string
                     description: Survey responder's email
@@ -1948,11 +2035,11 @@ components:
                 global_exclusion:
                     type: string
                     description: Global exclusion flag
-                    example: Enim aut ipsam perferendis fugiat temporibus non.
+                    example: Et aperiam dignissimos beatae.
                 survey_uid:
                     type: string
                     description: Survey UID
-                    example: Quasi aut earum voluptate.
+                    example: Cumque commodi aliquid laboriosam et recusandae.
                 uid:
                     type: string
                     description: Exclusion unique identifier
@@ -1962,13 +2049,13 @@ components:
                 user_id:
                     type: string
                     description: Recipient's user ID
-                    example: Et id itaque eligendi amet assumenda.
+                    example: Consequatur quis exercitationem.
             description: A survey or global exclusion with user information
             example:
-                committee_uid: Vitae adipisci non necessitatibus.
+                committee_uid: Sit excepturi ea.
                 email: test@email.com
-                global_exclusion: Impedit sunt rerum nisi quae.
-                survey_uid: Corporis voluptas.
+                global_exclusion: Et error nihil amet quo voluptatem velit.
+                survey_uid: Aut est quis sed.
                 uid: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
                 user:
                     emails:
@@ -1983,7 +2070,7 @@ components:
                           is_primary: true
                     id: Cum reiciendis ad expedita iusto sunt ab.
                     username: Voluptatum porro ut quo occaecati.
-                user_id: Corrupti ad tempora.
+                user_id: Id praesentium.
             required:
                 - uid
         ForbiddenError:
@@ -1992,15 +2079,15 @@ components:
                 code:
                     type: string
                     description: HTTP status code
-                    example: Voluptatem ad nobis et velit rerum.
+                    example: Quae in est ea.
                 message:
                     type: string
                     description: Error message
-                    example: Quas dolorem quia.
+                    example: Rerum aspernatur.
             description: Forbidden error response
             example:
-                code: Similique reprehenderit est dolor aspernatur soluta tenetur.
-                message: Atque qui.
+                code: Ut sint ducimus eligendi.
+                message: Hic omnis.
             required:
                 - code
                 - message
@@ -2058,15 +2145,15 @@ components:
                 code:
                     type: string
                     description: HTTP status code
-                    example: Non eos voluptatem quibusdam alias laudantium molestiae.
+                    example: Voluptate dolore.
                 message:
                     type: string
                     description: Error message
-                    example: Eius dolores maxime rerum et et.
+                    example: Et quia dignissimos enim aut.
             description: Internal server error response
             example:
-                code: Ut sit quia voluptatibus minima non temporibus.
-                message: Aut minus libero illo dignissimos.
+                code: Perferendis fugiat temporibus non vel.
+                message: Id itaque eligendi amet assumenda perferendis corporis.
             required:
                 - code
                 - message
@@ -2080,7 +2167,7 @@ components:
                 logo_url:
                     type: string
                     description: Project logo URL
-                    example: Sed sit aut adipisci ipsum dolore.
+                    example: Aperiam et ut.
                 name:
                     type: string
                     description: Project name
@@ -2105,7 +2192,7 @@ components:
             description: LFX Project information
             example:
                 id: 003170000123XHTAA2
-                logo_url: Ullam delectus quo.
+                logo_url: Vel ea.
                 name: Express JS
                 slug: express-gateway
                 status: Active
@@ -2120,15 +2207,15 @@ components:
                 code:
                     type: string
                     description: HTTP status code
-                    example: Ipsa nihil.
+                    example: Quas sunt.
                 message:
                     type: string
                     description: Error message
-                    example: Quam consequuntur.
+                    example: Voluptatum laudantium voluptatem corrupti odit qui doloremque.
             description: Not found error response
             example:
-                code: Itaque laborum provident.
-                message: Architecto qui vitae et enim pariatur omnis.
+                code: In voluptate doloribus est et id est.
+                message: Ut est sed accusamus atque omnis.
             required:
                 - code
                 - message
@@ -2151,22 +2238,22 @@ components:
                           committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                           project_name: Kubernetes
                           project_uid: 003170000123XHTAA2
+                        - committee_category: Technical Steering Committee
+                          committee_name: Technical Steering Committee
+                          committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                          project_name: Kubernetes
+                          project_uid: 003170000123XHTAA2
+                        - committee_category: Technical Steering Committee
+                          committee_name: Technical Steering Committee
+                          committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                          project_name: Kubernetes
+                          project_uid: 003170000123XHTAA2
                 affected_projects:
                     type: array
                     items:
                         $ref: '#/components/schemas/LFXProject'
                     description: List of affected projects
                     example:
-                        - id: 003170000123XHTAA2
-                          logo_url: Quisquam ipsum eum mollitia ea magni.
-                          name: Express JS
-                          slug: express-gateway
-                          status: Active
-                        - id: 003170000123XHTAA2
-                          logo_url: Quisquam ipsum eum mollitia ea magni.
-                          name: Express JS
-                          slug: express-gateway
-                          status: Active
                         - id: 003170000123XHTAA2
                           logo_url: Quisquam ipsum eum mollitia ea magni.
                           name: Express JS
@@ -2226,24 +2313,7 @@ components:
                       name: Express JS
                       slug: express-gateway
                       status: Active
-                    - id: 003170000123XHTAA2
-                      logo_url: Quisquam ipsum eum mollitia ea magni.
-                      name: Express JS
-                      slug: express-gateway
-                      status: Active
-                    - id: 003170000123XHTAA2
-                      logo_url: Quisquam ipsum eum mollitia ea magni.
-                      name: Express JS
-                      slug: express-gateway
-                      status: Active
                 affected_recipients:
-                    - email: john.doe@example.com
-                      first_name: John
-                      last_name: Doe
-                      name: John Doe
-                      role: Voting Rep
-                      user_id: 005f1000009RbC4AAK
-                      username: jdoe
                     - email: john.doe@example.com
                       first_name: John
                       last_name: Doe
@@ -2272,27 +2342,27 @@ components:
                 creator_id:
                     type: string
                     description: Ignored. The creator is the authenticated user.
-                    example: Molestiae doloribus.
+                    example: Error asperiores.
                 creator_name:
                     type: string
                     description: Ignored. The creator's name is resolved from the authenticated user.
-                    example: Laboriosam repudiandae fuga.
+                    example: Eveniet rerum asperiores sint eos sit ullam.
                 creator_username:
                     type: string
                     description: Ignored. The creator is the authenticated user.
-                    example: Sunt enim illum enim ut.
+                    example: Expedita cupiditate qui et ipsam.
                 email_body:
                     type: string
                     description: Email body HTML content
-                    example: Sapiente aut et pariatur.
+                    example: Dolor perspiciatis est suscipit.
                 email_body_text:
                     type: string
                     description: Email body plain text content
-                    example: Similique hic ut.
+                    example: Laboriosam est.
                 email_subject:
                     type: string
                     description: Email subject line
-                    example: Iste possimus deleniti eligendi quidem ad quia.
+                    example: Consequatur possimus quis iusto tenetur atque provident.
                 is_project_survey:
                     type: boolean
                     description: Whether the survey is project-level (true) or global-level (false)
@@ -2300,49 +2370,49 @@ components:
                 send_immediately:
                     type: boolean
                     description: Send immediately (true) or schedule for later (false)
-                    example: true
+                    example: false
                 stage_filter:
                     type: string
                     description: Project stage filter for global surveys
-                    example: Modi vero aliquam tempora non ratione dolorem.
+                    example: Sed hic ut omnis soluta voluptas.
                 survey_cutoff_date:
                     type: string
                     description: Survey cutoff/end date (RFC3339 format)
-                    example: Repudiandae sint quod dolores explicabo sapiente a.
+                    example: Quasi quaerat sit delectus consequuntur quia animi.
                 survey_monkey_id:
                     type: string
                     description: SurveyMonkey survey ID
-                    example: Nostrum sapiente sint amet.
+                    example: Repellendus porro et rerum.
                 survey_reminder_rate_days:
                     type: integer
                     description: Days between automatic reminder emails (0 = no reminders)
-                    example: 5884141388577373259
+                    example: 4907398021232387231
                     format: int64
                 survey_send_date:
                     type: string
                     description: Date to send the survey (RFC3339 format)
-                    example: Deleniti aspernatur sit rerum.
+                    example: Sequi eum dolorum quidem eum et.
                 survey_title:
                     type: string
                     description: Survey title
-                    example: Quasi sequi.
+                    example: Quod temporibus quos dolores libero magnam.
             example:
                 committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                 committee_voting_enabled: false
-                creator_id: Eos aut adipisci voluptatibus ut.
-                creator_name: Et cum sit numquam voluptatem eum.
-                creator_username: Incidunt qui.
-                email_body: Voluptatem maiores voluptate impedit rerum blanditiis voluptate.
-                email_body_text: Impedit rerum consequatur.
-                email_subject: Deleniti quam.
-                is_project_survey: false
+                creator_id: Quisquam est dignissimos nemo temporibus sunt temporibus.
+                creator_name: Ut rerum quis.
+                creator_username: Voluptate perferendis esse in.
+                email_body: Qui numquam nam et similique.
+                email_body_text: Provident quia cumque perspiciatis natus.
+                email_subject: Sint enim voluptas voluptatibus rerum et.
+                is_project_survey: true
                 send_immediately: true
-                stage_filter: Est deleniti molestias a.
-                survey_cutoff_date: Harum error sed sed sed.
-                survey_monkey_id: Et iusto et.
-                survey_reminder_rate_days: 4838169336440205852
-                survey_send_date: Est eligendi consequatur est et est.
-                survey_title: Itaque et.
+                stage_filter: Perspiciatis minus vel et est.
+                survey_cutoff_date: Et eos debitis incidunt repellendus qui repudiandae.
+                survey_monkey_id: Suscipit facilis reiciendis sed sequi beatae.
+                survey_reminder_rate_days: 3124647685120782883
+                survey_send_date: Maiores odit.
+                survey_title: Laboriosam et sit perferendis.
             required:
                 - committee_uid
         ServiceUnavailableError:
@@ -2351,15 +2421,15 @@ components:
                 code:
                     type: string
                     description: HTTP status code
-                    example: Itaque deserunt iste dicta laudantium delectus hic.
+                    example: Quis vitae.
                 message:
                     type: string
                     description: Error message
-                    example: Amet qui officia.
+                    example: Non necessitatibus alias impedit sunt.
             description: Service unavailable error response
             example:
-                code: Alias sit nisi.
-                message: Sit ut.
+                code: Nisi quae.
+                message: Corrupti ad tempora.
             required:
                 - code
                 - message
@@ -2392,7 +2462,7 @@ components:
                 nps_value:
                     type: number
                     description: NPS value for this committee
-                    example: 0.5164109737335509
+                    example: 0.7945856337682694
                     format: double
                 project_name:
                     type: string
@@ -2409,23 +2479,23 @@ components:
                 total_recipients:
                     type: integer
                     description: Total recipients for this committee
-                    example: 862548958731524204
+                    example: 5606323419479558305
                     format: int64
                 total_responses:
                     type: integer
                     description: Total responses for this committee
-                    example: 7553305410282146197
+                    example: 8106120907574553606
                     format: int64
             description: Survey committee details
             example:
                 committee_name: Technical Steering Committee
                 committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                nps_value: 0.6659721628870496
+                nps_value: 0.9977990945602307
                 project_name: Kubernetes
                 project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                 survey_url: https://surveymonkey.com/r/abc123
-                total_recipients: 6988118345155292745
-                total_responses: 7254659036620553097
+                total_recipients: 629541204528488956
+                total_responses: 8636070065123869937
         SurveyQuestionAnswer:
             type: object
             properties:
@@ -2435,6 +2505,8 @@ components:
                         $ref: '#/components/schemas/SurveyAnswerChoice'
                     description: Answers selected or entered by the recipient
                     example:
+                        - choice_id: c-001
+                          text: Strongly agree
                         - choice_id: c-001
                           text: Strongly agree
                         - choice_id: c-001
@@ -2464,6 +2536,8 @@ components:
                       text: Strongly agree
                     - choice_id: c-001
                       text: Strongly agree
+                    - choice_id: c-001
+                      text: Strongly agree
                 question_family: rating
                 question_id: q-001
                 question_subtype: ranking
@@ -2480,7 +2554,7 @@ components:
                 created_at:
                     type: string
                     description: When the response record was created (RFC3339)
-                    example: "1989-09-27T12:26:44Z"
+                    example: "2007-05-17T12:31:21Z"
                     format: date-time
                 email:
                     type: string
@@ -2506,7 +2580,7 @@ components:
                 last_received_time:
                     type: string
                     description: Last time a survey email was received (RFC3339)
-                    example: "1999-05-29T10:19:52Z"
+                    example: "2013-03-27T11:28:28Z"
                     format: date-time
                 membership_tier:
                     type: string
@@ -2529,7 +2603,7 @@ components:
                 response_datetime:
                     type: string
                     description: When the recipient submitted their response (RFC3339)
-                    example: "1998-08-15T13:57:14Z"
+                    example: "1970-08-16T15:31:59Z"
                     format: date-time
                 response_status:
                     type: string
@@ -2549,7 +2623,7 @@ components:
                 ses_bounce_diagnostic_code:
                     type: string
                     description: SES bounce diagnostic code
-                    example: Velit et id praesentium unde ut.
+                    example: Ut ut illo magnam sapiente.
                 ses_bounce_subtype:
                     type: string
                     description: SES bounce subtype
@@ -2561,42 +2635,42 @@ components:
                 ses_complaint_date:
                     type: string
                     description: When the SES complaint was filed (RFC3339)
-                    example: "1998-03-22T07:16:53Z"
+                    example: "1997-04-07T05:10:22Z"
                     format: date-time
                 ses_complaint_exists:
                     type: boolean
                     description: Whether a spam complaint was filed
-                    example: false
+                    example: true
                 ses_complaint_type:
                     type: string
                     description: SES complaint type
-                    example: Aut officiis dolorum aut quod accusamus et.
+                    example: Laudantium quibusdam eum eum omnis quia maiores.
                 ses_delivery_successful:
                     type: boolean
                     description: Whether SES delivery succeeded
-                    example: false
+                    example: true
                 ses_email_opened:
                     type: boolean
                     description: Whether the recipient opened the survey email
-                    example: false
+                    example: true
                 ses_email_opened_last_time:
                     type: string
                     description: Last time the email was opened (RFC3339)
-                    example: "1988-11-09T19:50:12Z"
+                    example: "1974-01-03T20:14:05Z"
                     format: date-time
                 ses_link_clicked:
                     type: boolean
                     description: Whether the recipient clicked the survey link
-                    example: false
+                    example: true
                 ses_link_clicked_last_time:
                     type: string
                     description: Last time the survey link was clicked (RFC3339)
-                    example: "1997-11-13T19:22:42Z"
+                    example: "2014-10-05T22:36:09Z"
                     format: date-time
                 ses_message_id:
                     type: string
                     description: SES message identifier
-                    example: Error nihil amet.
+                    example: Nihil nesciunt tempore est consequatur est.
                 survey_link:
                     type: string
                     description: Personal survey link for this recipient
@@ -2612,13 +2686,6 @@ components:
                               text: Strongly agree
                             - choice_id: c-001
                               text: Strongly agree
-                          question_family: rating
-                          question_id: q-001
-                          question_subtype: ranking
-                          question_text: How satisfied are you with the project governance?
-                        - answers:
-                            - choice_id: c-001
-                              text: Strongly agree
                             - choice_id: c-001
                               text: Strongly agree
                           question_family: rating
@@ -2630,11 +2697,15 @@ components:
                               text: Strongly agree
                             - choice_id: c-001
                               text: Strongly agree
+                            - choice_id: c-001
+                              text: Strongly agree
                           question_family: rating
                           question_id: q-001
                           question_subtype: ranking
                           question_text: How satisfied are you with the project governance?
                         - answers:
+                            - choice_id: c-001
+                              text: Strongly agree
                             - choice_id: c-001
                               text: Strongly agree
                             - choice_id: c-001
@@ -2662,13 +2733,13 @@ components:
             description: Individual survey response submitted by a recipient
             example:
                 committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                created_at: "1976-03-28T02:51:46Z"
+                created_at: "1972-06-26T22:22:09Z"
                 email: john.doe@example.com
                 first_name: John
                 id: cba14f40-1636-11ec-9621-0242ac130002
                 job_title: Principal Engineer
                 last_name: Doe
-                last_received_time: "1973-07-23T04:42:34Z"
+                last_received_time: "2007-10-04T08:17:08Z"
                 membership_tier: Platinum
                 nps_value: 9
                 num_automated_reminders_received: 2
@@ -2678,21 +2749,21 @@ components:
                 project:
                     name: Kubernetes
                     uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                response_datetime: "1997-11-08T09:42:48Z"
+                response_datetime: "1998-11-13T01:14:38Z"
                 response_status: Responded
                 role: Voting Rep
-                ses_bounce_diagnostic_code: Nihil doloremque eum enim.
+                ses_bounce_diagnostic_code: Modi vero aliquam tempora non ratione dolorem.
                 ses_bounce_subtype: NoEmail
                 ses_bounce_type: Permanent
-                ses_complaint_date: "1990-03-03T12:47:42Z"
-                ses_complaint_exists: false
-                ses_complaint_type: Exercitationem architecto quaerat unde maiores.
-                ses_delivery_successful: false
+                ses_complaint_date: "2013-10-31T08:31:36Z"
+                ses_complaint_exists: true
+                ses_complaint_type: Enim illum enim.
+                ses_delivery_successful: true
                 ses_email_opened: false
-                ses_email_opened_last_time: "1978-12-06T12:25:29Z"
-                ses_link_clicked: true
-                ses_link_clicked_last_time: "1973-09-01T08:02:05Z"
-                ses_message_id: In corrupti error expedita placeat.
+                ses_email_opened_last_time: "1997-03-11T15:44:43Z"
+                ses_link_clicked: false
+                ses_link_clicked_last_time: "1982-10-13T17:26:06Z"
+                ses_message_id: Unde et error cumque sit.
                 survey_link: https://surveymonkey.com/r/abc123
                 survey_monkey_question_answers:
                     - answers:
@@ -2700,6 +2771,8 @@ components:
                           text: Strongly agree
                         - choice_id: c-001
                           text: Strongly agree
+                        - choice_id: c-001
+                          text: Strongly agree
                       question_family: rating
                       question_id: q-001
                       question_subtype: ranking
@@ -2709,11 +2782,15 @@ components:
                           text: Strongly agree
                         - choice_id: c-001
                           text: Strongly agree
+                        - choice_id: c-001
+                          text: Strongly agree
                       question_family: rating
                       question_id: q-001
                       question_subtype: ranking
                       question_text: How satisfied are you with the project governance?
                     - answers:
+                        - choice_id: c-001
+                          text: Strongly agree
                         - choice_id: c-001
                           text: Strongly agree
                         - choice_id: c-001
@@ -2821,7 +2898,7 @@ components:
                     type: array
                     items:
                         type: string
-                        example: Perspiciatis blanditiis voluptas.
+                        example: Ut necessitatibus qui.
                     description: Array of committee IDs to send survey to
                     example:
                         - com-123
@@ -2916,11 +2993,11 @@ components:
                 committee_category:
                     type: string
                     description: Committee category
-                    example: Rerum dignissimos est reprehenderit.
+                    example: Voluptates unde non soluta quo qui voluptatem.
                 committee_voting_enabled:
                     type: boolean
                     description: Committee voting enabled
-                    example: true
+                    example: false
                 committees:
                     type: array
                     items:
@@ -2951,91 +3028,99 @@ components:
                           survey_url: https://surveymonkey.com/r/abc123
                           total_recipients: 2315858510787901347
                           total_responses: 4319941305328081628
+                        - committee_name: Technical Steering Committee
+                          committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                          nps_value: 0.5183088611218446
+                          project_name: Kubernetes
+                          project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                          survey_url: https://surveymonkey.com/r/abc123
+                          total_recipients: 2315858510787901347
+                          total_responses: 4319941305328081628
                 created_at:
                     type: string
                     description: Creation timestamp
-                    example: "1995-06-22T23:52:20Z"
+                    example: "1988-05-12T03:45:43Z"
                     format: date-time
                 creator_id:
                     type: string
                     description: Creator's user ID
-                    example: Neque natus deleniti assumenda et saepe.
+                    example: Voluptatum corporis harum dolores sint dignissimos.
                 creator_name:
                     type: string
                     description: Creator's full name
-                    example: Saepe libero reprehenderit dicta repellat beatae amet.
+                    example: Rerum alias hic sed et aut.
                 creator_username:
                     type: string
                     description: Creator's username
-                    example: Numquam in facilis.
+                    example: Repudiandae veritatis voluptatem consequuntur nostrum velit.
                 email_body:
                     type: string
                     description: Email body HTML
-                    example: Pariatur illum rerum et aut voluptas.
+                    example: Quam architecto nihil quidem nobis velit temporibus.
                 email_body_text:
                     type: string
                     description: Email body plain text
-                    example: Voluptatibus saepe sapiente.
+                    example: Rerum dolor consectetur ducimus debitis.
                 email_subject:
                     type: string
                     description: Email subject line
-                    example: Doloribus omnis magni ut omnis rem autem.
+                    example: Quae est.
                 is_nps_survey:
                     type: boolean
                     description: Whether this is an NPS survey
-                    example: false
+                    example: true
                 is_project_survey:
                     type: boolean
                     description: Whether project-level or global-level survey
-                    example: false
+                    example: true
                 last_modified_at:
                     type: string
                     description: Last modification timestamp
-                    example: "1972-07-17T15:43:19Z"
+                    example: "1979-03-06T00:19:34Z"
                     format: date-time
                 last_modified_by:
                     type: string
                     description: User ID of last modifier
-                    example: Et eligendi provident.
+                    example: Quia dolorem quam voluptate sed.
                 latest_automated_reminder_sent_at:
                     type: string
                     description: Latest automated reminder sent date
-                    example: "2012-05-05T09:47:01Z"
+                    example: "1998-07-08T12:20:04Z"
                     format: date-time
                 next_automated_reminder_at:
                     type: string
                     description: Next automated reminder date
-                    example: "1993-08-13T12:05:41Z"
+                    example: "1973-04-23T00:36:15Z"
                     format: date-time
                 nps_value:
                     type: number
                     description: NPS value
-                    example: 0.6551493168252138
+                    example: 0.9744121294013963
                     format: double
                 num_automated_reminders_sent:
                     type: integer
                     description: Number of automated reminders sent
-                    example: 520951341657882428
+                    example: 8006383030086001203
                     format: int64
                 num_automated_reminders_to_send:
                     type: integer
                     description: Number of automated reminders to send
-                    example: 3168147155293703047
+                    example: 334746699110937062
                     format: int64
                 num_detractors:
                     type: integer
                     description: Number of detractors
-                    example: 1005323119396654379
+                    example: 6903662142906849561
                     format: int64
                 num_passives:
                     type: integer
                     description: Number of passives
-                    example: 7218425895700182480
+                    example: 4948820693822762297
                     format: int64
                 num_promoters:
                     type: integer
                     description: Number of promoters
-                    example: 2792651311292498388
+                    example: 5909350386004870873
                     format: int64
                 response_status:
                     type: string
@@ -3048,29 +3133,29 @@ components:
                 send_immediately:
                     type: boolean
                     description: Whether survey is sent immediately
-                    example: false
+                    example: true
                 stage_filter:
                     type: string
                     description: Project stage filter
-                    example: Reiciendis suscipit molestiae.
+                    example: Incidunt rerum labore tenetur excepturi qui vitae.
                 survey_cutoff_date:
                     type: string
                     description: Survey cutoff date
-                    example: "2010-10-12T12:59:53Z"
+                    example: "1990-12-25T16:13:20Z"
                     format: date-time
                 survey_monkey_id:
                     type: string
                     description: SurveyMonkey survey ID
-                    example: Voluptatem quam consequatur facere blanditiis provident eligendi.
+                    example: Ullam rem amet minus cupiditate quam in.
                 survey_reminder_rate_days:
                     type: integer
                     description: Days between reminder emails
-                    example: 9175998011242303045
+                    example: 1791386665646684483
                     format: int64
                 survey_send_date:
                     type: string
                     description: Survey send date
-                    example: "1974-10-14T09:05:27Z"
+                    example: "1999-05-26T22:46:31Z"
                     format: date-time
                 survey_status:
                     type: string
@@ -3084,25 +3169,25 @@ components:
                 survey_title:
                     type: string
                     description: Survey title
-                    example: Aut sunt ut.
+                    example: Recusandae officia rem officiis vero non.
                 survey_url:
                     type: string
                     description: Survey URL
-                    example: Sit consequatur aliquam adipisci.
+                    example: Cupiditate nemo quasi praesentium reiciendis repudiandae ratione.
                 total_bounced_emails:
                     type: integer
                     description: Number of bounced emails
-                    example: 3424883605214475792
+                    example: 7438804683577849185
                     format: int64
                 total_recipients:
                     type: integer
                     description: Total number of recipients
-                    example: 1072011969510910610
+                    example: 2203244473551503728
                     format: int64
                 total_responses:
                     type: integer
                     description: Total number of responses
-                    example: 7446281943876049587
+                    example: 7434910400221329078
                     format: int64
                 uid:
                     type: string
@@ -3110,7 +3195,7 @@ components:
                     example: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
             description: Scheduled survey details
             example:
-                committee_category: Aut architecto velit quos.
+                committee_category: Temporibus est architecto.
                 committee_voting_enabled: false
                 committees:
                     - committee_name: Technical Steering Committee
@@ -3129,38 +3214,54 @@ components:
                       survey_url: https://surveymonkey.com/r/abc123
                       total_recipients: 2315858510787901347
                       total_responses: 4319941305328081628
-                created_at: "1996-08-21T18:08:38Z"
-                creator_id: Beatae repellendus quae est.
-                creator_name: Est ratione.
-                creator_username: Placeat id.
-                email_body: At iusto.
-                email_body_text: Ut repellat voluptates.
-                email_subject: Sit fuga iste quae quia debitis eius.
+                    - committee_name: Technical Steering Committee
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      nps_value: 0.5183088611218446
+                      project_name: Kubernetes
+                      project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      survey_url: https://surveymonkey.com/r/abc123
+                      total_recipients: 2315858510787901347
+                      total_responses: 4319941305328081628
+                    - committee_name: Technical Steering Committee
+                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      nps_value: 0.5183088611218446
+                      project_name: Kubernetes
+                      project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                      survey_url: https://surveymonkey.com/r/abc123
+                      total_recipients: 2315858510787901347
+                      total_responses: 4319941305328081628
+                created_at: "1985-07-25T06:45:43Z"
+                creator_id: Modi et voluptate.
+                creator_name: Maxime sapiente cumque quis.
+                creator_username: Maiores rerum.
+                email_body: Et enim pariatur omnis.
+                email_body_text: Quia in dolores.
+                email_subject: Provident debitis architecto qui.
                 is_nps_survey: true
                 is_project_survey: true
-                last_modified_at: "2004-01-10T07:50:50Z"
-                last_modified_by: Et deserunt minima quos est qui.
-                latest_automated_reminder_sent_at: "1992-07-05T04:41:29Z"
-                next_automated_reminder_at: "2009-08-02T20:27:39Z"
-                nps_value: 0.11477595017525302
-                num_automated_reminders_sent: 5471675888782996045
-                num_automated_reminders_to_send: 1684060621815863475
-                num_detractors: 1058961830300575916
-                num_passives: 2374708287046699948
-                num_promoters: 2360950764052236086
+                last_modified_at: "2012-09-24T06:45:53Z"
+                last_modified_by: Esse neque optio sit non.
+                latest_automated_reminder_sent_at: "2000-07-31T09:25:16Z"
+                next_automated_reminder_at: "1994-07-10T23:50:58Z"
+                nps_value: 0.8674860322946686
+                num_automated_reminders_sent: 1655793780689029501
+                num_automated_reminders_to_send: 6466894607766453442
+                num_detractors: 7770332772257242203
+                num_passives: 7602205579326120561
+                num_promoters: 6007958439388812385
                 response_status: scheduled
-                send_immediately: true
-                stage_filter: Explicabo assumenda et quia in rem quia.
-                survey_cutoff_date: "1970-11-28T11:45:17Z"
-                survey_monkey_id: Aut quae vel facere officiis distinctio temporibus.
-                survey_reminder_rate_days: 134919268332414201
-                survey_send_date: "1994-02-03T02:37:38Z"
+                send_immediately: false
+                stage_filter: Quia et quia dolores assumenda a.
+                survey_cutoff_date: "1983-05-12T19:42:46Z"
+                survey_monkey_id: Doloremque beatae necessitatibus.
+                survey_reminder_rate_days: 8294349557424310571
+                survey_send_date: "1983-12-15T22:16:38Z"
                 survey_status: scheduled
-                survey_title: Ut aut cumque deleniti ex est.
-                survey_url: Tempora similique nobis.
-                total_bounced_emails: 1016797978632035148
-                total_recipients: 2125822465772389544
-                total_responses: 5946431732317606372
+                survey_title: Praesentium architecto nostrum aut vel odio.
+                survey_url: Sunt dolorum.
+                total_bounced_emails: 6649652366166210536
+                total_recipients: 4873107143784286969
+                total_responses: 2873947130124236999
                 uid: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
             required:
                 - uid
@@ -3199,15 +3300,15 @@ components:
                 code:
                     type: string
                     description: HTTP status code
-                    example: Voluptas laudantium voluptatibus soluta.
+                    example: Quia sunt.
                 message:
                     type: string
                     description: Error message
-                    example: Et occaecati cupiditate iusto qui corporis.
+                    example: Omnis esse velit in totam excepturi et.
             description: Unauthorized error response
             example:
-                code: Nihil omnis et quibusdam.
-                message: Laboriosam enim nostrum illum.
+                code: Dolores rerum est fugiat nesciunt dolores.
+                message: Tenetur eos id excepturi.
             required:
                 - code
                 - message
@@ -3225,66 +3326,66 @@ components:
                 creator_id:
                     type: string
                     description: Ignored. The modifier is the authenticated user.
-                    example: Qui aliquid quam.
+                    example: Aspernatur non aspernatur porro ut voluptatem.
                 email_body:
                     type: string
                     description: Email body HTML content
-                    example: Sed consequuntur minus quo consequatur quos.
+                    example: Dignissimos itaque laboriosam voluptas.
                 email_body_text:
                     type: string
                     description: Email body plain text content
-                    example: Dolorem consequatur amet commodi.
+                    example: Maiores vel.
                 email_subject:
                     type: string
                     description: Email subject line
-                    example: Reiciendis commodi pariatur odit.
+                    example: Exercitationem minus placeat eaque molestiae totam qui.
                 survey_cutoff_date:
                     type: string
                     description: Survey cutoff/end date (RFC3339 format)
-                    example: Alias corrupti ab veniam animi quod magni.
+                    example: Et quas harum.
                 survey_reminder_rate_days:
                     type: integer
                     description: Days between automatic reminder emails (0 = no reminders)
-                    example: 8277153845665744566
+                    example: 736785105495977595
                     format: int64
                 survey_send_date:
                     type: string
                     description: Date to send the survey (RFC3339 format)
-                    example: In harum dolor voluptatem exercitationem.
+                    example: Et ea nihil qui.
                 survey_title:
                     type: string
                     description: Survey title
-                    example: Mollitia rerum dicta in.
+                    example: Rerum ut.
             example:
                 committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                 committee_voting_enabled: false
-                creator_id: Fugit minima sed accusantium et.
-                email_body: Sed hic ut omnis soluta voluptas.
-                email_body_text: Expedita cupiditate qui et ipsam.
-                email_subject: Vel non.
-                survey_cutoff_date: Voluptas consequuntur veritatis.
-                survey_reminder_rate_days: 5426763898141119147
-                survey_send_date: Possimus quaerat iure dolor at odio ea.
-                survey_title: Tenetur autem.
+                creator_id: Non consequatur et qui qui ut.
+                email_body: Voluptatem recusandae et laborum dignissimos quaerat aut.
+                email_body_text: Et doloremque magni.
+                email_subject: Omnis vero quia exercitationem aut autem non.
+                survey_cutoff_date: Dolorem est sed eum magni cupiditate et.
+                survey_reminder_rate_days: 7668168546574059745
+                survey_send_date: Ut ea sunt dolor iste maiores tempora.
+                survey_title: Nihil rem expedita iusto culpa ratione quia.
         UserEmail:
             type: object
             properties:
                 email_address:
                     type: string
                     description: Email address
-                    example: Animi in voluptate.
+                    example: Voluptas et ea.
                 id:
                     type: string
                     description: Email ID
-                    example: Corrupti odit qui.
+                    example: Quisquam natus saepe debitis id.
                 is_primary:
                     type: boolean
                     description: Whether this is the primary email
                     example: false
             description: User email information
             example:
-                email_address: Ut est sed accusamus atque omnis.
-                id: Et id est.
+                email_address: Molestiae accusamus impedit.
+                id: Minus illum et minima tempora animi repudiandae.
                 is_primary: true
         ValidateEmailRequestBody:
             type: object
@@ -3292,14 +3393,14 @@ components:
                 body:
                     type: string
                     description: Email body template
-                    example: Et est totam.
+                    example: Id sed voluptas mollitia.
                 subject:
                     type: string
                     description: Email subject template
-                    example: Perferendis esse in libero.
+                    example: Aperiam velit sint aspernatur.
             example:
-                body: Rerum quis itaque quisquam est dignissimos.
-                subject: Temporibus sunt temporibus eos suscipit facilis.
+                body: Eaque dolorem excepturi.
+                subject: Distinctio rerum.
         ValidateEmailResult:
             type: object
             properties:

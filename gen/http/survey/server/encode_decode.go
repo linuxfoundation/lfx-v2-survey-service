@@ -99,6 +99,19 @@ func EncodeScheduleSurveyError(encoder func(context.Context, http.ResponseWriter
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
 			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewScheduleSurveyConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
+			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
 			errors.As(v, &res)
@@ -381,6 +394,19 @@ func EncodeUpdateSurveyError(encoder func(context.Context, http.ResponseWriter) 
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
 			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewUpdateSurveyConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
+			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
 			errors.As(v, &res)
@@ -511,6 +537,19 @@ func EncodeDeleteSurveyError(encoder func(context.Context, http.ResponseWriter) 
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteSurveyConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -662,6 +701,19 @@ func EncodeBulkResendSurveyError(encoder func(context.Context, http.ResponseWrit
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewBulkResendSurveyConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -938,6 +990,19 @@ func EncodeSendMissingRecipientsError(encoder func(context.Context, http.Respons
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
 			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewSendMissingRecipientsConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
+			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
 			errors.As(v, &res)
@@ -1071,6 +1136,19 @@ func EncodeDeleteSurveyResponseError(encoder func(context.Context, http.Response
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
 			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteSurveyResponseConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
+			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
 			errors.As(v, &res)
@@ -1203,6 +1281,19 @@ func EncodeResendSurveyResponseError(encoder func(context.Context, http.Response
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewResendSurveyResponseConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -1351,6 +1442,19 @@ func EncodeDeleteRecipientGroupError(encoder func(context.Context, http.Response
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
 			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteRecipientGroupConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
+			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
 			errors.As(v, &res)
@@ -1497,6 +1601,19 @@ func EncodeCreateExclusionError(encoder func(context.Context, http.ResponseWrite
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
 			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewCreateExclusionConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
+			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
 			errors.As(v, &res)
@@ -1613,6 +1730,19 @@ func EncodeDeleteExclusionError(encoder func(context.Context, http.ResponseWrite
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteExclusionConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -1839,6 +1969,19 @@ func EncodeDeleteExclusionByIDError(encoder func(context.Context, http.ResponseW
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteExclusionByIDConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError

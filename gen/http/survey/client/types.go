@@ -430,6 +430,15 @@ type ScheduleSurveyBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// ScheduleSurveyConflictResponseBody is the type of the "survey" service
+// "schedule_survey" endpoint HTTP response body for the "Conflict" error.
+type ScheduleSurveyConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ScheduleSurveyForbiddenResponseBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP response body for the "Forbidden" error.
 type ScheduleSurveyForbiddenResponseBody struct {
@@ -531,6 +540,15 @@ type UpdateSurveyBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// UpdateSurveyConflictResponseBody is the type of the "survey" service
+// "update_survey" endpoint HTTP response body for the "Conflict" error.
+type UpdateSurveyConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // UpdateSurveyForbiddenResponseBody is the type of the "survey" service
 // "update_survey" endpoint HTTP response body for the "Forbidden" error.
 type UpdateSurveyForbiddenResponseBody struct {
@@ -587,6 +605,15 @@ type DeleteSurveyBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// DeleteSurveyConflictResponseBody is the type of the "survey" service
+// "delete_survey" endpoint HTTP response body for the "Conflict" error.
+type DeleteSurveyConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // DeleteSurveyForbiddenResponseBody is the type of the "survey" service
 // "delete_survey" endpoint HTTP response body for the "Forbidden" error.
 type DeleteSurveyForbiddenResponseBody struct {
@@ -637,6 +664,15 @@ type DeleteSurveyUnauthorizedResponseBody struct {
 // BulkResendSurveyBadRequestResponseBody is the type of the "survey" service
 // "bulk_resend_survey" endpoint HTTP response body for the "BadRequest" error.
 type BulkResendSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// BulkResendSurveyConflictResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "Conflict" error.
+type BulkResendSurveyConflictResponseBody struct {
 	// HTTP status code
 	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
 	// Error message
@@ -758,6 +794,16 @@ type SendMissingRecipientsBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// SendMissingRecipientsConflictResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "Conflict" error.
+type SendMissingRecipientsConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // SendMissingRecipientsForbiddenResponseBody is the type of the "survey"
 // service "send_missing_recipients" endpoint HTTP response body for the
 // "Forbidden" error.
@@ -812,6 +858,16 @@ type SendMissingRecipientsUnauthorizedResponseBody struct {
 // service "delete_survey_response" endpoint HTTP response body for the
 // "BadRequest" error.
 type DeleteSurveyResponseBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyResponseConflictResponseBody is the type of the "survey" service
+// "delete_survey_response" endpoint HTTP response body for the "Conflict"
+// error.
+type DeleteSurveyResponseConflictResponseBody struct {
 	// HTTP status code
 	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
 	// Error message
@@ -878,6 +934,16 @@ type ResendSurveyResponseBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// ResendSurveyResponseConflictResponseBody is the type of the "survey" service
+// "resend_survey_response" endpoint HTTP response body for the "Conflict"
+// error.
+type ResendSurveyResponseConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ResendSurveyResponseForbiddenResponseBody is the type of the "survey"
 // service "resend_survey_response" endpoint HTTP response body for the
 // "Forbidden" error.
@@ -932,6 +998,16 @@ type ResendSurveyResponseUnauthorizedResponseBody struct {
 // service "delete_recipient_group" endpoint HTTP response body for the
 // "BadRequest" error.
 type DeleteRecipientGroupBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteRecipientGroupConflictResponseBody is the type of the "survey" service
+// "delete_recipient_group" endpoint HTTP response body for the "Conflict"
+// error.
+type DeleteRecipientGroupConflictResponseBody struct {
 	// HTTP status code
 	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
 	// Error message
@@ -997,6 +1073,15 @@ type CreateExclusionBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// CreateExclusionConflictResponseBody is the type of the "survey" service
+// "create_exclusion" endpoint HTTP response body for the "Conflict" error.
+type CreateExclusionConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // CreateExclusionForbiddenResponseBody is the type of the "survey" service
 // "create_exclusion" endpoint HTTP response body for the "Forbidden" error.
 type CreateExclusionForbiddenResponseBody struct {
@@ -1028,6 +1113,15 @@ type CreateExclusionUnauthorizedResponseBody struct {
 // DeleteExclusionBadRequestResponseBody is the type of the "survey" service
 // "delete_exclusion" endpoint HTTP response body for the "BadRequest" error.
 type DeleteExclusionBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteExclusionConflictResponseBody is the type of the "survey" service
+// "delete_exclusion" endpoint HTTP response body for the "Conflict" error.
+type DeleteExclusionConflictResponseBody struct {
 	// HTTP status code
 	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
 	// Error message
@@ -1112,6 +1206,16 @@ type GetExclusionUnauthorizedResponseBody struct {
 // service "delete_exclusion_by_id" endpoint HTTP response body for the
 // "BadRequest" error.
 type DeleteExclusionByIDBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteExclusionByIDConflictResponseBody is the type of the "survey" service
+// "delete_exclusion_by_id" endpoint HTTP response body for the "Conflict"
+// error.
+type DeleteExclusionByIDConflictResponseBody struct {
 	// HTTP status code
 	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
 	// Error message
@@ -1680,6 +1784,17 @@ func NewScheduleSurveyBadRequest(body *ScheduleSurveyBadRequestResponseBody) *su
 	return v
 }
 
+// NewScheduleSurveyConflict builds a survey service schedule_survey endpoint
+// Conflict error.
+func NewScheduleSurveyConflict(body *ScheduleSurveyConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewScheduleSurveyForbidden builds a survey service schedule_survey endpoint
 // Forbidden error.
 func NewScheduleSurveyForbidden(body *ScheduleSurveyForbiddenResponseBody) *survey.ForbiddenError {
@@ -1909,6 +2024,17 @@ func NewUpdateSurveyBadRequest(body *UpdateSurveyBadRequestResponseBody) *survey
 	return v
 }
 
+// NewUpdateSurveyConflict builds a survey service update_survey endpoint
+// Conflict error.
+func NewUpdateSurveyConflict(body *UpdateSurveyConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewUpdateSurveyForbidden builds a survey service update_survey endpoint
 // Forbidden error.
 func NewUpdateSurveyForbidden(body *UpdateSurveyForbiddenResponseBody) *survey.ForbiddenError {
@@ -1975,6 +2101,17 @@ func NewDeleteSurveyBadRequest(body *DeleteSurveyBadRequestResponseBody) *survey
 	return v
 }
 
+// NewDeleteSurveyConflict builds a survey service delete_survey endpoint
+// Conflict error.
+func NewDeleteSurveyConflict(body *DeleteSurveyConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewDeleteSurveyForbidden builds a survey service delete_survey endpoint
 // Forbidden error.
 func NewDeleteSurveyForbidden(body *DeleteSurveyForbiddenResponseBody) *survey.ForbiddenError {
@@ -2034,6 +2171,17 @@ func NewDeleteSurveyUnauthorized(body *DeleteSurveyUnauthorizedResponseBody) *su
 // endpoint BadRequest error.
 func NewBulkResendSurveyBadRequest(body *BulkResendSurveyBadRequestResponseBody) *survey.BadRequestError {
 	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewBulkResendSurveyConflict builds a survey service bulk_resend_survey
+// endpoint Conflict error.
+func NewBulkResendSurveyConflict(body *BulkResendSurveyConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -2211,6 +2359,17 @@ func NewSendMissingRecipientsBadRequest(body *SendMissingRecipientsBadRequestRes
 	return v
 }
 
+// NewSendMissingRecipientsConflict builds a survey service
+// send_missing_recipients endpoint Conflict error.
+func NewSendMissingRecipientsConflict(body *SendMissingRecipientsConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewSendMissingRecipientsForbidden builds a survey service
 // send_missing_recipients endpoint Forbidden error.
 func NewSendMissingRecipientsForbidden(body *SendMissingRecipientsForbiddenResponseBody) *survey.ForbiddenError {
@@ -2270,6 +2429,17 @@ func NewSendMissingRecipientsUnauthorized(body *SendMissingRecipientsUnauthorize
 // delete_survey_response endpoint BadRequest error.
 func NewDeleteSurveyResponseBadRequest(body *DeleteSurveyResponseBadRequestResponseBody) *survey.BadRequestError {
 	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyResponseConflict builds a survey service
+// delete_survey_response endpoint Conflict error.
+func NewDeleteSurveyResponseConflict(body *DeleteSurveyResponseConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -2343,6 +2513,17 @@ func NewResendSurveyResponseBadRequest(body *ResendSurveyResponseBadRequestRespo
 	return v
 }
 
+// NewResendSurveyResponseConflict builds a survey service
+// resend_survey_response endpoint Conflict error.
+func NewResendSurveyResponseConflict(body *ResendSurveyResponseConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewResendSurveyResponseForbidden builds a survey service
 // resend_survey_response endpoint Forbidden error.
 func NewResendSurveyResponseForbidden(body *ResendSurveyResponseForbiddenResponseBody) *survey.ForbiddenError {
@@ -2402,6 +2583,17 @@ func NewResendSurveyResponseUnauthorized(body *ResendSurveyResponseUnauthorizedR
 // delete_recipient_group endpoint BadRequest error.
 func NewDeleteRecipientGroupBadRequest(body *DeleteRecipientGroupBadRequestResponseBody) *survey.BadRequestError {
 	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteRecipientGroupConflict builds a survey service
+// delete_recipient_group endpoint Conflict error.
+func NewDeleteRecipientGroupConflict(body *DeleteRecipientGroupConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -2490,6 +2682,17 @@ func NewCreateExclusionBadRequest(body *CreateExclusionBadRequestResponseBody) *
 	return v
 }
 
+// NewCreateExclusionConflict builds a survey service create_exclusion endpoint
+// Conflict error.
+func NewCreateExclusionConflict(body *CreateExclusionConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewCreateExclusionForbidden builds a survey service create_exclusion
 // endpoint Forbidden error.
 func NewCreateExclusionForbidden(body *CreateExclusionForbiddenResponseBody) *survey.ForbiddenError {
@@ -2527,6 +2730,17 @@ func NewCreateExclusionUnauthorized(body *CreateExclusionUnauthorizedResponseBod
 // endpoint BadRequest error.
 func NewDeleteExclusionBadRequest(body *DeleteExclusionBadRequestResponseBody) *survey.BadRequestError {
 	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteExclusionConflict builds a survey service delete_exclusion endpoint
+// Conflict error.
+func NewDeleteExclusionConflict(body *DeleteExclusionConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -2644,6 +2858,17 @@ func NewGetExclusionUnauthorized(body *GetExclusionUnauthorizedResponseBody) *su
 // delete_exclusion_by_id endpoint BadRequest error.
 func NewDeleteExclusionByIDBadRequest(body *DeleteExclusionByIDBadRequestResponseBody) *survey.BadRequestError {
 	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteExclusionByIDConflict builds a survey service
+// delete_exclusion_by_id endpoint Conflict error.
+func NewDeleteExclusionByIDConflict(body *DeleteExclusionByIDConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -3100,6 +3325,18 @@ func ValidateScheduleSurveyBadRequestResponseBody(body *ScheduleSurveyBadRequest
 	return
 }
 
+// ValidateScheduleSurveyConflictResponseBody runs the validations defined on
+// schedule_survey_Conflict_response_body
+func ValidateScheduleSurveyConflictResponseBody(body *ScheduleSurveyConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateScheduleSurveyForbiddenResponseBody runs the validations defined on
 // schedule_survey_Forbidden_response_body
 func ValidateScheduleSurveyForbiddenResponseBody(body *ScheduleSurveyForbiddenResponseBody) (err error) {
@@ -3232,6 +3469,18 @@ func ValidateUpdateSurveyBadRequestResponseBody(body *UpdateSurveyBadRequestResp
 	return
 }
 
+// ValidateUpdateSurveyConflictResponseBody runs the validations defined on
+// update_survey_Conflict_response_body
+func ValidateUpdateSurveyConflictResponseBody(body *UpdateSurveyConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateUpdateSurveyForbiddenResponseBody runs the validations defined on
 // update_survey_Forbidden_response_body
 func ValidateUpdateSurveyForbiddenResponseBody(body *UpdateSurveyForbiddenResponseBody) (err error) {
@@ -3304,6 +3553,18 @@ func ValidateDeleteSurveyBadRequestResponseBody(body *DeleteSurveyBadRequestResp
 	return
 }
 
+// ValidateDeleteSurveyConflictResponseBody runs the validations defined on
+// delete_survey_Conflict_response_body
+func ValidateDeleteSurveyConflictResponseBody(body *DeleteSurveyConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateDeleteSurveyForbiddenResponseBody runs the validations defined on
 // delete_survey_Forbidden_response_body
 func ValidateDeleteSurveyForbiddenResponseBody(body *DeleteSurveyForbiddenResponseBody) (err error) {
@@ -3367,6 +3628,18 @@ func ValidateDeleteSurveyUnauthorizedResponseBody(body *DeleteSurveyUnauthorized
 // ValidateBulkResendSurveyBadRequestResponseBody runs the validations defined
 // on bulk_resend_survey_BadRequest_response_body
 func ValidateBulkResendSurveyBadRequestResponseBody(body *BulkResendSurveyBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateBulkResendSurveyConflictResponseBody runs the validations defined on
+// bulk_resend_survey_Conflict_response_body
+func ValidateBulkResendSurveyConflictResponseBody(body *BulkResendSurveyConflictResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
 	}
@@ -3520,6 +3793,18 @@ func ValidateSendMissingRecipientsBadRequestResponseBody(body *SendMissingRecipi
 	return
 }
 
+// ValidateSendMissingRecipientsConflictResponseBody runs the validations
+// defined on send_missing_recipients_Conflict_response_body
+func ValidateSendMissingRecipientsConflictResponseBody(body *SendMissingRecipientsConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateSendMissingRecipientsForbiddenResponseBody runs the validations
 // defined on send_missing_recipients_Forbidden_response_body
 func ValidateSendMissingRecipientsForbiddenResponseBody(body *SendMissingRecipientsForbiddenResponseBody) (err error) {
@@ -3585,6 +3870,18 @@ func ValidateSendMissingRecipientsUnauthorizedResponseBody(body *SendMissingReci
 // ValidateDeleteSurveyResponseBadRequestResponseBody runs the validations
 // defined on delete_survey_response_BadRequest_response_body
 func ValidateDeleteSurveyResponseBadRequestResponseBody(body *DeleteSurveyResponseBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteSurveyResponseConflictResponseBody runs the validations
+// defined on delete_survey_response_Conflict_response_body
+func ValidateDeleteSurveyResponseConflictResponseBody(body *DeleteSurveyResponseConflictResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
 	}
@@ -3668,6 +3965,18 @@ func ValidateResendSurveyResponseBadRequestResponseBody(body *ResendSurveyRespon
 	return
 }
 
+// ValidateResendSurveyResponseConflictResponseBody runs the validations
+// defined on resend_survey_response_Conflict_response_body
+func ValidateResendSurveyResponseConflictResponseBody(body *ResendSurveyResponseConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateResendSurveyResponseForbiddenResponseBody runs the validations
 // defined on resend_survey_response_Forbidden_response_body
 func ValidateResendSurveyResponseForbiddenResponseBody(body *ResendSurveyResponseForbiddenResponseBody) (err error) {
@@ -3733,6 +4042,18 @@ func ValidateResendSurveyResponseUnauthorizedResponseBody(body *ResendSurveyResp
 // ValidateDeleteRecipientGroupBadRequestResponseBody runs the validations
 // defined on delete_recipient_group_BadRequest_response_body
 func ValidateDeleteRecipientGroupBadRequestResponseBody(body *DeleteRecipientGroupBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteRecipientGroupConflictResponseBody runs the validations
+// defined on delete_recipient_group_Conflict_response_body
+func ValidateDeleteRecipientGroupConflictResponseBody(body *DeleteRecipientGroupConflictResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
 	}
@@ -3816,6 +4137,18 @@ func ValidateCreateExclusionBadRequestResponseBody(body *CreateExclusionBadReque
 	return
 }
 
+// ValidateCreateExclusionConflictResponseBody runs the validations defined on
+// create_exclusion_Conflict_response_body
+func ValidateCreateExclusionConflictResponseBody(body *CreateExclusionConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateCreateExclusionForbiddenResponseBody runs the validations defined on
 // create_exclusion_Forbidden_response_body
 func ValidateCreateExclusionForbiddenResponseBody(body *CreateExclusionForbiddenResponseBody) (err error) {
@@ -3855,6 +4188,18 @@ func ValidateCreateExclusionUnauthorizedResponseBody(body *CreateExclusionUnauth
 // ValidateDeleteExclusionBadRequestResponseBody runs the validations defined
 // on delete_exclusion_BadRequest_response_body
 func ValidateDeleteExclusionBadRequestResponseBody(body *DeleteExclusionBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteExclusionConflictResponseBody runs the validations defined on
+// delete_exclusion_Conflict_response_body
+func ValidateDeleteExclusionConflictResponseBody(body *DeleteExclusionConflictResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
 	}
@@ -3963,6 +4308,18 @@ func ValidateGetExclusionUnauthorizedResponseBody(body *GetExclusionUnauthorized
 // ValidateDeleteExclusionByIDBadRequestResponseBody runs the validations
 // defined on delete_exclusion_by_id_BadRequest_response_body
 func ValidateDeleteExclusionByIDBadRequestResponseBody(body *DeleteExclusionByIDBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteExclusionByIDConflictResponseBody runs the validations defined
+// on delete_exclusion_by_id_Conflict_response_body
+func ValidateDeleteExclusionByIDConflictResponseBody(body *DeleteExclusionByIDConflictResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
 	}
