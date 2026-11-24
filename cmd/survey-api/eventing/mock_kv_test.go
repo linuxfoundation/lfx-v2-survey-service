@@ -137,13 +137,19 @@ func (m *mockKeyValue) PurgeDeletes(ctx context.Context, _ ...jetstream.KVPurgeO
 }
 
 type mockKeyValueEntry struct {
-	key   string
-	value []byte
+	key      string
+	value    []byte
+	revision uint64
 }
 
-func (e mockKeyValueEntry) Key() string                     { return e.key }
-func (e mockKeyValueEntry) Value() []byte                   { return e.value }
-func (e mockKeyValueEntry) Revision() uint64                { return 1 }
+func (e mockKeyValueEntry) Key() string   { return e.key }
+func (e mockKeyValueEntry) Value() []byte { return e.value }
+func (e mockKeyValueEntry) Revision() uint64 {
+	if e.revision == 0 {
+		return 1
+	}
+	return e.revision
+}
 func (e mockKeyValueEntry) Created() time.Time              { return time.Now() }
 func (e mockKeyValueEntry) Delta() uint64                   { return 0 }
 func (e mockKeyValueEntry) Operation() jetstream.KeyValueOp { return jetstream.KeyValuePut }

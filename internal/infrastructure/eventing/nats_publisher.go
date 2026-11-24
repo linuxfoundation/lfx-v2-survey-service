@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"regexp"
 	"slices"
+	"time"
 
 	fgaconstants "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/constants"
 	fgatypes "github.com/linuxfoundation/lfx-v2-fga-sync/pkg/types"
@@ -118,6 +119,9 @@ func (p *NATSPublisher) PublishSurveyTemplateEvent(ctx context.Context, action s
 // publishWithSpan wraps conn.PublishMsg with an OTel producer span and injects
 // trace context into the NATS message headers.
 func (p *NATSPublisher) publishWithSpan(ctx context.Context, subject string, data []byte) error {
+	if err := domain.CheckSourceFence(ctx); err != nil {
+		return err
+	}
 	ctx, span := tracer.Start(ctx, "nats.publish",
 		trace.WithSpanKind(trace.SpanKindProducer),
 		trace.WithAttributes(
@@ -138,6 +142,11 @@ func (p *NATSPublisher) publishWithSpan(ctx context.Context, subject string, dat
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return fmt.Errorf("failed to publish to subject %s: %w", subject, err)
+	}
+	flushCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	if err := p.conn.FlushWithContext(flushCtx); err != nil {
+		return fmt.Errorf("failed to flush published event: %w", err)
 	}
 	return nil
 }

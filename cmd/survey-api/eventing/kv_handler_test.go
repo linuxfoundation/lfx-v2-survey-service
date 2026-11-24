@@ -4,12 +4,15 @@
 package eventing
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"testing"
 	"time"
 
+	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain/mocks"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -26,6 +29,7 @@ type fakeMsg struct {
 	data        []byte
 	headers     nats.Header
 	delivered   uint64
+	revision    uint64
 	metadataErr error
 
 	acked     bool
@@ -36,6 +40,63 @@ type fakeMsg struct {
 	metaCalls int
 }
 
+func TestStateReadRetryWarnings(t *testing.T) {
+	for _, kind := range []string{"survey", "survey_response", "survey_template"} {
+		t.Run(kind, func(t *testing.T) {
+			var logs bytes.Buffer
+			logger := slog.New(slog.NewJSONHandler(&logs, nil))
+			state := newFakeKV(nil)
+			state.getErr = map[string]error{kind + ".one": domain.ErrEventStateUnavailable}
+			publisher, _ := newRecordingPublisher(nil)
+			var retry bool
+			switch kind {
+			case "survey":
+				retry = handleSurveyDelete(context.Background(), "one", publisher, state, logger)
+			case "survey_response":
+				retry = handleSurveyResponseDelete(context.Background(), "one", publisher, state, logger)
+			case "survey_template":
+				retry = handleSurveyTemplateDelete(context.Background(), "one", publisher, state, logger)
+			}
+			require.True(t, retry)
+			require.Contains(t, logs.String(), `"level":"WARN"`)
+			require.Contains(t, logs.String(), `"key":"`+kind+`.one"`)
+			require.Contains(t, logs.String(), domain.ErrEventStateUnavailable.Error())
+		})
+	}
+}
+
+func TestRetryBeyondFormerDeliveryBudget(t *testing.T) {
+	state := newFakeKV(nil)
+	state.putErr = domain.ErrEventStateUnavailable
+	pub, _ := newRecordingPublisher(nil)
+	for attempt := uint64(1); attempt <= 5; attempt++ {
+		if attempt == 5 {
+			state.putErr = nil
+		}
+		msg := &fakeMsg{subject: "$KV.v1-objects.surveymonkey-surveys.tpl-1", data: mustJSON(t, templateV1Data()), delivered: attempt}
+		kvMessageHandler(context.Background(), msg, pub, nil, state, nil, nil, discardLogger())
+		if attempt < 5 {
+			require.True(t, msg.naked)
+			require.False(t, msg.acked)
+			if attempt >= 3 {
+				require.Equal(t, 20*time.Second, msg.nakDelay)
+			}
+		} else {
+			require.True(t, msg.acked)
+			require.False(t, msg.naked)
+		}
+	}
+	entry, err := state.Get(context.Background(), "survey_template."+templateV1Data()["id"].(string))
+	require.NoError(t, err)
+	require.Equal(t, "1", string(entry.Value()))
+}
+
+func TestKVEntryPreservesSourceRevision(t *testing.T) {
+	entry := &kvEntry{revision: 42}
+	require.Equal(t, uint64(42), entry.Revision())
+	require.Zero(t, entry.Delta())
+}
+
 func (m *fakeMsg) Subject() string      { return m.subject }
 func (m *fakeMsg) Data() []byte         { return m.data }
 func (m *fakeMsg) Headers() nats.Header { return m.headers }
@@ -44,7 +105,7 @@ func (m *fakeMsg) Metadata() (*jetstream.MsgMetadata, error) {
 	if m.metadataErr != nil {
 		return nil, m.metadataErr
 	}
-	return &jetstream.MsgMetadata{NumDelivered: m.delivered}, nil
+	return &jetstream.MsgMetadata{NumDelivered: m.delivered, Sequence: jetstream.SequencePair{Stream: m.revision}}, nil
 }
 func (m *fakeMsg) Ack() error { m.acked = true; return m.ackErr }
 func (m *fakeMsg) NakWithDelay(d time.Duration) error {
@@ -409,7 +470,7 @@ func TestKVMessageHandler(t *testing.T) {
 
 		assert.True(t, msg.acked)
 		assert.False(t, msg.naked)
-		assert.Zero(t, msg.metaCalls, "metadata is only read when retrying")
+		assert.Equal(t, 1, msg.metaCalls, "metadata carries the source revision even on permanent failures")
 	})
 
 	t.Run("a transient failure is NAKed with exponential backoff by delivery count", func(t *testing.T) {

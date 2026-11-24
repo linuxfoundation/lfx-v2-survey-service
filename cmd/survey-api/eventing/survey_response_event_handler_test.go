@@ -543,12 +543,12 @@ func TestHandleSurveyResponseUpdate(t *testing.T) {
 		assert.NotContains(t, mappings.data, "survey_response.resp-1")
 	})
 
-	t.Run("a mapping store failure after publish is still acknowledged", func(t *testing.T) {
+	t.Run("a mapping store failure after publish retries", func(t *testing.T) {
 		pub, events := newRecordingPublisher(nil)
 		mappings := parentMappingKV()
 		mappings.putErr = errors.New("kv down")
 
-		assert.False(t, update(t, responseV1Data(), pub, mappings, parentSurveyKV(t)))
+		assert.True(t, update(t, responseV1Data(), pub, mappings, parentSurveyKV(t)))
 		assert.Len(t, *events, 1)
 	})
 }
@@ -628,6 +628,86 @@ func TestHandleSurveyResponseUpdate_Invite(t *testing.T) {
 
 		assert.False(t, sender.Called)
 	})
+
+	t.Run("terminal resolution failure remains recoverable", func(t *testing.T) {
+		pub, _ := newRecordingPublisher(nil)
+		state := parentMappingKV()
+		invites, sender, objects := newHandler(t, state)
+		invites.userReader = &mocks.MockUserReader{Username: "existing"}
+		state.resolveErr = domain.ErrEventStateUnavailable
+		data := responseV1Data()
+		data["username"] = ""
+		require.True(t, handleSurveyResponseUpdate(ctx, key, data, pub, v1IDMapper(), state, objects, invites, discardLogger()))
+		require.False(t, sender.Called)
+		prepared, err := state.InvitationPrepared(ctx, "resp-1")
+		require.NoError(t, err)
+		require.True(t, prepared)
+		state.resolveErr = nil
+		require.False(t, handleSurveyResponseUpdate(ctx, key, data, pub, v1IDMapper(), state, objects, invites, discardLogger()))
+		require.False(t, sender.Called)
+		prepared, err = state.InvitationPrepared(ctx, "resp-1")
+		require.NoError(t, err)
+		require.False(t, prepared)
+	})
+	for _, terminal := range []string{"existing LFID", "missing recipient", "username populated"} {
+		t.Run("terminal "+terminal+" prevents later email-edit invite", func(t *testing.T) {
+			pub, _ := newRecordingPublisher(nil)
+			state := parentMappingKV()
+			invites, sender, objects := newHandler(t, state)
+			data := responseV1Data()
+			data["username"] = ""
+			if terminal == "existing LFID" {
+				invites.userReader = &mocks.MockUserReader{Username: "existing"}
+			} else {
+				require.NoError(t, state.PrepareInvitation(ctx, "resp-1"))
+				if terminal == "missing recipient" {
+					data["email"] = ""
+				} else {
+					data["username"] = "existing"
+				}
+			}
+			require.False(t, handleSurveyResponseUpdate(ctx, key, data, pub, v1IDMapper(), state, objects, invites, discardLogger()))
+			require.False(t, sender.Called)
+			prepared, err := state.InvitationPrepared(ctx, "resp-1")
+			require.NoError(t, err)
+			require.False(t, prepared)
+			data["username"] = ""
+			data["email"] = "new@example.com"
+			invites.userReader = &mocks.MockUserReader{Err: domain.ErrUserNotFound}
+			require.False(t, handleSurveyResponseUpdate(ctx, key, data, pub, v1IDMapper(), state, objects, invites, discardLogger()))
+			require.False(t, sender.Called)
+		})
+	}
+	for _, failure := range []string{"guard read", "guard claim"} {
+		t.Run(failure+" failure resumes on updated redelivery", func(t *testing.T) {
+			pub, events := newRecordingPublisher(nil)
+			mappings := parentMappingKV()
+			invites, sender, objects := newHandler(t, mappings)
+			guardKey := surveyResponseLFIDInviteSentKey("resp-1")
+			if failure == "guard read" {
+				mappings.getErr = map[string]error{guardKey: domain.ErrEventStateUnavailable}
+			} else {
+				mappings.createErr = map[string]error{guardKey: domain.ErrEventStateUnavailable}
+			}
+			data := responseV1Data()
+			data["username"] = ""
+			require.True(t, handleSurveyResponseUpdate(ctx, key, data, pub, v1IDMapper(), mappings, objects, invites, discardLogger()))
+			require.False(t, sender.Called)
+			require.Equal(t, "1", mappings.value("survey_response.resp-1"))
+			prepared, err := mappings.InvitationPrepared(ctx, "resp-1")
+			require.NoError(t, err)
+			require.True(t, prepared)
+			delete(mappings.getErr, guardKey)
+			delete(mappings.createErr, guardKey)
+			require.False(t, handleSurveyResponseUpdate(ctx, key, data, pub, v1IDMapper(), mappings, objects, invites, discardLogger()))
+			require.True(t, sender.Called)
+			require.Equal(t, "updated", (*events)[1].Action)
+			require.Equal(t, "invite-1", mappings.value(guardKey))
+			sender.Called = false
+			require.False(t, handleSurveyResponseUpdate(ctx, key, data, pub, v1IDMapper(), mappings, objects, invites, discardLogger()))
+			require.False(t, sender.Called, "completed guard suppresses replay")
+		})
+	}
 }
 
 // ─── handleSurveyResponseDelete ──────────────────────────────────────────────
@@ -681,12 +761,12 @@ func TestHandleSurveyResponseDelete(t *testing.T) {
 		assert.Equal(t, "1", kv.value("survey_response.resp-1"))
 	})
 
-	t.Run("a tombstone store failure is still acknowledged", func(t *testing.T) {
+	t.Run("a tombstone store failure retries", func(t *testing.T) {
 		pub, events := newRecordingPublisher(nil)
 		kv := newFakeKV(nil)
 		kv.putErr = errors.New("kv down")
 
-		assert.False(t, handleSurveyResponseDelete(ctx, "resp-1", pub, kv, discardLogger()))
+		assert.True(t, handleSurveyResponseDelete(ctx, "resp-1", pub, kv, discardLogger()))
 		assert.Len(t, *events, 1)
 	})
 }

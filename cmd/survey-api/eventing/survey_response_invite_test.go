@@ -100,8 +100,8 @@ func TestMaybeSendSurveyInvite(t *testing.T) {
 			userReader: stubSurveyInviteUserReader{err: domain.ErrUserNotFound},
 			setupMaps: func(kv *mockKeyValue) {
 				kv.On("Get", mock.Anything, inviteSentKey).Return(nil, jetstream.ErrKeyNotFound)
-				kv.On("Put", mock.Anything, inviteSentKey, []byte("pending")).Return(uint64(1), nil)
-				kv.On("Put", mock.Anything, inviteSentKey, []byte("invite-new")).Return(uint64(2), nil)
+				kv.On("Create", mock.Anything, inviteSentKey, []byte("pending")).Return(uint64(1), nil)
+				kv.On("Update", mock.Anything, inviteSentKey, []byte("invite-new"), uint64(1)).Return(uint64(2), nil)
 			},
 			setupObjects: func(kv *mockKeyValue) {
 				kv.On("Get", mock.Anything, surveyKey).
@@ -114,8 +114,8 @@ func TestMaybeSendSurveyInvite(t *testing.T) {
 			userReader: stubSurveyInviteUserReader{err: errors.New("auth unavailable")},
 			setupMaps: func(kv *mockKeyValue) {
 				kv.On("Get", mock.Anything, inviteSentKey).Return(nil, jetstream.ErrKeyNotFound)
-				kv.On("Put", mock.Anything, inviteSentKey, []byte("pending")).Return(uint64(1), nil)
-				kv.On("Put", mock.Anything, inviteSentKey, []byte("invite-new")).Return(uint64(2), nil)
+				kv.On("Create", mock.Anything, inviteSentKey, []byte("pending")).Return(uint64(1), nil)
+				kv.On("Update", mock.Anything, inviteSentKey, []byte("invite-new"), uint64(1)).Return(uint64(2), nil)
 			},
 			setupObjects: func(kv *mockKeyValue) {
 				kv.On("Get", mock.Anything, surveyKey).
