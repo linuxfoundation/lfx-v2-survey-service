@@ -26,11 +26,6 @@ paths:
                   * `manage:surveys`
             operationId: survey#schedule_survey
             parameters:
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
                 - name: schedule_survey_request_body
                   in: body
                   required: true
@@ -47,42 +42,42 @@ paths:
                             - uid
                             - survey_status
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -120,11 +115,6 @@ paths:
                   description: Survey identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "200":
                     description: OK response.
@@ -134,42 +124,42 @@ paths:
                             - uid
                             - survey_status
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -196,11 +186,6 @@ paths:
                   description: Survey identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
                 - name: update_survey_request_body
                   in: body
                   required: true
@@ -215,49 +200,49 @@ paths:
                             - uid
                             - survey_status
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -284,58 +269,53 @@ paths:
                   description: Survey identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "204":
                     description: No Content response.
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -363,11 +343,6 @@ paths:
                   description: Survey identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
                 - name: bulk_resend_survey_request_body
                   in: body
                   required: true
@@ -379,49 +354,49 @@ paths:
                 "204":
                     description: No Content response.
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -454,53 +429,48 @@ paths:
                   description: Survey identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "200":
                     description: OK response.
                     schema:
                         $ref: '#/definitions/PreviewSendResult'
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -543,58 +513,53 @@ paths:
                   description: Survey identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "204":
                     description: No Content response.
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -642,11 +607,6 @@ paths:
                   description: Survey identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "200":
                     description: OK response.
@@ -656,42 +616,42 @@ paths:
                             - data
                             - meta
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -724,58 +684,53 @@ paths:
                   description: Response identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "204":
                     description: No Content response.
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -808,58 +763,53 @@ paths:
                   description: Response identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "204":
                     description: No Content response.
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -892,58 +842,53 @@ paths:
                   description: Survey identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "204":
                     description: No Content response.
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -966,11 +911,6 @@ paths:
                   * `manage:surveys`
             operationId: survey#create_exclusion
             parameters:
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
                 - name: create_exclusion_request_body
                   in: body
                   required: true
@@ -984,35 +924,35 @@ paths:
                         required:
                             - uid
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
@@ -1034,11 +974,6 @@ paths:
                   * `manage:surveys`
             operationId: survey#delete_exclusion
             parameters:
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
                 - name: delete_exclusion_request_body
                   in: body
                   required: true
@@ -1048,35 +983,35 @@ paths:
                 "204":
                     description: No Content response.
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
@@ -1104,11 +1039,6 @@ paths:
                   description: Exclusion identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "200":
                     description: OK response.
@@ -1117,35 +1047,35 @@ paths:
                         required:
                             - uid
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "404":
-                    description: Not Found response.
+                    description: 'NotFound: Not found'
                     schema:
                         $ref: '#/definitions/NotFoundError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
@@ -1172,44 +1102,39 @@ paths:
                   description: Exclusion identifier
                   required: true
                   type: string
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "204":
                     description: No Content response.
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "409":
-                    description: Conflict response.
+                    description: 'Conflict: Conflict'
                     schema:
                         $ref: '#/definitions/ConflictError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
@@ -1244,11 +1169,6 @@ paths:
                   required: false
                   type: string
                   format: uuid
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
             responses:
                 "200":
                     description: OK response.
@@ -1257,35 +1177,35 @@ paths:
                         items:
                             $ref: '#/definitions/SurveyTemplate'
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
                             - code
                             - message
                 "503":
-                    description: Service Unavailable response.
+                    description: 'ServiceUnavailable: Service unavailable'
                     schema:
                         $ref: '#/definitions/ServiceUnavailableError'
                         required:
@@ -1308,11 +1228,6 @@ paths:
                   * `manage:surveys`
             operationId: survey#validate_email
             parameters:
-                - name: Authorization
-                  in: header
-                  description: JWT token
-                  required: false
-                  type: string
                 - name: validate_email_request_body
                   in: body
                   required: true
@@ -1327,28 +1242,28 @@ paths:
                             - body
                             - subject
                 "400":
-                    description: Bad Request response.
+                    description: 'BadRequest: Bad request'
                     schema:
                         $ref: '#/definitions/BadRequestError'
                         required:
                             - code
                             - message
                 "401":
-                    description: Unauthorized response.
+                    description: 'Unauthorized: Unauthorized'
                     schema:
                         $ref: '#/definitions/UnauthorizedError'
                         required:
                             - code
                             - message
                 "403":
-                    description: Forbidden response.
+                    description: 'Forbidden: Forbidden'
                     schema:
                         $ref: '#/definitions/ForbiddenError'
                         required:
                             - code
                             - message
                 "500":
-                    description: Internal Server Error response.
+                    description: 'InternalServerError: Internal server error'
                     schema:
                         $ref: '#/definitions/InternalServerError'
                         required:
@@ -1366,15 +1281,15 @@ definitions:
             code:
                 type: string
                 description: HTTP status code
-                example: Reiciendis repudiandae vel aspernatur eos est quos.
+                example: Ipsum doloribus excepturi fuga eum quia autem.
             message:
                 type: string
                 description: Error message
-                example: Voluptates odit velit quis ipsam.
-        description: Bad request
+                example: Et voluptas quia maxime rerum deserunt.
+        description: Bad request error response
         example:
-            code: Quam rerum sed omnis.
-            message: Et vitae.
+            code: Ipsum doloribus excepturi fuga eum quia autem.
+            message: Et voluptas quia maxime rerum deserunt.
         required:
             - code
             - message
@@ -1385,15 +1300,15 @@ definitions:
             code:
                 type: string
                 description: HTTP status code
-                example: Voluptate voluptates dicta ratione necessitatibus.
+                example: Natus enim sapiente.
             message:
                 type: string
                 description: Error message
-                example: Commodi facere soluta iure ut autem.
-        description: Conflict
+                example: Qui consectetur dolores tempora.
+        description: Conflict error response
         example:
-            code: Velit quo excepturi nostrum neque ad.
-            message: Qui recusandae sit velit.
+            code: Natus enim sapiente.
+            message: Qui consectetur dolores tempora.
         required:
             - code
             - message
@@ -1448,7 +1363,7 @@ definitions:
             committee_uid:
                 type: string
                 description: Committee UID
-                example: Accusantium quaerat.
+                example: Distinctio similique quis eum libero.
             email:
                 type: string
                 description: Survey responder's email
@@ -1456,11 +1371,11 @@ definitions:
             global_exclusion:
                 type: string
                 description: Global exclusion flag
-                example: Necessitatibus similique.
+                example: Repellendus ut.
             survey_uid:
                 type: string
                 description: Survey UID
-                example: Quis ut qui.
+                example: Nisi natus.
             uid:
                 type: string
                 description: Exclusion unique identifier
@@ -1468,14 +1383,15 @@ definitions:
             user_id:
                 type: string
                 description: Recipient's user ID
-                example: Et voluptate est accusantium dignissimos est.
+                example: Earum non magnam a illo.
+        description: A survey or global exclusion
         example:
-            committee_uid: Aut necessitatibus in est id quo consequatur.
+            committee_uid: Distinctio similique quis eum libero.
             email: test@email.com
-            global_exclusion: Illum ab est velit aperiam recusandae voluptatum.
-            survey_uid: Quo deserunt.
+            global_exclusion: Repellendus ut.
+            survey_uid: Nisi natus.
             uid: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
-            user_id: Est minus tempore molestiae odio quas incidunt.
+            user_id: Earum non magnam a illo.
         required:
             - uid
     ExclusionUser:
@@ -1488,40 +1404,43 @@ definitions:
                     $ref: '#/definitions/UserEmail'
                 description: User emails
                 example:
-                    - email_address: Eum iste veritatis repellendus quisquam.
-                      id: Aut odio vero et esse et aut.
+                    - email_address: Rem sint eaque ut quisquam.
+                      id: Id nihil.
                       is_primary: true
-                    - email_address: Eum iste veritatis repellendus quisquam.
-                      id: Aut odio vero et esse et aut.
+                    - email_address: Rem sint eaque ut quisquam.
+                      id: Id nihil.
                       is_primary: true
-                    - email_address: Eum iste veritatis repellendus quisquam.
-                      id: Aut odio vero et esse et aut.
+                    - email_address: Rem sint eaque ut quisquam.
+                      id: Id nihil.
+                      is_primary: true
+                    - email_address: Rem sint eaque ut quisquam.
+                      id: Id nihil.
                       is_primary: true
             id:
                 type: string
                 description: User ID
-                example: Alias maxime id sunt recusandae dolorum.
+                example: Et dolorum et sapiente est.
             username:
                 type: string
                 description: Username
-                example: Ipsum sapiente.
+                example: Ducimus sit sapiente.
         description: User information for an exclusion
         example:
             emails:
-                - email_address: Eum iste veritatis repellendus quisquam.
-                  id: Aut odio vero et esse et aut.
+                - email_address: Rem sint eaque ut quisquam.
+                  id: Id nihil.
                   is_primary: true
-                - email_address: Eum iste veritatis repellendus quisquam.
-                  id: Aut odio vero et esse et aut.
+                - email_address: Rem sint eaque ut quisquam.
+                  id: Id nihil.
                   is_primary: true
-                - email_address: Eum iste veritatis repellendus quisquam.
-                  id: Aut odio vero et esse et aut.
+                - email_address: Rem sint eaque ut quisquam.
+                  id: Id nihil.
                   is_primary: true
-                - email_address: Eum iste veritatis repellendus quisquam.
-                  id: Aut odio vero et esse et aut.
+                - email_address: Rem sint eaque ut quisquam.
+                  id: Id nihil.
                   is_primary: true
-            id: Rerum facilis.
-            username: Quaerat doloribus voluptatem repellendus facilis.
+            id: Et dolorum et sapiente est.
+            username: Ducimus sit sapiente.
     ExtendedExclusionResult:
         title: ExtendedExclusionResult
         type: object
@@ -1529,7 +1448,7 @@ definitions:
             committee_uid:
                 type: string
                 description: Committee UID
-                example: Totam non omnis minima.
+                example: Molestiae voluptatem et magnam deserunt.
             email:
                 type: string
                 description: Survey responder's email
@@ -1537,11 +1456,11 @@ definitions:
             global_exclusion:
                 type: string
                 description: Global exclusion flag
-                example: Et rerum dolorem non nisi deserunt.
+                example: Vel voluptate.
             survey_uid:
                 type: string
                 description: Survey UID
-                example: Nesciunt debitis.
+                example: Sed non ut.
             uid:
                 type: string
                 description: Exclusion unique identifier
@@ -1551,27 +1470,31 @@ definitions:
             user_id:
                 type: string
                 description: Recipient's user ID
-                example: Et est eos facilis qui.
+                example: Quia consequuntur repellat nisi.
+        description: A survey or global exclusion with user information
         example:
-            committee_uid: Aperiam sapiente aperiam.
+            committee_uid: Molestiae voluptatem et magnam deserunt.
             email: test@email.com
-            global_exclusion: Nemo iste qui tempore et fugiat quam.
-            survey_uid: Qui velit est consequuntur.
+            global_exclusion: Vel voluptate.
+            survey_uid: Sed non ut.
             uid: 5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e
             user:
                 emails:
-                    - email_address: Eum iste veritatis repellendus quisquam.
-                      id: Aut odio vero et esse et aut.
+                    - email_address: Rem sint eaque ut quisquam.
+                      id: Id nihil.
                       is_primary: true
-                    - email_address: Eum iste veritatis repellendus quisquam.
-                      id: Aut odio vero et esse et aut.
+                    - email_address: Rem sint eaque ut quisquam.
+                      id: Id nihil.
                       is_primary: true
-                    - email_address: Eum iste veritatis repellendus quisquam.
-                      id: Aut odio vero et esse et aut.
+                    - email_address: Rem sint eaque ut quisquam.
+                      id: Id nihil.
                       is_primary: true
-                id: Est saepe numquam eum laudantium doloremque eum.
-                username: Id earum quod eum delectus autem et.
-            user_id: Aut in voluptate non.
+                    - email_address: Rem sint eaque ut quisquam.
+                      id: Id nihil.
+                      is_primary: true
+                id: Et dolorum et sapiente est.
+                username: Ducimus sit sapiente.
+            user_id: Quia consequuntur repellat nisi.
         required:
             - uid
     ForbiddenError:
@@ -1581,15 +1504,15 @@ definitions:
             code:
                 type: string
                 description: HTTP status code
-                example: Cumque perspiciatis tempora aspernatur.
+                example: At quo qui dicta voluptatem pariatur.
             message:
                 type: string
                 description: Error message
-                example: Tempore ab velit quaerat in.
-        description: Forbidden
+                example: Quis error temporibus sit et consequuntur voluptatem.
+        description: Forbidden error response
         example:
-            code: Blanditiis qui ut vel est sunt.
-            message: Consequatur repellendus consequatur animi quasi tempora eum.
+            code: At quo qui dicta voluptatem pariatur.
+            message: Quis error temporibus sit et consequuntur voluptatem.
         required:
             - code
             - message
@@ -1649,15 +1572,15 @@ definitions:
             code:
                 type: string
                 description: HTTP status code
-                example: Aliquam nihil non laboriosam excepturi a mollitia.
+                example: Voluptatum in dolores.
             message:
                 type: string
                 description: Error message
-                example: Suscipit aut eum libero sint ipsa laudantium.
-        description: Internal server error
+                example: Ipsam aut aliquam quos harum eaque.
+        description: Internal server error response
         example:
-            code: Quaerat et eius officiis quia.
-            message: Fugit enim fugiat nihil rerum veniam reiciendis.
+            code: Voluptatum in dolores.
+            message: Ipsam aut aliquam quos harum eaque.
         required:
             - code
             - message
@@ -1672,7 +1595,7 @@ definitions:
             logo_url:
                 type: string
                 description: Project logo URL
-                example: Iusto qui provident dolor.
+                example: Molestiae qui.
             name:
                 type: string
                 description: Project name
@@ -1697,7 +1620,7 @@ definitions:
         description: LFX Project information
         example:
             id: 003170000123XHTAA2
-            logo_url: Aut ipsum nulla est in voluptates eius.
+            logo_url: Molestiae qui.
             name: Express JS
             slug: express-gateway
             status: Active
@@ -1713,15 +1636,15 @@ definitions:
             code:
                 type: string
                 description: HTTP status code
-                example: Harum quaerat sequi perspiciatis omnis provident.
+                example: Est labore voluptatem consequatur explicabo.
             message:
                 type: string
                 description: Error message
-                example: Quibusdam sapiente.
-        description: Not found
+                example: Voluptatem quidem ut omnis eum.
+        description: Not found error response
         example:
-            code: Rem rem earum nihil.
-            message: Est qui sit earum.
+            code: Est labore voluptatem consequatur explicabo.
+            message: Voluptatem quidem ut omnis eum.
         required:
             - code
             - message
@@ -1745,11 +1668,6 @@ definitions:
                       committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       project_name: Kubernetes
                       project_uid: 003170000123XHTAA2
-                    - committee_category: Technical Steering Committee
-                      committee_name: Technical Steering Committee
-                      committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                      project_name: Kubernetes
-                      project_uid: 003170000123XHTAA2
             affected_projects:
                 type: array
                 items:
@@ -1757,22 +1675,17 @@ definitions:
                 description: List of affected projects
                 example:
                     - id: 003170000123XHTAA2
-                      logo_url: Aut id mollitia voluptas aut maiores.
+                      logo_url: Molestiae qui.
                       name: Express JS
                       slug: express-gateway
                       status: Active
                     - id: 003170000123XHTAA2
-                      logo_url: Aut id mollitia voluptas aut maiores.
+                      logo_url: Molestiae qui.
                       name: Express JS
                       slug: express-gateway
                       status: Active
                     - id: 003170000123XHTAA2
-                      logo_url: Aut id mollitia voluptas aut maiores.
-                      name: Express JS
-                      slug: express-gateway
-                      status: Active
-                    - id: 003170000123XHTAA2
-                      logo_url: Aut id mollitia voluptas aut maiores.
+                      logo_url: Molestiae qui.
                       name: Express JS
                       slug: express-gateway
                       status: Active
@@ -1803,13 +1716,7 @@ definitions:
                       role: Voting Rep
                       user_id: 005f1000009RbC4AAK
                       username: jdoe
-                    - email: john.doe@example.com
-                      first_name: John
-                      last_name: Doe
-                      name: John Doe
-                      role: Voting Rep
-                      user_id: 005f1000009RbC4AAK
-                      username: jdoe
+        description: Preview of recipients, committees, and projects affected by a resend
         example:
             affected_committees:
                 - committee_category: Technical Steering Committee
@@ -1822,33 +1729,30 @@ definitions:
                   committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   project_name: Kubernetes
                   project_uid: 003170000123XHTAA2
-                - committee_category: Technical Steering Committee
-                  committee_name: Technical Steering Committee
-                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                  project_name: Kubernetes
-                  project_uid: 003170000123XHTAA2
-                - committee_category: Technical Steering Committee
-                  committee_name: Technical Steering Committee
-                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                  project_name: Kubernetes
-                  project_uid: 003170000123XHTAA2
             affected_projects:
                 - id: 003170000123XHTAA2
-                  logo_url: Aut id mollitia voluptas aut maiores.
+                  logo_url: Molestiae qui.
                   name: Express JS
                   slug: express-gateway
                   status: Active
                 - id: 003170000123XHTAA2
-                  logo_url: Aut id mollitia voluptas aut maiores.
+                  logo_url: Molestiae qui.
                   name: Express JS
                   slug: express-gateway
                   status: Active
                 - id: 003170000123XHTAA2
-                  logo_url: Aut id mollitia voluptas aut maiores.
+                  logo_url: Molestiae qui.
                   name: Express JS
                   slug: express-gateway
                   status: Active
             affected_recipients:
+                - email: john.doe@example.com
+                  first_name: John
+                  last_name: Doe
+                  name: John Doe
+                  role: Voting Rep
+                  user_id: 005f1000009RbC4AAK
+                  username: jdoe
                 - email: john.doe@example.com
                   first_name: John
                   last_name: Doe
@@ -1870,15 +1774,15 @@ definitions:
             code:
                 type: string
                 description: HTTP status code
-                example: Ut provident beatae non vero facilis.
+                example: Ea hic delectus officiis dolorum libero ut.
             message:
                 type: string
                 description: Error message
-                example: Ut et non ab quaerat.
-        description: Service unavailable
+                example: Inventore quis atque.
+        description: Service unavailable error response
         example:
-            code: Voluptatem recusandae officiis provident velit ratione quod.
-            message: Et quibusdam.
+            code: Ea hic delectus officiis dolorum libero ut.
+            message: Inventore quis atque.
         required:
             - code
             - message
@@ -1906,7 +1810,7 @@ definitions:
                 type: array
                 items:
                     type: string
-                    example: Architecto impedit quia.
+                    example: Voluptatem et qui ut fuga aut adipisci.
                 description: Array of recipient IDs to resend survey emails to
                 example:
                     - cba14f40-1636-11ec-9621-0242ac130002
@@ -1932,7 +1836,7 @@ definitions:
             nps_value:
                 type: number
                 description: NPS value for this committee
-                example: 0.5321655236543198
+                example: 0.8919541608979904
                 format: double
             project_name:
                 type: string
@@ -1949,23 +1853,23 @@ definitions:
             total_recipients:
                 type: integer
                 description: Total recipients for this committee
-                example: 5888471810541887469
+                example: 2199214278205972519
                 format: int64
             total_responses:
                 type: integer
                 description: Total responses for this committee
-                example: 7906207952282005937
+                example: 7136688557656320942
                 format: int64
         description: Survey committee details
         example:
             committee_name: Technical Steering Committee
             committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-            nps_value: 0.8503424703069261
+            nps_value: 0.8919541608979904
             project_name: Kubernetes
             project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
             survey_url: https://surveymonkey.com/r/abc123
-            total_recipients: 3298483988605284369
-            total_responses: 6784254985233737776
+            total_recipients: 2199214278205972519
+            total_responses: 7136688557656320942
     SurveyCreateExclusionRequestBody:
         title: SurveyCreateExclusionRequestBody
         type: object
@@ -1973,29 +1877,29 @@ definitions:
             committee_uid:
                 type: string
                 description: Committee UID for survey-specific exclusion
-                example: Quasi unde.
+                example: Omnis quae.
             email:
                 type: string
                 description: Survey responder's email
-                example: Facere sit debitis.
+                example: Debitis cumque est.
             global_exclusion:
                 type: string
                 description: Global exclusion flag
-                example: Explicabo vel voluptatum aliquid molestias assumenda.
+                example: Sit modi quasi.
             survey_uid:
                 type: string
                 description: Survey UID for survey-specific exclusion
-                example: Laudantium in sint incidunt occaecati quasi et.
+                example: Occaecati dignissimos.
             user_id:
                 type: string
                 description: Recipient's user ID
-                example: Autem neque.
+                example: Ut eaque veritatis.
         example:
-            committee_uid: Iure ut qui est.
-            email: Consequatur ducimus.
-            global_exclusion: Ad sed eligendi.
-            survey_uid: Ipsa enim ratione pariatur earum.
-            user_id: Reiciendis impedit tenetur tenetur qui dolor assumenda.
+            committee_uid: Omnis quae.
+            email: Debitis cumque est.
+            global_exclusion: Sit modi quasi.
+            survey_uid: Occaecati dignissimos.
+            user_id: Ut eaque veritatis.
     SurveyDeleteExclusionRequestBody:
         title: SurveyDeleteExclusionRequestBody
         type: object
@@ -2003,29 +1907,29 @@ definitions:
             committee_uid:
                 type: string
                 description: Committee UID for survey-specific exclusion
-                example: Ratione optio assumenda numquam reiciendis.
+                example: Accusamus et sed consequatur eius architecto.
             email:
                 type: string
                 description: Survey responder's email
-                example: Tenetur ratione officia.
+                example: Odio ipsam unde tempore sit et.
             global_exclusion:
                 type: string
                 description: Global exclusion flag
-                example: Quia eaque eaque.
+                example: Sequi nam eaque.
             survey_uid:
                 type: string
                 description: Survey UID for survey-specific exclusion
-                example: Exercitationem aliquid debitis beatae ut.
+                example: Consequuntur inventore eos maiores.
             user_id:
                 type: string
                 description: Recipient's user ID
-                example: Dolores non.
+                example: Quam aliquid ratione.
         example:
-            committee_uid: Sequi nulla et delectus alias ad et.
-            email: Unde eligendi aperiam sit.
-            global_exclusion: Itaque quia omnis et.
-            survey_uid: Omnis non voluptatem provident sed delectus aperiam.
-            user_id: Nam facilis ducimus.
+            committee_uid: Accusamus et sed consequatur eius architecto.
+            email: Odio ipsam unde tempore sit et.
+            global_exclusion: Sequi nam eaque.
+            survey_uid: Consequuntur inventore eos maiores.
+            user_id: Quam aliquid ratione.
     SurveyQuestionAnswer:
         title: SurveyQuestionAnswer
         type: object
@@ -2036,8 +1940,6 @@ definitions:
                     $ref: '#/definitions/SurveyAnswerChoice'
                 description: Answers selected or entered by the recipient
                 example:
-                    - choice_id: c-001
-                      text: Strongly agree
                     - choice_id: c-001
                       text: Strongly agree
                     - choice_id: c-001
@@ -2086,7 +1988,7 @@ definitions:
             created_at:
                 type: string
                 description: When the response record was created (RFC3339)
-                example: "1990-04-10T00:32:21Z"
+                example: "1999-03-08T18:15:09Z"
                 format: date-time
             email:
                 type: string
@@ -2112,7 +2014,7 @@ definitions:
             last_received_time:
                 type: string
                 description: Last time a survey email was received (RFC3339)
-                example: "1997-02-08T10:02:42Z"
+                example: "1979-05-15T23:23:07Z"
                 format: date-time
             membership_tier:
                 type: string
@@ -2135,7 +2037,7 @@ definitions:
             response_datetime:
                 type: string
                 description: When the recipient submitted their response (RFC3339)
-                example: "1991-02-19T05:52:27Z"
+                example: "2010-08-28T13:35:32Z"
                 format: date-time
             response_status:
                 type: string
@@ -2155,7 +2057,7 @@ definitions:
             ses_bounce_diagnostic_code:
                 type: string
                 description: SES bounce diagnostic code
-                example: Hic et aut quo neque.
+                example: Culpa explicabo provident.
             ses_bounce_subtype:
                 type: string
                 description: SES bounce subtype
@@ -2167,7 +2069,7 @@ definitions:
             ses_complaint_date:
                 type: string
                 description: When the SES complaint was filed (RFC3339)
-                example: "1978-11-27T14:06:08Z"
+                example: "1983-08-26T07:21:55Z"
                 format: date-time
             ses_complaint_exists:
                 type: boolean
@@ -2176,7 +2078,7 @@ definitions:
             ses_complaint_type:
                 type: string
                 description: SES complaint type
-                example: Quos saepe dolor.
+                example: Porro ab velit.
             ses_delivery_successful:
                 type: boolean
                 description: Whether SES delivery succeeded
@@ -2184,25 +2086,25 @@ definitions:
             ses_email_opened:
                 type: boolean
                 description: Whether the recipient opened the survey email
-                example: false
+                example: true
             ses_email_opened_last_time:
                 type: string
                 description: Last time the email was opened (RFC3339)
-                example: "1973-12-31T12:57:37Z"
+                example: "1977-06-17T21:42:38Z"
                 format: date-time
             ses_link_clicked:
                 type: boolean
                 description: Whether the recipient clicked the survey link
-                example: true
+                example: false
             ses_link_clicked_last_time:
                 type: string
                 description: Last time the survey link was clicked (RFC3339)
-                example: "1976-02-07T15:06:53Z"
+                example: "1971-08-05T21:08:43Z"
                 format: date-time
             ses_message_id:
                 type: string
                 description: SES message identifier
-                example: Eos ut et ut quis.
+                example: Dolorum et a praesentium ut reprehenderit vel.
             survey_link:
                 type: string
                 description: Personal survey link for this recipient
@@ -2218,13 +2120,6 @@ definitions:
                           text: Strongly agree
                         - choice_id: c-001
                           text: Strongly agree
-                      question_family: rating
-                      question_id: q-001
-                      question_subtype: ranking
-                      question_text: How satisfied are you with the project governance?
-                    - answers:
-                        - choice_id: c-001
-                          text: Strongly agree
                         - choice_id: c-001
                           text: Strongly agree
                       question_family: rating
@@ -2236,11 +2131,15 @@ definitions:
                           text: Strongly agree
                         - choice_id: c-001
                           text: Strongly agree
+                        - choice_id: c-001
+                          text: Strongly agree
                       question_family: rating
                       question_id: q-001
                       question_subtype: ranking
                       question_text: How satisfied are you with the project governance?
                     - answers:
+                        - choice_id: c-001
+                          text: Strongly agree
                         - choice_id: c-001
                           text: Strongly agree
                         - choice_id: c-001
@@ -2268,13 +2167,13 @@ definitions:
         description: Individual survey response submitted by a recipient
         example:
             committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-            created_at: "1995-04-15T20:25:58Z"
+            created_at: "1999-03-08T18:15:09Z"
             email: john.doe@example.com
             first_name: John
             id: cba14f40-1636-11ec-9621-0242ac130002
             job_title: Principal Engineer
             last_name: Doe
-            last_received_time: "1989-11-13T21:46:25Z"
+            last_received_time: "1979-05-15T23:23:07Z"
             membership_tier: Platinum
             nps_value: 9
             num_automated_reminders_received: 2
@@ -2284,24 +2183,26 @@ definitions:
             project:
                 name: Kubernetes
                 uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-            response_datetime: "1988-03-05T20:26:23Z"
+            response_datetime: "2010-08-28T13:35:32Z"
             response_status: Responded
             role: Voting Rep
-            ses_bounce_diagnostic_code: Rerum quae et dolorem excepturi qui ut.
+            ses_bounce_diagnostic_code: Culpa explicabo provident.
             ses_bounce_subtype: NoEmail
             ses_bounce_type: Permanent
-            ses_complaint_date: "1977-09-21T09:50:19Z"
-            ses_complaint_exists: false
-            ses_complaint_type: Saepe doloribus recusandae.
-            ses_delivery_successful: false
+            ses_complaint_date: "1983-08-26T07:21:55Z"
+            ses_complaint_exists: true
+            ses_complaint_type: Porro ab velit.
+            ses_delivery_successful: true
             ses_email_opened: true
-            ses_email_opened_last_time: "1995-12-01T14:35:53Z"
-            ses_link_clicked: true
-            ses_link_clicked_last_time: "1971-09-29T10:36:58Z"
-            ses_message_id: Explicabo ullam alias quisquam et sed quis.
+            ses_email_opened_last_time: "1977-06-17T21:42:38Z"
+            ses_link_clicked: false
+            ses_link_clicked_last_time: "1971-08-05T21:08:43Z"
+            ses_message_id: Dolorum et a praesentium ut reprehenderit vel.
             survey_link: https://surveymonkey.com/r/abc123
             survey_monkey_question_answers:
                 - answers:
+                    - choice_id: c-001
+                      text: Strongly agree
                     - choice_id: c-001
                       text: Strongly agree
                     - choice_id: c-001
@@ -2311,6 +2212,19 @@ definitions:
                   question_subtype: ranking
                   question_text: How satisfied are you with the project governance?
                 - answers:
+                    - choice_id: c-001
+                      text: Strongly agree
+                    - choice_id: c-001
+                      text: Strongly agree
+                    - choice_id: c-001
+                      text: Strongly agree
+                  question_family: rating
+                  question_id: q-001
+                  question_subtype: ranking
+                  question_text: How satisfied are you with the project governance?
+                - answers:
+                    - choice_id: c-001
+                      text: Strongly agree
                     - choice_id: c-001
                       text: Strongly agree
                     - choice_id: c-001
@@ -2399,6 +2313,7 @@ definitions:
                 example: []
             meta:
                 $ref: '#/definitions/SurveyResponsePageMeta'
+        description: Paginated list of individual survey responses per recipient
         example:
             data: []
             meta:
@@ -2416,11 +2331,11 @@ definitions:
             committee_category:
                 type: string
                 description: Committee category
-                example: Eius dolor deserunt debitis.
+                example: Dolorem omnis eos.
             committee_voting_enabled:
                 type: boolean
                 description: Committee voting enabled
-                example: false
+                example: true
             committees:
                 type: array
                 items:
@@ -2429,65 +2344,65 @@ definitions:
                 example:
                     - committee_name: Technical Steering Committee
                       committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                      nps_value: 0.7338553265470341
+                      nps_value: 0.8919541608979904
                       project_name: Kubernetes
                       project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       survey_url: https://surveymonkey.com/r/abc123
-                      total_recipients: 4380493782318789385
-                      total_responses: 6703144626018872213
+                      total_recipients: 2199214278205972519
+                      total_responses: 7136688557656320942
                     - committee_name: Technical Steering Committee
                       committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                      nps_value: 0.7338553265470341
+                      nps_value: 0.8919541608979904
                       project_name: Kubernetes
                       project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       survey_url: https://surveymonkey.com/r/abc123
-                      total_recipients: 4380493782318789385
-                      total_responses: 6703144626018872213
+                      total_recipients: 2199214278205972519
+                      total_responses: 7136688557656320942
                     - committee_name: Technical Steering Committee
                       committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                      nps_value: 0.7338553265470341
+                      nps_value: 0.8919541608979904
                       project_name: Kubernetes
                       project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       survey_url: https://surveymonkey.com/r/abc123
-                      total_recipients: 4380493782318789385
-                      total_responses: 6703144626018872213
+                      total_recipients: 2199214278205972519
+                      total_responses: 7136688557656320942
                     - committee_name: Technical Steering Committee
                       committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                      nps_value: 0.7338553265470341
+                      nps_value: 0.8919541608979904
                       project_name: Kubernetes
                       project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                       survey_url: https://surveymonkey.com/r/abc123
-                      total_recipients: 4380493782318789385
-                      total_responses: 6703144626018872213
+                      total_recipients: 2199214278205972519
+                      total_responses: 7136688557656320942
             created_at:
                 type: string
                 description: Creation timestamp
-                example: "1975-03-27T11:19:35Z"
+                example: "1976-02-04T05:27:37Z"
                 format: date-time
             creator_id:
                 type: string
                 description: Creator's user ID
-                example: Quos voluptate consequatur voluptas placeat.
+                example: Maxime impedit et.
             creator_name:
                 type: string
                 description: Creator's full name
-                example: Iusto harum repellat qui odit.
+                example: Ut impedit.
             creator_username:
                 type: string
                 description: Creator's username
-                example: Eos eaque sapiente qui repellat.
+                example: Quia aperiam tenetur corrupti.
             email_body:
                 type: string
                 description: Email body HTML
-                example: Dignissimos ipsam eius nisi consequatur necessitatibus molestias.
+                example: Necessitatibus placeat et qui officiis voluptate.
             email_body_text:
                 type: string
                 description: Email body plain text
-                example: Ab laboriosam.
+                example: Deleniti laudantium ipsam.
             email_subject:
                 type: string
                 description: Email subject line
-                example: Odit voluptas voluptatibus ducimus nam.
+                example: Qui velit nulla voluptatem illum.
             is_nps_survey:
                 type: boolean
                 description: Whether this is an NPS survey
@@ -2499,51 +2414,51 @@ definitions:
             last_modified_at:
                 type: string
                 description: Last modification timestamp
-                example: "1972-06-20T05:02:02Z"
+                example: "1974-03-13T03:16:43Z"
                 format: date-time
             last_modified_by:
                 type: string
                 description: User ID of last modifier
-                example: Nobis saepe eos enim adipisci.
+                example: Quo esse.
             latest_automated_reminder_sent_at:
                 type: string
                 description: Latest automated reminder sent date
-                example: "1986-04-07T23:19:55Z"
+                example: "1981-10-17T02:50:12Z"
                 format: date-time
             next_automated_reminder_at:
                 type: string
                 description: Next automated reminder date
-                example: "1977-05-18T07:55:11Z"
+                example: "2013-11-13T15:22:09Z"
                 format: date-time
             nps_value:
                 type: number
                 description: NPS value
-                example: 0.583150336677709
+                example: 0.23758385158178416
                 format: double
             num_automated_reminders_sent:
                 type: integer
                 description: Number of automated reminders sent
-                example: 5196831861939631839
+                example: 5890834086106003934
                 format: int64
             num_automated_reminders_to_send:
                 type: integer
                 description: Number of automated reminders to send
-                example: 8795978192037783985
+                example: 3040168544576392839
                 format: int64
             num_detractors:
                 type: integer
                 description: Number of detractors
-                example: 4771319480606979417
+                example: 2247699043079463279
                 format: int64
             num_passives:
                 type: integer
                 description: Number of passives
-                example: 2580277412964340776
+                example: 6183517097593665772
                 format: int64
             num_promoters:
                 type: integer
                 description: Number of promoters
-                example: 4168125815729591074
+                example: 3615802168304629542
                 format: int64
             response_status:
                 type: string
@@ -2560,25 +2475,25 @@ definitions:
             stage_filter:
                 type: string
                 description: Project stage filter
-                example: Impedit qui.
+                example: Saepe magni ullam aut autem.
             survey_cutoff_date:
                 type: string
                 description: Survey cutoff date
-                example: "1987-08-02T04:20:14Z"
+                example: "1971-08-23T20:19:51Z"
                 format: date-time
             survey_monkey_id:
                 type: string
                 description: SurveyMonkey survey ID
-                example: Expedita voluptas qui atque.
+                example: Debitis provident veritatis fugit deleniti laborum repellendus.
             survey_reminder_rate_days:
                 type: integer
                 description: Days between reminder emails
-                example: 2227198725388310643
+                example: 4140468901778994739
                 format: int64
             survey_send_date:
                 type: string
                 description: Survey send date
-                example: "1988-08-13T04:18:56Z"
+                example: "1970-06-29T15:39:15Z"
                 format: date-time
             survey_status:
                 type: string
@@ -2592,82 +2507,99 @@ definitions:
             survey_title:
                 type: string
                 description: Survey title
-                example: Et voluptas nesciunt magnam est.
+                example: Fuga nobis accusamus excepturi.
             survey_url:
                 type: string
                 description: Survey URL
-                example: Nisi sequi consequuntur rerum.
+                example: Quos eaque quisquam.
             total_bounced_emails:
                 type: integer
                 description: Number of bounced emails
-                example: 4007924659459734540
+                example: 3719492611364711966
                 format: int64
             total_recipients:
                 type: integer
                 description: Total number of recipients
-                example: 2617375458690316165
+                example: 956746504341291556
                 format: int64
             total_responses:
                 type: integer
                 description: Total number of responses
-                example: 687050951074884430
+                example: 7880675659312219820
                 format: int64
             uid:
                 type: string
                 description: Survey unique identifier
                 example: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
+        description: Scheduled survey details
         example:
-            committee_category: Esse dolorem.
+            committee_category: Dolorem omnis eos.
             committee_voting_enabled: true
             committees:
                 - committee_name: Technical Steering Committee
                   committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                  nps_value: 0.7338553265470341
+                  nps_value: 0.8919541608979904
                   project_name: Kubernetes
                   project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   survey_url: https://surveymonkey.com/r/abc123
-                  total_recipients: 4380493782318789385
-                  total_responses: 6703144626018872213
+                  total_recipients: 2199214278205972519
+                  total_responses: 7136688557656320942
                 - committee_name: Technical Steering Committee
                   committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-                  nps_value: 0.7338553265470341
+                  nps_value: 0.8919541608979904
                   project_name: Kubernetes
                   project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
                   survey_url: https://surveymonkey.com/r/abc123
-                  total_recipients: 4380493782318789385
-                  total_responses: 6703144626018872213
-            created_at: "1974-04-11T09:58:54Z"
-            creator_id: Sed nulla.
-            creator_name: Eligendi eligendi.
-            creator_username: Vel quidem nulla eveniet corporis at.
-            email_body: Itaque saepe.
-            email_body_text: Modi quisquam inventore vitae sed beatae.
-            email_subject: Rerum magni dolorem velit sit et.
+                  total_recipients: 2199214278205972519
+                  total_responses: 7136688557656320942
+                - committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  nps_value: 0.8919541608979904
+                  project_name: Kubernetes
+                  project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  survey_url: https://surveymonkey.com/r/abc123
+                  total_recipients: 2199214278205972519
+                  total_responses: 7136688557656320942
+                - committee_name: Technical Steering Committee
+                  committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  nps_value: 0.8919541608979904
+                  project_name: Kubernetes
+                  project_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
+                  survey_url: https://surveymonkey.com/r/abc123
+                  total_recipients: 2199214278205972519
+                  total_responses: 7136688557656320942
+            created_at: "1976-02-04T05:27:37Z"
+            creator_id: Maxime impedit et.
+            creator_name: Ut impedit.
+            creator_username: Quia aperiam tenetur corrupti.
+            email_body: Necessitatibus placeat et qui officiis voluptate.
+            email_body_text: Deleniti laudantium ipsam.
+            email_subject: Qui velit nulla voluptatem illum.
             is_nps_survey: true
-            is_project_survey: true
-            last_modified_at: "1983-05-08T05:30:59Z"
-            last_modified_by: Molestias quis occaecati repellendus.
-            latest_automated_reminder_sent_at: "2009-02-19T07:45:29Z"
-            next_automated_reminder_at: "2004-04-24T08:45:56Z"
-            nps_value: 0.01678886250754297
-            num_automated_reminders_sent: 1416442308113106563
-            num_automated_reminders_to_send: 853716811249958395
-            num_detractors: 201570708445090950
-            num_passives: 250142572852472756
-            num_promoters: 2853001713697540754
+            is_project_survey: false
+            last_modified_at: "1974-03-13T03:16:43Z"
+            last_modified_by: Quo esse.
+            latest_automated_reminder_sent_at: "1981-10-17T02:50:12Z"
+            next_automated_reminder_at: "2013-11-13T15:22:09Z"
+            nps_value: 0.23758385158178416
+            num_automated_reminders_sent: 5890834086106003934
+            num_automated_reminders_to_send: 3040168544576392839
+            num_detractors: 2247699043079463279
+            num_passives: 6183517097593665772
+            num_promoters: 3615802168304629542
             response_status: scheduled
-            send_immediately: false
-            stage_filter: Vitae odio maiores quia.
-            survey_cutoff_date: "1991-09-03T23:18:14Z"
-            survey_monkey_id: Fugit omnis molestias a fuga eos.
-            survey_reminder_rate_days: 6996222548824721535
-            survey_send_date: "1971-06-01T19:46:10Z"
+            send_immediately: true
+            stage_filter: Saepe magni ullam aut autem.
+            survey_cutoff_date: "1971-08-23T20:19:51Z"
+            survey_monkey_id: Debitis provident veritatis fugit deleniti laborum repellendus.
+            survey_reminder_rate_days: 4140468901778994739
+            survey_send_date: "1970-06-29T15:39:15Z"
             survey_status: scheduled
-            survey_title: Ut sapiente iure.
-            survey_url: Ut suscipit perspiciatis cupiditate.
-            total_bounced_emails: 4170793714020573193
-            total_recipients: 8295767598158092021
-            total_responses: 7373958538290696021
+            survey_title: Fuga nobis accusamus excepturi.
+            survey_url: Quos eaque quisquam.
+            total_bounced_emails: 3719492611364711966
+            total_recipients: 956746504341291556
+            total_responses: 7880675659312219820
             uid: 4e8165a9-9b29-4506-b093-ab0a4aae9b84
         required:
             - uid
@@ -2687,27 +2619,27 @@ definitions:
             creator_id:
                 type: string
                 description: Ignored. The creator is the authenticated user.
-                example: Beatae adipisci quaerat eius sit.
+                example: Dolorem temporibus quibusdam unde reiciendis ut maxime.
             creator_name:
                 type: string
                 description: Ignored. The creator's name is resolved from the authenticated user.
-                example: Autem accusantium totam iste.
+                example: Et sequi nulla tempora.
             creator_username:
                 type: string
                 description: Ignored. The creator is the authenticated user.
-                example: Libero eos et nesciunt provident adipisci.
+                example: Amet et et.
             email_body:
                 type: string
                 description: Email body HTML content
-                example: Consequuntur corporis blanditiis.
+                example: Rerum ratione quisquam.
             email_body_text:
                 type: string
                 description: Email body plain text content
-                example: Illum perferendis tempora qui est cum.
+                example: Ut aliquid magnam incidunt suscipit quasi.
             email_subject:
                 type: string
                 description: Email subject line
-                example: Sit tempora voluptatum recusandae ipsum aut.
+                example: Velit placeat eius ut quod et perferendis.
             is_project_survey:
                 type: boolean
                 description: Whether the survey is project-level (true) or global-level (false)
@@ -2719,45 +2651,45 @@ definitions:
             stage_filter:
                 type: string
                 description: Project stage filter for global surveys
-                example: Provident libero voluptatem ullam.
+                example: Et magni vero magnam magni est et.
             survey_cutoff_date:
                 type: string
                 description: Survey cutoff/end date (RFC3339 format)
-                example: Enim sint et quia omnis totam nemo.
+                example: Cupiditate et.
             survey_monkey_id:
                 type: string
                 description: SurveyMonkey survey ID
-                example: Dignissimos sunt nihil architecto dolorum quis.
+                example: Explicabo et aperiam aut molestias.
             survey_reminder_rate_days:
                 type: integer
                 description: Days between automatic reminder emails (0 = no reminders)
-                example: 4659538237104169697
+                example: 2823344719393375505
                 format: int64
             survey_send_date:
                 type: string
                 description: Date to send the survey (RFC3339 format)
-                example: Modi voluptas.
+                example: Qui rerum adipisci odit dicta voluptas.
             survey_title:
                 type: string
                 description: Survey title
-                example: Quam suscipit.
+                example: Ut veritatis id.
         example:
             committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-            committee_voting_enabled: true
-            creator_id: Omnis sequi.
-            creator_name: Vitae necessitatibus accusamus ipsum et cum itaque.
-            creator_username: Occaecati id vero.
-            email_body: Consequatur quo dolorem tenetur consequatur modi culpa.
-            email_body_text: Fuga expedita magni in voluptatem tempora id.
-            email_subject: Ipsam laboriosam molestiae.
+            committee_voting_enabled: false
+            creator_id: Dolorem temporibus quibusdam unde reiciendis ut maxime.
+            creator_name: Et sequi nulla tempora.
+            creator_username: Amet et et.
+            email_body: Rerum ratione quisquam.
+            email_body_text: Ut aliquid magnam incidunt suscipit quasi.
+            email_subject: Velit placeat eius ut quod et perferendis.
             is_project_survey: false
-            send_immediately: true
-            stage_filter: Aut molestiae et.
-            survey_cutoff_date: Nesciunt dolore dolores iste quis et.
-            survey_monkey_id: Ab dolore vero.
-            survey_reminder_rate_days: 6609988692001039494
-            survey_send_date: Quam dolorum consequatur non ex.
-            survey_title: Architecto sed magni culpa explicabo.
+            send_immediately: false
+            stage_filter: Et magni vero magnam magni est et.
+            survey_cutoff_date: Cupiditate et.
+            survey_monkey_id: Explicabo et aperiam aut molestias.
+            survey_reminder_rate_days: 2823344719393375505
+            survey_send_date: Qui rerum adipisci odit dicta voluptas.
+            survey_title: Ut veritatis id.
         required:
             - committee_uid
     SurveyTemplate:
@@ -2804,47 +2736,47 @@ definitions:
             creator_id:
                 type: string
                 description: Ignored. The modifier is the authenticated user.
-                example: Quibusdam quasi in tempore beatae.
+                example: Quia eos omnis non magnam ut.
             email_body:
                 type: string
                 description: Email body HTML content
-                example: Nisi consequuntur consequuntur possimus voluptatum.
+                example: Blanditiis aliquam a cumque.
             email_body_text:
                 type: string
                 description: Email body plain text content
-                example: Deleniti quod.
+                example: Voluptates eos aut.
             email_subject:
                 type: string
                 description: Email subject line
-                example: Et reiciendis veniam sint possimus minus.
+                example: Possimus distinctio accusamus cupiditate.
             survey_cutoff_date:
                 type: string
                 description: Survey cutoff/end date (RFC3339 format)
-                example: Enim optio vel nobis vitae corrupti quaerat.
+                example: Sed exercitationem.
             survey_reminder_rate_days:
                 type: integer
                 description: Days between automatic reminder emails (0 = no reminders)
-                example: 3891394482161785799
+                example: 1575473299966576967
                 format: int64
             survey_send_date:
                 type: string
                 description: Date to send the survey (RFC3339 format)
-                example: Autem amet.
+                example: Maxime sed et sunt nihil quia.
             survey_title:
                 type: string
                 description: Survey title
-                example: Est repellat magnam itaque laudantium ut quae.
+                example: Expedita voluptates.
         example:
             committee_uid: qa1e8536-a985-4cf5-b981-a170927a1d11
-            committee_voting_enabled: true
-            creator_id: Unde soluta est quos necessitatibus.
-            email_body: Quas labore non eos.
-            email_body_text: Quas illo eos at aut doloribus.
-            email_subject: Sed dolore non et tenetur.
-            survey_cutoff_date: Explicabo occaecati non architecto minima est.
-            survey_reminder_rate_days: 296607924047547470
-            survey_send_date: Est doloribus quaerat quos.
-            survey_title: Dolore quia quis ut quas.
+            committee_voting_enabled: false
+            creator_id: Quia eos omnis non magnam ut.
+            email_body: Blanditiis aliquam a cumque.
+            email_body_text: Voluptates eos aut.
+            email_subject: Possimus distinctio accusamus cupiditate.
+            survey_cutoff_date: Sed exercitationem.
+            survey_reminder_rate_days: 1575473299966576967
+            survey_send_date: Maxime sed et sunt nihil quia.
+            survey_title: Expedita voluptates.
     SurveyValidateEmailRequestBody:
         title: SurveyValidateEmailRequestBody
         type: object
@@ -2852,14 +2784,14 @@ definitions:
             body:
                 type: string
                 description: Email body template
-                example: Ut voluptates aut cupiditate.
+                example: Eos doloribus quam numquam nostrum ipsam qui.
             subject:
                 type: string
                 description: Email subject template
-                example: Dolorem voluptatem neque.
+                example: Ut et dolores autem quae rerum qui.
         example:
-            body: Eligendi provident temporibus aut sunt.
-            subject: Sed laborum id aut reprehenderit veniam.
+            body: Eos doloribus quam numquam nostrum ipsam qui.
+            subject: Ut et dolores autem quae rerum qui.
     UnauthorizedError:
         title: UnauthorizedError
         type: object
@@ -2867,15 +2799,15 @@ definitions:
             code:
                 type: string
                 description: HTTP status code
-                example: Quis dolores.
+                example: Enim quis.
             message:
                 type: string
                 description: Error message
-                example: Perspiciatis eos earum voluptate.
-        description: Unauthorized
+                example: Aliquam molestias necessitatibus labore.
+        description: Unauthorized error response
         example:
-            code: Atque nemo voluptatem et id aut autem.
-            message: Qui omnis et ut asperiores.
+            code: Enim quis.
+            message: Aliquam molestias necessitatibus labore.
         required:
             - code
             - message
@@ -2886,20 +2818,20 @@ definitions:
             email_address:
                 type: string
                 description: Email address
-                example: Cumque nostrum mollitia aut aut eos minus.
+                example: Rem sint eaque ut quisquam.
             id:
                 type: string
                 description: Email ID
-                example: Sit non facere error voluptates.
+                example: Id nihil.
             is_primary:
                 type: boolean
                 description: Whether this is the primary email
-                example: false
+                example: true
         description: User email information
         example:
-            email_address: Earum aut.
-            id: In quis voluptatem ipsa molestias at.
-            is_primary: false
+            email_address: Rem sint eaque ut quisquam.
+            id: Id nihil.
+            is_primary: true
     ValidateEmailResult:
         title: ValidateEmailResult
         type: object
@@ -2912,6 +2844,7 @@ definitions:
                 type: string
                 description: Validated email subject
                 example: An example survey subject with the year 2023
+        description: Validated email template body and subject
         example:
             body: An example survey body with the quarter Q1
             subject: An example survey subject with the year 2023
