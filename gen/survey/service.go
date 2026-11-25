@@ -61,6 +61,8 @@ type Service interface {
 	// List individual per-recipient responses for a survey (proxies to ITX GET
 	// /v2/surveys/{survey_uid}/responses)
 	ListSurveyResponses(context.Context, *ListSurveyResponsesPayload) (res *SurveyResponsesPage, err error)
+	// List SurveyMonkey survey templates (proxies to ITX GET /v2/surveys/templates)
+	ListSurveyTemplates(context.Context, *ListSurveyTemplatesPayload) (res []*SurveyTemplate, err error)
 	// Validate email template body and subject (proxies to ITX POST
 	// /v2/surveys/validate_email)
 	ValidateEmail(context.Context, *ValidateEmailPayload) (res *ValidateEmailResult, err error)
@@ -86,7 +88,7 @@ const ServiceName = "survey"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [16]string{"schedule_survey", "get_survey", "update_survey", "delete_survey", "bulk_resend_survey", "preview_send_survey", "send_missing_recipients", "delete_survey_response", "resend_survey_response", "delete_recipient_group", "create_exclusion", "delete_exclusion", "get_exclusion", "delete_exclusion_by_id", "list_survey_responses", "validate_email"}
+var MethodNames = [17]string{"schedule_survey", "get_survey", "update_survey", "delete_survey", "bulk_resend_survey", "preview_send_survey", "send_missing_recipients", "delete_survey_response", "resend_survey_response", "delete_recipient_group", "create_exclusion", "delete_exclusion", "get_exclusion", "delete_exclusion_by_id", "list_survey_responses", "list_survey_templates", "validate_email"}
 
 // Bad request error response
 type BadRequestError struct {
@@ -342,6 +344,18 @@ type ListSurveyResponsesPayload struct {
 	ProjectUids *string
 }
 
+// ListSurveyTemplatesPayload is the payload type of the survey service
+// list_survey_templates method.
+type ListSurveyTemplatesPayload struct {
+	// JWT token
+	Token *string
+	// LFX project UID (v2) used for the writer check
+	ProjectUID string
+	// Optional committee UID (v2); a committee writer may list templates instead
+	// of a project writer
+	CommitteeUID *string
+}
+
 // Not found error response
 type NotFoundError struct {
 	// HTTP status code
@@ -394,11 +408,11 @@ type ScheduleSurveyPayload struct {
 	IsProjectSurvey *bool
 	// Project stage filter for global surveys
 	StageFilter *string
-	// Creator's username
+	// Ignored. The creator is the authenticated user.
 	CreatorUsername *string
-	// Creator's full name
+	// Ignored. The creator's name is resolved from the authenticated user.
 	CreatorName *string
-	// Creator's user ID
+	// Ignored. The creator is the authenticated user.
 	CreatorID *string
 	// SurveyMonkey survey ID
 	SurveyMonkeyID *string
@@ -669,6 +683,18 @@ type SurveyScheduleResult struct {
 	LatestAutomatedReminderSentAt *string
 }
 
+// SurveyMonkey survey template available for scheduling
+type SurveyTemplate struct {
+	// SurveyMonkey survey ID
+	ID string
+	// Survey template title
+	Title string
+	// Survey template nickname
+	Nickname *string
+	// SurveyMonkey API URL for the survey template
+	Href *string
+}
+
 // Unauthorized error response
 type UnauthorizedError struct {
 	// HTTP status code
@@ -686,7 +712,7 @@ type UpdateSurveyPayload struct {
 	SurveyUID string
 	// Committee UID to send survey to
 	CommitteeUID *string
-	// Creator's user ID
+	// Ignored. The modifier is the authenticated user.
 	CreatorID *string
 	// Survey title
 	SurveyTitle *string

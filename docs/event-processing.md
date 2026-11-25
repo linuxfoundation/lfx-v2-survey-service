@@ -14,8 +14,9 @@ The survey service implements NATS KV bucket event processing to automatically s
 │   (via KV)      │
 └────────┬────────┘
          │
-         ├─ itx-surveys:*
-         └─ itx-survey-responses:*
+         ├─ itx-surveys.*
+         ├─ itx-survey-responses.*
+         └─ surveymonkey-surveys.*
          │
          v
 ┌─────────────────────────────────┐
@@ -200,7 +201,7 @@ EVENT_PROCESSING_ENABLED=false ./survey-api
 ```
 INFO  Event processing is ENABLED - initializing event processor
 INFO  Event processor started in background
-INFO  processing survey update key=itx-surveys:survey-123
+DEBUG processing survey update key=itx-surveys.survey-123
 INFO  successfully sent survey indexer and access messages survey_id=survey-123
 ```
 
@@ -343,7 +344,8 @@ When processing a survey response, the handler checks that the parent survey map
 
    ```bash
    # Put test survey in v1-objects KV
-   nats kv put v1-objects itx-surveys:test-123 '{"id":"test-123",...}'
+   # Keys are <prefix>.<uid>; a colon would not match any handler prefix
+   nats kv put v1-objects itx-surveys.test-123 '{"id":"test-123",...}'
    ```
 
 4. **Check processing logs**:
@@ -353,14 +355,29 @@ When processing a survey response, the handler checks that the parent survey map
    grep "processing survey update" logs/survey-api.log
    ```
 
+5. **Run the automated tests**:
+
+   ```bash
+   go test ./cmd/survey-api/eventing/... -race
+   ```
+
+   The handlers are tested with an in-memory KV and a recording publisher;
+   `NewEventProcessor`, `Start`/`Stop` and the invite subscriber run against an
+   in-process JetStream server, so no external NATS is needed. The shared
+   helpers live in `cmd/survey-api/eventing/helpers_test.go`.
+
 ### Code Structure
 
 ```
 cmd/survey-api/eventing/
-├── event_processor.go           # Lifecycle management
-├── kv_handler.go                # Event routing by key prefix
-├── survey_event_handler.go      # Survey transformation logic
-└── survey_response_event_handler.go  # Response transformation logic
+├── event_processor.go                # Lifecycle management
+├── kv_handler.go                     # Event routing by key prefix
+├── survey_event_handler.go           # Survey transformation logic
+├── survey_response_event_handler.go  # Response transformation logic
+├── survey_template_event_handler.go  # SurveyMonkey template transformation logic
+├── survey_response_invite.go         # Best-effort LFID invite for new responses
+├── invite_accepted_subscriber.go     # Enriches responses after an invite is accepted
+└── invite_config.go                  # Invite feature configuration
 
 internal/domain/
 ├── event_models.go              # v2 data models
@@ -379,7 +396,8 @@ To add processing for new entity types:
 2. Add routing logic in `kv_handler.go`
 3. Define v2 model in `internal/domain/event_models.go`
 4. Add publisher method in `internal/infrastructure/eventing/nats_publisher.go`
-5. Update documentation
+5. Add tests in the `_test.go` of each file you touched (see `CLAUDE.md`, "Test doubles and harnesses")
+6. Update documentation
 
 ## References
 

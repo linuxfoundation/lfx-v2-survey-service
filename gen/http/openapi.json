@@ -50,7 +50,7 @@
             }
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -60,7 +60,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -70,7 +70,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -79,8 +79,18 @@
               ]
             }
           },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -90,7 +100,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -139,7 +149,7 @@
             }
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -149,7 +159,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -159,7 +169,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -168,8 +178,18 @@
               ]
             }
           },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -210,7 +230,7 @@
             "description": "No Content response."
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -220,7 +240,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -230,7 +250,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -239,8 +259,18 @@
               ]
             }
           },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -288,7 +318,7 @@
             }
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -298,7 +328,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -308,7 +338,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -318,7 +348,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -328,7 +358,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -368,7 +398,7 @@
             "description": "No Content response."
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -378,7 +408,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -388,7 +418,104 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ForbiddenError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
+          "500": {
+            "description": "InternalServerError: Internal server error",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          }
+        },
+        "schemes": [
+          "http"
+        ],
+        "security": [
+          {
+            "jwt_header_Authorization": []
+          }
+        ]
+      }
+    },
+    "/surveys/templates": {
+      "get": {
+        "tags": [
+          "survey"
+        ],
+        "summary": "list_survey_templates survey",
+        "description": "List SurveyMonkey survey templates (proxies to ITX GET /v2/surveys/templates)\n\n**Required security scopes for jwt**:\n  * `manage:projects`\n  * `manage:surveys`",
+        "operationId": "survey#list_survey_templates",
+        "parameters": [
+          {
+            "name": "project_uid",
+            "in": "query",
+            "description": "LFX project UID (v2) used for the writer check",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "committee_uid",
+            "in": "query",
+            "description": "Optional committee UID (v2); a committee writer may list templates instead of a project writer",
+            "required": false,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK response.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SurveyTemplate"
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest: Bad request",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
+          "401": {
+            "description": "Unauthorized: Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/UnauthorizedError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
+          "403": {
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -398,9 +525,19 @@
             }
           },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
+          "503": {
+            "description": "ServiceUnavailable: Service unavailable",
+            "schema": {
+              "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
                 "code",
                 "message"
@@ -448,7 +585,7 @@
             }
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -458,7 +595,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -468,7 +605,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -478,7 +615,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -541,7 +678,7 @@
             }
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -551,7 +688,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -561,7 +698,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -571,7 +708,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -581,7 +718,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -591,7 +728,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -646,7 +783,7 @@
             }
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -656,7 +793,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -666,7 +803,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -676,7 +813,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -685,8 +822,18 @@
               ]
             }
           },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -696,7 +843,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -736,7 +883,7 @@
             "description": "No Content response."
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -746,7 +893,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -756,7 +903,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -766,7 +913,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -775,8 +922,18 @@
               ]
             }
           },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -786,7 +943,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -839,7 +996,7 @@
             "description": "No Content response."
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -849,7 +1006,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -859,7 +1016,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -869,7 +1026,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -878,8 +1035,18 @@
               ]
             }
           },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -889,7 +1056,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -941,7 +1108,7 @@
             }
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -951,7 +1118,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -961,7 +1128,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -971,7 +1138,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -981,7 +1148,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -991,7 +1158,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -1054,7 +1221,7 @@
             "description": "No Content response."
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -1064,7 +1231,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -1074,7 +1241,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -1084,7 +1251,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -1093,8 +1260,18 @@
               ]
             }
           },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -1104,7 +1281,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -1181,7 +1358,7 @@
             }
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -1191,7 +1368,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -1201,7 +1378,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -1211,7 +1388,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -1221,7 +1398,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -1231,7 +1408,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -1280,7 +1457,7 @@
             "description": "No Content response."
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -1290,7 +1467,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -1300,7 +1477,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -1310,7 +1487,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -1319,8 +1496,18 @@
               ]
             }
           },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -1330,7 +1517,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -1379,7 +1566,7 @@
             "description": "No Content response."
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -1389,7 +1576,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -1399,7 +1586,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -1409,7 +1596,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -1418,8 +1605,18 @@
               ]
             }
           },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -1429,7 +1626,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -1478,7 +1675,7 @@
             "description": "No Content response."
           },
           "400": {
-            "description": "Bad Request response.",
+            "description": "BadRequest: Bad request",
             "schema": {
               "$ref": "#/definitions/BadRequestError",
               "required": [
@@ -1488,7 +1685,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized response.",
+            "description": "Unauthorized: Unauthorized",
             "schema": {
               "$ref": "#/definitions/UnauthorizedError",
               "required": [
@@ -1498,7 +1695,7 @@
             }
           },
           "403": {
-            "description": "Forbidden response.",
+            "description": "Forbidden: Forbidden",
             "schema": {
               "$ref": "#/definitions/ForbiddenError",
               "required": [
@@ -1508,7 +1705,7 @@
             }
           },
           "404": {
-            "description": "Not Found response.",
+            "description": "NotFound: Not found",
             "schema": {
               "$ref": "#/definitions/NotFoundError",
               "required": [
@@ -1517,8 +1714,18 @@
               ]
             }
           },
+          "409": {
+            "description": "Conflict: Conflict",
+            "schema": {
+              "$ref": "#/definitions/ConflictError",
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
           "500": {
-            "description": "Internal Server Error response.",
+            "description": "InternalServerError: Internal server error",
             "schema": {
               "$ref": "#/definitions/InternalServerError",
               "required": [
@@ -1528,7 +1735,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable response.",
+            "description": "ServiceUnavailable: Service unavailable",
             "schema": {
               "$ref": "#/definitions/ServiceUnavailableError",
               "required": [
@@ -1557,18 +1764,43 @@
         "code": {
           "type": "string",
           "description": "HTTP status code",
-          "example": "Nam ipsa ut dicta et expedita provident."
+          "example": "Ipsum doloribus excepturi fuga eum quia autem."
         },
         "message": {
           "type": "string",
           "description": "Error message",
-          "example": "Repellendus in doloribus est qui."
+          "example": "Et voluptas quia maxime rerum deserunt."
         }
       },
-      "description": "Bad request",
+      "description": "Bad request error response",
       "example": {
-        "code": "Nam ipsa ut dicta et expedita provident.",
-        "message": "Repellendus in doloribus est qui."
+        "code": "Ipsum doloribus excepturi fuga eum quia autem.",
+        "message": "Et voluptas quia maxime rerum deserunt."
+      },
+      "required": [
+        "code",
+        "message"
+      ]
+    },
+    "ConflictError": {
+      "title": "ConflictError",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "HTTP status code",
+          "example": "Natus enim sapiente."
+        },
+        "message": {
+          "type": "string",
+          "description": "Error message",
+          "example": "Qui consectetur dolores tempora."
+        }
+      },
+      "description": "Conflict error response",
+      "example": {
+        "code": "Natus enim sapiente.",
+        "message": "Qui consectetur dolores tempora."
       },
       "required": [
         "code",
@@ -1636,7 +1868,7 @@
         "committee_uid": {
           "type": "string",
           "description": "Committee UID",
-          "example": "Rem recusandae doloremque rem natus qui voluptas."
+          "example": "Distinctio similique quis eum libero."
         },
         "email": {
           "type": "string",
@@ -1646,12 +1878,12 @@
         "global_exclusion": {
           "type": "string",
           "description": "Global exclusion flag",
-          "example": "Est nam nam dolores temporibus."
+          "example": "Repellendus ut."
         },
         "survey_uid": {
           "type": "string",
           "description": "Survey UID",
-          "example": "Aut quis quos."
+          "example": "Nisi natus."
         },
         "uid": {
           "type": "string",
@@ -1661,17 +1893,17 @@
         "user_id": {
           "type": "string",
           "description": "Recipient's user ID",
-          "example": "Quas molestias at incidunt id eius."
+          "example": "Earum non magnam a illo."
         }
       },
       "description": "A survey or global exclusion",
       "example": {
-        "committee_uid": "Rem recusandae doloremque rem natus qui voluptas.",
+        "committee_uid": "Distinctio similique quis eum libero.",
         "email": "test@email.com",
-        "global_exclusion": "Est nam nam dolores temporibus.",
-        "survey_uid": "Aut quis quos.",
+        "global_exclusion": "Repellendus ut.",
+        "survey_uid": "Nisi natus.",
         "uid": "5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e",
-        "user_id": "Quas molestias at incidunt id eius."
+        "user_id": "Earum non magnam a illo."
       },
       "required": [
         "uid"
@@ -1689,54 +1921,64 @@
           "description": "User emails",
           "example": [
             {
-              "email_address": "Asperiores suscipit aut.",
-              "id": "Deserunt unde tempore impedit.",
-              "is_primary": false
+              "email_address": "Rem sint eaque ut quisquam.",
+              "id": "Id nihil.",
+              "is_primary": true
             },
             {
-              "email_address": "Asperiores suscipit aut.",
-              "id": "Deserunt unde tempore impedit.",
-              "is_primary": false
+              "email_address": "Rem sint eaque ut quisquam.",
+              "id": "Id nihil.",
+              "is_primary": true
             },
             {
-              "email_address": "Asperiores suscipit aut.",
-              "id": "Deserunt unde tempore impedit.",
-              "is_primary": false
+              "email_address": "Rem sint eaque ut quisquam.",
+              "id": "Id nihil.",
+              "is_primary": true
+            },
+            {
+              "email_address": "Rem sint eaque ut quisquam.",
+              "id": "Id nihil.",
+              "is_primary": true
             }
           ]
         },
         "id": {
           "type": "string",
           "description": "User ID",
-          "example": "Inventore eius sit."
+          "example": "Et dolorum et sapiente est."
         },
         "username": {
           "type": "string",
           "description": "Username",
-          "example": "Eligendi sapiente est."
+          "example": "Ducimus sit sapiente."
         }
       },
       "description": "User information for an exclusion",
       "example": {
         "emails": [
           {
-            "email_address": "Asperiores suscipit aut.",
-            "id": "Deserunt unde tempore impedit.",
-            "is_primary": false
+            "email_address": "Rem sint eaque ut quisquam.",
+            "id": "Id nihil.",
+            "is_primary": true
           },
           {
-            "email_address": "Asperiores suscipit aut.",
-            "id": "Deserunt unde tempore impedit.",
-            "is_primary": false
+            "email_address": "Rem sint eaque ut quisquam.",
+            "id": "Id nihil.",
+            "is_primary": true
           },
           {
-            "email_address": "Asperiores suscipit aut.",
-            "id": "Deserunt unde tempore impedit.",
-            "is_primary": false
+            "email_address": "Rem sint eaque ut quisquam.",
+            "id": "Id nihil.",
+            "is_primary": true
+          },
+          {
+            "email_address": "Rem sint eaque ut quisquam.",
+            "id": "Id nihil.",
+            "is_primary": true
           }
         ],
-        "id": "Inventore eius sit.",
-        "username": "Eligendi sapiente est."
+        "id": "Et dolorum et sapiente est.",
+        "username": "Ducimus sit sapiente."
       }
     },
     "ExtendedExclusionResult": {
@@ -1746,7 +1988,7 @@
         "committee_uid": {
           "type": "string",
           "description": "Committee UID",
-          "example": "Ut provident iste nulla provident omnis."
+          "example": "Molestiae voluptatem et magnam deserunt."
         },
         "email": {
           "type": "string",
@@ -1756,12 +1998,12 @@
         "global_exclusion": {
           "type": "string",
           "description": "Global exclusion flag",
-          "example": "Eum expedita."
+          "example": "Vel voluptate."
         },
         "survey_uid": {
           "type": "string",
           "description": "Survey UID",
-          "example": "Ipsa error tempora commodi aut."
+          "example": "Sed non ut."
         },
         "uid": {
           "type": "string",
@@ -1774,38 +2016,43 @@
         "user_id": {
           "type": "string",
           "description": "Recipient's user ID",
-          "example": "Molestias recusandae recusandae esse veritatis."
+          "example": "Quia consequuntur repellat nisi."
         }
       },
       "description": "A survey or global exclusion with user information",
       "example": {
-        "committee_uid": "Ut provident iste nulla provident omnis.",
+        "committee_uid": "Molestiae voluptatem et magnam deserunt.",
         "email": "test@email.com",
-        "global_exclusion": "Eum expedita.",
-        "survey_uid": "Ipsa error tempora commodi aut.",
+        "global_exclusion": "Vel voluptate.",
+        "survey_uid": "Sed non ut.",
         "uid": "5f8b3c4d-9a2e-4f1b-8c7d-6e5a4b3c2d1e",
         "user": {
           "emails": [
             {
-              "email_address": "Asperiores suscipit aut.",
-              "id": "Deserunt unde tempore impedit.",
-              "is_primary": false
+              "email_address": "Rem sint eaque ut quisquam.",
+              "id": "Id nihil.",
+              "is_primary": true
             },
             {
-              "email_address": "Asperiores suscipit aut.",
-              "id": "Deserunt unde tempore impedit.",
-              "is_primary": false
+              "email_address": "Rem sint eaque ut quisquam.",
+              "id": "Id nihil.",
+              "is_primary": true
             },
             {
-              "email_address": "Asperiores suscipit aut.",
-              "id": "Deserunt unde tempore impedit.",
-              "is_primary": false
+              "email_address": "Rem sint eaque ut quisquam.",
+              "id": "Id nihil.",
+              "is_primary": true
+            },
+            {
+              "email_address": "Rem sint eaque ut quisquam.",
+              "id": "Id nihil.",
+              "is_primary": true
             }
           ],
-          "id": "Inventore eius sit.",
-          "username": "Eligendi sapiente est."
+          "id": "Et dolorum et sapiente est.",
+          "username": "Ducimus sit sapiente."
         },
-        "user_id": "Molestias recusandae recusandae esse veritatis."
+        "user_id": "Quia consequuntur repellat nisi."
       },
       "required": [
         "uid"
@@ -1818,18 +2065,18 @@
         "code": {
           "type": "string",
           "description": "HTTP status code",
-          "example": "Accusantium a doloribus."
+          "example": "At quo qui dicta voluptatem pariatur."
         },
         "message": {
           "type": "string",
           "description": "Error message",
-          "example": "Rerum aut earum est."
+          "example": "Quis error temporibus sit et consequuntur voluptatem."
         }
       },
-      "description": "Forbidden",
+      "description": "Forbidden error response",
       "example": {
-        "code": "Accusantium a doloribus.",
-        "message": "Rerum aut earum est."
+        "code": "At quo qui dicta voluptatem pariatur.",
+        "message": "Quis error temporibus sit et consequuntur voluptatem."
       },
       "required": [
         "code",
@@ -1904,18 +2151,18 @@
         "code": {
           "type": "string",
           "description": "HTTP status code",
-          "example": "Neque fugiat ipsum aperiam non nemo ut."
+          "example": "Voluptatum in dolores."
         },
         "message": {
           "type": "string",
           "description": "Error message",
-          "example": "Dignissimos excepturi repudiandae est."
+          "example": "Ipsam aut aliquam quos harum eaque."
         }
       },
-      "description": "Internal server error",
+      "description": "Internal server error response",
       "example": {
-        "code": "Neque fugiat ipsum aperiam non nemo ut.",
-        "message": "Dignissimos excepturi repudiandae est."
+        "code": "Voluptatum in dolores.",
+        "message": "Ipsam aut aliquam quos harum eaque."
       },
       "required": [
         "code",
@@ -1934,7 +2181,7 @@
         "logo_url": {
           "type": "string",
           "description": "Project logo URL",
-          "example": "Aut non accusamus quis."
+          "example": "Molestiae qui."
         },
         "name": {
           "type": "string",
@@ -1965,7 +2212,7 @@
       "description": "LFX Project information",
       "example": {
         "id": "003170000123XHTAA2",
-        "logo_url": "Aut non accusamus quis.",
+        "logo_url": "Molestiae qui.",
         "name": "Express JS",
         "slug": "express-gateway",
         "status": "Active"
@@ -1984,18 +2231,18 @@
         "code": {
           "type": "string",
           "description": "HTTP status code",
-          "example": "Blanditiis debitis eum voluptatem velit voluptatem quia."
+          "example": "Est labore voluptatem consequatur explicabo."
         },
         "message": {
           "type": "string",
           "description": "Error message",
-          "example": "Quasi architecto."
+          "example": "Voluptatem quidem ut omnis eum."
         }
       },
-      "description": "Not found",
+      "description": "Not found error response",
       "example": {
-        "code": "Blanditiis debitis eum voluptatem velit voluptatem quia.",
-        "message": "Quasi architecto."
+        "code": "Est labore voluptatem consequatur explicabo.",
+        "message": "Voluptatem quidem ut omnis eum."
       },
       "required": [
         "code",
@@ -2026,20 +2273,6 @@
               "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
               "project_name": "Kubernetes",
               "project_uid": "003170000123XHTAA2"
-            },
-            {
-              "committee_category": "Technical Steering Committee",
-              "committee_name": "Technical Steering Committee",
-              "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-              "project_name": "Kubernetes",
-              "project_uid": "003170000123XHTAA2"
-            },
-            {
-              "committee_category": "Technical Steering Committee",
-              "committee_name": "Technical Steering Committee",
-              "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-              "project_name": "Kubernetes",
-              "project_uid": "003170000123XHTAA2"
             }
           ]
         },
@@ -2052,21 +2285,21 @@
           "example": [
             {
               "id": "003170000123XHTAA2",
-              "logo_url": "Aut non accusamus quis.",
+              "logo_url": "Molestiae qui.",
               "name": "Express JS",
               "slug": "express-gateway",
               "status": "Active"
             },
             {
               "id": "003170000123XHTAA2",
-              "logo_url": "Aut non accusamus quis.",
+              "logo_url": "Molestiae qui.",
               "name": "Express JS",
               "slug": "express-gateway",
               "status": "Active"
             },
             {
               "id": "003170000123XHTAA2",
-              "logo_url": "Aut non accusamus quis.",
+              "logo_url": "Molestiae qui.",
               "name": "Express JS",
               "slug": "express-gateway",
               "status": "Active"
@@ -2080,6 +2313,15 @@
           },
           "description": "List of affected recipients",
           "example": [
+            {
+              "email": "john.doe@example.com",
+              "first_name": "John",
+              "last_name": "Doe",
+              "name": "John Doe",
+              "role": "Voting Rep",
+              "user_id": "005f1000009RbC4AAK",
+              "username": "jdoe"
+            },
             {
               "email": "john.doe@example.com",
               "first_name": "John",
@@ -2117,46 +2359,41 @@
             "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
             "project_name": "Kubernetes",
             "project_uid": "003170000123XHTAA2"
-          },
-          {
-            "committee_category": "Technical Steering Committee",
-            "committee_name": "Technical Steering Committee",
-            "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-            "project_name": "Kubernetes",
-            "project_uid": "003170000123XHTAA2"
-          },
-          {
-            "committee_category": "Technical Steering Committee",
-            "committee_name": "Technical Steering Committee",
-            "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-            "project_name": "Kubernetes",
-            "project_uid": "003170000123XHTAA2"
           }
         ],
         "affected_projects": [
           {
             "id": "003170000123XHTAA2",
-            "logo_url": "Aut non accusamus quis.",
+            "logo_url": "Molestiae qui.",
             "name": "Express JS",
             "slug": "express-gateway",
             "status": "Active"
           },
           {
             "id": "003170000123XHTAA2",
-            "logo_url": "Aut non accusamus quis.",
+            "logo_url": "Molestiae qui.",
             "name": "Express JS",
             "slug": "express-gateway",
             "status": "Active"
           },
           {
             "id": "003170000123XHTAA2",
-            "logo_url": "Aut non accusamus quis.",
+            "logo_url": "Molestiae qui.",
             "name": "Express JS",
             "slug": "express-gateway",
             "status": "Active"
           }
         ],
         "affected_recipients": [
+          {
+            "email": "john.doe@example.com",
+            "first_name": "John",
+            "last_name": "Doe",
+            "name": "John Doe",
+            "role": "Voting Rep",
+            "user_id": "005f1000009RbC4AAK",
+            "username": "jdoe"
+          },
           {
             "email": "john.doe@example.com",
             "first_name": "John",
@@ -2185,18 +2422,18 @@
         "code": {
           "type": "string",
           "description": "HTTP status code",
-          "example": "Enim iusto accusamus dolores itaque placeat molestiae."
+          "example": "Ea hic delectus officiis dolorum libero ut."
         },
         "message": {
           "type": "string",
           "description": "Error message",
-          "example": "Ipsum sunt occaecati cupiditate."
+          "example": "Inventore quis atque."
         }
       },
-      "description": "Service unavailable",
+      "description": "Service unavailable error response",
       "example": {
-        "code": "Enim iusto accusamus dolores itaque placeat molestiae.",
-        "message": "Ipsum sunt occaecati cupiditate."
+        "code": "Ea hic delectus officiis dolorum libero ut.",
+        "message": "Inventore quis atque."
       },
       "required": [
         "code",
@@ -2232,7 +2469,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "example": "Vero eaque."
+            "example": "Voluptatem et qui ut fuga aut adipisci."
           },
           "description": "Array of recipient IDs to resend survey emails to",
           "example": [
@@ -2268,7 +2505,7 @@
         "nps_value": {
           "type": "number",
           "description": "NPS value for this committee",
-          "example": 0.09492087326885662,
+          "example": 0.8919541608979904,
           "format": "double"
         },
         "project_name": {
@@ -2289,13 +2526,13 @@
         "total_recipients": {
           "type": "integer",
           "description": "Total recipients for this committee",
-          "example": 3658743929367783534,
+          "example": 2199214278205972519,
           "format": "int64"
         },
         "total_responses": {
           "type": "integer",
           "description": "Total responses for this committee",
-          "example": 4021925119943190798,
+          "example": 7136688557656320942,
           "format": "int64"
         }
       },
@@ -2303,12 +2540,12 @@
       "example": {
         "committee_name": "Technical Steering Committee",
         "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-        "nps_value": 0.09492087326885662,
+        "nps_value": 0.8919541608979904,
         "project_name": "Kubernetes",
         "project_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
         "survey_url": "https://surveymonkey.com/r/abc123",
-        "total_recipients": 3658743929367783534,
-        "total_responses": 4021925119943190798
+        "total_recipients": 2199214278205972519,
+        "total_responses": 7136688557656320942
       }
     },
     "SurveyCreateExclusionRequestBody": {
@@ -2318,35 +2555,35 @@
         "committee_uid": {
           "type": "string",
           "description": "Committee UID for survey-specific exclusion",
-          "example": "Velit rerum assumenda aperiam."
+          "example": "Omnis quae."
         },
         "email": {
           "type": "string",
           "description": "Survey responder's email",
-          "example": "Quasi praesentium est iusto est ut perspiciatis."
+          "example": "Debitis cumque est."
         },
         "global_exclusion": {
           "type": "string",
           "description": "Global exclusion flag",
-          "example": "Eum saepe suscipit."
+          "example": "Sit modi quasi."
         },
         "survey_uid": {
           "type": "string",
           "description": "Survey UID for survey-specific exclusion",
-          "example": "Possimus officiis."
+          "example": "Occaecati dignissimos."
         },
         "user_id": {
           "type": "string",
           "description": "Recipient's user ID",
-          "example": "Omnis ut occaecati ratione."
+          "example": "Ut eaque veritatis."
         }
       },
       "example": {
-        "committee_uid": "Velit rerum assumenda aperiam.",
-        "email": "Quasi praesentium est iusto est ut perspiciatis.",
-        "global_exclusion": "Eum saepe suscipit.",
-        "survey_uid": "Possimus officiis.",
-        "user_id": "Omnis ut occaecati ratione."
+        "committee_uid": "Omnis quae.",
+        "email": "Debitis cumque est.",
+        "global_exclusion": "Sit modi quasi.",
+        "survey_uid": "Occaecati dignissimos.",
+        "user_id": "Ut eaque veritatis."
       }
     },
     "SurveyDeleteExclusionRequestBody": {
@@ -2356,35 +2593,35 @@
         "committee_uid": {
           "type": "string",
           "description": "Committee UID for survey-specific exclusion",
-          "example": "Accusamus dolor est repellendus."
+          "example": "Accusamus et sed consequatur eius architecto."
         },
         "email": {
           "type": "string",
           "description": "Survey responder's email",
-          "example": "Reiciendis esse autem."
+          "example": "Odio ipsam unde tempore sit et."
         },
         "global_exclusion": {
           "type": "string",
           "description": "Global exclusion flag",
-          "example": "Qui est."
+          "example": "Sequi nam eaque."
         },
         "survey_uid": {
           "type": "string",
           "description": "Survey UID for survey-specific exclusion",
-          "example": "Et voluptatem maiores nam."
+          "example": "Consequuntur inventore eos maiores."
         },
         "user_id": {
           "type": "string",
           "description": "Recipient's user ID",
-          "example": "Hic quae amet blanditiis voluptas est."
+          "example": "Quam aliquid ratione."
         }
       },
       "example": {
-        "committee_uid": "Accusamus dolor est repellendus.",
-        "email": "Reiciendis esse autem.",
-        "global_exclusion": "Qui est.",
-        "survey_uid": "Et voluptatem maiores nam.",
-        "user_id": "Hic quae amet blanditiis voluptas est."
+        "committee_uid": "Accusamus et sed consequatur eius architecto.",
+        "email": "Odio ipsam unde tempore sit et.",
+        "global_exclusion": "Sequi nam eaque.",
+        "survey_uid": "Consequuntur inventore eos maiores.",
+        "user_id": "Quam aliquid ratione."
       }
     },
     "SurveyQuestionAnswer": {
@@ -2398,6 +2635,10 @@
           },
           "description": "Answers selected or entered by the recipient",
           "example": [
+            {
+              "choice_id": "c-001",
+              "text": "Strongly agree"
+            },
             {
               "choice_id": "c-001",
               "text": "Strongly agree"
@@ -2439,6 +2680,10 @@
           {
             "choice_id": "c-001",
             "text": "Strongly agree"
+          },
+          {
+            "choice_id": "c-001",
+            "text": "Strongly agree"
           }
         ],
         "question_family": "rating",
@@ -2462,7 +2707,7 @@
         "created_at": {
           "type": "string",
           "description": "When the response record was created (RFC3339)",
-          "example": "1997-07-27T09:56:04Z",
+          "example": "1999-03-08T18:15:09Z",
           "format": "date-time"
         },
         "email": {
@@ -2494,7 +2739,7 @@
         "last_received_time": {
           "type": "string",
           "description": "Last time a survey email was received (RFC3339)",
-          "example": "2006-02-05T10:31:23Z",
+          "example": "1979-05-15T23:23:07Z",
           "format": "date-time"
         },
         "membership_tier": {
@@ -2523,7 +2768,7 @@
         "response_datetime": {
           "type": "string",
           "description": "When the recipient submitted their response (RFC3339)",
-          "example": "1998-05-05T17:33:45Z",
+          "example": "2010-08-28T13:35:32Z",
           "format": "date-time"
         },
         "response_status": {
@@ -2547,7 +2792,7 @@
         "ses_bounce_diagnostic_code": {
           "type": "string",
           "description": "SES bounce diagnostic code",
-          "example": "Est soluta distinctio ipsa."
+          "example": "Culpa explicabo provident."
         },
         "ses_bounce_subtype": {
           "type": "string",
@@ -2562,7 +2807,7 @@
         "ses_complaint_date": {
           "type": "string",
           "description": "When the SES complaint was filed (RFC3339)",
-          "example": "1976-08-08T00:44:36Z",
+          "example": "1983-08-26T07:21:55Z",
           "format": "date-time"
         },
         "ses_complaint_exists": {
@@ -2573,7 +2818,7 @@
         "ses_complaint_type": {
           "type": "string",
           "description": "SES complaint type",
-          "example": "Itaque quo quam sed voluptatem."
+          "example": "Porro ab velit."
         },
         "ses_delivery_successful": {
           "type": "boolean",
@@ -2588,24 +2833,24 @@
         "ses_email_opened_last_time": {
           "type": "string",
           "description": "Last time the email was opened (RFC3339)",
-          "example": "1992-12-04T08:45:31Z",
+          "example": "1977-06-17T21:42:38Z",
           "format": "date-time"
         },
         "ses_link_clicked": {
           "type": "boolean",
           "description": "Whether the recipient clicked the survey link",
-          "example": true
+          "example": false
         },
         "ses_link_clicked_last_time": {
           "type": "string",
           "description": "Last time the survey link was clicked (RFC3339)",
-          "example": "1991-05-18T01:38:42Z",
+          "example": "1971-08-05T21:08:43Z",
           "format": "date-time"
         },
         "ses_message_id": {
           "type": "string",
           "description": "SES message identifier",
-          "example": "Reprehenderit cumque assumenda iusto aperiam magni veritatis."
+          "example": "Dolorum et a praesentium ut reprehenderit vel."
         },
         "survey_link": {
           "type": "string",
@@ -2628,6 +2873,10 @@
                 {
                   "choice_id": "c-001",
                   "text": "Strongly agree"
+                },
+                {
+                  "choice_id": "c-001",
+                  "text": "Strongly agree"
                 }
               ],
               "question_family": "rating",
@@ -2644,6 +2893,10 @@
                 {
                   "choice_id": "c-001",
                   "text": "Strongly agree"
+                },
+                {
+                  "choice_id": "c-001",
+                  "text": "Strongly agree"
                 }
               ],
               "question_family": "rating",
@@ -2653,6 +2906,10 @@
             },
             {
               "answers": [
+                {
+                  "choice_id": "c-001",
+                  "text": "Strongly agree"
+                },
                 {
                   "choice_id": "c-001",
                   "text": "Strongly agree"
@@ -2693,13 +2950,13 @@
       "description": "Individual survey response submitted by a recipient",
       "example": {
         "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-        "created_at": "1997-07-27T09:56:04Z",
+        "created_at": "1999-03-08T18:15:09Z",
         "email": "john.doe@example.com",
         "first_name": "John",
         "id": "cba14f40-1636-11ec-9621-0242ac130002",
         "job_title": "Principal Engineer",
         "last_name": "Doe",
-        "last_received_time": "2006-02-05T10:31:23Z",
+        "last_received_time": "1979-05-15T23:23:07Z",
         "membership_tier": "Platinum",
         "nps_value": 9,
         "num_automated_reminders_received": 2,
@@ -2711,21 +2968,21 @@
           "name": "Kubernetes",
           "uid": "qa1e8536-a985-4cf5-b981-a170927a1d11"
         },
-        "response_datetime": "1998-05-05T17:33:45Z",
+        "response_datetime": "2010-08-28T13:35:32Z",
         "response_status": "Responded",
         "role": "Voting Rep",
-        "ses_bounce_diagnostic_code": "Est soluta distinctio ipsa.",
+        "ses_bounce_diagnostic_code": "Culpa explicabo provident.",
         "ses_bounce_subtype": "NoEmail",
         "ses_bounce_type": "Permanent",
-        "ses_complaint_date": "1976-08-08T00:44:36Z",
+        "ses_complaint_date": "1983-08-26T07:21:55Z",
         "ses_complaint_exists": true,
-        "ses_complaint_type": "Itaque quo quam sed voluptatem.",
+        "ses_complaint_type": "Porro ab velit.",
         "ses_delivery_successful": true,
         "ses_email_opened": true,
-        "ses_email_opened_last_time": "1992-12-04T08:45:31Z",
-        "ses_link_clicked": true,
-        "ses_link_clicked_last_time": "1991-05-18T01:38:42Z",
-        "ses_message_id": "Reprehenderit cumque assumenda iusto aperiam magni veritatis.",
+        "ses_email_opened_last_time": "1977-06-17T21:42:38Z",
+        "ses_link_clicked": false,
+        "ses_link_clicked_last_time": "1971-08-05T21:08:43Z",
+        "ses_message_id": "Dolorum et a praesentium ut reprehenderit vel.",
         "survey_link": "https://surveymonkey.com/r/abc123",
         "survey_monkey_question_answers": [
           {
@@ -2737,6 +2994,10 @@
               {
                 "choice_id": "c-001",
                 "text": "Strongly agree"
+              },
+              {
+                "choice_id": "c-001",
+                "text": "Strongly agree"
               }
             ],
             "question_family": "rating",
@@ -2753,6 +3014,10 @@
               {
                 "choice_id": "c-001",
                 "text": "Strongly agree"
+              },
+              {
+                "choice_id": "c-001",
+                "text": "Strongly agree"
               }
             ],
             "question_family": "rating",
@@ -2762,6 +3027,10 @@
           },
           {
             "answers": [
+              {
+                "choice_id": "c-001",
+                "text": "Strongly agree"
+              },
               {
                 "choice_id": "c-001",
                 "text": "Strongly agree"
@@ -2903,12 +3172,12 @@
         "committee_category": {
           "type": "string",
           "description": "Committee category",
-          "example": "Voluptatem commodi corrupti vel velit repudiandae quae."
+          "example": "Dolorem omnis eos."
         },
         "committee_voting_enabled": {
           "type": "boolean",
           "description": "Committee voting enabled",
-          "example": false
+          "example": true
         },
         "committees": {
           "type": "array",
@@ -2920,60 +3189,80 @@
             {
               "committee_name": "Technical Steering Committee",
               "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-              "nps_value": 0.09492087326885662,
+              "nps_value": 0.8919541608979904,
               "project_name": "Kubernetes",
               "project_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
               "survey_url": "https://surveymonkey.com/r/abc123",
-              "total_recipients": 3658743929367783534,
-              "total_responses": 4021925119943190798
+              "total_recipients": 2199214278205972519,
+              "total_responses": 7136688557656320942
             },
             {
               "committee_name": "Technical Steering Committee",
               "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-              "nps_value": 0.09492087326885662,
+              "nps_value": 0.8919541608979904,
               "project_name": "Kubernetes",
               "project_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
               "survey_url": "https://surveymonkey.com/r/abc123",
-              "total_recipients": 3658743929367783534,
-              "total_responses": 4021925119943190798
+              "total_recipients": 2199214278205972519,
+              "total_responses": 7136688557656320942
+            },
+            {
+              "committee_name": "Technical Steering Committee",
+              "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
+              "nps_value": 0.8919541608979904,
+              "project_name": "Kubernetes",
+              "project_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
+              "survey_url": "https://surveymonkey.com/r/abc123",
+              "total_recipients": 2199214278205972519,
+              "total_responses": 7136688557656320942
+            },
+            {
+              "committee_name": "Technical Steering Committee",
+              "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
+              "nps_value": 0.8919541608979904,
+              "project_name": "Kubernetes",
+              "project_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
+              "survey_url": "https://surveymonkey.com/r/abc123",
+              "total_recipients": 2199214278205972519,
+              "total_responses": 7136688557656320942
             }
           ]
         },
         "created_at": {
           "type": "string",
           "description": "Creation timestamp",
-          "example": "1982-08-07T19:27:27Z",
+          "example": "1976-02-04T05:27:37Z",
           "format": "date-time"
         },
         "creator_id": {
           "type": "string",
           "description": "Creator's user ID",
-          "example": "Beatae enim."
+          "example": "Maxime impedit et."
         },
         "creator_name": {
           "type": "string",
           "description": "Creator's full name",
-          "example": "Illum ullam rem eligendi."
+          "example": "Ut impedit."
         },
         "creator_username": {
           "type": "string",
           "description": "Creator's username",
-          "example": "Natus rerum pariatur magni illum."
+          "example": "Quia aperiam tenetur corrupti."
         },
         "email_body": {
           "type": "string",
           "description": "Email body HTML",
-          "example": "Vel voluptatem debitis est laborum id."
+          "example": "Necessitatibus placeat et qui officiis voluptate."
         },
         "email_body_text": {
           "type": "string",
           "description": "Email body plain text",
-          "example": "Sequi porro."
+          "example": "Deleniti laudantium ipsam."
         },
         "email_subject": {
           "type": "string",
           "description": "Email subject line",
-          "example": "Ut sint dolores tempora a dolorem incidunt."
+          "example": "Qui velit nulla voluptatem illum."
         },
         "is_nps_survey": {
           "type": "boolean",
@@ -2988,60 +3277,60 @@
         "last_modified_at": {
           "type": "string",
           "description": "Last modification timestamp",
-          "example": "2004-01-23T07:11:26Z",
+          "example": "1974-03-13T03:16:43Z",
           "format": "date-time"
         },
         "last_modified_by": {
           "type": "string",
           "description": "User ID of last modifier",
-          "example": "Sint et velit."
+          "example": "Quo esse."
         },
         "latest_automated_reminder_sent_at": {
           "type": "string",
           "description": "Latest automated reminder sent date",
-          "example": "1987-10-19T10:46:45Z",
+          "example": "1981-10-17T02:50:12Z",
           "format": "date-time"
         },
         "next_automated_reminder_at": {
           "type": "string",
           "description": "Next automated reminder date",
-          "example": "1980-12-06T13:32:09Z",
+          "example": "2013-11-13T15:22:09Z",
           "format": "date-time"
         },
         "nps_value": {
           "type": "number",
           "description": "NPS value",
-          "example": 0.31201342465183735,
+          "example": 0.23758385158178416,
           "format": "double"
         },
         "num_automated_reminders_sent": {
           "type": "integer",
           "description": "Number of automated reminders sent",
-          "example": 142997387315680018,
+          "example": 5890834086106003934,
           "format": "int64"
         },
         "num_automated_reminders_to_send": {
           "type": "integer",
           "description": "Number of automated reminders to send",
-          "example": 7243894542855632147,
+          "example": 3040168544576392839,
           "format": "int64"
         },
         "num_detractors": {
           "type": "integer",
           "description": "Number of detractors",
-          "example": 4114091276961015469,
+          "example": 2247699043079463279,
           "format": "int64"
         },
         "num_passives": {
           "type": "integer",
           "description": "Number of passives",
-          "example": 4037424390957406864,
+          "example": 6183517097593665772,
           "format": "int64"
         },
         "num_promoters": {
           "type": "integer",
           "description": "Number of promoters",
-          "example": 4852415825224053956,
+          "example": 3615802168304629542,
           "format": "int64"
         },
         "response_status": {
@@ -3062,29 +3351,29 @@
         "stage_filter": {
           "type": "string",
           "description": "Project stage filter",
-          "example": "Placeat culpa eius tempore inventore quos."
+          "example": "Saepe magni ullam aut autem."
         },
         "survey_cutoff_date": {
           "type": "string",
           "description": "Survey cutoff date",
-          "example": "1987-03-21T11:51:25Z",
+          "example": "1971-08-23T20:19:51Z",
           "format": "date-time"
         },
         "survey_monkey_id": {
           "type": "string",
           "description": "SurveyMonkey survey ID",
-          "example": "Maxime eos atque dolor."
+          "example": "Debitis provident veritatis fugit deleniti laborum repellendus."
         },
         "survey_reminder_rate_days": {
           "type": "integer",
           "description": "Days between reminder emails",
-          "example": 1888054747789007662,
+          "example": 4140468901778994739,
           "format": "int64"
         },
         "survey_send_date": {
           "type": "string",
           "description": "Survey send date",
-          "example": "1997-01-06T00:47:05Z",
+          "example": "1970-06-29T15:39:15Z",
           "format": "date-time"
         },
         "survey_status": {
@@ -3101,29 +3390,29 @@
         "survey_title": {
           "type": "string",
           "description": "Survey title",
-          "example": "Aut quasi vitae."
+          "example": "Fuga nobis accusamus excepturi."
         },
         "survey_url": {
           "type": "string",
           "description": "Survey URL",
-          "example": "Deleniti quibusdam veritatis et."
+          "example": "Quos eaque quisquam."
         },
         "total_bounced_emails": {
           "type": "integer",
           "description": "Number of bounced emails",
-          "example": 4222813778174952530,
+          "example": 3719492611364711966,
           "format": "int64"
         },
         "total_recipients": {
           "type": "integer",
           "description": "Total number of recipients",
-          "example": 7364787154034584178,
+          "example": 956746504341291556,
           "format": "int64"
         },
         "total_responses": {
           "type": "integer",
           "description": "Total number of responses",
-          "example": 1292921374344251599,
+          "example": 7880675659312219820,
           "format": "int64"
         },
         "uid": {
@@ -3134,62 +3423,82 @@
       },
       "description": "Scheduled survey details",
       "example": {
-        "committee_category": "Voluptatem commodi corrupti vel velit repudiandae quae.",
-        "committee_voting_enabled": false,
+        "committee_category": "Dolorem omnis eos.",
+        "committee_voting_enabled": true,
         "committees": [
           {
             "committee_name": "Technical Steering Committee",
             "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-            "nps_value": 0.09492087326885662,
+            "nps_value": 0.8919541608979904,
             "project_name": "Kubernetes",
             "project_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
             "survey_url": "https://surveymonkey.com/r/abc123",
-            "total_recipients": 3658743929367783534,
-            "total_responses": 4021925119943190798
+            "total_recipients": 2199214278205972519,
+            "total_responses": 7136688557656320942
           },
           {
             "committee_name": "Technical Steering Committee",
             "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-            "nps_value": 0.09492087326885662,
+            "nps_value": 0.8919541608979904,
             "project_name": "Kubernetes",
             "project_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
             "survey_url": "https://surveymonkey.com/r/abc123",
-            "total_recipients": 3658743929367783534,
-            "total_responses": 4021925119943190798
+            "total_recipients": 2199214278205972519,
+            "total_responses": 7136688557656320942
+          },
+          {
+            "committee_name": "Technical Steering Committee",
+            "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
+            "nps_value": 0.8919541608979904,
+            "project_name": "Kubernetes",
+            "project_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
+            "survey_url": "https://surveymonkey.com/r/abc123",
+            "total_recipients": 2199214278205972519,
+            "total_responses": 7136688557656320942
+          },
+          {
+            "committee_name": "Technical Steering Committee",
+            "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
+            "nps_value": 0.8919541608979904,
+            "project_name": "Kubernetes",
+            "project_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
+            "survey_url": "https://surveymonkey.com/r/abc123",
+            "total_recipients": 2199214278205972519,
+            "total_responses": 7136688557656320942
           }
         ],
-        "created_at": "1982-08-07T19:27:27Z",
-        "creator_id": "Beatae enim.",
-        "creator_name": "Illum ullam rem eligendi.",
-        "creator_username": "Natus rerum pariatur magni illum.",
-        "email_body": "Vel voluptatem debitis est laborum id.",
-        "email_body_text": "Sequi porro.",
-        "email_subject": "Ut sint dolores tempora a dolorem incidunt.",
+        "created_at": "1976-02-04T05:27:37Z",
+        "creator_id": "Maxime impedit et.",
+        "creator_name": "Ut impedit.",
+        "creator_username": "Quia aperiam tenetur corrupti.",
+        "email_body": "Necessitatibus placeat et qui officiis voluptate.",
+        "email_body_text": "Deleniti laudantium ipsam.",
+        "email_subject": "Qui velit nulla voluptatem illum.",
         "is_nps_survey": true,
         "is_project_survey": false,
-        "last_modified_at": "2004-01-23T07:11:26Z",
-        "last_modified_by": "Sint et velit.",
-        "latest_automated_reminder_sent_at": "1987-10-19T10:46:45Z",
-        "next_automated_reminder_at": "1980-12-06T13:32:09Z",
-        "nps_value": 0.31201342465183735,
-        "num_automated_reminders_sent": 142997387315680018,
-        "num_automated_reminders_to_send": 7243894542855632147,
-        "num_detractors": 4114091276961015469,
-        "num_passives": 4037424390957406864,
-        "num_promoters": 4852415825224053956,
+        "last_modified_at": "1974-03-13T03:16:43Z",
+        "last_modified_by": "Quo esse.",
+        "latest_automated_reminder_sent_at": "1981-10-17T02:50:12Z",
+        "next_automated_reminder_at": "2013-11-13T15:22:09Z",
+        "nps_value": 0.23758385158178416,
+        "num_automated_reminders_sent": 5890834086106003934,
+        "num_automated_reminders_to_send": 3040168544576392839,
+        "num_detractors": 2247699043079463279,
+        "num_passives": 6183517097593665772,
+        "num_promoters": 3615802168304629542,
         "response_status": "scheduled",
         "send_immediately": true,
-        "stage_filter": "Placeat culpa eius tempore inventore quos.",
-        "survey_cutoff_date": "1987-03-21T11:51:25Z",
-        "survey_monkey_id": "Maxime eos atque dolor.",
-        "survey_reminder_rate_days": 1888054747789007662,
-        "survey_send_date": "1997-01-06T00:47:05Z",
+        "stage_filter": "Saepe magni ullam aut autem.",
+        "survey_cutoff_date": "1971-08-23T20:19:51Z",
+        "survey_monkey_id": "Debitis provident veritatis fugit deleniti laborum repellendus.",
+        "survey_reminder_rate_days": 4140468901778994739,
+        "survey_send_date": "1970-06-29T15:39:15Z",
         "survey_status": "scheduled",
-        "survey_title": "Aut quasi vitae.",
-        "survey_url": "Deleniti quibusdam veritatis et.",
-        "total_bounced_emails": 4222813778174952530,
-        "total_recipients": 7364787154034584178,
-        "total_responses": 1292921374344251599,
+        "survey_title": "Fuga nobis accusamus excepturi.",
+        "survey_url": "Quos eaque quisquam.",
+        "total_bounced_emails": 3719492611364711966,
+        "total_recipients": 956746504341291556,
+        "total_responses": 7880675659312219820,
         "uid": "4e8165a9-9b29-4506-b093-ab0a4aae9b84"
       },
       "required": [
@@ -3209,37 +3518,37 @@
         "committee_voting_enabled": {
           "type": "boolean",
           "description": "Whether committee voting is enabled",
-          "example": true
+          "example": false
         },
         "creator_id": {
           "type": "string",
-          "description": "Creator's user ID",
-          "example": "Amet amet quas optio."
+          "description": "Ignored. The creator is the authenticated user.",
+          "example": "Dolorem temporibus quibusdam unde reiciendis ut maxime."
         },
         "creator_name": {
           "type": "string",
-          "description": "Creator's full name",
-          "example": "Expedita ut aut."
+          "description": "Ignored. The creator's name is resolved from the authenticated user.",
+          "example": "Et sequi nulla tempora."
         },
         "creator_username": {
           "type": "string",
-          "description": "Creator's username",
-          "example": "Neque sint nesciunt blanditiis dicta eligendi."
+          "description": "Ignored. The creator is the authenticated user.",
+          "example": "Amet et et."
         },
         "email_body": {
           "type": "string",
           "description": "Email body HTML content",
-          "example": "Veniam adipisci sint quae tempore."
+          "example": "Rerum ratione quisquam."
         },
         "email_body_text": {
           "type": "string",
           "description": "Email body plain text content",
-          "example": "Beatae voluptatem accusantium."
+          "example": "Ut aliquid magnam incidunt suscipit quasi."
         },
         "email_subject": {
           "type": "string",
           "description": "Email subject line",
-          "example": "Dolorem quos quisquam aliquam animi et rem."
+          "example": "Velit placeat eius ut quod et perferendis."
         },
         "is_project_survey": {
           "type": "boolean",
@@ -3249,60 +3558,97 @@
         "send_immediately": {
           "type": "boolean",
           "description": "Send immediately (true) or schedule for later (false)",
-          "example": true
+          "example": false
         },
         "stage_filter": {
           "type": "string",
           "description": "Project stage filter for global surveys",
-          "example": "Et incidunt esse illum autem odio."
+          "example": "Et magni vero magnam magni est et."
         },
         "survey_cutoff_date": {
           "type": "string",
           "description": "Survey cutoff/end date (RFC3339 format)",
-          "example": "Numquam dicta."
+          "example": "Cupiditate et."
         },
         "survey_monkey_id": {
           "type": "string",
           "description": "SurveyMonkey survey ID",
-          "example": "Ut et."
+          "example": "Explicabo et aperiam aut molestias."
         },
         "survey_reminder_rate_days": {
           "type": "integer",
           "description": "Days between automatic reminder emails (0 = no reminders)",
-          "example": 9058985036227425231,
+          "example": 2823344719393375505,
           "format": "int64"
         },
         "survey_send_date": {
           "type": "string",
           "description": "Date to send the survey (RFC3339 format)",
-          "example": "Consequatur molestias ut rerum ipsum sequi."
+          "example": "Qui rerum adipisci odit dicta voluptas."
         },
         "survey_title": {
           "type": "string",
           "description": "Survey title",
-          "example": "Nihil excepturi."
+          "example": "Ut veritatis id."
         }
       },
       "example": {
         "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-        "committee_voting_enabled": true,
-        "creator_id": "Amet amet quas optio.",
-        "creator_name": "Expedita ut aut.",
-        "creator_username": "Neque sint nesciunt blanditiis dicta eligendi.",
-        "email_body": "Veniam adipisci sint quae tempore.",
-        "email_body_text": "Beatae voluptatem accusantium.",
-        "email_subject": "Dolorem quos quisquam aliquam animi et rem.",
+        "committee_voting_enabled": false,
+        "creator_id": "Dolorem temporibus quibusdam unde reiciendis ut maxime.",
+        "creator_name": "Et sequi nulla tempora.",
+        "creator_username": "Amet et et.",
+        "email_body": "Rerum ratione quisquam.",
+        "email_body_text": "Ut aliquid magnam incidunt suscipit quasi.",
+        "email_subject": "Velit placeat eius ut quod et perferendis.",
         "is_project_survey": false,
-        "send_immediately": true,
-        "stage_filter": "Et incidunt esse illum autem odio.",
-        "survey_cutoff_date": "Numquam dicta.",
-        "survey_monkey_id": "Ut et.",
-        "survey_reminder_rate_days": 9058985036227425231,
-        "survey_send_date": "Consequatur molestias ut rerum ipsum sequi.",
-        "survey_title": "Nihil excepturi."
+        "send_immediately": false,
+        "stage_filter": "Et magni vero magnam magni est et.",
+        "survey_cutoff_date": "Cupiditate et.",
+        "survey_monkey_id": "Explicabo et aperiam aut molestias.",
+        "survey_reminder_rate_days": 2823344719393375505,
+        "survey_send_date": "Qui rerum adipisci odit dicta voluptas.",
+        "survey_title": "Ut veritatis id."
       },
       "required": [
         "committee_uid"
+      ]
+    },
+    "SurveyTemplate": {
+      "title": "SurveyTemplate",
+      "type": "object",
+      "properties": {
+        "href": {
+          "type": "string",
+          "description": "SurveyMonkey API URL for the survey template",
+          "example": "https://api.surveymonkey.com/v3/surveys/412349483"
+        },
+        "id": {
+          "type": "string",
+          "description": "SurveyMonkey survey ID",
+          "example": "412349483"
+        },
+        "nickname": {
+          "type": "string",
+          "description": "Survey template nickname",
+          "example": "Board NPS"
+        },
+        "title": {
+          "type": "string",
+          "description": "Survey template title",
+          "example": "Board Member NPS"
+        }
+      },
+      "description": "SurveyMonkey survey template available for scheduling",
+      "example": {
+        "href": "https://api.surveymonkey.com/v3/surveys/412349483",
+        "id": "412349483",
+        "nickname": "Board NPS",
+        "title": "Board Member NPS"
+      },
+      "required": [
+        "id",
+        "title"
       ]
     },
     "SurveyUpdateSurveyRequestBody": {
@@ -3317,61 +3663,61 @@
         "committee_voting_enabled": {
           "type": "boolean",
           "description": "Whether committee voting is enabled",
-          "example": true
+          "example": false
         },
         "creator_id": {
           "type": "string",
-          "description": "Creator's user ID",
-          "example": "Aut error quis ut."
+          "description": "Ignored. The modifier is the authenticated user.",
+          "example": "Quia eos omnis non magnam ut."
         },
         "email_body": {
           "type": "string",
           "description": "Email body HTML content",
-          "example": "Odit dignissimos nihil voluptatem consectetur."
+          "example": "Blanditiis aliquam a cumque."
         },
         "email_body_text": {
           "type": "string",
           "description": "Email body plain text content",
-          "example": "Sint libero."
+          "example": "Voluptates eos aut."
         },
         "email_subject": {
           "type": "string",
           "description": "Email subject line",
-          "example": "Quos omnis."
+          "example": "Possimus distinctio accusamus cupiditate."
         },
         "survey_cutoff_date": {
           "type": "string",
           "description": "Survey cutoff/end date (RFC3339 format)",
-          "example": "Repellat dolores quam et quia maiores."
+          "example": "Sed exercitationem."
         },
         "survey_reminder_rate_days": {
           "type": "integer",
           "description": "Days between automatic reminder emails (0 = no reminders)",
-          "example": 6708291480370102043,
+          "example": 1575473299966576967,
           "format": "int64"
         },
         "survey_send_date": {
           "type": "string",
           "description": "Date to send the survey (RFC3339 format)",
-          "example": "Aliquid eum natus atque."
+          "example": "Maxime sed et sunt nihil quia."
         },
         "survey_title": {
           "type": "string",
           "description": "Survey title",
-          "example": "Aut alias."
+          "example": "Expedita voluptates."
         }
       },
       "example": {
         "committee_uid": "qa1e8536-a985-4cf5-b981-a170927a1d11",
-        "committee_voting_enabled": true,
-        "creator_id": "Aut error quis ut.",
-        "email_body": "Odit dignissimos nihil voluptatem consectetur.",
-        "email_body_text": "Sint libero.",
-        "email_subject": "Quos omnis.",
-        "survey_cutoff_date": "Repellat dolores quam et quia maiores.",
-        "survey_reminder_rate_days": 6708291480370102043,
-        "survey_send_date": "Aliquid eum natus atque.",
-        "survey_title": "Aut alias."
+        "committee_voting_enabled": false,
+        "creator_id": "Quia eos omnis non magnam ut.",
+        "email_body": "Blanditiis aliquam a cumque.",
+        "email_body_text": "Voluptates eos aut.",
+        "email_subject": "Possimus distinctio accusamus cupiditate.",
+        "survey_cutoff_date": "Sed exercitationem.",
+        "survey_reminder_rate_days": 1575473299966576967,
+        "survey_send_date": "Maxime sed et sunt nihil quia.",
+        "survey_title": "Expedita voluptates."
       }
     },
     "SurveyValidateEmailRequestBody": {
@@ -3381,17 +3727,17 @@
         "body": {
           "type": "string",
           "description": "Email body template",
-          "example": "Accusamus consectetur."
+          "example": "Eos doloribus quam numquam nostrum ipsam qui."
         },
         "subject": {
           "type": "string",
           "description": "Email subject template",
-          "example": "Labore ullam non ut sint ipsa."
+          "example": "Ut et dolores autem quae rerum qui."
         }
       },
       "example": {
-        "body": "Accusamus consectetur.",
-        "subject": "Labore ullam non ut sint ipsa."
+        "body": "Eos doloribus quam numquam nostrum ipsam qui.",
+        "subject": "Ut et dolores autem quae rerum qui."
       }
     },
     "UnauthorizedError": {
@@ -3401,18 +3747,18 @@
         "code": {
           "type": "string",
           "description": "HTTP status code",
-          "example": "Qui sit."
+          "example": "Enim quis."
         },
         "message": {
           "type": "string",
           "description": "Error message",
-          "example": "Architecto aut quia ut."
+          "example": "Aliquam molestias necessitatibus labore."
         }
       },
-      "description": "Unauthorized",
+      "description": "Unauthorized error response",
       "example": {
-        "code": "Qui sit.",
-        "message": "Architecto aut quia ut."
+        "code": "Enim quis.",
+        "message": "Aliquam molestias necessitatibus labore."
       },
       "required": [
         "code",
@@ -3426,24 +3772,24 @@
         "email_address": {
           "type": "string",
           "description": "Email address",
-          "example": "Asperiores suscipit aut."
+          "example": "Rem sint eaque ut quisquam."
         },
         "id": {
           "type": "string",
           "description": "Email ID",
-          "example": "Deserunt unde tempore impedit."
+          "example": "Id nihil."
         },
         "is_primary": {
           "type": "boolean",
           "description": "Whether this is the primary email",
-          "example": false
+          "example": true
         }
       },
       "description": "User email information",
       "example": {
-        "email_address": "Asperiores suscipit aut.",
-        "id": "Deserunt unde tempore impedit.",
-        "is_primary": false
+        "email_address": "Rem sint eaque ut quisquam.",
+        "id": "Id nihil.",
+        "is_primary": true
       }
     },
     "ValidateEmailResult": {

@@ -8,9 +8,7 @@
 
 package client
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // ScheduleSurveySurveyPath returns the URL path to the survey service schedule_survey HTTP endpoint.
 func ScheduleSurveySurveyPath() string {
@@ -85,6 +83,11 @@ func DeleteExclusionByIDSurveyPath(exclusionID string) string {
 // ListSurveyResponsesSurveyPath returns the URL path to the survey service list_survey_responses HTTP endpoint.
 func ListSurveyResponsesSurveyPath(surveyUID string) string {
 	return fmt.Sprintf("/surveys/%v/responses", surveyUID)
+}
+
+// ListSurveyTemplatesSurveyPath returns the URL path to the survey service list_survey_templates HTTP endpoint.
+func ListSurveyTemplatesSurveyPath() string {
+	return "/surveys/templates"
 }
 
 // ValidateEmailSurveyPath returns the URL path to the survey service validate_email HTTP endpoint.

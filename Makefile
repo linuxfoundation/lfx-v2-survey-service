@@ -1,7 +1,7 @@
 # Copyright The Linux Foundation and each contributor to LFX.
 # SPDX-License-Identifier: MIT
 
-.PHONY: all help deps apigen build test clean run debug lint fmt check verify docker-build helm-install helm-install-local helm-templates helm-templates-local helm-uninstall
+.PHONY: all help deps apigen build test clean run debug lint megalinter fmt check verify docker-build helm-install helm-install-local helm-templates helm-templates-local helm-uninstall
 
 # Default target
 all: clean deps apigen fmt lint test build
@@ -9,6 +9,9 @@ all: clean deps apigen fmt lint test build
 # Docker configuration
 DOCKER_IMAGE=linuxfoundation/lfx-v2-survey-service
 DOCKER_TAG=latest
+
+# Run the CI MegaLinter Go flavor locally.
+MEGALINTER_IMAGE := ghcr.io/oxsecurity/megalinter-go@sha256:e676b8e9dac00d148bf1abb6ab809f1df76f07e804d8061f78631975d0c90925  # v10.2.0
 
 # Helm configuration
 HELM_CHART_PATH=./charts/lfx-v2-survey-service
@@ -21,7 +24,7 @@ GO_FILES=$(shell find . -name "*.go" -not -path "./gen/*" -not -path "./vendor/*
 
 # Goa CLI version, derived from go.mod so it can never drift out of sync with
 # the goa.design/goa/v3 runtime version this repo builds against.
-GOA_VERSION := $(shell awk '/goa.design\/goa\/v3 /{print $$2}' go.mod)
+GOA_VERSION := $(shell go list -m -f '{{.Version}}' goa.design/goa/v3)
 
 # Help target
 help:
@@ -35,6 +38,7 @@ help:
 	@echo "  test           - Run unit tests"
 	@echo "  clean          - Remove generated files and binaries"
 	@echo "  lint           - Run golangci-lint"
+	@echo "  megalinter     - Run MegaLinter using Docker"
 	@echo "  fmt            - Format Go code"
 	@echo "  check          - Run fmt and lint without modifying files"
 	@echo "  verify         - Verify API generation is up to date"
@@ -102,6 +106,10 @@ lint:
 		echo "golangci-lint not found. Run 'make deps' to install it."; \
 		exit 1; \
 	fi
+
+megalinter:
+	docker pull $(MEGALINTER_IMAGE)
+	docker run --rm --platform linux/amd64 -e GOTOOLCHAIN=auto -v '$(CURDIR):/tmp/lint:rw' $(MEGALINTER_IMAGE)
 
 # Format code
 fmt:

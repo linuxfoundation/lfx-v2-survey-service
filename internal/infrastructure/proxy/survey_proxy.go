@@ -137,3 +137,17 @@ func (c *Client) ValidateEmail(ctx context.Context, req *itx.ValidateEmailReques
 	return doJSON[itx.ValidateEmailResponse](ctx, c, http.MethodPost,
 		fmt.Sprintf("%sv2/surveys/validate_email", c.config.BaseURL), body)
 }
+
+// ListSurveyTemplates lists the SurveyMonkey survey templates available in ITX
+func (c *Client) ListSurveyTemplates(ctx context.Context) ([]itx.SurveyTemplate, error) {
+	templates, err := doJSON[[]itx.SurveyTemplate](ctx, c, http.MethodGet,
+		fmt.Sprintf("%sv2/surveys/templates", c.config.BaseURL), nil)
+	if err != nil {
+		return nil, err
+	}
+	// ITX may encode an empty list as null; always hand back a non-nil slice.
+	if *templates == nil {
+		return []itx.SurveyTemplate{}, nil
+	}
+	return *templates, nil
+}

@@ -22,11 +22,11 @@ type ScheduleSurveyRequestBody struct {
 	IsProjectSurvey *bool `form:"is_project_survey,omitempty" json:"is_project_survey,omitempty" xml:"is_project_survey,omitempty"`
 	// Project stage filter for global surveys
 	StageFilter *string `form:"stage_filter,omitempty" json:"stage_filter,omitempty" xml:"stage_filter,omitempty"`
-	// Creator's username
+	// Ignored. The creator is the authenticated user.
 	CreatorUsername *string `form:"creator_username,omitempty" json:"creator_username,omitempty" xml:"creator_username,omitempty"`
-	// Creator's full name
+	// Ignored. The creator's name is resolved from the authenticated user.
 	CreatorName *string `form:"creator_name,omitempty" json:"creator_name,omitempty" xml:"creator_name,omitempty"`
-	// Creator's user ID
+	// Ignored. The creator is the authenticated user.
 	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
 	// SurveyMonkey survey ID
 	SurveyMonkeyID *string `form:"survey_monkey_id,omitempty" json:"survey_monkey_id,omitempty" xml:"survey_monkey_id,omitempty"`
@@ -55,7 +55,7 @@ type ScheduleSurveyRequestBody struct {
 type UpdateSurveyRequestBody struct {
 	// Committee UID to send survey to
 	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
-	// Creator's user ID
+	// Ignored. The modifier is the authenticated user.
 	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
 	// Survey title
 	SurveyTitle *string `form:"survey_title,omitempty" json:"survey_title,omitempty" xml:"survey_title,omitempty"`
@@ -408,6 +408,10 @@ type ListSurveyResponsesResponseBody struct {
 	Meta *SurveyResponsePageMetaResponseBody `form:"meta" json:"meta" xml:"meta"`
 }
 
+// ListSurveyTemplatesResponseBody is the type of the "survey" service
+// "list_survey_templates" endpoint HTTP response body.
+type ListSurveyTemplatesResponseBody []*SurveyTemplateResponse
+
 // ValidateEmailResponseBody is the type of the "survey" service
 // "validate_email" endpoint HTTP response body.
 type ValidateEmailResponseBody struct {
@@ -420,6 +424,15 @@ type ValidateEmailResponseBody struct {
 // ScheduleSurveyBadRequestResponseBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP response body for the "BadRequest" error.
 type ScheduleSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ScheduleSurveyConflictResponseBody is the type of the "survey" service
+// "schedule_survey" endpoint HTTP response body for the "Conflict" error.
+type ScheduleSurveyConflictResponseBody struct {
 	// HTTP status code
 	Code string `form:"code" json:"code" xml:"code"`
 	// Error message
@@ -527,6 +540,15 @@ type UpdateSurveyBadRequestResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// UpdateSurveyConflictResponseBody is the type of the "survey" service
+// "update_survey" endpoint HTTP response body for the "Conflict" error.
+type UpdateSurveyConflictResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // UpdateSurveyForbiddenResponseBody is the type of the "survey" service
 // "update_survey" endpoint HTTP response body for the "Forbidden" error.
 type UpdateSurveyForbiddenResponseBody struct {
@@ -583,6 +605,15 @@ type DeleteSurveyBadRequestResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// DeleteSurveyConflictResponseBody is the type of the "survey" service
+// "delete_survey" endpoint HTTP response body for the "Conflict" error.
+type DeleteSurveyConflictResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // DeleteSurveyForbiddenResponseBody is the type of the "survey" service
 // "delete_survey" endpoint HTTP response body for the "Forbidden" error.
 type DeleteSurveyForbiddenResponseBody struct {
@@ -633,6 +664,15 @@ type DeleteSurveyUnauthorizedResponseBody struct {
 // BulkResendSurveyBadRequestResponseBody is the type of the "survey" service
 // "bulk_resend_survey" endpoint HTTP response body for the "BadRequest" error.
 type BulkResendSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// BulkResendSurveyConflictResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "Conflict" error.
+type BulkResendSurveyConflictResponseBody struct {
 	// HTTP status code
 	Code string `form:"code" json:"code" xml:"code"`
 	// Error message
@@ -754,6 +794,16 @@ type SendMissingRecipientsBadRequestResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// SendMissingRecipientsConflictResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "Conflict" error.
+type SendMissingRecipientsConflictResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // SendMissingRecipientsForbiddenResponseBody is the type of the "survey"
 // service "send_missing_recipients" endpoint HTTP response body for the
 // "Forbidden" error.
@@ -808,6 +858,16 @@ type SendMissingRecipientsUnauthorizedResponseBody struct {
 // service "delete_survey_response" endpoint HTTP response body for the
 // "BadRequest" error.
 type DeleteSurveyResponseBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteSurveyResponseConflictResponseBody is the type of the "survey" service
+// "delete_survey_response" endpoint HTTP response body for the "Conflict"
+// error.
+type DeleteSurveyResponseConflictResponseBody struct {
 	// HTTP status code
 	Code string `form:"code" json:"code" xml:"code"`
 	// Error message
@@ -874,6 +934,16 @@ type ResendSurveyResponseBadRequestResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// ResendSurveyResponseConflictResponseBody is the type of the "survey" service
+// "resend_survey_response" endpoint HTTP response body for the "Conflict"
+// error.
+type ResendSurveyResponseConflictResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // ResendSurveyResponseForbiddenResponseBody is the type of the "survey"
 // service "resend_survey_response" endpoint HTTP response body for the
 // "Forbidden" error.
@@ -928,6 +998,16 @@ type ResendSurveyResponseUnauthorizedResponseBody struct {
 // service "delete_recipient_group" endpoint HTTP response body for the
 // "BadRequest" error.
 type DeleteRecipientGroupBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteRecipientGroupConflictResponseBody is the type of the "survey" service
+// "delete_recipient_group" endpoint HTTP response body for the "Conflict"
+// error.
+type DeleteRecipientGroupConflictResponseBody struct {
 	// HTTP status code
 	Code string `form:"code" json:"code" xml:"code"`
 	// Error message
@@ -993,6 +1073,15 @@ type CreateExclusionBadRequestResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// CreateExclusionConflictResponseBody is the type of the "survey" service
+// "create_exclusion" endpoint HTTP response body for the "Conflict" error.
+type CreateExclusionConflictResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // CreateExclusionForbiddenResponseBody is the type of the "survey" service
 // "create_exclusion" endpoint HTTP response body for the "Forbidden" error.
 type CreateExclusionForbiddenResponseBody struct {
@@ -1024,6 +1113,15 @@ type CreateExclusionUnauthorizedResponseBody struct {
 // DeleteExclusionBadRequestResponseBody is the type of the "survey" service
 // "delete_exclusion" endpoint HTTP response body for the "BadRequest" error.
 type DeleteExclusionBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteExclusionConflictResponseBody is the type of the "survey" service
+// "delete_exclusion" endpoint HTTP response body for the "Conflict" error.
+type DeleteExclusionConflictResponseBody struct {
 	// HTTP status code
 	Code string `form:"code" json:"code" xml:"code"`
 	// Error message
@@ -1114,6 +1212,16 @@ type DeleteExclusionByIDBadRequestResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// DeleteExclusionByIDConflictResponseBody is the type of the "survey" service
+// "delete_exclusion_by_id" endpoint HTTP response body for the "Conflict"
+// error.
+type DeleteExclusionByIDConflictResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // DeleteExclusionByIDForbiddenResponseBody is the type of the "survey" service
 // "delete_exclusion_by_id" endpoint HTTP response body for the "Forbidden"
 // error.
@@ -1197,6 +1305,56 @@ type ListSurveyResponsesServiceUnavailableResponseBody struct {
 // service "list_survey_responses" endpoint HTTP response body for the
 // "Unauthorized" error.
 type ListSurveyResponsesUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyTemplatesBadRequestResponseBody is the type of the "survey"
+// service "list_survey_templates" endpoint HTTP response body for the
+// "BadRequest" error.
+type ListSurveyTemplatesBadRequestResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyTemplatesForbiddenResponseBody is the type of the "survey" service
+// "list_survey_templates" endpoint HTTP response body for the "Forbidden"
+// error.
+type ListSurveyTemplatesForbiddenResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyTemplatesInternalServerErrorResponseBody is the type of the
+// "survey" service "list_survey_templates" endpoint HTTP response body for the
+// "InternalServerError" error.
+type ListSurveyTemplatesInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyTemplatesServiceUnavailableResponseBody is the type of the
+// "survey" service "list_survey_templates" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type ListSurveyTemplatesServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code string `form:"code" json:"code" xml:"code"`
+	// Error message
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// ListSurveyTemplatesUnauthorizedResponseBody is the type of the "survey"
+// service "list_survey_templates" endpoint HTTP response body for the
+// "Unauthorized" error.
+type ListSurveyTemplatesUnauthorizedResponseBody struct {
 	// HTTP status code
 	Code string `form:"code" json:"code" xml:"code"`
 	// Error message
@@ -1456,6 +1614,18 @@ type SurveyResponsePageMetaResponseBody struct {
 	PerPage *int `form:"per_page,omitempty" json:"per_page,omitempty" xml:"per_page,omitempty"`
 }
 
+// SurveyTemplateResponse is used to define fields on response body types.
+type SurveyTemplateResponse struct {
+	// SurveyMonkey survey ID
+	ID string `form:"id" json:"id" xml:"id"`
+	// Survey template title
+	Title string `form:"title" json:"title" xml:"title"`
+	// Survey template nickname
+	Nickname *string `form:"nickname,omitempty" json:"nickname,omitempty" xml:"nickname,omitempty"`
+	// SurveyMonkey API URL for the survey template
+	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
+}
+
 // NewScheduleSurveyResponseBody builds the HTTP response body from the result
 // of the "schedule_survey" endpoint of the "survey" service.
 func NewScheduleSurveyResponseBody(res *survey.SurveyScheduleResult) *ScheduleSurveyResponseBody {
@@ -1705,6 +1875,20 @@ func NewListSurveyResponsesResponseBody(res *survey.SurveyResponsesPage) *ListSu
 	return body
 }
 
+// NewListSurveyTemplatesResponseBody builds the HTTP response body from the
+// result of the "list_survey_templates" endpoint of the "survey" service.
+func NewListSurveyTemplatesResponseBody(res []*survey.SurveyTemplate) ListSurveyTemplatesResponseBody {
+	body := make([]*SurveyTemplateResponse, len(res))
+	for i, val := range res {
+		if val == nil {
+			body[i] = nil
+			continue
+		}
+		body[i] = marshalSurveySurveyTemplateToSurveyTemplateResponse(val)
+	}
+	return body
+}
+
 // NewValidateEmailResponseBody builds the HTTP response body from the result
 // of the "validate_email" endpoint of the "survey" service.
 func NewValidateEmailResponseBody(res *survey.ValidateEmailResult) *ValidateEmailResponseBody {
@@ -1719,6 +1903,16 @@ func NewValidateEmailResponseBody(res *survey.ValidateEmailResult) *ValidateEmai
 // the result of the "schedule_survey" endpoint of the "survey" service.
 func NewScheduleSurveyBadRequestResponseBody(res *survey.BadRequestError) *ScheduleSurveyBadRequestResponseBody {
 	body := &ScheduleSurveyBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewScheduleSurveyConflictResponseBody builds the HTTP response body from the
+// result of the "schedule_survey" endpoint of the "survey" service.
+func NewScheduleSurveyConflictResponseBody(res *survey.ConflictError) *ScheduleSurveyConflictResponseBody {
+	body := &ScheduleSurveyConflictResponseBody{
 		Code:    res.Code,
 		Message: res.Message,
 	}
@@ -1837,6 +2031,16 @@ func NewUpdateSurveyBadRequestResponseBody(res *survey.BadRequestError) *UpdateS
 	return body
 }
 
+// NewUpdateSurveyConflictResponseBody builds the HTTP response body from the
+// result of the "update_survey" endpoint of the "survey" service.
+func NewUpdateSurveyConflictResponseBody(res *survey.ConflictError) *UpdateSurveyConflictResponseBody {
+	body := &UpdateSurveyConflictResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewUpdateSurveyForbiddenResponseBody builds the HTTP response body from the
 // result of the "update_survey" endpoint of the "survey" service.
 func NewUpdateSurveyForbiddenResponseBody(res *survey.ForbiddenError) *UpdateSurveyForbiddenResponseBody {
@@ -1897,6 +2101,16 @@ func NewDeleteSurveyBadRequestResponseBody(res *survey.BadRequestError) *DeleteS
 	return body
 }
 
+// NewDeleteSurveyConflictResponseBody builds the HTTP response body from the
+// result of the "delete_survey" endpoint of the "survey" service.
+func NewDeleteSurveyConflictResponseBody(res *survey.ConflictError) *DeleteSurveyConflictResponseBody {
+	body := &DeleteSurveyConflictResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewDeleteSurveyForbiddenResponseBody builds the HTTP response body from the
 // result of the "delete_survey" endpoint of the "survey" service.
 func NewDeleteSurveyForbiddenResponseBody(res *survey.ForbiddenError) *DeleteSurveyForbiddenResponseBody {
@@ -1951,6 +2165,16 @@ func NewDeleteSurveyUnauthorizedResponseBody(res *survey.UnauthorizedError) *Del
 // the result of the "bulk_resend_survey" endpoint of the "survey" service.
 func NewBulkResendSurveyBadRequestResponseBody(res *survey.BadRequestError) *BulkResendSurveyBadRequestResponseBody {
 	body := &BulkResendSurveyBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewBulkResendSurveyConflictResponseBody builds the HTTP response body from
+// the result of the "bulk_resend_survey" endpoint of the "survey" service.
+func NewBulkResendSurveyConflictResponseBody(res *survey.ConflictError) *BulkResendSurveyConflictResponseBody {
+	body := &BulkResendSurveyConflictResponseBody{
 		Code:    res.Code,
 		Message: res.Message,
 	}
@@ -2084,6 +2308,17 @@ func NewSendMissingRecipientsBadRequestResponseBody(res *survey.BadRequestError)
 	return body
 }
 
+// NewSendMissingRecipientsConflictResponseBody builds the HTTP response body
+// from the result of the "send_missing_recipients" endpoint of the "survey"
+// service.
+func NewSendMissingRecipientsConflictResponseBody(res *survey.ConflictError) *SendMissingRecipientsConflictResponseBody {
+	body := &SendMissingRecipientsConflictResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewSendMissingRecipientsForbiddenResponseBody builds the HTTP response body
 // from the result of the "send_missing_recipients" endpoint of the "survey"
 // service.
@@ -2144,6 +2379,17 @@ func NewSendMissingRecipientsUnauthorizedResponseBody(res *survey.UnauthorizedEr
 // service.
 func NewDeleteSurveyResponseBadRequestResponseBody(res *survey.BadRequestError) *DeleteSurveyResponseBadRequestResponseBody {
 	body := &DeleteSurveyResponseBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteSurveyResponseConflictResponseBody builds the HTTP response body
+// from the result of the "delete_survey_response" endpoint of the "survey"
+// service.
+func NewDeleteSurveyResponseConflictResponseBody(res *survey.ConflictError) *DeleteSurveyResponseConflictResponseBody {
+	body := &DeleteSurveyResponseConflictResponseBody{
 		Code:    res.Code,
 		Message: res.Message,
 	}
@@ -2216,6 +2462,17 @@ func NewResendSurveyResponseBadRequestResponseBody(res *survey.BadRequestError) 
 	return body
 }
 
+// NewResendSurveyResponseConflictResponseBody builds the HTTP response body
+// from the result of the "resend_survey_response" endpoint of the "survey"
+// service.
+func NewResendSurveyResponseConflictResponseBody(res *survey.ConflictError) *ResendSurveyResponseConflictResponseBody {
+	body := &ResendSurveyResponseConflictResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewResendSurveyResponseForbiddenResponseBody builds the HTTP response body
 // from the result of the "resend_survey_response" endpoint of the "survey"
 // service.
@@ -2276,6 +2533,17 @@ func NewResendSurveyResponseUnauthorizedResponseBody(res *survey.UnauthorizedErr
 // service.
 func NewDeleteRecipientGroupBadRequestResponseBody(res *survey.BadRequestError) *DeleteRecipientGroupBadRequestResponseBody {
 	body := &DeleteRecipientGroupBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteRecipientGroupConflictResponseBody builds the HTTP response body
+// from the result of the "delete_recipient_group" endpoint of the "survey"
+// service.
+func NewDeleteRecipientGroupConflictResponseBody(res *survey.ConflictError) *DeleteRecipientGroupConflictResponseBody {
+	body := &DeleteRecipientGroupConflictResponseBody{
 		Code:    res.Code,
 		Message: res.Message,
 	}
@@ -2347,6 +2615,16 @@ func NewCreateExclusionBadRequestResponseBody(res *survey.BadRequestError) *Crea
 	return body
 }
 
+// NewCreateExclusionConflictResponseBody builds the HTTP response body from
+// the result of the "create_exclusion" endpoint of the "survey" service.
+func NewCreateExclusionConflictResponseBody(res *survey.ConflictError) *CreateExclusionConflictResponseBody {
+	body := &CreateExclusionConflictResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewCreateExclusionForbiddenResponseBody builds the HTTP response body from
 // the result of the "create_exclusion" endpoint of the "survey" service.
 func NewCreateExclusionForbiddenResponseBody(res *survey.ForbiddenError) *CreateExclusionForbiddenResponseBody {
@@ -2382,6 +2660,16 @@ func NewCreateExclusionUnauthorizedResponseBody(res *survey.UnauthorizedError) *
 // the result of the "delete_exclusion" endpoint of the "survey" service.
 func NewDeleteExclusionBadRequestResponseBody(res *survey.BadRequestError) *DeleteExclusionBadRequestResponseBody {
 	body := &DeleteExclusionBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteExclusionConflictResponseBody builds the HTTP response body from
+// the result of the "delete_exclusion" endpoint of the "survey" service.
+func NewDeleteExclusionConflictResponseBody(res *survey.ConflictError) *DeleteExclusionConflictResponseBody {
+	body := &DeleteExclusionConflictResponseBody{
 		Code:    res.Code,
 		Message: res.Message,
 	}
@@ -2474,6 +2762,17 @@ func NewGetExclusionUnauthorizedResponseBody(res *survey.UnauthorizedError) *Get
 // service.
 func NewDeleteExclusionByIDBadRequestResponseBody(res *survey.BadRequestError) *DeleteExclusionByIDBadRequestResponseBody {
 	body := &DeleteExclusionByIDBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteExclusionByIDConflictResponseBody builds the HTTP response body
+// from the result of the "delete_exclusion_by_id" endpoint of the "survey"
+// service.
+func NewDeleteExclusionByIDConflictResponseBody(res *survey.ConflictError) *DeleteExclusionByIDConflictResponseBody {
+	body := &DeleteExclusionByIDConflictResponseBody{
 		Code:    res.Code,
 		Message: res.Message,
 	}
@@ -2573,6 +2872,61 @@ func NewListSurveyResponsesServiceUnavailableResponseBody(res *survey.ServiceUna
 // service.
 func NewListSurveyResponsesUnauthorizedResponseBody(res *survey.UnauthorizedError) *ListSurveyResponsesUnauthorizedResponseBody {
 	body := &ListSurveyResponsesUnauthorizedResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyTemplatesBadRequestResponseBody builds the HTTP response body
+// from the result of the "list_survey_templates" endpoint of the "survey"
+// service.
+func NewListSurveyTemplatesBadRequestResponseBody(res *survey.BadRequestError) *ListSurveyTemplatesBadRequestResponseBody {
+	body := &ListSurveyTemplatesBadRequestResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyTemplatesForbiddenResponseBody builds the HTTP response body
+// from the result of the "list_survey_templates" endpoint of the "survey"
+// service.
+func NewListSurveyTemplatesForbiddenResponseBody(res *survey.ForbiddenError) *ListSurveyTemplatesForbiddenResponseBody {
+	body := &ListSurveyTemplatesForbiddenResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyTemplatesInternalServerErrorResponseBody builds the HTTP
+// response body from the result of the "list_survey_templates" endpoint of the
+// "survey" service.
+func NewListSurveyTemplatesInternalServerErrorResponseBody(res *survey.InternalServerError) *ListSurveyTemplatesInternalServerErrorResponseBody {
+	body := &ListSurveyTemplatesInternalServerErrorResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyTemplatesServiceUnavailableResponseBody builds the HTTP
+// response body from the result of the "list_survey_templates" endpoint of the
+// "survey" service.
+func NewListSurveyTemplatesServiceUnavailableResponseBody(res *survey.ServiceUnavailableError) *ListSurveyTemplatesServiceUnavailableResponseBody {
+	body := &ListSurveyTemplatesServiceUnavailableResponseBody{
+		Code:    res.Code,
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewListSurveyTemplatesUnauthorizedResponseBody builds the HTTP response body
+// from the result of the "list_survey_templates" endpoint of the "survey"
+// service.
+func NewListSurveyTemplatesUnauthorizedResponseBody(res *survey.UnauthorizedError) *ListSurveyTemplatesUnauthorizedResponseBody {
+	body := &ListSurveyTemplatesUnauthorizedResponseBody{
 		Code:    res.Code,
 		Message: res.Message,
 	}
@@ -2823,6 +3177,17 @@ func NewListSurveyResponsesPayload(surveyUID string, pageToken *string, perPage 
 	return v
 }
 
+// NewListSurveyTemplatesPayload builds a survey service list_survey_templates
+// endpoint payload.
+func NewListSurveyTemplatesPayload(projectUID string, committeeUID *string, token *string) *survey.ListSurveyTemplatesPayload {
+	v := &survey.ListSurveyTemplatesPayload{}
+	v.ProjectUID = projectUID
+	v.CommitteeUID = committeeUID
+	v.Token = token
+
+	return v
+}
+
 // NewValidateEmailPayload builds a survey service validate_email endpoint
 // payload.
 func NewValidateEmailPayload(body *ValidateEmailRequestBody, token *string) *survey.ValidateEmailPayload {
@@ -2836,7 +3201,7 @@ func NewValidateEmailPayload(body *ValidateEmailRequestBody, token *string) *sur
 }
 
 // ValidateScheduleSurveyRequestBody runs the validations defined on
-// schedule_survey_request_body
+// ScheduleSurveyRequestBody
 func ValidateScheduleSurveyRequestBody(body *ScheduleSurveyRequestBody) (err error) {
 	if body.CommitteeUID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("committee_uid", "body"))
@@ -2845,7 +3210,7 @@ func ValidateScheduleSurveyRequestBody(body *ScheduleSurveyRequestBody) (err err
 }
 
 // ValidateBulkResendSurveyRequestBody runs the validations defined on
-// bulk_resend_survey_request_body
+// BulkResendSurveyRequestBody
 func ValidateBulkResendSurveyRequestBody(body *BulkResendSurveyRequestBody) (err error) {
 	if body.RecipientIds == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("recipient_ids", "body"))

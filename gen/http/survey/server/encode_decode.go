@@ -66,9 +66,10 @@ func DecodeScheduleSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request) 
 		}
 		payload = NewScheduleSurveyPayload(&body, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -99,6 +100,19 @@ func EncodeScheduleSurveyError(encoder func(context.Context, http.ResponseWriter
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewScheduleSurveyConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -199,9 +213,10 @@ func DecodeGetSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request) goaht
 		}
 		payload = NewGetSurveyPayload(surveyUID, projectUID, projectUids, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -350,9 +365,10 @@ func DecodeUpdateSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request) go
 		}
 		payload = NewUpdateSurveyPayload(&body, surveyUID, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -383,6 +399,19 @@ func EncodeUpdateSurveyError(encoder func(context.Context, http.ResponseWriter) 
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewUpdateSurveyConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -482,9 +511,10 @@ func DecodeDeleteSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request) go
 		}
 		payload = NewDeleteSurveyPayload(surveyUID, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -515,6 +545,19 @@ func EncodeDeleteSurveyError(encoder func(context.Context, http.ResponseWriter) 
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteSurveyConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -634,9 +677,10 @@ func DecodeBulkResendSurveyRequest(mux goahttp.Muxer, decoder func(*http.Request
 		}
 		payload = NewBulkResendSurveyPayload(&body, surveyUID, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -667,6 +711,19 @@ func EncodeBulkResendSurveyError(encoder func(context.Context, http.ResponseWrit
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewBulkResendSurveyConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -774,9 +831,10 @@ func DecodePreviewSendSurveyRequest(mux goahttp.Muxer, decoder func(*http.Reques
 		}
 		payload = NewPreviewSendSurveyPayload(surveyUID, committeeUID, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -911,9 +969,10 @@ func DecodeSendMissingRecipientsRequest(mux goahttp.Muxer, decoder func(*http.Re
 		}
 		payload = NewSendMissingRecipientsPayload(surveyUID, committeeUID, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -944,6 +1003,19 @@ func EncodeSendMissingRecipientsError(encoder func(context.Context, http.Respons
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewSendMissingRecipientsConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -1045,9 +1117,10 @@ func DecodeDeleteSurveyResponseRequest(mux goahttp.Muxer, decoder func(*http.Req
 		}
 		payload = NewDeleteSurveyResponsePayload(surveyUID, responseID, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -1078,6 +1151,19 @@ func EncodeDeleteSurveyResponseError(encoder func(context.Context, http.Response
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteSurveyResponseConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -1179,9 +1265,10 @@ func DecodeResendSurveyResponseRequest(mux goahttp.Muxer, decoder func(*http.Req
 		}
 		payload = NewResendSurveyResponsePayload(surveyUID, responseID, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -1212,6 +1299,19 @@ func EncodeResendSurveyResponseError(encoder func(context.Context, http.Response
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewResendSurveyResponseConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -1327,9 +1427,10 @@ func DecodeDeleteRecipientGroupRequest(mux goahttp.Muxer, decoder func(*http.Req
 		}
 		payload = NewDeleteRecipientGroupPayload(surveyUID, committeeUID, projectUID, foundationID, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -1360,6 +1461,19 @@ func EncodeDeleteRecipientGroupError(encoder func(context.Context, http.Response
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteRecipientGroupConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -1474,9 +1588,10 @@ func DecodeCreateExclusionRequest(mux goahttp.Muxer, decoder func(*http.Request)
 		}
 		payload = NewCreateExclusionPayload(&body, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -1507,6 +1622,19 @@ func EncodeCreateExclusionError(encoder func(context.Context, http.ResponseWrite
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewCreateExclusionConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -1592,9 +1720,10 @@ func DecodeDeleteExclusionRequest(mux goahttp.Muxer, decoder func(*http.Request)
 		}
 		payload = NewDeleteExclusionPayload(&body, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -1625,6 +1754,19 @@ func EncodeDeleteExclusionError(encoder func(context.Context, http.ResponseWrite
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteExclusionConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -1701,9 +1843,10 @@ func DecodeGetExclusionRequest(mux goahttp.Muxer, decoder func(*http.Request) go
 		}
 		payload = NewGetExclusionPayload(exclusionID, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -1820,9 +1963,10 @@ func DecodeDeleteExclusionByIDRequest(mux goahttp.Muxer, decoder func(*http.Requ
 		}
 		payload = NewDeleteExclusionByIDPayload(exclusionID, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -1853,6 +1997,19 @@ func EncodeDeleteExclusionByIDError(encoder func(context.Context, http.ResponseW
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Conflict":
+			var res *survey.ConflictError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteExclusionByIDConflictResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusConflict)
 			return enc.Encode(body)
 		case "Forbidden":
 			var res *survey.ForbiddenError
@@ -1950,9 +2107,10 @@ func DecodeListSurveyResponsesRequest(mux goahttp.Muxer, decoder func(*http.Requ
 		}
 		payload = NewListSurveyResponsesPayload(surveyUID, pageToken, perPage, projectUID, projectUids, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -2055,6 +2213,144 @@ func EncodeListSurveyResponsesError(encoder func(context.Context, http.ResponseW
 	}
 }
 
+// EncodeListSurveyTemplatesResponse returns an encoder for responses returned
+// by the survey list_survey_templates endpoint.
+func EncodeListSurveyTemplatesResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res, _ := v.([]*survey.SurveyTemplate)
+		enc := encoder(ctx, w)
+		body := NewListSurveyTemplatesResponseBody(res)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeListSurveyTemplatesRequest returns a decoder for requests sent to the
+// survey list_survey_templates endpoint.
+func DecodeListSurveyTemplatesRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*survey.ListSurveyTemplatesPayload, error) {
+	return func(r *http.Request) (*survey.ListSurveyTemplatesPayload, error) {
+		var payload *survey.ListSurveyTemplatesPayload
+		var (
+			projectUID   string
+			committeeUID *string
+			token        *string
+			err          error
+		)
+		qp := r.URL.Query()
+		projectUID = qp.Get("project_uid")
+		if projectUID == "" {
+			err = goa.MergeErrors(err, goa.MissingFieldError("project_uid", "query string"))
+		}
+		err = goa.MergeErrors(err, goa.ValidateFormat("project_uid", projectUID, goa.FormatUUID))
+		committeeUIDRaw := qp.Get("committee_uid")
+		if committeeUIDRaw != "" {
+			committeeUID = &committeeUIDRaw
+		}
+		if committeeUID != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("committee_uid", *committeeUID, goa.FormatUUID))
+		}
+		tokenRaw := r.Header.Get("Authorization")
+		if tokenRaw != "" {
+			token = &tokenRaw
+		}
+		if err != nil {
+			return payload, err
+		}
+		payload = NewListSurveyTemplatesPayload(projectUID, committeeUID, token)
+		if payload.Token != nil {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
+				// Remove authorization scheme prefix (e.g. "Bearer")
+				cred = cred[index+1:]
+				payload.Token = &cred
+			}
+		}
+
+		return payload, nil
+	}
+}
+
+// EncodeListSurveyTemplatesError returns an encoder for errors returned by the
+// list_survey_templates survey endpoint.
+func EncodeListSurveyTemplatesError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "BadRequest":
+			var res *survey.BadRequestError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyTemplatesBadRequestResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "Forbidden":
+			var res *survey.ForbiddenError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyTemplatesForbiddenResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusForbidden)
+			return enc.Encode(body)
+		case "InternalServerError":
+			var res *survey.InternalServerError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyTemplatesInternalServerErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		case "ServiceUnavailable":
+			var res *survey.ServiceUnavailableError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyTemplatesServiceUnavailableResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return enc.Encode(body)
+		case "Unauthorized":
+			var res *survey.UnauthorizedError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewListSurveyTemplatesUnauthorizedResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusUnauthorized)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
 // EncodeValidateEmailResponse returns an encoder for responses returned by the
 // survey validate_email endpoint.
 func EncodeValidateEmailResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
@@ -2097,9 +2393,10 @@ func DecodeValidateEmailRequest(mux goahttp.Muxer, decoder func(*http.Request) g
 		}
 		payload = NewValidateEmailPayload(&body, token)
 		if payload.Token != nil {
-			if strings.Contains(*payload.Token, " ") {
+			cred := *payload.Token
+			if index := strings.IndexByte(string(cred), ' '); index >= 0 {
 				// Remove authorization scheme prefix (e.g. "Bearer")
-				cred := strings.SplitN(*payload.Token, " ", 2)[1]
+				cred = cred[index+1:]
 				payload.Token = &cred
 			}
 		}
@@ -2180,9 +2477,6 @@ func EncodeValidateEmailError(encoder func(context.Context, http.ResponseWriter)
 // type *SurveyCommitteeResponseBody from a value of type
 // *survey.SurveyCommittee.
 func marshalSurveySurveyCommitteeToSurveyCommitteeResponseBody(v *survey.SurveyCommittee) *SurveyCommitteeResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &SurveyCommitteeResponseBody{
 		CommitteeName:   v.CommitteeName,
 		CommitteeUID:    v.CommitteeUID,
@@ -2200,9 +2494,6 @@ func marshalSurveySurveyCommitteeToSurveyCommitteeResponseBody(v *survey.SurveyC
 // marshalSurveyLFXProjectToLFXProjectResponseBody builds a value of type
 // *LFXProjectResponseBody from a value of type *survey.LFXProject.
 func marshalSurveyLFXProjectToLFXProjectResponseBody(v *survey.LFXProject) *LFXProjectResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &LFXProjectResponseBody{
 		ID:      v.ID,
 		Name:    v.Name,
@@ -2218,9 +2509,6 @@ func marshalSurveyLFXProjectToLFXProjectResponseBody(v *survey.LFXProject) *LFXP
 // of type *ExcludedCommitteeResponseBody from a value of type
 // *survey.ExcludedCommittee.
 func marshalSurveyExcludedCommitteeToExcludedCommitteeResponseBody(v *survey.ExcludedCommittee) *ExcludedCommitteeResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &ExcludedCommitteeResponseBody{
 		ProjectUID:        v.ProjectUID,
 		ProjectName:       v.ProjectName,
@@ -2236,9 +2524,6 @@ func marshalSurveyExcludedCommitteeToExcludedCommitteeResponseBody(v *survey.Exc
 // value of type *ITXPreviewRecipientResponseBody from a value of type
 // *survey.ITXPreviewRecipient.
 func marshalSurveyITXPreviewRecipientToITXPreviewRecipientResponseBody(v *survey.ITXPreviewRecipient) *ITXPreviewRecipientResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &ITXPreviewRecipientResponseBody{
 		UserID:    v.UserID,
 		Name:      v.Name,
@@ -2255,9 +2540,6 @@ func marshalSurveyITXPreviewRecipientToITXPreviewRecipientResponseBody(v *survey
 // marshalSurveyExclusionUserToExclusionUserResponseBody builds a value of type
 // *ExclusionUserResponseBody from a value of type *survey.ExclusionUser.
 func marshalSurveyExclusionUserToExclusionUserResponseBody(v *survey.ExclusionUser) *ExclusionUserResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &ExclusionUserResponseBody{
 		ID:       v.ID,
 		Username: v.Username,
@@ -2279,9 +2561,6 @@ func marshalSurveyExclusionUserToExclusionUserResponseBody(v *survey.ExclusionUs
 // marshalSurveyUserEmailToUserEmailResponseBody builds a value of type
 // *UserEmailResponseBody from a value of type *survey.UserEmail.
 func marshalSurveyUserEmailToUserEmailResponseBody(v *survey.UserEmail) *UserEmailResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &UserEmailResponseBody{
 		ID:           v.ID,
 		EmailAddress: v.EmailAddress,
@@ -2352,9 +2631,6 @@ func marshalSurveySurveyResponseItemToSurveyResponseItemResponseBody(v *survey.S
 // of type *SurveyResponseOrgResponseBody from a value of type
 // *survey.SurveyResponseOrg.
 func marshalSurveySurveyResponseOrgToSurveyResponseOrgResponseBody(v *survey.SurveyResponseOrg) *SurveyResponseOrgResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &SurveyResponseOrgResponseBody{
 		ID:   v.ID,
 		Name: v.Name,
@@ -2367,9 +2643,6 @@ func marshalSurveySurveyResponseOrgToSurveyResponseOrgResponseBody(v *survey.Sur
 // value of type *SurveyResponseProjResponseBody from a value of type
 // *survey.SurveyResponseProj.
 func marshalSurveySurveyResponseProjToSurveyResponseProjResponseBody(v *survey.SurveyResponseProj) *SurveyResponseProjResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &SurveyResponseProjResponseBody{
 		UID:  v.UID,
 		Name: v.Name,
@@ -2382,9 +2655,6 @@ func marshalSurveySurveyResponseProjToSurveyResponseProjResponseBody(v *survey.S
 // value of type *SurveyQuestionAnswerResponseBody from a value of type
 // *survey.SurveyQuestionAnswer.
 func marshalSurveySurveyQuestionAnswerToSurveyQuestionAnswerResponseBody(v *survey.SurveyQuestionAnswer) *SurveyQuestionAnswerResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &SurveyQuestionAnswerResponseBody{
 		QuestionID:      v.QuestionID,
 		QuestionText:    v.QuestionText,
@@ -2409,9 +2679,6 @@ func marshalSurveySurveyQuestionAnswerToSurveyQuestionAnswerResponseBody(v *surv
 // value of type *SurveyAnswerChoiceResponseBody from a value of type
 // *survey.SurveyAnswerChoice.
 func marshalSurveySurveyAnswerChoiceToSurveyAnswerChoiceResponseBody(v *survey.SurveyAnswerChoice) *SurveyAnswerChoiceResponseBody {
-	if v == nil {
-		return nil
-	}
 	res := &SurveyAnswerChoiceResponseBody{
 		ChoiceID: v.ChoiceID,
 		Text:     v.Text,
@@ -2429,6 +2696,19 @@ func marshalSurveySurveyResponsePageMetaToSurveyResponsePageMetaResponseBody(v *
 		TotalPages:   v.TotalPages,
 		TotalResults: v.TotalResults,
 		PerPage:      v.PerPage,
+	}
+
+	return res
+}
+
+// marshalSurveySurveyTemplateToSurveyTemplateResponse builds a value of type
+// *SurveyTemplateResponse from a value of type *survey.SurveyTemplate.
+func marshalSurveySurveyTemplateToSurveyTemplateResponse(v *survey.SurveyTemplate) *SurveyTemplateResponse {
+	res := &SurveyTemplateResponse{
+		ID:       v.ID,
+		Title:    v.Title,
+		Nickname: v.Nickname,
+		Href:     v.Href,
 	}
 
 	return res

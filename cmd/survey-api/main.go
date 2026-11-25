@@ -210,6 +210,21 @@ func run() int {
 	// Initialize service layer — pass proxyClient for each sub-interface; the concrete
 	// *proxy.Client satisfies domain.ITXProxyClient, which embeds all three.
 	surveyService := service.NewSurveyService(proxyClient, proxyClient, proxyClient, idMapper, logger)
+
+	// The creator's display name is resolved from the auth service over NATS. It is
+	// best-effort: without NATS the service stamps the username as the name.
+	if cfg.NATSURL != "" {
+		nameNC, err := natsgo.Connect(cfg.NATSURL,
+			natsgo.Name("survey-service-user-metadata"),
+			natsgo.DrainTimeout(30*time.Second),
+		)
+		if err != nil {
+			logger.Warn("Failed to connect to NATS for creator name lookup; using usernames as creator names", "error", err)
+		} else {
+			defer nameNC.Drain() //nolint:errcheck // best-effort drain on shutdown
+			surveyService.WithUserNameReader(infraNATS.NewUserNameReader(nameNC, logger))
+		}
+	}
 	if err := surveyService.ServiceReady(); err != nil {
 		logger.Error("Survey service dependency check failed", "error", err)
 		return 1

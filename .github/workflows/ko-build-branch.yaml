@@ -40,12 +40,11 @@ jobs:
           echo tag="$container_tag" >> "$GITHUB_OUTPUT"
       - name: Build survey-api for PR
         env:
-          IMAGE_SHA_TAG: ${{ github.sha }}
-          IMAGE_BRANCH_TAG: ${{ steps.container_tag.outputs.tag }}
+          CONTAINER_TAG: ${{ steps.container_tag.outputs.tag }}
         run: |
           ko build github.com/linuxfoundation/lfx-v2-survey-service/cmd/survey-api \
             -B \
             --platform linux/amd64,linux/arm64 \
-            -t "$IMAGE_SHA_TAG" \
-            -t "$IMAGE_BRANCH_TAG" \
+            -t "${GITHUB_SHA}" \
+            -t "${CONTAINER_TAG}" \
             --sbom spdx

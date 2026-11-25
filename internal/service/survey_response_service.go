@@ -5,6 +5,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/linuxfoundation/lfx-v2-survey-service/gen/survey"
 	"github.com/linuxfoundation/lfx-v2-survey-service/internal/domain"
@@ -16,7 +17,7 @@ import (
 func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.DeleteSurveyResponsePayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "deleting survey response",
+	s.logger.DebugContext(ctx, "deleting survey response",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"response_id", p.ResponseID,
@@ -40,7 +41,7 @@ func (s *SurveyService) DeleteSurveyResponse(ctx context.Context, p *survey.Dele
 func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.ResendSurveyResponsePayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "resending survey response",
+	s.logger.DebugContext(ctx, "resending survey response",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"response_id", p.ResponseID,
@@ -64,7 +65,7 @@ func (s *SurveyService) ResendSurveyResponse(ctx context.Context, p *survey.Rese
 func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.DeleteRecipientGroupPayload) error {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "deleting recipient group from survey",
+	s.logger.DebugContext(ctx, "deleting recipient group from survey",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"committee_uid", p.CommitteeUID,
@@ -101,7 +102,7 @@ func (s *SurveyService) DeleteRecipientGroup(ctx context.Context, p *survey.Dele
 func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListSurveyResponsesPayload) (*survey.SurveyResponsesPage, error) {
 	principal := principalFromCtx(ctx)
 
-	s.logger.InfoContext(ctx, "listing survey responses",
+	s.logger.DebugContext(ctx, "listing survey responses",
 		"principal", principal,
 		"survey_uid", p.SurveyUID,
 		"project_uid", p.ProjectUID,
@@ -125,11 +126,7 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 	if p.ProjectUID != nil && *p.ProjectUID != "" {
 		projectV1, err := s.idMapper.MapProjectV2ToV1(ctx, *p.ProjectUID)
 		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map project_uid to V1",
-				"project_uid", *p.ProjectUID,
-				"error", err,
-			)
-			return nil, err
+			return nil, fmt.Errorf("map project_uid %q to v1: %w", *p.ProjectUID, err)
 		}
 		params.ProjectID = &projectV1
 		s.logger.DebugContext(ctx, "mapped project_uid for responses filter",
@@ -141,10 +138,6 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 	if p.ProjectUids != nil && *p.ProjectUids != "" {
 		projectV1IDs, err := s.mapProjectUIDsV2ToV1(ctx, *p.ProjectUids)
 		if err != nil {
-			s.logger.ErrorContext(ctx, "failed to map project_uids to V1",
-				"project_uids", *p.ProjectUids,
-				"error", err,
-			)
 			return nil, err
 		}
 		params.ProjectIDs = &projectV1IDs
@@ -163,10 +156,7 @@ func (s *SurveyService) ListSurveyResponses(ctx context.Context, p *survey.ListS
 	// Map response back to Goa result (V1→V2 ID mapping per response)
 	result, err := s.mapITXResponsesToPage(ctx, itxResponse)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to map ITX responses",
-			"error", err,
-		)
-		return nil, err
+		return nil, fmt.Errorf("map ITX survey responses: %w", err)
 	}
 
 	s.logger.InfoContext(ctx, "survey responses listed successfully",

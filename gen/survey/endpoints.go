@@ -32,6 +32,7 @@ type Endpoints struct {
 	GetExclusion          goa.Endpoint
 	DeleteExclusionByID   goa.Endpoint
 	ListSurveyResponses   goa.Endpoint
+	ListSurveyTemplates   goa.Endpoint
 	ValidateEmail         goa.Endpoint
 }
 
@@ -55,6 +56,7 @@ func NewEndpoints(s Service) *Endpoints {
 		GetExclusion:          NewGetExclusionEndpoint(s, a.JWTAuth),
 		DeleteExclusionByID:   NewDeleteExclusionByIDEndpoint(s, a.JWTAuth),
 		ListSurveyResponses:   NewListSurveyResponsesEndpoint(s, a.JWTAuth),
+		ListSurveyTemplates:   NewListSurveyTemplatesEndpoint(s, a.JWTAuth),
 		ValidateEmail:         NewValidateEmailEndpoint(s, a.JWTAuth),
 	}
 }
@@ -76,6 +78,7 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.GetExclusion = m(e.GetExclusion)
 	e.DeleteExclusionByID = m(e.DeleteExclusionByID)
 	e.ListSurveyResponses = m(e.ListSurveyResponses)
+	e.ListSurveyTemplates = m(e.ListSurveyTemplates)
 	e.ValidateEmail = m(e.ValidateEmail)
 }
 
@@ -92,7 +95,7 @@ func NewScheduleSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.En
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -115,7 +118,7 @@ func NewGetSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoin
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -138,7 +141,7 @@ func NewUpdateSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endp
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -161,7 +164,7 @@ func NewDeleteSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endp
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -184,7 +187,7 @@ func NewBulkResendSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -207,7 +210,7 @@ func NewPreviewSendSurveyEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -230,7 +233,7 @@ func NewSendMissingRecipientsEndpoint(s Service, authJWTFn security.AuthJWTFunc)
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -253,7 +256,7 @@ func NewDeleteSurveyResponseEndpoint(s Service, authJWTFn security.AuthJWTFunc) 
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -276,7 +279,7 @@ func NewResendSurveyResponseEndpoint(s Service, authJWTFn security.AuthJWTFunc) 
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -299,7 +302,7 @@ func NewDeleteRecipientGroupEndpoint(s Service, authJWTFn security.AuthJWTFunc) 
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -322,7 +325,7 @@ func NewCreateExclusionEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.E
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -345,7 +348,7 @@ func NewDeleteExclusionEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.E
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -368,7 +371,7 @@ func NewGetExclusionEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endp
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -391,7 +394,7 @@ func NewDeleteExclusionByIDEndpoint(s Service, authJWTFn security.AuthJWTFunc) g
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
@@ -414,13 +417,36 @@ func NewListSurveyResponsesEndpoint(s Service, authJWTFn security.AuthJWTFunc) g
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {
 			return nil, err
 		}
 		return s.ListSurveyResponses(ctx, p)
+	}
+}
+
+// NewListSurveyTemplatesEndpoint returns an endpoint function that calls the
+// method "list_survey_templates" of service "survey".
+func NewListSurveyTemplatesEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*ListSurveyTemplatesPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"read:projects", "manage:projects", "manage:surveys"},
+			RequiredScopes: []string{"manage:projects", "manage:surveys"},
+		}
+		var token string
+		if p.Token != nil {
+			token = string(*p.Token)
+		}
+		ctx, err = authJWTFn(ctx, token, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.ListSurveyTemplates(ctx, p)
 	}
 }
 
@@ -437,7 +463,7 @@ func NewValidateEmailEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.End
 		}
 		var token string
 		if p.Token != nil {
-			token = *p.Token
+			token = string(*p.Token)
 		}
 		ctx, err = authJWTFn(ctx, token, &sc)
 		if err != nil {

@@ -22,11 +22,11 @@ type ScheduleSurveyRequestBody struct {
 	IsProjectSurvey *bool `form:"is_project_survey,omitempty" json:"is_project_survey,omitempty" xml:"is_project_survey,omitempty"`
 	// Project stage filter for global surveys
 	StageFilter *string `form:"stage_filter,omitempty" json:"stage_filter,omitempty" xml:"stage_filter,omitempty"`
-	// Creator's username
+	// Ignored. The creator is the authenticated user.
 	CreatorUsername *string `form:"creator_username,omitempty" json:"creator_username,omitempty" xml:"creator_username,omitempty"`
-	// Creator's full name
+	// Ignored. The creator's name is resolved from the authenticated user.
 	CreatorName *string `form:"creator_name,omitempty" json:"creator_name,omitempty" xml:"creator_name,omitempty"`
-	// Creator's user ID
+	// Ignored. The creator is the authenticated user.
 	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
 	// SurveyMonkey survey ID
 	SurveyMonkeyID *string `form:"survey_monkey_id,omitempty" json:"survey_monkey_id,omitempty" xml:"survey_monkey_id,omitempty"`
@@ -55,7 +55,7 @@ type ScheduleSurveyRequestBody struct {
 type UpdateSurveyRequestBody struct {
 	// Committee UID to send survey to
 	CommitteeUID *string `form:"committee_uid,omitempty" json:"committee_uid,omitempty" xml:"committee_uid,omitempty"`
-	// Creator's user ID
+	// Ignored. The modifier is the authenticated user.
 	CreatorID *string `form:"creator_id,omitempty" json:"creator_id,omitempty" xml:"creator_id,omitempty"`
 	// Survey title
 	SurveyTitle *string `form:"survey_title,omitempty" json:"survey_title,omitempty" xml:"survey_title,omitempty"`
@@ -426,6 +426,15 @@ type ScheduleSurveyBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// ScheduleSurveyConflictResponseBody is the type of the "survey" service
+// "schedule_survey" endpoint HTTP response body for the "Conflict" error.
+type ScheduleSurveyConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ScheduleSurveyForbiddenResponseBody is the type of the "survey" service
 // "schedule_survey" endpoint HTTP response body for the "Forbidden" error.
 type ScheduleSurveyForbiddenResponseBody struct {
@@ -527,6 +536,15 @@ type UpdateSurveyBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// UpdateSurveyConflictResponseBody is the type of the "survey" service
+// "update_survey" endpoint HTTP response body for the "Conflict" error.
+type UpdateSurveyConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // UpdateSurveyForbiddenResponseBody is the type of the "survey" service
 // "update_survey" endpoint HTTP response body for the "Forbidden" error.
 type UpdateSurveyForbiddenResponseBody struct {
@@ -583,6 +601,15 @@ type DeleteSurveyBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// DeleteSurveyConflictResponseBody is the type of the "survey" service
+// "delete_survey" endpoint HTTP response body for the "Conflict" error.
+type DeleteSurveyConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // DeleteSurveyForbiddenResponseBody is the type of the "survey" service
 // "delete_survey" endpoint HTTP response body for the "Forbidden" error.
 type DeleteSurveyForbiddenResponseBody struct {
@@ -633,6 +660,15 @@ type DeleteSurveyUnauthorizedResponseBody struct {
 // BulkResendSurveyBadRequestResponseBody is the type of the "survey" service
 // "bulk_resend_survey" endpoint HTTP response body for the "BadRequest" error.
 type BulkResendSurveyBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// BulkResendSurveyConflictResponseBody is the type of the "survey" service
+// "bulk_resend_survey" endpoint HTTP response body for the "Conflict" error.
+type BulkResendSurveyConflictResponseBody struct {
 	// HTTP status code
 	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
 	// Error message
@@ -754,6 +790,16 @@ type SendMissingRecipientsBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// SendMissingRecipientsConflictResponseBody is the type of the "survey"
+// service "send_missing_recipients" endpoint HTTP response body for the
+// "Conflict" error.
+type SendMissingRecipientsConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // SendMissingRecipientsForbiddenResponseBody is the type of the "survey"
 // service "send_missing_recipients" endpoint HTTP response body for the
 // "Forbidden" error.
@@ -808,6 +854,16 @@ type SendMissingRecipientsUnauthorizedResponseBody struct {
 // service "delete_survey_response" endpoint HTTP response body for the
 // "BadRequest" error.
 type DeleteSurveyResponseBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteSurveyResponseConflictResponseBody is the type of the "survey" service
+// "delete_survey_response" endpoint HTTP response body for the "Conflict"
+// error.
+type DeleteSurveyResponseConflictResponseBody struct {
 	// HTTP status code
 	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
 	// Error message
@@ -874,6 +930,16 @@ type ResendSurveyResponseBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// ResendSurveyResponseConflictResponseBody is the type of the "survey" service
+// "resend_survey_response" endpoint HTTP response body for the "Conflict"
+// error.
+type ResendSurveyResponseConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ResendSurveyResponseForbiddenResponseBody is the type of the "survey"
 // service "resend_survey_response" endpoint HTTP response body for the
 // "Forbidden" error.
@@ -928,6 +994,16 @@ type ResendSurveyResponseUnauthorizedResponseBody struct {
 // service "delete_recipient_group" endpoint HTTP response body for the
 // "BadRequest" error.
 type DeleteRecipientGroupBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteRecipientGroupConflictResponseBody is the type of the "survey" service
+// "delete_recipient_group" endpoint HTTP response body for the "Conflict"
+// error.
+type DeleteRecipientGroupConflictResponseBody struct {
 	// HTTP status code
 	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
 	// Error message
@@ -993,6 +1069,15 @@ type CreateExclusionBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// CreateExclusionConflictResponseBody is the type of the "survey" service
+// "create_exclusion" endpoint HTTP response body for the "Conflict" error.
+type CreateExclusionConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // CreateExclusionForbiddenResponseBody is the type of the "survey" service
 // "create_exclusion" endpoint HTTP response body for the "Forbidden" error.
 type CreateExclusionForbiddenResponseBody struct {
@@ -1024,6 +1109,15 @@ type CreateExclusionUnauthorizedResponseBody struct {
 // DeleteExclusionBadRequestResponseBody is the type of the "survey" service
 // "delete_exclusion" endpoint HTTP response body for the "BadRequest" error.
 type DeleteExclusionBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteExclusionConflictResponseBody is the type of the "survey" service
+// "delete_exclusion" endpoint HTTP response body for the "Conflict" error.
+type DeleteExclusionConflictResponseBody struct {
 	// HTTP status code
 	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
 	// Error message
@@ -1114,6 +1208,16 @@ type DeleteExclusionByIDBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// DeleteExclusionByIDConflictResponseBody is the type of the "survey" service
+// "delete_exclusion_by_id" endpoint HTTP response body for the "Conflict"
+// error.
+type DeleteExclusionByIDConflictResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // DeleteExclusionByIDForbiddenResponseBody is the type of the "survey" service
 // "delete_exclusion_by_id" endpoint HTTP response body for the "Forbidden"
 // error.
@@ -1197,6 +1301,56 @@ type ListSurveyResponsesServiceUnavailableResponseBody struct {
 // service "list_survey_responses" endpoint HTTP response body for the
 // "Unauthorized" error.
 type ListSurveyResponsesUnauthorizedResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListSurveyTemplatesBadRequestResponseBody is the type of the "survey"
+// service "list_survey_templates" endpoint HTTP response body for the
+// "BadRequest" error.
+type ListSurveyTemplatesBadRequestResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListSurveyTemplatesForbiddenResponseBody is the type of the "survey" service
+// "list_survey_templates" endpoint HTTP response body for the "Forbidden"
+// error.
+type ListSurveyTemplatesForbiddenResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListSurveyTemplatesInternalServerErrorResponseBody is the type of the
+// "survey" service "list_survey_templates" endpoint HTTP response body for the
+// "InternalServerError" error.
+type ListSurveyTemplatesInternalServerErrorResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListSurveyTemplatesServiceUnavailableResponseBody is the type of the
+// "survey" service "list_survey_templates" endpoint HTTP response body for the
+// "ServiceUnavailable" error.
+type ListSurveyTemplatesServiceUnavailableResponseBody struct {
+	// HTTP status code
+	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
+	// Error message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListSurveyTemplatesUnauthorizedResponseBody is the type of the "survey"
+// service "list_survey_templates" endpoint HTTP response body for the
+// "Unauthorized" error.
+type ListSurveyTemplatesUnauthorizedResponseBody struct {
 	// HTTP status code
 	Code *string `form:"code,omitempty" json:"code,omitempty" xml:"code,omitempty"`
 	// Error message
@@ -1456,6 +1610,18 @@ type SurveyResponsePageMetaResponseBody struct {
 	PerPage *int `form:"per_page,omitempty" json:"per_page,omitempty" xml:"per_page,omitempty"`
 }
 
+// SurveyTemplateResponse is used to define fields on response body types.
+type SurveyTemplateResponse struct {
+	// SurveyMonkey survey ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Survey template title
+	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
+	// Survey template nickname
+	Nickname *string `form:"nickname,omitempty" json:"nickname,omitempty" xml:"nickname,omitempty"`
+	// SurveyMonkey API URL for the survey template
+	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
+}
+
 // NewScheduleSurveyRequestBody builds the HTTP request body from the payload
 // of the "schedule_survey" endpoint of the "survey" service.
 func NewScheduleSurveyRequestBody(p *survey.ScheduleSurveyPayload) *ScheduleSurveyRequestBody {
@@ -1607,6 +1773,17 @@ func NewScheduleSurveySurveyScheduleResultCreated(body *ScheduleSurveyResponseBo
 // BadRequest error.
 func NewScheduleSurveyBadRequest(body *ScheduleSurveyBadRequestResponseBody) *survey.BadRequestError {
 	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewScheduleSurveyConflict builds a survey service schedule_survey endpoint
+// Conflict error.
+func NewScheduleSurveyConflict(body *ScheduleSurveyConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -1843,6 +2020,17 @@ func NewUpdateSurveyBadRequest(body *UpdateSurveyBadRequestResponseBody) *survey
 	return v
 }
 
+// NewUpdateSurveyConflict builds a survey service update_survey endpoint
+// Conflict error.
+func NewUpdateSurveyConflict(body *UpdateSurveyConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewUpdateSurveyForbidden builds a survey service update_survey endpoint
 // Forbidden error.
 func NewUpdateSurveyForbidden(body *UpdateSurveyForbiddenResponseBody) *survey.ForbiddenError {
@@ -1909,6 +2097,17 @@ func NewDeleteSurveyBadRequest(body *DeleteSurveyBadRequestResponseBody) *survey
 	return v
 }
 
+// NewDeleteSurveyConflict builds a survey service delete_survey endpoint
+// Conflict error.
+func NewDeleteSurveyConflict(body *DeleteSurveyConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewDeleteSurveyForbidden builds a survey service delete_survey endpoint
 // Forbidden error.
 func NewDeleteSurveyForbidden(body *DeleteSurveyForbiddenResponseBody) *survey.ForbiddenError {
@@ -1968,6 +2167,17 @@ func NewDeleteSurveyUnauthorized(body *DeleteSurveyUnauthorizedResponseBody) *su
 // endpoint BadRequest error.
 func NewBulkResendSurveyBadRequest(body *BulkResendSurveyBadRequestResponseBody) *survey.BadRequestError {
 	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewBulkResendSurveyConflict builds a survey service bulk_resend_survey
+// endpoint Conflict error.
+func NewBulkResendSurveyConflict(body *BulkResendSurveyConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -2145,6 +2355,17 @@ func NewSendMissingRecipientsBadRequest(body *SendMissingRecipientsBadRequestRes
 	return v
 }
 
+// NewSendMissingRecipientsConflict builds a survey service
+// send_missing_recipients endpoint Conflict error.
+func NewSendMissingRecipientsConflict(body *SendMissingRecipientsConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewSendMissingRecipientsForbidden builds a survey service
 // send_missing_recipients endpoint Forbidden error.
 func NewSendMissingRecipientsForbidden(body *SendMissingRecipientsForbiddenResponseBody) *survey.ForbiddenError {
@@ -2204,6 +2425,17 @@ func NewSendMissingRecipientsUnauthorized(body *SendMissingRecipientsUnauthorize
 // delete_survey_response endpoint BadRequest error.
 func NewDeleteSurveyResponseBadRequest(body *DeleteSurveyResponseBadRequestResponseBody) *survey.BadRequestError {
 	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteSurveyResponseConflict builds a survey service
+// delete_survey_response endpoint Conflict error.
+func NewDeleteSurveyResponseConflict(body *DeleteSurveyResponseConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -2277,6 +2509,17 @@ func NewResendSurveyResponseBadRequest(body *ResendSurveyResponseBadRequestRespo
 	return v
 }
 
+// NewResendSurveyResponseConflict builds a survey service
+// resend_survey_response endpoint Conflict error.
+func NewResendSurveyResponseConflict(body *ResendSurveyResponseConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewResendSurveyResponseForbidden builds a survey service
 // resend_survey_response endpoint Forbidden error.
 func NewResendSurveyResponseForbidden(body *ResendSurveyResponseForbiddenResponseBody) *survey.ForbiddenError {
@@ -2343,6 +2586,17 @@ func NewDeleteRecipientGroupBadRequest(body *DeleteRecipientGroupBadRequestRespo
 	return v
 }
 
+// NewDeleteRecipientGroupConflict builds a survey service
+// delete_recipient_group endpoint Conflict error.
+func NewDeleteRecipientGroupConflict(body *DeleteRecipientGroupConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewDeleteRecipientGroupForbidden builds a survey service
 // delete_recipient_group endpoint Forbidden error.
 func NewDeleteRecipientGroupForbidden(body *DeleteRecipientGroupForbiddenResponseBody) *survey.ForbiddenError {
@@ -2398,9 +2652,9 @@ func NewDeleteRecipientGroupUnauthorized(body *DeleteRecipientGroupUnauthorizedR
 	return v
 }
 
-// NewCreateExclusionExclusionResultCreated builds a "survey" service
-// "create_exclusion" endpoint result from a HTTP "Created" response.
-func NewCreateExclusionExclusionResultCreated(body *CreateExclusionResponseBody) *survey.ExclusionResult {
+// NewCreateExclusionResultCreated builds a "survey" service "create_exclusion"
+// endpoint result from a HTTP "Created" response.
+func NewCreateExclusionResultCreated(body *CreateExclusionResponseBody) *survey.ExclusionResult {
 	v := &survey.ExclusionResult{
 		UID:             *body.UID,
 		Email:           body.Email,
@@ -2417,6 +2671,17 @@ func NewCreateExclusionExclusionResultCreated(body *CreateExclusionResponseBody)
 // endpoint BadRequest error.
 func NewCreateExclusionBadRequest(body *CreateExclusionBadRequestResponseBody) *survey.BadRequestError {
 	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewCreateExclusionConflict builds a survey service create_exclusion endpoint
+// Conflict error.
+func NewCreateExclusionConflict(body *CreateExclusionConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -2461,6 +2726,17 @@ func NewCreateExclusionUnauthorized(body *CreateExclusionUnauthorizedResponseBod
 // endpoint BadRequest error.
 func NewDeleteExclusionBadRequest(body *DeleteExclusionBadRequestResponseBody) *survey.BadRequestError {
 	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteExclusionConflict builds a survey service delete_exclusion endpoint
+// Conflict error.
+func NewDeleteExclusionConflict(body *DeleteExclusionConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
 		Code:    *body.Code,
 		Message: *body.Message,
 	}
@@ -2585,6 +2861,17 @@ func NewDeleteExclusionByIDBadRequest(body *DeleteExclusionByIDBadRequestRespons
 	return v
 }
 
+// NewDeleteExclusionByIDConflict builds a survey service
+// delete_exclusion_by_id endpoint Conflict error.
+func NewDeleteExclusionByIDConflict(body *DeleteExclusionByIDConflictResponseBody) *survey.ConflictError {
+	v := &survey.ConflictError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewDeleteExclusionByIDForbidden builds a survey service
 // delete_exclusion_by_id endpoint Forbidden error.
 func NewDeleteExclusionByIDForbidden(body *DeleteExclusionByIDForbiddenResponseBody) *survey.ForbiddenError {
@@ -2701,6 +2988,76 @@ func NewListSurveyResponsesUnauthorized(body *ListSurveyResponsesUnauthorizedRes
 	return v
 }
 
+// NewListSurveyTemplatesSurveyTemplateOK builds a "survey" service
+// "list_survey_templates" endpoint result from a HTTP "OK" response.
+func NewListSurveyTemplatesSurveyTemplateOK(body []*SurveyTemplateResponse) []*survey.SurveyTemplate {
+	v := make([]*survey.SurveyTemplate, len(body))
+	for i, val := range body {
+		if val == nil {
+			v[i] = nil
+			continue
+		}
+		v[i] = unmarshalSurveyTemplateResponseToSurveySurveyTemplate(val)
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesBadRequest builds a survey service
+// list_survey_templates endpoint BadRequest error.
+func NewListSurveyTemplatesBadRequest(body *ListSurveyTemplatesBadRequestResponseBody) *survey.BadRequestError {
+	v := &survey.BadRequestError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesForbidden builds a survey service
+// list_survey_templates endpoint Forbidden error.
+func NewListSurveyTemplatesForbidden(body *ListSurveyTemplatesForbiddenResponseBody) *survey.ForbiddenError {
+	v := &survey.ForbiddenError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesInternalServerError builds a survey service
+// list_survey_templates endpoint InternalServerError error.
+func NewListSurveyTemplatesInternalServerError(body *ListSurveyTemplatesInternalServerErrorResponseBody) *survey.InternalServerError {
+	v := &survey.InternalServerError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesServiceUnavailable builds a survey service
+// list_survey_templates endpoint ServiceUnavailable error.
+func NewListSurveyTemplatesServiceUnavailable(body *ListSurveyTemplatesServiceUnavailableResponseBody) *survey.ServiceUnavailableError {
+	v := &survey.ServiceUnavailableError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListSurveyTemplatesUnauthorized builds a survey service
+// list_survey_templates endpoint Unauthorized error.
+func NewListSurveyTemplatesUnauthorized(body *ListSurveyTemplatesUnauthorizedResponseBody) *survey.UnauthorizedError {
+	v := &survey.UnauthorizedError{
+		Code:    *body.Code,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // NewValidateEmailResultOK builds a "survey" service "validate_email" endpoint
 // result from a HTTP "OK" response.
 func NewValidateEmailResultOK(body *ValidateEmailResponseBody) *survey.ValidateEmailResult {
@@ -2757,7 +3114,7 @@ func NewValidateEmailUnauthorized(body *ValidateEmailUnauthorizedResponseBody) *
 }
 
 // ValidateScheduleSurveyResponseBody runs the validations defined on
-// schedule_survey_response_body
+// ScheduleSurveyResponseBody
 func ValidateScheduleSurveyResponseBody(body *ScheduleSurveyResponseBody) (err error) {
 	if body.UID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
@@ -2797,7 +3154,7 @@ func ValidateScheduleSurveyResponseBody(body *ScheduleSurveyResponseBody) (err e
 }
 
 // ValidateGetSurveyResponseBody runs the validations defined on
-// get_survey_response_body
+// GetSurveyResponseBody
 func ValidateGetSurveyResponseBody(body *GetSurveyResponseBody) (err error) {
 	if body.UID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
@@ -2837,7 +3194,7 @@ func ValidateGetSurveyResponseBody(body *GetSurveyResponseBody) (err error) {
 }
 
 // ValidateUpdateSurveyResponseBody runs the validations defined on
-// update_survey_response_body
+// UpdateSurveyResponseBody
 func ValidateUpdateSurveyResponseBody(body *UpdateSurveyResponseBody) (err error) {
 	if body.UID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
@@ -2877,25 +3234,25 @@ func ValidateUpdateSurveyResponseBody(body *UpdateSurveyResponseBody) (err error
 }
 
 // ValidatePreviewSendSurveyResponseBody runs the validations defined on
-// preview_send_survey_response_body
+// PreviewSendSurveyResponseBody
 func ValidatePreviewSendSurveyResponseBody(body *PreviewSendSurveyResponseBody) (err error) {
 	for _, e := range body.AffectedProjects {
 		if e != nil {
-			if err2 := ValidateLFXProjectResponseBody(e); err2 != nil {
+			if err2 := validateLFXProjectResponseBody(e, "body.affected_projects[*]"); err2 != nil {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
 	}
 	for _, e := range body.AffectedCommittees {
 		if e != nil {
-			if err2 := ValidateExcludedCommitteeResponseBody(e); err2 != nil {
+			if err2 := validateExcludedCommitteeResponseBody(e, "body.affected_committees[*]"); err2 != nil {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
 	}
 	for _, e := range body.AffectedRecipients {
 		if e != nil {
-			if err2 := ValidateITXPreviewRecipientResponseBody(e); err2 != nil {
+			if err2 := validateITXPreviewRecipientResponseBody(e, "body.affected_recipients[*]"); err2 != nil {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
@@ -2904,7 +3261,7 @@ func ValidatePreviewSendSurveyResponseBody(body *PreviewSendSurveyResponseBody) 
 }
 
 // ValidateCreateExclusionResponseBody runs the validations defined on
-// create_exclusion_response_body
+// CreateExclusionResponseBody
 func ValidateCreateExclusionResponseBody(body *CreateExclusionResponseBody) (err error) {
 	if body.UID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
@@ -2913,7 +3270,7 @@ func ValidateCreateExclusionResponseBody(body *CreateExclusionResponseBody) (err
 }
 
 // ValidateGetExclusionResponseBody runs the validations defined on
-// get_exclusion_response_body
+// GetExclusionResponseBody
 func ValidateGetExclusionResponseBody(body *GetExclusionResponseBody) (err error) {
 	if body.UID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("uid", "body"))
@@ -2922,7 +3279,7 @@ func ValidateGetExclusionResponseBody(body *GetExclusionResponseBody) (err error
 }
 
 // ValidateListSurveyResponsesResponseBody runs the validations defined on
-// list_survey_responses_response_body
+// ListSurveyResponsesResponseBody
 func ValidateListSurveyResponsesResponseBody(body *ListSurveyResponsesResponseBody) (err error) {
 	if body.Data == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("data", "body"))
@@ -2932,7 +3289,7 @@ func ValidateListSurveyResponsesResponseBody(body *ListSurveyResponsesResponseBo
 	}
 	for _, e := range body.Data {
 		if e != nil {
-			if err2 := ValidateSurveyResponseItemResponseBody(e); err2 != nil {
+			if err2 := validateSurveyResponseItemResponseBody(e, "body.data[*]"); err2 != nil {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
@@ -2941,7 +3298,7 @@ func ValidateListSurveyResponsesResponseBody(body *ListSurveyResponsesResponseBo
 }
 
 // ValidateValidateEmailResponseBody runs the validations defined on
-// validate_email_response_body
+// ValidateEmailResponseBody
 func ValidateValidateEmailResponseBody(body *ValidateEmailResponseBody) (err error) {
 	if body.Body == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("body", "body"))
@@ -2953,7 +3310,7 @@ func ValidateValidateEmailResponseBody(body *ValidateEmailResponseBody) (err err
 }
 
 // ValidateScheduleSurveyBadRequestResponseBody runs the validations defined on
-// schedule_survey_BadRequest_response_body
+// ScheduleSurveyBadRequestResponseBody
 func ValidateScheduleSurveyBadRequestResponseBody(body *ScheduleSurveyBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -2964,8 +3321,20 @@ func ValidateScheduleSurveyBadRequestResponseBody(body *ScheduleSurveyBadRequest
 	return
 }
 
+// ValidateScheduleSurveyConflictResponseBody runs the validations defined on
+// ScheduleSurveyConflictResponseBody
+func ValidateScheduleSurveyConflictResponseBody(body *ScheduleSurveyConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateScheduleSurveyForbiddenResponseBody runs the validations defined on
-// schedule_survey_Forbidden_response_body
+// ScheduleSurveyForbiddenResponseBody
 func ValidateScheduleSurveyForbiddenResponseBody(body *ScheduleSurveyForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -2977,7 +3346,7 @@ func ValidateScheduleSurveyForbiddenResponseBody(body *ScheduleSurveyForbiddenRe
 }
 
 // ValidateScheduleSurveyInternalServerErrorResponseBody runs the validations
-// defined on schedule_survey_InternalServerError_response_body
+// defined on ScheduleSurveyInternalServerErrorResponseBody
 func ValidateScheduleSurveyInternalServerErrorResponseBody(body *ScheduleSurveyInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -2989,7 +3358,7 @@ func ValidateScheduleSurveyInternalServerErrorResponseBody(body *ScheduleSurveyI
 }
 
 // ValidateScheduleSurveyServiceUnavailableResponseBody runs the validations
-// defined on schedule_survey_ServiceUnavailable_response_body
+// defined on ScheduleSurveyServiceUnavailableResponseBody
 func ValidateScheduleSurveyServiceUnavailableResponseBody(body *ScheduleSurveyServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3001,7 +3370,7 @@ func ValidateScheduleSurveyServiceUnavailableResponseBody(body *ScheduleSurveySe
 }
 
 // ValidateScheduleSurveyUnauthorizedResponseBody runs the validations defined
-// on schedule_survey_Unauthorized_response_body
+// on ScheduleSurveyUnauthorizedResponseBody
 func ValidateScheduleSurveyUnauthorizedResponseBody(body *ScheduleSurveyUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3013,7 +3382,7 @@ func ValidateScheduleSurveyUnauthorizedResponseBody(body *ScheduleSurveyUnauthor
 }
 
 // ValidateGetSurveyBadRequestResponseBody runs the validations defined on
-// get_survey_BadRequest_response_body
+// GetSurveyBadRequestResponseBody
 func ValidateGetSurveyBadRequestResponseBody(body *GetSurveyBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3025,7 +3394,7 @@ func ValidateGetSurveyBadRequestResponseBody(body *GetSurveyBadRequestResponseBo
 }
 
 // ValidateGetSurveyForbiddenResponseBody runs the validations defined on
-// get_survey_Forbidden_response_body
+// GetSurveyForbiddenResponseBody
 func ValidateGetSurveyForbiddenResponseBody(body *GetSurveyForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3037,7 +3406,7 @@ func ValidateGetSurveyForbiddenResponseBody(body *GetSurveyForbiddenResponseBody
 }
 
 // ValidateGetSurveyInternalServerErrorResponseBody runs the validations
-// defined on get_survey_InternalServerError_response_body
+// defined on GetSurveyInternalServerErrorResponseBody
 func ValidateGetSurveyInternalServerErrorResponseBody(body *GetSurveyInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3049,7 +3418,7 @@ func ValidateGetSurveyInternalServerErrorResponseBody(body *GetSurveyInternalSer
 }
 
 // ValidateGetSurveyNotFoundResponseBody runs the validations defined on
-// get_survey_NotFound_response_body
+// GetSurveyNotFoundResponseBody
 func ValidateGetSurveyNotFoundResponseBody(body *GetSurveyNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3061,7 +3430,7 @@ func ValidateGetSurveyNotFoundResponseBody(body *GetSurveyNotFoundResponseBody) 
 }
 
 // ValidateGetSurveyServiceUnavailableResponseBody runs the validations defined
-// on get_survey_ServiceUnavailable_response_body
+// on GetSurveyServiceUnavailableResponseBody
 func ValidateGetSurveyServiceUnavailableResponseBody(body *GetSurveyServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3073,7 +3442,7 @@ func ValidateGetSurveyServiceUnavailableResponseBody(body *GetSurveyServiceUnava
 }
 
 // ValidateGetSurveyUnauthorizedResponseBody runs the validations defined on
-// get_survey_Unauthorized_response_body
+// GetSurveyUnauthorizedResponseBody
 func ValidateGetSurveyUnauthorizedResponseBody(body *GetSurveyUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3085,7 +3454,7 @@ func ValidateGetSurveyUnauthorizedResponseBody(body *GetSurveyUnauthorizedRespon
 }
 
 // ValidateUpdateSurveyBadRequestResponseBody runs the validations defined on
-// update_survey_BadRequest_response_body
+// UpdateSurveyBadRequestResponseBody
 func ValidateUpdateSurveyBadRequestResponseBody(body *UpdateSurveyBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3096,8 +3465,20 @@ func ValidateUpdateSurveyBadRequestResponseBody(body *UpdateSurveyBadRequestResp
 	return
 }
 
+// ValidateUpdateSurveyConflictResponseBody runs the validations defined on
+// UpdateSurveyConflictResponseBody
+func ValidateUpdateSurveyConflictResponseBody(body *UpdateSurveyConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateUpdateSurveyForbiddenResponseBody runs the validations defined on
-// update_survey_Forbidden_response_body
+// UpdateSurveyForbiddenResponseBody
 func ValidateUpdateSurveyForbiddenResponseBody(body *UpdateSurveyForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3109,7 +3490,7 @@ func ValidateUpdateSurveyForbiddenResponseBody(body *UpdateSurveyForbiddenRespon
 }
 
 // ValidateUpdateSurveyInternalServerErrorResponseBody runs the validations
-// defined on update_survey_InternalServerError_response_body
+// defined on UpdateSurveyInternalServerErrorResponseBody
 func ValidateUpdateSurveyInternalServerErrorResponseBody(body *UpdateSurveyInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3121,7 +3502,7 @@ func ValidateUpdateSurveyInternalServerErrorResponseBody(body *UpdateSurveyInter
 }
 
 // ValidateUpdateSurveyNotFoundResponseBody runs the validations defined on
-// update_survey_NotFound_response_body
+// UpdateSurveyNotFoundResponseBody
 func ValidateUpdateSurveyNotFoundResponseBody(body *UpdateSurveyNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3133,7 +3514,7 @@ func ValidateUpdateSurveyNotFoundResponseBody(body *UpdateSurveyNotFoundResponse
 }
 
 // ValidateUpdateSurveyServiceUnavailableResponseBody runs the validations
-// defined on update_survey_ServiceUnavailable_response_body
+// defined on UpdateSurveyServiceUnavailableResponseBody
 func ValidateUpdateSurveyServiceUnavailableResponseBody(body *UpdateSurveyServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3145,7 +3526,7 @@ func ValidateUpdateSurveyServiceUnavailableResponseBody(body *UpdateSurveyServic
 }
 
 // ValidateUpdateSurveyUnauthorizedResponseBody runs the validations defined on
-// update_survey_Unauthorized_response_body
+// UpdateSurveyUnauthorizedResponseBody
 func ValidateUpdateSurveyUnauthorizedResponseBody(body *UpdateSurveyUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3157,7 +3538,7 @@ func ValidateUpdateSurveyUnauthorizedResponseBody(body *UpdateSurveyUnauthorized
 }
 
 // ValidateDeleteSurveyBadRequestResponseBody runs the validations defined on
-// delete_survey_BadRequest_response_body
+// DeleteSurveyBadRequestResponseBody
 func ValidateDeleteSurveyBadRequestResponseBody(body *DeleteSurveyBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3168,8 +3549,20 @@ func ValidateDeleteSurveyBadRequestResponseBody(body *DeleteSurveyBadRequestResp
 	return
 }
 
+// ValidateDeleteSurveyConflictResponseBody runs the validations defined on
+// DeleteSurveyConflictResponseBody
+func ValidateDeleteSurveyConflictResponseBody(body *DeleteSurveyConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateDeleteSurveyForbiddenResponseBody runs the validations defined on
-// delete_survey_Forbidden_response_body
+// DeleteSurveyForbiddenResponseBody
 func ValidateDeleteSurveyForbiddenResponseBody(body *DeleteSurveyForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3181,7 +3574,7 @@ func ValidateDeleteSurveyForbiddenResponseBody(body *DeleteSurveyForbiddenRespon
 }
 
 // ValidateDeleteSurveyInternalServerErrorResponseBody runs the validations
-// defined on delete_survey_InternalServerError_response_body
+// defined on DeleteSurveyInternalServerErrorResponseBody
 func ValidateDeleteSurveyInternalServerErrorResponseBody(body *DeleteSurveyInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3193,7 +3586,7 @@ func ValidateDeleteSurveyInternalServerErrorResponseBody(body *DeleteSurveyInter
 }
 
 // ValidateDeleteSurveyNotFoundResponseBody runs the validations defined on
-// delete_survey_NotFound_response_body
+// DeleteSurveyNotFoundResponseBody
 func ValidateDeleteSurveyNotFoundResponseBody(body *DeleteSurveyNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3205,7 +3598,7 @@ func ValidateDeleteSurveyNotFoundResponseBody(body *DeleteSurveyNotFoundResponse
 }
 
 // ValidateDeleteSurveyServiceUnavailableResponseBody runs the validations
-// defined on delete_survey_ServiceUnavailable_response_body
+// defined on DeleteSurveyServiceUnavailableResponseBody
 func ValidateDeleteSurveyServiceUnavailableResponseBody(body *DeleteSurveyServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3217,7 +3610,7 @@ func ValidateDeleteSurveyServiceUnavailableResponseBody(body *DeleteSurveyServic
 }
 
 // ValidateDeleteSurveyUnauthorizedResponseBody runs the validations defined on
-// delete_survey_Unauthorized_response_body
+// DeleteSurveyUnauthorizedResponseBody
 func ValidateDeleteSurveyUnauthorizedResponseBody(body *DeleteSurveyUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3229,7 +3622,7 @@ func ValidateDeleteSurveyUnauthorizedResponseBody(body *DeleteSurveyUnauthorized
 }
 
 // ValidateBulkResendSurveyBadRequestResponseBody runs the validations defined
-// on bulk_resend_survey_BadRequest_response_body
+// on BulkResendSurveyBadRequestResponseBody
 func ValidateBulkResendSurveyBadRequestResponseBody(body *BulkResendSurveyBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3240,8 +3633,20 @@ func ValidateBulkResendSurveyBadRequestResponseBody(body *BulkResendSurveyBadReq
 	return
 }
 
+// ValidateBulkResendSurveyConflictResponseBody runs the validations defined on
+// BulkResendSurveyConflictResponseBody
+func ValidateBulkResendSurveyConflictResponseBody(body *BulkResendSurveyConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateBulkResendSurveyForbiddenResponseBody runs the validations defined
-// on bulk_resend_survey_Forbidden_response_body
+// on BulkResendSurveyForbiddenResponseBody
 func ValidateBulkResendSurveyForbiddenResponseBody(body *BulkResendSurveyForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3253,7 +3658,7 @@ func ValidateBulkResendSurveyForbiddenResponseBody(body *BulkResendSurveyForbidd
 }
 
 // ValidateBulkResendSurveyInternalServerErrorResponseBody runs the validations
-// defined on bulk_resend_survey_InternalServerError_response_body
+// defined on BulkResendSurveyInternalServerErrorResponseBody
 func ValidateBulkResendSurveyInternalServerErrorResponseBody(body *BulkResendSurveyInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3265,7 +3670,7 @@ func ValidateBulkResendSurveyInternalServerErrorResponseBody(body *BulkResendSur
 }
 
 // ValidateBulkResendSurveyNotFoundResponseBody runs the validations defined on
-// bulk_resend_survey_NotFound_response_body
+// BulkResendSurveyNotFoundResponseBody
 func ValidateBulkResendSurveyNotFoundResponseBody(body *BulkResendSurveyNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3277,7 +3682,7 @@ func ValidateBulkResendSurveyNotFoundResponseBody(body *BulkResendSurveyNotFound
 }
 
 // ValidateBulkResendSurveyServiceUnavailableResponseBody runs the validations
-// defined on bulk_resend_survey_ServiceUnavailable_response_body
+// defined on BulkResendSurveyServiceUnavailableResponseBody
 func ValidateBulkResendSurveyServiceUnavailableResponseBody(body *BulkResendSurveyServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3289,7 +3694,7 @@ func ValidateBulkResendSurveyServiceUnavailableResponseBody(body *BulkResendSurv
 }
 
 // ValidateBulkResendSurveyUnauthorizedResponseBody runs the validations
-// defined on bulk_resend_survey_Unauthorized_response_body
+// defined on BulkResendSurveyUnauthorizedResponseBody
 func ValidateBulkResendSurveyUnauthorizedResponseBody(body *BulkResendSurveyUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3301,7 +3706,7 @@ func ValidateBulkResendSurveyUnauthorizedResponseBody(body *BulkResendSurveyUnau
 }
 
 // ValidatePreviewSendSurveyBadRequestResponseBody runs the validations defined
-// on preview_send_survey_BadRequest_response_body
+// on PreviewSendSurveyBadRequestResponseBody
 func ValidatePreviewSendSurveyBadRequestResponseBody(body *PreviewSendSurveyBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3313,7 +3718,7 @@ func ValidatePreviewSendSurveyBadRequestResponseBody(body *PreviewSendSurveyBadR
 }
 
 // ValidatePreviewSendSurveyForbiddenResponseBody runs the validations defined
-// on preview_send_survey_Forbidden_response_body
+// on PreviewSendSurveyForbiddenResponseBody
 func ValidatePreviewSendSurveyForbiddenResponseBody(body *PreviewSendSurveyForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3325,7 +3730,7 @@ func ValidatePreviewSendSurveyForbiddenResponseBody(body *PreviewSendSurveyForbi
 }
 
 // ValidatePreviewSendSurveyInternalServerErrorResponseBody runs the
-// validations defined on preview_send_survey_InternalServerError_response_body
+// validations defined on PreviewSendSurveyInternalServerErrorResponseBody
 func ValidatePreviewSendSurveyInternalServerErrorResponseBody(body *PreviewSendSurveyInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3337,7 +3742,7 @@ func ValidatePreviewSendSurveyInternalServerErrorResponseBody(body *PreviewSendS
 }
 
 // ValidatePreviewSendSurveyNotFoundResponseBody runs the validations defined
-// on preview_send_survey_NotFound_response_body
+// on PreviewSendSurveyNotFoundResponseBody
 func ValidatePreviewSendSurveyNotFoundResponseBody(body *PreviewSendSurveyNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3349,7 +3754,7 @@ func ValidatePreviewSendSurveyNotFoundResponseBody(body *PreviewSendSurveyNotFou
 }
 
 // ValidatePreviewSendSurveyServiceUnavailableResponseBody runs the validations
-// defined on preview_send_survey_ServiceUnavailable_response_body
+// defined on PreviewSendSurveyServiceUnavailableResponseBody
 func ValidatePreviewSendSurveyServiceUnavailableResponseBody(body *PreviewSendSurveyServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3361,7 +3766,7 @@ func ValidatePreviewSendSurveyServiceUnavailableResponseBody(body *PreviewSendSu
 }
 
 // ValidatePreviewSendSurveyUnauthorizedResponseBody runs the validations
-// defined on preview_send_survey_Unauthorized_response_body
+// defined on PreviewSendSurveyUnauthorizedResponseBody
 func ValidatePreviewSendSurveyUnauthorizedResponseBody(body *PreviewSendSurveyUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3373,7 +3778,7 @@ func ValidatePreviewSendSurveyUnauthorizedResponseBody(body *PreviewSendSurveyUn
 }
 
 // ValidateSendMissingRecipientsBadRequestResponseBody runs the validations
-// defined on send_missing_recipients_BadRequest_response_body
+// defined on SendMissingRecipientsBadRequestResponseBody
 func ValidateSendMissingRecipientsBadRequestResponseBody(body *SendMissingRecipientsBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3384,8 +3789,20 @@ func ValidateSendMissingRecipientsBadRequestResponseBody(body *SendMissingRecipi
 	return
 }
 
+// ValidateSendMissingRecipientsConflictResponseBody runs the validations
+// defined on SendMissingRecipientsConflictResponseBody
+func ValidateSendMissingRecipientsConflictResponseBody(body *SendMissingRecipientsConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateSendMissingRecipientsForbiddenResponseBody runs the validations
-// defined on send_missing_recipients_Forbidden_response_body
+// defined on SendMissingRecipientsForbiddenResponseBody
 func ValidateSendMissingRecipientsForbiddenResponseBody(body *SendMissingRecipientsForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3397,8 +3814,7 @@ func ValidateSendMissingRecipientsForbiddenResponseBody(body *SendMissingRecipie
 }
 
 // ValidateSendMissingRecipientsInternalServerErrorResponseBody runs the
-// validations defined on
-// send_missing_recipients_InternalServerError_response_body
+// validations defined on SendMissingRecipientsInternalServerErrorResponseBody
 func ValidateSendMissingRecipientsInternalServerErrorResponseBody(body *SendMissingRecipientsInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3410,7 +3826,7 @@ func ValidateSendMissingRecipientsInternalServerErrorResponseBody(body *SendMiss
 }
 
 // ValidateSendMissingRecipientsNotFoundResponseBody runs the validations
-// defined on send_missing_recipients_NotFound_response_body
+// defined on SendMissingRecipientsNotFoundResponseBody
 func ValidateSendMissingRecipientsNotFoundResponseBody(body *SendMissingRecipientsNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3422,8 +3838,7 @@ func ValidateSendMissingRecipientsNotFoundResponseBody(body *SendMissingRecipien
 }
 
 // ValidateSendMissingRecipientsServiceUnavailableResponseBody runs the
-// validations defined on
-// send_missing_recipients_ServiceUnavailable_response_body
+// validations defined on SendMissingRecipientsServiceUnavailableResponseBody
 func ValidateSendMissingRecipientsServiceUnavailableResponseBody(body *SendMissingRecipientsServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3435,7 +3850,7 @@ func ValidateSendMissingRecipientsServiceUnavailableResponseBody(body *SendMissi
 }
 
 // ValidateSendMissingRecipientsUnauthorizedResponseBody runs the validations
-// defined on send_missing_recipients_Unauthorized_response_body
+// defined on SendMissingRecipientsUnauthorizedResponseBody
 func ValidateSendMissingRecipientsUnauthorizedResponseBody(body *SendMissingRecipientsUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3447,7 +3862,7 @@ func ValidateSendMissingRecipientsUnauthorizedResponseBody(body *SendMissingReci
 }
 
 // ValidateDeleteSurveyResponseBadRequestResponseBody runs the validations
-// defined on delete_survey_response_BadRequest_response_body
+// defined on DeleteSurveyResponseBadRequestResponseBody
 func ValidateDeleteSurveyResponseBadRequestResponseBody(body *DeleteSurveyResponseBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3458,8 +3873,20 @@ func ValidateDeleteSurveyResponseBadRequestResponseBody(body *DeleteSurveyRespon
 	return
 }
 
+// ValidateDeleteSurveyResponseConflictResponseBody runs the validations
+// defined on DeleteSurveyResponseConflictResponseBody
+func ValidateDeleteSurveyResponseConflictResponseBody(body *DeleteSurveyResponseConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateDeleteSurveyResponseForbiddenResponseBody runs the validations
-// defined on delete_survey_response_Forbidden_response_body
+// defined on DeleteSurveyResponseForbiddenResponseBody
 func ValidateDeleteSurveyResponseForbiddenResponseBody(body *DeleteSurveyResponseForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3471,8 +3898,7 @@ func ValidateDeleteSurveyResponseForbiddenResponseBody(body *DeleteSurveyRespons
 }
 
 // ValidateDeleteSurveyResponseInternalServerErrorResponseBody runs the
-// validations defined on
-// delete_survey_response_InternalServerError_response_body
+// validations defined on DeleteSurveyResponseInternalServerErrorResponseBody
 func ValidateDeleteSurveyResponseInternalServerErrorResponseBody(body *DeleteSurveyResponseInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3484,7 +3910,7 @@ func ValidateDeleteSurveyResponseInternalServerErrorResponseBody(body *DeleteSur
 }
 
 // ValidateDeleteSurveyResponseNotFoundResponseBody runs the validations
-// defined on delete_survey_response_NotFound_response_body
+// defined on DeleteSurveyResponseNotFoundResponseBody
 func ValidateDeleteSurveyResponseNotFoundResponseBody(body *DeleteSurveyResponseNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3496,8 +3922,7 @@ func ValidateDeleteSurveyResponseNotFoundResponseBody(body *DeleteSurveyResponse
 }
 
 // ValidateDeleteSurveyResponseServiceUnavailableResponseBody runs the
-// validations defined on
-// delete_survey_response_ServiceUnavailable_response_body
+// validations defined on DeleteSurveyResponseServiceUnavailableResponseBody
 func ValidateDeleteSurveyResponseServiceUnavailableResponseBody(body *DeleteSurveyResponseServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3509,7 +3934,7 @@ func ValidateDeleteSurveyResponseServiceUnavailableResponseBody(body *DeleteSurv
 }
 
 // ValidateDeleteSurveyResponseUnauthorizedResponseBody runs the validations
-// defined on delete_survey_response_Unauthorized_response_body
+// defined on DeleteSurveyResponseUnauthorizedResponseBody
 func ValidateDeleteSurveyResponseUnauthorizedResponseBody(body *DeleteSurveyResponseUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3521,7 +3946,7 @@ func ValidateDeleteSurveyResponseUnauthorizedResponseBody(body *DeleteSurveyResp
 }
 
 // ValidateResendSurveyResponseBadRequestResponseBody runs the validations
-// defined on resend_survey_response_BadRequest_response_body
+// defined on ResendSurveyResponseBadRequestResponseBody
 func ValidateResendSurveyResponseBadRequestResponseBody(body *ResendSurveyResponseBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3532,8 +3957,20 @@ func ValidateResendSurveyResponseBadRequestResponseBody(body *ResendSurveyRespon
 	return
 }
 
+// ValidateResendSurveyResponseConflictResponseBody runs the validations
+// defined on ResendSurveyResponseConflictResponseBody
+func ValidateResendSurveyResponseConflictResponseBody(body *ResendSurveyResponseConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateResendSurveyResponseForbiddenResponseBody runs the validations
-// defined on resend_survey_response_Forbidden_response_body
+// defined on ResendSurveyResponseForbiddenResponseBody
 func ValidateResendSurveyResponseForbiddenResponseBody(body *ResendSurveyResponseForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3545,8 +3982,7 @@ func ValidateResendSurveyResponseForbiddenResponseBody(body *ResendSurveyRespons
 }
 
 // ValidateResendSurveyResponseInternalServerErrorResponseBody runs the
-// validations defined on
-// resend_survey_response_InternalServerError_response_body
+// validations defined on ResendSurveyResponseInternalServerErrorResponseBody
 func ValidateResendSurveyResponseInternalServerErrorResponseBody(body *ResendSurveyResponseInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3558,7 +3994,7 @@ func ValidateResendSurveyResponseInternalServerErrorResponseBody(body *ResendSur
 }
 
 // ValidateResendSurveyResponseNotFoundResponseBody runs the validations
-// defined on resend_survey_response_NotFound_response_body
+// defined on ResendSurveyResponseNotFoundResponseBody
 func ValidateResendSurveyResponseNotFoundResponseBody(body *ResendSurveyResponseNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3570,8 +4006,7 @@ func ValidateResendSurveyResponseNotFoundResponseBody(body *ResendSurveyResponse
 }
 
 // ValidateResendSurveyResponseServiceUnavailableResponseBody runs the
-// validations defined on
-// resend_survey_response_ServiceUnavailable_response_body
+// validations defined on ResendSurveyResponseServiceUnavailableResponseBody
 func ValidateResendSurveyResponseServiceUnavailableResponseBody(body *ResendSurveyResponseServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3583,7 +4018,7 @@ func ValidateResendSurveyResponseServiceUnavailableResponseBody(body *ResendSurv
 }
 
 // ValidateResendSurveyResponseUnauthorizedResponseBody runs the validations
-// defined on resend_survey_response_Unauthorized_response_body
+// defined on ResendSurveyResponseUnauthorizedResponseBody
 func ValidateResendSurveyResponseUnauthorizedResponseBody(body *ResendSurveyResponseUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3595,7 +4030,7 @@ func ValidateResendSurveyResponseUnauthorizedResponseBody(body *ResendSurveyResp
 }
 
 // ValidateDeleteRecipientGroupBadRequestResponseBody runs the validations
-// defined on delete_recipient_group_BadRequest_response_body
+// defined on DeleteRecipientGroupBadRequestResponseBody
 func ValidateDeleteRecipientGroupBadRequestResponseBody(body *DeleteRecipientGroupBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3606,8 +4041,20 @@ func ValidateDeleteRecipientGroupBadRequestResponseBody(body *DeleteRecipientGro
 	return
 }
 
+// ValidateDeleteRecipientGroupConflictResponseBody runs the validations
+// defined on DeleteRecipientGroupConflictResponseBody
+func ValidateDeleteRecipientGroupConflictResponseBody(body *DeleteRecipientGroupConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateDeleteRecipientGroupForbiddenResponseBody runs the validations
-// defined on delete_recipient_group_Forbidden_response_body
+// defined on DeleteRecipientGroupForbiddenResponseBody
 func ValidateDeleteRecipientGroupForbiddenResponseBody(body *DeleteRecipientGroupForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3619,8 +4066,7 @@ func ValidateDeleteRecipientGroupForbiddenResponseBody(body *DeleteRecipientGrou
 }
 
 // ValidateDeleteRecipientGroupInternalServerErrorResponseBody runs the
-// validations defined on
-// delete_recipient_group_InternalServerError_response_body
+// validations defined on DeleteRecipientGroupInternalServerErrorResponseBody
 func ValidateDeleteRecipientGroupInternalServerErrorResponseBody(body *DeleteRecipientGroupInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3632,7 +4078,7 @@ func ValidateDeleteRecipientGroupInternalServerErrorResponseBody(body *DeleteRec
 }
 
 // ValidateDeleteRecipientGroupNotFoundResponseBody runs the validations
-// defined on delete_recipient_group_NotFound_response_body
+// defined on DeleteRecipientGroupNotFoundResponseBody
 func ValidateDeleteRecipientGroupNotFoundResponseBody(body *DeleteRecipientGroupNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3644,8 +4090,7 @@ func ValidateDeleteRecipientGroupNotFoundResponseBody(body *DeleteRecipientGroup
 }
 
 // ValidateDeleteRecipientGroupServiceUnavailableResponseBody runs the
-// validations defined on
-// delete_recipient_group_ServiceUnavailable_response_body
+// validations defined on DeleteRecipientGroupServiceUnavailableResponseBody
 func ValidateDeleteRecipientGroupServiceUnavailableResponseBody(body *DeleteRecipientGroupServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3657,7 +4102,7 @@ func ValidateDeleteRecipientGroupServiceUnavailableResponseBody(body *DeleteReci
 }
 
 // ValidateDeleteRecipientGroupUnauthorizedResponseBody runs the validations
-// defined on delete_recipient_group_Unauthorized_response_body
+// defined on DeleteRecipientGroupUnauthorizedResponseBody
 func ValidateDeleteRecipientGroupUnauthorizedResponseBody(body *DeleteRecipientGroupUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3669,7 +4114,7 @@ func ValidateDeleteRecipientGroupUnauthorizedResponseBody(body *DeleteRecipientG
 }
 
 // ValidateCreateExclusionBadRequestResponseBody runs the validations defined
-// on create_exclusion_BadRequest_response_body
+// on CreateExclusionBadRequestResponseBody
 func ValidateCreateExclusionBadRequestResponseBody(body *CreateExclusionBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3680,8 +4125,20 @@ func ValidateCreateExclusionBadRequestResponseBody(body *CreateExclusionBadReque
 	return
 }
 
+// ValidateCreateExclusionConflictResponseBody runs the validations defined on
+// CreateExclusionConflictResponseBody
+func ValidateCreateExclusionConflictResponseBody(body *CreateExclusionConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateCreateExclusionForbiddenResponseBody runs the validations defined on
-// create_exclusion_Forbidden_response_body
+// CreateExclusionForbiddenResponseBody
 func ValidateCreateExclusionForbiddenResponseBody(body *CreateExclusionForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3693,7 +4150,7 @@ func ValidateCreateExclusionForbiddenResponseBody(body *CreateExclusionForbidden
 }
 
 // ValidateCreateExclusionInternalServerErrorResponseBody runs the validations
-// defined on create_exclusion_InternalServerError_response_body
+// defined on CreateExclusionInternalServerErrorResponseBody
 func ValidateCreateExclusionInternalServerErrorResponseBody(body *CreateExclusionInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3705,7 +4162,7 @@ func ValidateCreateExclusionInternalServerErrorResponseBody(body *CreateExclusio
 }
 
 // ValidateCreateExclusionUnauthorizedResponseBody runs the validations defined
-// on create_exclusion_Unauthorized_response_body
+// on CreateExclusionUnauthorizedResponseBody
 func ValidateCreateExclusionUnauthorizedResponseBody(body *CreateExclusionUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3717,7 +4174,7 @@ func ValidateCreateExclusionUnauthorizedResponseBody(body *CreateExclusionUnauth
 }
 
 // ValidateDeleteExclusionBadRequestResponseBody runs the validations defined
-// on delete_exclusion_BadRequest_response_body
+// on DeleteExclusionBadRequestResponseBody
 func ValidateDeleteExclusionBadRequestResponseBody(body *DeleteExclusionBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3728,8 +4185,20 @@ func ValidateDeleteExclusionBadRequestResponseBody(body *DeleteExclusionBadReque
 	return
 }
 
+// ValidateDeleteExclusionConflictResponseBody runs the validations defined on
+// DeleteExclusionConflictResponseBody
+func ValidateDeleteExclusionConflictResponseBody(body *DeleteExclusionConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateDeleteExclusionForbiddenResponseBody runs the validations defined on
-// delete_exclusion_Forbidden_response_body
+// DeleteExclusionForbiddenResponseBody
 func ValidateDeleteExclusionForbiddenResponseBody(body *DeleteExclusionForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3741,7 +4210,7 @@ func ValidateDeleteExclusionForbiddenResponseBody(body *DeleteExclusionForbidden
 }
 
 // ValidateDeleteExclusionInternalServerErrorResponseBody runs the validations
-// defined on delete_exclusion_InternalServerError_response_body
+// defined on DeleteExclusionInternalServerErrorResponseBody
 func ValidateDeleteExclusionInternalServerErrorResponseBody(body *DeleteExclusionInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3753,7 +4222,7 @@ func ValidateDeleteExclusionInternalServerErrorResponseBody(body *DeleteExclusio
 }
 
 // ValidateDeleteExclusionUnauthorizedResponseBody runs the validations defined
-// on delete_exclusion_Unauthorized_response_body
+// on DeleteExclusionUnauthorizedResponseBody
 func ValidateDeleteExclusionUnauthorizedResponseBody(body *DeleteExclusionUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3765,7 +4234,7 @@ func ValidateDeleteExclusionUnauthorizedResponseBody(body *DeleteExclusionUnauth
 }
 
 // ValidateGetExclusionBadRequestResponseBody runs the validations defined on
-// get_exclusion_BadRequest_response_body
+// GetExclusionBadRequestResponseBody
 func ValidateGetExclusionBadRequestResponseBody(body *GetExclusionBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3777,7 +4246,7 @@ func ValidateGetExclusionBadRequestResponseBody(body *GetExclusionBadRequestResp
 }
 
 // ValidateGetExclusionForbiddenResponseBody runs the validations defined on
-// get_exclusion_Forbidden_response_body
+// GetExclusionForbiddenResponseBody
 func ValidateGetExclusionForbiddenResponseBody(body *GetExclusionForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3789,7 +4258,7 @@ func ValidateGetExclusionForbiddenResponseBody(body *GetExclusionForbiddenRespon
 }
 
 // ValidateGetExclusionInternalServerErrorResponseBody runs the validations
-// defined on get_exclusion_InternalServerError_response_body
+// defined on GetExclusionInternalServerErrorResponseBody
 func ValidateGetExclusionInternalServerErrorResponseBody(body *GetExclusionInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3801,7 +4270,7 @@ func ValidateGetExclusionInternalServerErrorResponseBody(body *GetExclusionInter
 }
 
 // ValidateGetExclusionNotFoundResponseBody runs the validations defined on
-// get_exclusion_NotFound_response_body
+// GetExclusionNotFoundResponseBody
 func ValidateGetExclusionNotFoundResponseBody(body *GetExclusionNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3813,7 +4282,7 @@ func ValidateGetExclusionNotFoundResponseBody(body *GetExclusionNotFoundResponse
 }
 
 // ValidateGetExclusionUnauthorizedResponseBody runs the validations defined on
-// get_exclusion_Unauthorized_response_body
+// GetExclusionUnauthorizedResponseBody
 func ValidateGetExclusionUnauthorizedResponseBody(body *GetExclusionUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3825,7 +4294,7 @@ func ValidateGetExclusionUnauthorizedResponseBody(body *GetExclusionUnauthorized
 }
 
 // ValidateDeleteExclusionByIDBadRequestResponseBody runs the validations
-// defined on delete_exclusion_by_id_BadRequest_response_body
+// defined on DeleteExclusionByIDBadRequestResponseBody
 func ValidateDeleteExclusionByIDBadRequestResponseBody(body *DeleteExclusionByIDBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3836,8 +4305,20 @@ func ValidateDeleteExclusionByIDBadRequestResponseBody(body *DeleteExclusionByID
 	return
 }
 
+// ValidateDeleteExclusionByIDConflictResponseBody runs the validations defined
+// on DeleteExclusionByIDConflictResponseBody
+func ValidateDeleteExclusionByIDConflictResponseBody(body *DeleteExclusionByIDConflictResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateDeleteExclusionByIDForbiddenResponseBody runs the validations
-// defined on delete_exclusion_by_id_Forbidden_response_body
+// defined on DeleteExclusionByIDForbiddenResponseBody
 func ValidateDeleteExclusionByIDForbiddenResponseBody(body *DeleteExclusionByIDForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3849,8 +4330,7 @@ func ValidateDeleteExclusionByIDForbiddenResponseBody(body *DeleteExclusionByIDF
 }
 
 // ValidateDeleteExclusionByIDInternalServerErrorResponseBody runs the
-// validations defined on
-// delete_exclusion_by_id_InternalServerError_response_body
+// validations defined on DeleteExclusionByIDInternalServerErrorResponseBody
 func ValidateDeleteExclusionByIDInternalServerErrorResponseBody(body *DeleteExclusionByIDInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3862,7 +4342,7 @@ func ValidateDeleteExclusionByIDInternalServerErrorResponseBody(body *DeleteExcl
 }
 
 // ValidateDeleteExclusionByIDUnauthorizedResponseBody runs the validations
-// defined on delete_exclusion_by_id_Unauthorized_response_body
+// defined on DeleteExclusionByIDUnauthorizedResponseBody
 func ValidateDeleteExclusionByIDUnauthorizedResponseBody(body *DeleteExclusionByIDUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3874,7 +4354,7 @@ func ValidateDeleteExclusionByIDUnauthorizedResponseBody(body *DeleteExclusionBy
 }
 
 // ValidateListSurveyResponsesBadRequestResponseBody runs the validations
-// defined on list_survey_responses_BadRequest_response_body
+// defined on ListSurveyResponsesBadRequestResponseBody
 func ValidateListSurveyResponsesBadRequestResponseBody(body *ListSurveyResponsesBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3886,7 +4366,7 @@ func ValidateListSurveyResponsesBadRequestResponseBody(body *ListSurveyResponses
 }
 
 // ValidateListSurveyResponsesForbiddenResponseBody runs the validations
-// defined on list_survey_responses_Forbidden_response_body
+// defined on ListSurveyResponsesForbiddenResponseBody
 func ValidateListSurveyResponsesForbiddenResponseBody(body *ListSurveyResponsesForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3898,8 +4378,7 @@ func ValidateListSurveyResponsesForbiddenResponseBody(body *ListSurveyResponsesF
 }
 
 // ValidateListSurveyResponsesInternalServerErrorResponseBody runs the
-// validations defined on
-// list_survey_responses_InternalServerError_response_body
+// validations defined on ListSurveyResponsesInternalServerErrorResponseBody
 func ValidateListSurveyResponsesInternalServerErrorResponseBody(body *ListSurveyResponsesInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3911,7 +4390,7 @@ func ValidateListSurveyResponsesInternalServerErrorResponseBody(body *ListSurvey
 }
 
 // ValidateListSurveyResponsesNotFoundResponseBody runs the validations defined
-// on list_survey_responses_NotFound_response_body
+// on ListSurveyResponsesNotFoundResponseBody
 func ValidateListSurveyResponsesNotFoundResponseBody(body *ListSurveyResponsesNotFoundResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3923,7 +4402,7 @@ func ValidateListSurveyResponsesNotFoundResponseBody(body *ListSurveyResponsesNo
 }
 
 // ValidateListSurveyResponsesServiceUnavailableResponseBody runs the
-// validations defined on list_survey_responses_ServiceUnavailable_response_body
+// validations defined on ListSurveyResponsesServiceUnavailableResponseBody
 func ValidateListSurveyResponsesServiceUnavailableResponseBody(body *ListSurveyResponsesServiceUnavailableResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3935,7 +4414,7 @@ func ValidateListSurveyResponsesServiceUnavailableResponseBody(body *ListSurveyR
 }
 
 // ValidateListSurveyResponsesUnauthorizedResponseBody runs the validations
-// defined on list_survey_responses_Unauthorized_response_body
+// defined on ListSurveyResponsesUnauthorizedResponseBody
 func ValidateListSurveyResponsesUnauthorizedResponseBody(body *ListSurveyResponsesUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3946,8 +4425,68 @@ func ValidateListSurveyResponsesUnauthorizedResponseBody(body *ListSurveyRespons
 	return
 }
 
+// ValidateListSurveyTemplatesBadRequestResponseBody runs the validations
+// defined on ListSurveyTemplatesBadRequestResponseBody
+func ValidateListSurveyTemplatesBadRequestResponseBody(body *ListSurveyTemplatesBadRequestResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListSurveyTemplatesForbiddenResponseBody runs the validations
+// defined on ListSurveyTemplatesForbiddenResponseBody
+func ValidateListSurveyTemplatesForbiddenResponseBody(body *ListSurveyTemplatesForbiddenResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListSurveyTemplatesInternalServerErrorResponseBody runs the
+// validations defined on ListSurveyTemplatesInternalServerErrorResponseBody
+func ValidateListSurveyTemplatesInternalServerErrorResponseBody(body *ListSurveyTemplatesInternalServerErrorResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListSurveyTemplatesServiceUnavailableResponseBody runs the
+// validations defined on ListSurveyTemplatesServiceUnavailableResponseBody
+func ValidateListSurveyTemplatesServiceUnavailableResponseBody(body *ListSurveyTemplatesServiceUnavailableResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListSurveyTemplatesUnauthorizedResponseBody runs the validations
+// defined on ListSurveyTemplatesUnauthorizedResponseBody
+func ValidateListSurveyTemplatesUnauthorizedResponseBody(body *ListSurveyTemplatesUnauthorizedResponseBody) (err error) {
+	if body.Code == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateValidateEmailBadRequestResponseBody runs the validations defined on
-// validate_email_BadRequest_response_body
+// ValidateEmailBadRequestResponseBody
 func ValidateValidateEmailBadRequestResponseBody(body *ValidateEmailBadRequestResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3959,7 +4498,7 @@ func ValidateValidateEmailBadRequestResponseBody(body *ValidateEmailBadRequestRe
 }
 
 // ValidateValidateEmailForbiddenResponseBody runs the validations defined on
-// validate_email_Forbidden_response_body
+// ValidateEmailForbiddenResponseBody
 func ValidateValidateEmailForbiddenResponseBody(body *ValidateEmailForbiddenResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3971,7 +4510,7 @@ func ValidateValidateEmailForbiddenResponseBody(body *ValidateEmailForbiddenResp
 }
 
 // ValidateValidateEmailInternalServerErrorResponseBody runs the validations
-// defined on validate_email_InternalServerError_response_body
+// defined on ValidateEmailInternalServerErrorResponseBody
 func ValidateValidateEmailInternalServerErrorResponseBody(body *ValidateEmailInternalServerErrorResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3983,7 +4522,7 @@ func ValidateValidateEmailInternalServerErrorResponseBody(body *ValidateEmailInt
 }
 
 // ValidateValidateEmailUnauthorizedResponseBody runs the validations defined
-// on validate_email_Unauthorized_response_body
+// on ValidateEmailUnauthorizedResponseBody
 func ValidateValidateEmailUnauthorizedResponseBody(body *ValidateEmailUnauthorizedResponseBody) (err error) {
 	if body.Code == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("code", "body"))
@@ -3994,8 +4533,7 @@ func ValidateValidateEmailUnauthorizedResponseBody(body *ValidateEmailUnauthoriz
 	return
 }
 
-// ValidateLFXProjectResponseBody runs the validations defined on
-// LFXProjectResponseBody
+// ValidateLFXProjectResponseBody runs the validations defined on LFXProject
 func ValidateLFXProjectResponseBody(body *LFXProjectResponseBody) (err error) {
 	if body.ID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
@@ -4017,8 +4555,31 @@ func ValidateLFXProjectResponseBody(body *LFXProjectResponseBody) (err error) {
 	return
 }
 
+// validateLFXProjectResponseBody checks LFXProject and reports errors using
+// the path supplied by its caller
+func validateLFXProjectResponseBody(body *LFXProjectResponseBody, path string) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", path))
+	}
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", path))
+	}
+	if body.Slug == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("slug", path))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", path))
+	}
+	if body.Status != nil {
+		if !(*body.Status == "Formation - Exploratory" || *body.Status == "Formation - Engaged" || *body.Status == "Active" || *body.Status == "Archived" || *body.Status == "Formation - On Hold" || *body.Status == "Formation - Disengaged" || *body.Status == "Formation - Confidential" || *body.Status == "Prospect") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError(path+".status", *body.Status, []any{"Formation - Exploratory", "Formation - Engaged", "Active", "Archived", "Formation - On Hold", "Formation - Disengaged", "Formation - Confidential", "Prospect"}))
+		}
+	}
+	return
+}
+
 // ValidateExcludedCommitteeResponseBody runs the validations defined on
-// ExcludedCommitteeResponseBody
+// ExcludedCommittee
 func ValidateExcludedCommitteeResponseBody(body *ExcludedCommitteeResponseBody) (err error) {
 	if body.ProjectUID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("project_uid", "body"))
@@ -4043,8 +4604,34 @@ func ValidateExcludedCommitteeResponseBody(body *ExcludedCommitteeResponseBody) 
 	return
 }
 
+// validateExcludedCommitteeResponseBody checks ExcludedCommittee and reports
+// errors using the path supplied by its caller
+func validateExcludedCommitteeResponseBody(body *ExcludedCommitteeResponseBody, path string) (err error) {
+	if body.ProjectUID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("project_uid", path))
+	}
+	if body.ProjectName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("project_name", path))
+	}
+	if body.CommitteeUID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("committee_uid", path))
+	}
+	if body.CommitteeName == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("committee_name", path))
+	}
+	if body.CommitteeCategory == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("committee_category", path))
+	}
+	if body.CommitteeCategory != nil {
+		if !(*body.CommitteeCategory == "Legal Committee" || *body.CommitteeCategory == "Finance Committee" || *body.CommitteeCategory == "Special Interest Group" || *body.CommitteeCategory == "Board" || *body.CommitteeCategory == "Technical Oversight Committee/Technical Advisory Committee" || *body.CommitteeCategory == "Technical Steering Committee") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError(path+".committee_category", *body.CommitteeCategory, []any{"Legal Committee", "Finance Committee", "Special Interest Group", "Board", "Technical Oversight Committee/Technical Advisory Committee", "Technical Steering Committee"}))
+		}
+	}
+	return
+}
+
 // ValidateITXPreviewRecipientResponseBody runs the validations defined on
-// ITXPreviewRecipientResponseBody
+// ITXPreviewRecipient
 func ValidateITXPreviewRecipientResponseBody(body *ITXPreviewRecipientResponseBody) (err error) {
 	if body.UserID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("user_id", "body"))
@@ -4063,8 +4650,28 @@ func ValidateITXPreviewRecipientResponseBody(body *ITXPreviewRecipientResponseBo
 	return
 }
 
+// validateITXPreviewRecipientResponseBody checks ITXPreviewRecipient and
+// reports errors using the path supplied by its caller
+func validateITXPreviewRecipientResponseBody(body *ITXPreviewRecipientResponseBody, path string) (err error) {
+	if body.UserID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("user_id", path))
+	}
+	if body.Email == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("email", path))
+	}
+	if body.Email != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat(path+".email", *body.Email, goa.FormatEmail))
+	}
+	if body.Role != nil {
+		if !(*body.Role == "Chair" || *body.Role == "Voting Rep" || *body.Role == "Member") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError(path+".role", *body.Role, []any{"Chair", "Voting Rep", "Member"}))
+		}
+	}
+	return
+}
+
 // ValidateSurveyResponseItemResponseBody runs the validations defined on
-// SurveyResponseItemResponseBody
+// SurveyResponseItem
 func ValidateSurveyResponseItemResponseBody(body *SurveyResponseItemResponseBody) (err error) {
 	if body.ID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
@@ -4091,7 +4698,7 @@ func ValidateSurveyResponseItemResponseBody(body *SurveyResponseItemResponseBody
 	}
 	for _, e := range body.SurveyMonkeyQuestionAnswers {
 		if e != nil {
-			if err2 := ValidateSurveyQuestionAnswerResponseBody(e); err2 != nil {
+			if err2 := validateSurveyQuestionAnswerResponseBody(e, "body.survey_monkey_question_answers[*]"); err2 != nil {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
@@ -4108,11 +4715,88 @@ func ValidateSurveyResponseItemResponseBody(body *SurveyResponseItemResponseBody
 	return
 }
 
+// validateSurveyResponseItemResponseBody checks SurveyResponseItem and reports
+// errors using the path supplied by its caller
+func validateSurveyResponseItemResponseBody(body *SurveyResponseItemResponseBody, path string) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", path))
+	}
+	if body.SurveyUID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("survey_uid", path))
+	}
+	if body.Email != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat(path+".email", *body.Email, goa.FormatEmail))
+	}
+	if body.ResponseStatus != nil {
+		if !(*body.ResponseStatus == "Responded" || *body.ResponseStatus == "Clicked" || *body.ResponseStatus == "Opened" || *body.ResponseStatus == "Delivered" || *body.ResponseStatus == "Failed" || *body.ResponseStatus == "Pending") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError(path+".response_status", *body.ResponseStatus, []any{"Responded", "Clicked", "Opened", "Delivered", "Failed", "Pending"}))
+		}
+	}
+	if body.CreatedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat(path+".created_at", *body.CreatedAt, goa.FormatDateTime))
+	}
+	if body.ResponseDatetime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat(path+".response_datetime", *body.ResponseDatetime, goa.FormatDateTime))
+	}
+	if body.LastReceivedTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat(path+".last_received_time", *body.LastReceivedTime, goa.FormatDateTime))
+	}
+	for _, e := range body.SurveyMonkeyQuestionAnswers {
+		if e != nil {
+			if err2 := validateSurveyQuestionAnswerResponseBody(e, path+".survey_monkey_question_answers[*]"); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	if body.SesComplaintDate != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat(path+".ses_complaint_date", *body.SesComplaintDate, goa.FormatDateTime))
+	}
+	if body.SesEmailOpenedLastTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat(path+".ses_email_opened_last_time", *body.SesEmailOpenedLastTime, goa.FormatDateTime))
+	}
+	if body.SesLinkClickedLastTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat(path+".ses_link_clicked_last_time", *body.SesLinkClickedLastTime, goa.FormatDateTime))
+	}
+	return
+}
+
 // ValidateSurveyQuestionAnswerResponseBody runs the validations defined on
-// SurveyQuestionAnswerResponseBody
+// SurveyQuestionAnswer
 func ValidateSurveyQuestionAnswerResponseBody(body *SurveyQuestionAnswerResponseBody) (err error) {
 	if body.QuestionID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("question_id", "body"))
+	}
+	return
+}
+
+// validateSurveyQuestionAnswerResponseBody checks SurveyQuestionAnswer and
+// reports errors using the path supplied by its caller
+func validateSurveyQuestionAnswerResponseBody(body *SurveyQuestionAnswerResponseBody, path string) (err error) {
+	if body.QuestionID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("question_id", path))
+	}
+	return
+}
+
+// ValidateSurveyTemplateResponse runs the validations defined on SurveyTemplate
+func ValidateSurveyTemplateResponse(body *SurveyTemplateResponse) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Title == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
+	}
+	return
+}
+
+// validateSurveyTemplateResponse checks SurveyTemplate and reports errors
+// using the path supplied by its caller
+func validateSurveyTemplateResponse(body *SurveyTemplateResponse, path string) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", path))
+	}
+	if body.Title == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("title", path))
 	}
 	return
 }

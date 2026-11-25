@@ -151,6 +151,7 @@ Response body is identical to Proxy API response.
 | Proxy API (LFX) | ITX API | Notes |
 |-----------------|---------|-------|
 | `committee_uid` (single string, required) | `committees` (array) | Proxy accepts single committee UID, converted to array for ITX |
+| `creator_username`, `creator_id`, `creator_name` | Same | Request values are **ignored**. The proxy sets `creator_username` and `creator_id` to the authenticated user's LFID username and `creator_name` to that user's display name from the auth service (the username when the lookup is unavailable) |
 | All other request fields | Same | Request fields are identical |
 | All response fields | Same | Response fields are identical |
 
@@ -282,7 +283,8 @@ Response body is identical to ITX Create Survey response with updated values.
 | Proxy API (LFX) | ITX API | Notes |
 |-----------------|---------|-------|
 | `/surveys/{survey_id}` | `/v2/surveys/{survey_id}/schedule` | Path differs - proxy has shorter path |
-| All fields | Same | Request/response fields are identical |
+| `creator_id` | `creator_username`, `creator_id` | The request value is **ignored**. The proxy sets both to the authenticated user's LFID username; ITX records `creator_username` as the survey's last modifier |
+| All other fields | Same | Request/response fields are identical |
 
 ---
 
@@ -645,6 +647,67 @@ The email validation endpoint supports various template variables that can be us
 | `{{survey_link}}` | Unique survey link | <https://surveymonkey.com/>... |
 
 **Note**: The actual template variables supported may vary. This endpoint allows you to test templates before sending surveys to ensure variables are correctly replaced.
+
+---
+
+## List Survey Templates
+
+### Proxy API Endpoint
+
+**Method**: `GET /surveys/templates`
+
+**Authorization**: Requires `writer_guard` permission on `project:{project_uid}` (project writers or global writers), or `writer` permission on `committee:{committee_uid}` when `committee_uid` is provided
+
+**Request Headers**:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Query Parameters**:
+
+- `project_uid` (string, required, UUID) - LFX Project UID (V2 format) used for the writer check
+- `committee_uid` (string, optional, UUID) - Committee UID (V2 format); a committee writer may list templates instead of a project writer
+
+**Note**: `project_uid` and `committee_uid` are used only for authorization. Templates are global in ITX, so neither value is forwarded. Missing or malformed UUIDs return `400 Bad Request`.
+
+**Response**: `200 OK`
+
+```json
+[
+  {
+    "id": "412349483",
+    "title": "Board Member NPS",
+    "nickname": "Board NPS",
+    "href": "https://api.surveymonkey.com/v3/surveys/412349483"
+  }
+]
+```
+
+The response is a bare JSON array with no envelope or pagination. `nickname` and `href` are omitted when ITX returns them empty.
+
+### ITX API Endpoint
+
+**Method**: `GET /v2/surveys/templates`
+
+**Request Headers**:
+
+```
+Authorization: Bearer <oauth2_m2m_token>
+x-scope: manage:surveys
+```
+
+**Response**: `200 OK`
+
+Response body is a JSON array of `{id, title, nickname, href}` objects, identical to the Proxy API response.
+
+### Field Mapping
+
+| Proxy API (LFX) | ITX API | Notes |
+|-----------------|---------|-------|
+| `/surveys/templates` | `/v2/surveys/templates` | Path differs - proxy has no `/v2` prefix |
+| `project_uid`, `committee_uid` query params | Not sent | Used only by the Heimdall writer check |
+| All response fields | Same | Response fields are identical |
 
 ---
 

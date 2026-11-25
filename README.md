@@ -48,7 +48,7 @@ See [ITX Proxy Implementation Architecture](docs/itx-proxy-implementation.md) fo
 
 ## API Endpoints
 
-The service provides 15 REST API endpoints for survey management:
+The service provides the following REST API endpoints for survey management:
 
 ### Survey Management
 
@@ -75,6 +75,7 @@ The service provides 15 REST API endpoints for survey management:
 
 ### Utilities
 
+- `GET /surveys/templates?project_uid={uuid}[&committee_uid={uuid}]` - List SurveyMonkey survey templates (project or committee writers)
 - `POST /surveys/validate_email` - Validate email template body and subject
 
 ### API Documentation
@@ -101,7 +102,7 @@ For detailed API contracts showing request/response schemas and differences betw
 
 ## Prerequisites
 
-- Go 1.25.14 or later
+- Go 1.26.11 or later
 - jq (for `make apigen` post-processing)
 - Docker (for containerization)
 - Kubernetes cluster (for deployment)
@@ -223,7 +224,9 @@ The service requires Auth0 credentials stored in AWS Secrets Manager:
    - `client_id` - Auth0 client ID
    - `client_private_key` - RSA private key in raw PEM format (not base64)
 
-3. The External Secrets Operator will sync these to Kubernetes automatically
+3. The External Secrets Operator will sync these to Kubernetes automatically.
+   The ExternalSecret and SecretStore that do this are declared in
+   `lfx-v2-argocd` (`custom-resources/lfx-v2-survey-service/`), not in this chart.
 
 ### Verify Deployment
 

@@ -30,6 +30,13 @@ make run
 
 **Required env vars** (no defaults): `ITX_CLIENT_ID`, `ITX_CLIENT_PRIVATE_KEY` (RSA PEM)
 
+## Go version
+
+**Go toolchain version**: Follow the `lfx-megalinter` skill's Go version policy.
+It sets the latest patch of the previous stable Go minor and caps it at the
+minor bundled by the pinned MegaLinter release. This importable module declares
+the lowest Go version allowed by its dependencies and pins the patch in `toolchain`.
+
 ## Architecture
 
 This service is a **stateless HTTP proxy** between LFX Platform V2 clients and the ITX (Linux Foundation IT) survey backend ([itx-service-survey-monkey](https://github.com/linuxfoundation-it/itx-service-survey-monkey)). Its core job is:
@@ -70,5 +77,17 @@ pkg/                    ← Shared utilities and ITX API models
 **ID mapping**: A v2 `committee_uid` maps to a v1 compound ID `{project_sfid}:{committee_sfid}`. The mapper first resolves the project UID to a Salesforce ID via NATS, then constructs the compound format. Set `ID_MAPPING_DISABLED=true` to skip mapping (uses noop mapper).
 
 **Event processing**: The `eventing/event_processor.go` watches NATS JetStream KV buckets for keys matching `$KV.v1-objects.itx-surveys.>` and `$KV.v1-objects.itx-survey-responses.>`. Handlers transform v1 payloads to v2 `SurveyData`/`SurveyResponseData` and publish to the v2 indexer via NATS. Durable consumer: `survey-service-kv-consumer`, max 3 redeliveries.
+
+**Creator identity**: `ScheduleSurvey` and `UpdateSurvey` never trust `creator_*` values from the request body. The creator is the JWT principal (LFID username); the display name comes from the auth service (`lfx.auth-service.user_metadata.read`) through the optional `UserNameReader`, falling back to the username. ITX stores the name as sent and does not look it up.
+
+**Test file naming**: a `_test.go` file must match an implementation file in the same directory (`foo_test.go` tests `foo.go`). Never add themed or suffixed test files such as `foo_gaps_test.go` or `foo_coverage_test.go`; put tests in the `_test.go` of the file that defines the code under test. Only shared fakes/helpers (`mock_*_test.go`, `helpers_test.go`) may lack a counterpart. Find violations with: `find . -name '*_test.go' ! -path './gen/*' | while read f; do [ -f "${f%_test.go}.go" ] || echo "$f"; done`.
+
+**Test doubles and harnesses**: reuse these instead of writing new fakes.
+- `internal/domain/mocks` has function-field mocks for every domain interface (service tests); an unconfigured method panics, so a test fails loudly if it calls something it did not set up.
+- `internal/infrastructure/proxy/client_test.go` has an `operation` table harness (`runOperations`). A new ITX proxy method gets one `operation` row in the `_test.go` of the file that defines it (`survey_proxy_test.go`, `response_proxy_test.go`, `exclusion_proxy_test.go`, `client_test.go`); the harness checks method, path, query, body, `x-scope` header, decoded result and 404 mapping.
+- `cmd/survey-api/eventing/helpers_test.go` has `fakeKV` (a stateful in-memory `jetstream.KeyValue` for Get/Put), `newRecordingPublisher` and `discardLogger` for the KV event handlers. Assert on what was published and stored rather than on call sequences. For code that needs a real connection (`NewEventProcessor`, the invite subscriber), `startTestNATS` runs an in-process JetStream server on a random port.
+- NATS adapters are tested against an in-process server, not a mock connection: `newPublisherHarness` (`internal/infrastructure/eventing/nats_publisher_test.go`) captures what lands on the indexer and FGA subjects, and `newMapper` (`internal/infrastructure/idmapper/nats_mapper_test.go`) fakes the v1-sync-helper responder. Request/reply senders that take the `Requester` interface use `MockRequester` (`internal/infrastructure/nats/mock_test.go`).
+- Middleware and logging tests assert on real log output: `captureLogs` (`internal/middleware/helpers_test.go`) installs the service logger against a temp file and reads back the JSON entries. Tests using it must not run in parallel. JWT tests (`internal/infrastructure/auth/jwt_test.go`) sign tokens against an in-process JWKS server.
+- Give every field in a "maps every field" fixture a distinct value, so a swapped pair of fields cannot pass.
 
 **Structured logging**: Uses `slog` throughout. The `internal/logging/` package sets up OpenTelemetry-aware structured logging. Pass the logger via context or direct injection — avoid `log.Print*`.

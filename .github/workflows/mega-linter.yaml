@@ -34,7 +34,7 @@ jobs:
       - name: MegaLinter
         id: ml
         # Use the Go flavor.
-        uses: oxsecurity/megalinter/flavors/go@ef3e84b8b836d76db562d0f3ed7da61e8fd538bc  # v9.6.0
+        uses: oxsecurity/megalinter/flavors/go@f2fe8c1cba37091848df3e524066c8c23ef353ed  # v10.2.0
         env:
           # All available variables are described in documentation
           # https://megalinter.io/configuration/
@@ -43,3 +43,11 @@ jobs:
           REPOSITORY_TRIVY_UNSECURED_ENV_VARIABLES: GITHUB_TOKEN
           # Set the Go toolchain to auto so that megalinter uses the correct go version for the service.
           GOTOOLCHAIN: auto
+          # betterleaks scans git history (see .mega-linter.yml) and runs git with
+          # the global and system config disabled, so it misses the safe.directory
+          # entry MegaLinter's entrypoint adds and fails with "dubious ownership"
+          # on the workspace, which the runner user owns. Pass the entry through
+          # git's environment config, which betterleaks keeps.
+          GIT_CONFIG_COUNT: "1"
+          GIT_CONFIG_KEY_0: safe.directory
+          GIT_CONFIG_VALUE_0: /github/workspace
