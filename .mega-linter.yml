@@ -28,8 +28,8 @@ DISABLE_ERRORS_LINTERS:
   - REPOSITORY_CHECKOV
   - REPOSITORY_DEVSKIM
 YAML_YAMLLINT_CONFIG_FILE: .yamllint
-# zizmor's "artipacked" audit needs the GitHub API (to verify
-# SHA-pinned action tags), which requires GITHUB_TOKEN.
+# Zizmor's online audits (e.g. resolving action refs and tags to pinned SHAs)
+# query the GitHub API, which requires GITHUB_TOKEN.
 ACTION_ZIZMOR_UNSECURED_ENV_VARIABLES:
   - GITHUB_TOKEN
 # MegaLinter runs betterleaks on the working tree (`dir`). Scan the full git
@@ -38,8 +38,7 @@ ACTION_ZIZMOR_UNSECURED_ENV_VARIABLES:
 # .betterleaksignore use commit-scoped fingerprints.
 REPOSITORY_BETTERLEAKS_ARGUMENTS: git
 REPOSITORY_BETTERLEAKS_COMMAND_REMOVE_ARGUMENTS: dir
-# The workflow passes safe.directory to git for this scan; see
-# .github/workflows/mega-linter.yaml.
+# The workflow and local MegaLinter target pass safe.directory to git for this scan.
 SPELL_CSPELL_ANALYZE_FILE_NAMES: false
 SPELL_CSPELL_PRE_COMMANDS:
   - command: >-
