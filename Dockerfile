@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: MIT
 
 # Build stage
-FROM golang:1.26.11-alpine@sha256:ecb67f987aa1a57794c91d19ade7ae0209f2f0f5496aaef9e6ae85ddf92d02ab AS builder
+# checkov:skip=CKV_DOCKER_7: The local builder uses the current Chainguard Go image.
+FROM cgr.dev/chainguard/go:latest AS builder
 
 ARG TARGETARCH
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH
