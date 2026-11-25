@@ -3,6 +3,7 @@
 
 # Build stage
 # checkov:skip=CKV_DOCKER_7: The local builder uses the current Chainguard Go image.
+# hadolint ignore=DL3007
 FROM cgr.dev/chainguard/go:latest AS builder
 
 ARG TARGETARCH
